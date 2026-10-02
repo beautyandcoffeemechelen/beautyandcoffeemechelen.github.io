@@ -1,0 +1,2718 @@
+/* ============================================================
+   BEAUTY & COFFEE — app logic
+   100% client-side. No photo or personal data ever leaves the device.
+   ============================================================ */
+(function(){
+  "use strict";
+
+  const state = {
+    lang: "nl",
+    profile: null,        // 'kind' | 'man' | 'vrouw'
+    ageBracket: null,     // '16-24' | '25-34' | '35-44' | '45plus'
+    sunExposed: null,     // bool
+    healthFlags: { phlebitis:false, contactLenses:false, menstruation:false, pregnant:false, musclePain:false, roaccutane:false, dietExercise:false, sport:false, diet:false },
+    kidsDrink: null,      // 'water' | 'chocolate'
+    mood: null,
+    complaintText: "",
+    category: null,
+    temperature: null,   // 'hot' | 'iced'
+    caffeine: null,
+    milk: "none",
+    extras: [],
+    context: null,        // 'salon' | 'thuis'
+    slots: [],            // preferred weekend moments for the booking message
+    skinFact: null,       // code of the skin fact shown on the result screen
+    sunFact: null,        // code of the fact shown on the sun-check step
+    photoDataUrl: null,
+    filter: "none",       // 'none' | 'glow' | 'warm' | 'bw' | 'vintage'
+    cameraStream: null,
+    match: null
+  };
+
+  const STEP_WEIGHTS = {
+    welcome:0, profile:8, age:16, sunCheck:24, healthCheck:30, kidsDrink:16, mood:38, category:48,
+    temperature:56, caffeine:66, toppings:76, context:84, photo:92, loading:96, result:100
+  };
+  let history = ["welcome"];
+
+  const FILTERS = {
+    none:  "",
+    glow:    "brightness(1.08) saturate(1.15) contrast(0.96)",
+    warm:    "sepia(0.28) saturate(1.35) brightness(1.05)",
+    bw:      "grayscale(1) contrast(1.08)",
+    vintage: "sepia(0.35) contrast(0.9) brightness(1.05) saturate(0.8)"
+  };
+  const FILTER_IDS = ["none","glow","warm","bw","vintage","cartoon","mangacolor"];
+  const cartoonCache = { sourceUrl: null, filterId: null, resultUrl: null };
+
+  /* ---------------- helpers ---------------- */
+  const $ = (sel, ctx) => (ctx||document).querySelector(sel);
+  const $$ = (sel, ctx) => Array.from((ctx||document).querySelectorAll(sel));
+
+  function showToast(msg){
+    const el = $("#toast");
+    el.textContent = msg;
+    el.classList.add("is-visible");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=> el.classList.remove("is-visible"), 3200);
+  }
+
+  /* ---------------- i18n ---------------- */
+  function applyI18n(){
+    $$("[data-i18n]").forEach(el => {
+      const val = t(el.getAttribute("data-i18n"), state.lang);
+      if (val != null) el.innerHTML = val;
+    });
+    document.documentElement.lang = state.lang;
+    $$(".lang-btn").forEach(b => {
+      const active = b.dataset.lang === state.lang;
+      b.classList.toggle("is-active", active);
+      b.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+    renderProfileOptions();
+    renderAgeOptions();
+    renderSunOptions();
+    renderHealthOptions();
+    renderKidsDrinkOptions();
+    renderMoodOptions();
+    renderCategoryOptions();
+    renderTemperatureOptions();
+    renderCaffeineOptions();
+    renderMilkOptions();
+    renderExtrasOptions();
+    renderContextOptions();
+    renderFilterOptions();
+    if (state.match) { renderResultDetails(); renderResultBlocks(); renderMatchTools(); renderLoyaltyBlock(); }
+    renderSlotPicker();
+    const ps = $("#priceSearch"); if (ps) ps.placeholder = t("pricelist_search", state.lang) || "";
+    if (typeof PRICE_LIST !== "undefined" && $('[data-step="pricelist"]').classList.contains("is-active")) renderPriceList();
+    renderSunFact();
+    if (typeof HOUSE_RULES !== "undefined" && $('[data-step="houserules"]').classList.contains("is-active")) renderHouseRules();
+    if ($('[data-step="findme"]') && $('[data-step="findme"]').classList.contains("is-active")) renderFindMe();
+    if (typeof localData !== "undefined") renderReturningUserBlock();
+    renderSocialLinks();
+    renderActions();
+    if (typeof news !== "undefined" && news.posts) renderNewsCard();
+  }
+
+  function setLang(lang){
+    state.lang = lang;
+    applyI18n();
+  }
+
+  /* ---------------- step navigation ---------------- */
+  function updateProgress(name){
+    const w = STEP_WEIGHTS[name] ?? 0;
+    $("#progressFill").style.width = w + "%";
+    $(".progress").style.visibility = (name==="welcome" || name==="pricelist" || name==="houserules" || name==="stampcard" || name==="findme") ? "hidden" : "visible";
+  }
+
+  function showStep(name){
+    $$(".step").forEach(sec => sec.classList.toggle("is-active", sec.dataset.step === name));
+    const topBack = $("#topbarBack"); if (topBack) topBack.hidden = (name === "welcome");
+    updateProgress(name);
+
+    if (name === "pricelist") {
+      renderPriceList();
+    }
+    if (name === "houserules") {
+      renderHouseRules();
+    }
+    if (name === "stampcard") {
+      renderLoyaltyBlock();
+    }
+    if (name === "findme") {
+      renderFindMe();
+    }
+    if (name === "sunCheck") {
+      state.sunFact = randomFactCode(SKIN_FACT_POOLS.sun);
+      renderSunFact();
+    }
+    if (name === "healthCheck") {
+      renderHealthOptions();
+    }
+    if (name === "temperature") {
+      renderTemperatureOptions();
+    }
+    if (name === "toppings") {
+      renderMilkOptions();
+      renderExtrasOptions();
+    }
+    if (name === "photo") {
+      enterPhotoStep();
+    } else if (state.cameraStream) {
+      stopCamera();
+    }
+
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
+  /* Every step is also an entry in the browser history, so the phone's own
+     back button / back gesture works like the "Terug" button (feedback:
+     people could not find the way back). NB: "history" (lower case) is the
+     app's own step list; the browser's is window.history. */
+  function goTo(name){
+    history.push(name);
+    try { window.history.pushState({ bcStep:name }, ""); } catch(e){ /* ignore */ }
+    showStep(name);
+  }
+  function stepBack(){
+    if (history.length > 1) history.pop();
+    showStep(history[history.length-1]);
+  }
+  function back(){
+    if (window.history.state && window.history.state.bcStep && history.length > 1) window.history.back();  // → popstate → stepBack()
+    else stepBack();
+  }
+  window.addEventListener("popstate", () => {
+    if (document.getElementById("stampScanOverlay")) { closeStampScanner(); return; }
+    if (history.length > 1) stepBack();
+  });
+  // Result screen: go back to the first question with every answer kept,
+  // so someone who clicked the wrong profile can simply change it.
+  function editAnswers(){
+    history = ["welcome"];
+    goTo("profile");
+  }
+
+  /* ---------------- option rendering ---------------- */
+  function renderProfileOptions(){
+    const wrap = $("#profileOptions");
+    wrap.innerHTML = "";
+    PROFILES.forEach(id => {
+      const data = t(`profiles.${id}`, state.lang);
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "option-card" + (state.profile===id ? " is-selected" : "");
+      card.innerHTML = `<span class="option-card__icon">${PROFILE_ICONS[id]}</span>
+        <span class="option-card__text">
+          <span class="option-card__title">${data.title}</span>
+          <span class="option-card__sub">${data.sub}</span>
+        </span>`;
+      card.addEventListener("click", () => {
+        state.profile = id; renderProfileOptions();
+        localData.savedProfile = id;
+        if (id === "kind"){ localData.savedAgeBracket = null; }
+        saveLocalData();
+        setTimeout(() => { goTo(id === "kind" ? "kidsDrink" : "age"); }, 200);
+      });
+      wrap.appendChild(card);
+    });
+  }
+
+  function renderAgeOptions(){
+    const wrap = $("#ageOptions");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+    AGE_BRACKETS.forEach(id => {
+      const tile = document.createElement("button");
+      tile.type = "button";
+      tile.className = "option-tile" + (state.ageBracket===id ? " is-selected" : "");
+      tile.innerHTML = `<span class="option-tile__icon">${AGE_ICONS[id]}</span>
+        <span class="option-tile__title">${t(`age.${id}`, state.lang)}</span>`;
+      tile.addEventListener("click", () => { state.ageBracket = id; renderAgeOptions(); localData.savedAgeBracket = id; saveLocalData(); setTimeout(()=>goTo("sunCheck"), 200); });
+      wrap.appendChild(tile);
+    });
+  }
+
+  function renderSunOptions(){
+    const wrap = $("#sunOptions");
+    wrap.innerHTML = "";
+    [["yes",true],["no",false]].forEach(([key,val]) => {
+      const tile = document.createElement("button");
+      tile.type = "button";
+      tile.className = "option-tile" + (state.sunExposed===val ? " is-selected" : "");
+      tile.innerHTML = `<span class="option-tile__icon">${key==="yes" ? "🌞" : "🌥️"}</span>
+        <span class="option-tile__title">${t(`sun_${key}`, state.lang)}</span>`;
+      tile.addEventListener("click", () => { state.sunExposed = val; renderSunOptions(); setTimeout(()=>goTo("healthCheck"), 200); });
+      wrap.appendChild(tile);
+    });
+    let notice = wrap.parentElement.querySelector(".sun-notice");
+    if (!notice){
+      notice = document.createElement("div");
+      notice.className = "sun-notice";
+      wrap.insertAdjacentElement("afterend", notice);
+    }
+    notice.innerHTML = `<span class="sun-notice__icon">🧴</span><span>${t("sun_filtered_notice", state.lang)}</span>`;
+  }
+
+  function renderHealthOptions(){
+    const checkWrap = $("#healthChecklist");
+    if (checkWrap){
+      checkWrap.innerHTML = "";
+      const items = [
+        ["phlebitis", "🩸"],
+        ["contactLenses", "👓"],
+        ["musclePain", "💪"],
+        ["roaccutane", "💊"]
+      ];
+      if (state.profile === "vrouw") items.push(["menstruation", "🌙"], ["pregnant", "🤰"]);
+      items.forEach(([key, icon]) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "chip chip--check" + (state.healthFlags[key] ? " is-selected" : "");
+        chip.innerHTML = `<span class="chip__icon">${icon}</span> ${t(`health_${key}`, state.lang)}`;
+        chip.addEventListener("click", () => {
+          state.healthFlags[key] = !state.healthFlags[key];
+          renderHealthOptions();
+        });
+        checkWrap.appendChild(chip);
+      });
+      let rNotice = checkWrap.parentElement.querySelector(".roaccutane-notice");
+      if (state.healthFlags.roaccutane){
+        if (!rNotice){
+          rNotice = document.createElement("div");
+          rNotice.className = "sun-notice roaccutane-notice";
+          checkWrap.insertAdjacentElement("afterend", rNotice);
+        }
+        rNotice.innerHTML = `<span class="sun-notice__icon">💊</span><span>${t("roaccutane_filtered_notice", state.lang)}</span>`;
+      } else if (rNotice){
+        rNotice.remove();
+      }
+    }
+
+    // Sport and diet are two separate choices (both may be ticked);
+    // "neither" clears them. The matching logic still only needs
+    // dietExercise = sport OR diet (for the slimming massage).
+    const dietWrap = $("#dietOptions");
+    if (dietWrap){
+      dietWrap.innerHTML = "";
+      const hf = state.healthFlags;
+      [["sport","🏃"],["diet","🥗"],["none","🙅"]].forEach(([key, icon]) => {
+        const selected = key === "none" ? (!hf.sport && !hf.diet) : !!hf[key];
+        const tile = document.createElement("button");
+        tile.type = "button";
+        tile.className = "option-tile" + (selected ? " is-selected" : "");
+        tile.setAttribute("aria-pressed", selected ? "true" : "false");
+        tile.innerHTML = `<span class="option-tile__icon">${icon}</span>
+          <span class="option-tile__title">${t(`diet_opt_${key}`, state.lang)}</span>`;
+        tile.addEventListener("click", () => {
+          if (key === "none"){ hf.sport = false; hf.diet = false; }
+          else hf[key] = !hf[key];
+          hf.dietExercise = hf.sport || hf.diet;
+          renderHealthOptions();
+        });
+        dietWrap.appendChild(tile);
+      });
+    }
+  }
+
+  function renderKidsDrinkOptions(){
+    const wrap = $("#kidsDrinkOptions");
+    wrap.innerHTML = "";
+    KIDS_DRINKS.forEach(d => {
+      const tile = document.createElement("button");
+      tile.type = "button";
+      tile.className = "option-tile option-tile--kid" + (state.kidsDrink===d.id ? " is-selected" : "");
+      tile.innerHTML = `<span class="option-tile__icon">${d.icon}</span>
+        <span class="option-tile__title">${d.name[state.lang]}</span>`;
+      tile.addEventListener("click", () => { state.kidsDrink = d.id; renderKidsDrinkOptions(); setTimeout(()=>goTo("context"), 200); });
+      wrap.appendChild(tile);
+    });
+  }
+
+  function renderMoodOptions(){
+    const wrap = $("#moodOptions");
+    wrap.innerHTML = "";
+    MOODS.forEach(id => {
+      const data = t(`moods.${id}`, state.lang);
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "option-card" + (state.mood===id ? " is-selected" : "");
+      card.innerHTML = `<span class="option-card__icon">${MOOD_ICONS[id]}</span>
+        <span class="option-card__text">
+          <span class="option-card__title">${data.title}</span>
+          <span class="option-card__sub">${data.sub}</span>
+        </span>`;
+      card.addEventListener("click", () => { state.mood = id; renderMoodOptions(); setTimeout(()=>goTo("category"), 220); });
+      wrap.appendChild(card);
+    });
+  }
+
+  function renderCategoryOptions(){
+    const wrap = $("#categoryOptions");
+    wrap.innerHTML = "";
+    CATEGORIES.forEach(id => {
+      const data = t(`categories.${id}`, state.lang);
+      const tile = document.createElement("button");
+      tile.type = "button";
+      tile.className = "option-tile" + (state.category===id ? " is-selected" : "");
+      tile.innerHTML = `<span class="option-tile__icon">${CATEGORY_ICONS[id]}</span>
+        <span class="option-tile__title">${data.title}</span>
+        <span class="option-tile__sub">${data.sub}</span>`;
+      tile.addEventListener("click", () => { state.category = id; renderCategoryOptions(); setTimeout(()=>goTo("temperature"), 220); });
+      wrap.appendChild(tile);
+    });
+  }
+
+  function renderTemperatureOptions(){
+    const wrap = $("#temperatureOptions");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+    TEMPERATURE_OPTIONS.forEach(id => {
+      const data = t(`temperature.${id}`, state.lang);
+      const tile = document.createElement("button");
+      tile.type = "button";
+      tile.className = "option-tile" + (state.temperature===id ? " is-selected" : "");
+      tile.innerHTML = `<span class="option-tile__icon">${TEMPERATURE_ICONS[id]}</span>
+        <span class="option-tile__title">${data.title}</span>
+        <span class="option-tile__sub">${data.sub}</span>`;
+      tile.addEventListener("click", () => {
+        state.temperature = id; renderTemperatureOptions();
+        setTimeout(() => {
+          if (state.category === "matcha"){ state.caffeine = "caff"; goTo("toppings"); }
+          else { goTo("caffeine"); }
+        }, 220);
+      });
+      wrap.appendChild(tile);
+    });
+
+    const hint = $("#temperatureHint");
+    if (hint){
+      if (state.category === "tea"){
+        hint.hidden = false;
+        hint.textContent = t("temperature_tea_hint", state.lang);
+      } else {
+        hint.hidden = true;
+      }
+    }
+  }
+
+  function renderCaffeineOptions(){
+    const wrap = $("#caffeineOptions");
+    wrap.innerHTML = "";
+    CAFFEINE_OPTIONS.forEach(id => {
+      const data = t(`caffeine.${id}`, state.lang);
+      const tile = document.createElement("button");
+      tile.type = "button";
+      tile.className = "option-tile" + (state.caffeine===id ? " is-selected" : "");
+      tile.innerHTML = `<span class="option-tile__icon">${CAFFEINE_ICONS[id]}</span>
+        <span class="option-tile__title">${data.title}</span>
+        <span class="option-tile__sub">${data.sub}</span>`;
+      tile.addEventListener("click", () => { state.caffeine = id; renderCaffeineOptions(); setTimeout(()=>goTo("toppings"), 220); });
+      wrap.appendChild(tile);
+    });
+  }
+
+  function renderMilkOptions(){
+    const group = $("#milkGroup");
+    const wrap = $("#milkOptions");
+    // Plain teas don't take milk — except Matcha, our only caffeinated tea
+    // that comes with a milk option (choosing milk turns it into a Matcha
+    // Latte). So: hidden for decaf tea, shown otherwise.
+    const milkApplies = !(state.category === "tea" && state.caffeine === "decaf");
+    if (group) group.hidden = !milkApplies;
+    if (!milkApplies && state.milk !== "none") state.milk = "none";
+
+    wrap.innerHTML = "";
+    MILK_OPTIONS.forEach(id => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip" + (state.milk===id ? " is-selected" : "");
+      chip.textContent = t(`milk.${id}`, state.lang);
+      chip.addEventListener("click", () => { state.milk = id; renderMilkOptions(); });
+      wrap.appendChild(chip);
+    });
+
+    let hint = group ? group.querySelector(".milk-hint") : null;
+    if (milkApplies && state.category === "tea"){
+      if (!hint){
+        hint = document.createElement("p");
+        hint.className = "milk-hint";
+        group.appendChild(hint);
+      }
+      hint.textContent = t("milk_tea_hint", state.lang);
+    } else if (hint){
+      hint.remove();
+    }
+  }
+
+  function renderExtrasOptions(){
+    const wrap = $("#extrasOptions");
+    wrap.innerHTML = "";
+    const options = (state.category === "tea" || state.category === "matcha") ? TEA_EXTRA_OPTIONS : EXTRA_OPTIONS;
+    // drop any previously-picked extras that no longer apply (e.g. switched from coffee to tea)
+    state.extras = state.extras.filter(id => options.includes(id));
+    options.forEach(id => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip" + (state.extras.includes(id) ? " is-selected" : "");
+      chip.textContent = t(`extras.${id}`, state.lang);
+      chip.addEventListener("click", () => {
+        const i = state.extras.indexOf(id);
+        if (i>-1) state.extras.splice(i,1); else state.extras.push(id);
+        renderExtrasOptions();
+      });
+      wrap.appendChild(chip);
+    });
+    }
+
+  function renderContextOptions(){
+    const wrap = $("#contextOptions");
+    wrap.innerHTML = "";
+    [
+      { id:"salon", icon:"🏢", key:"context_salon", sub:"context_salon_sub" },
+      { id:"thuis", icon:"🏡", key:"context_home", sub:"context_home_sub" }
+    ].forEach(opt => {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "option-card" + (state.context===opt.id ? " is-selected" : "");
+      card.innerHTML = `<span class="option-card__icon">${opt.icon}</span>
+        <span class="option-card__text">
+          <span class="option-card__title">${t(opt.key, state.lang)}</span>
+          <span class="option-card__sub">${t(opt.sub, state.lang)}</span>
+        </span>`;
+      card.addEventListener("click", () => {
+        state.context = opt.id; renderContextOptions();
+        setTimeout(() => { runGeneration(); }, 200);
+      });
+      wrap.appendChild(card);
+    });
+  }
+
+  /* ---------------- camera / photo ---------------- */
+  const video = () => $("#cameraVideo");
+  const canvas = () => $("#captureCanvas");
+  const preview = () => $("#photoPreview");
+  const placeholder = () => $("#photoPlaceholder");
+  let cameraFacing = "user";
+
+  /* Called every time the photo step becomes active. The camera/upload flow
+     is available regardless of salon vs. thuis — thuis just adds a visible
+     "skip this" hint since Generate never requires a photo either way. */
+  function enterPhotoStep(){
+    $("#photoEditor").hidden = true;
+    $("#photoStage").hidden = false;
+    $("#filterRow").hidden = false;
+    $("#photoHomeBlock").hidden = state.context !== "thuis";
+    $("#generateBtn").disabled = false;
+
+    if (state.photoDataUrl){
+      showPhotoPreview();
+    } else {
+      openCamera();
+    }
+  }
+
+  async function openCamera(facing){
+    if (facing) cameraFacing = facing;
+    stopCamera();
+    $("#photoEditor").hidden = true;
+    $("#photoStage").hidden = false;
+    placeholder().hidden = false;
+    placeholder().querySelector("p").textContent = t("camera_starting", state.lang);
+    video().hidden = true;
+    preview().hidden = true;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: cameraFacing },
+          width: { ideal: 1080 },
+          height: { ideal: 1350 }
+        },
+        audio: false
+      });
+      state.cameraStream = stream;
+      const v = video();
+      v.srcObject = stream;
+      v.hidden = false;
+      v.classList.toggle("is-mirrored", cameraFacing === "user");
+      placeholder().hidden = true;
+      applyGlowPreview();
+      try { await v.play(); } catch(e){ /* some browsers auto-play once metadata loads */ }
+      $("#photoActionsIdle").hidden = true;
+      $("#photoActionsCamera").hidden = false;
+      $("#photoActionsRetake").hidden = true;
+      $("#uploadInsteadBtn").hidden = false;
+      updateSwitchCameraVisibility();
+    } catch(err){
+      placeholder().hidden = false;
+      placeholder().querySelector("p").textContent = t("camera_denied_text", state.lang);
+      $("#photoActionsCamera").hidden = true;
+      $("#uploadInsteadBtn").hidden = true;
+      $("#photoActionsIdle").hidden = false;
+      $("#switchCameraBtn").hidden = true;
+      showToast(t("toast_camera_denied", state.lang));
+    }
+  }
+
+  async function updateSwitchCameraVisibility(){
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const cams = devices.filter(d => d.kind === "videoinput");
+      $("#switchCameraBtn").hidden = cams.length < 2;
+    } catch(e){
+      $("#switchCameraBtn").hidden = false; // let the user try regardless if we can't enumerate
+    }
+  }
+
+  function switchCamera(){
+    openCamera(cameraFacing === "user" ? "environment" : "user");
+  }
+
+  function stopCamera(){
+    if (state.cameraStream){
+      state.cameraStream.getTracks().forEach(tr => tr.stop());
+      state.cameraStream = null;
+    }
+    video().hidden = true;
+    $("#switchCameraBtn").hidden = true;
+  }
+
+  function snapPhoto(){
+    const v = video();
+    const c = canvas();
+    c.width = v.videoWidth; c.height = v.videoHeight;
+    const ctx = c.getContext("2d");
+    if (cameraFacing === "user"){
+      ctx.translate(c.width, 0);
+      ctx.scale(-1, 1);
+    }
+    ctx.drawImage(v, 0, 0, c.width, c.height);
+    const dataUrl = c.toDataURL("image/jpeg", 0.92);
+    stopCamera();
+    openEditor(dataUrl, { previousUrl: state.photoDataUrl });
+  }
+
+  function cancelCamera(){
+    stopCamera();
+    $("#photoActionsCamera").hidden = true;
+    $("#uploadInsteadBtn").hidden = true;
+    $("#photoActionsIdle").hidden = false;
+    placeholder().hidden = !!state.photoDataUrl;
+    preview().hidden = !state.photoDataUrl;
+  }
+
+  function showPhotoPreview(){
+    $("#photoEditor").hidden = true;
+    $("#photoStage").hidden = false;
+    $("#filterRow").hidden = false;   // fix v28: filters stayed hidden after the photo editor
+    preview().src = state.photoDataUrl;
+    preview().hidden = false;
+    placeholder().hidden = true;
+    $("#photoActionsCamera").hidden = true;
+    $("#uploadInsteadBtn").hidden = true;
+    $("#photoActionsIdle").hidden = true;
+    $("#photoActionsRetake").hidden = false;
+    $("#generateBtn").disabled = false;
+    applyGlowPreview();
+  }
+
+  function retakePhoto(){
+    state.photoDataUrl = null;
+    preview().hidden = true;
+    placeholder().hidden = false;
+    $("#photoActionsRetake").hidden = true;
+    $("#photoActionsIdle").hidden = false;
+  }
+
+  function handleFileUpload(file){
+    if (!file) return;
+    stopCamera();
+    const reader = new FileReader();
+    reader.onload = e => openEditor(e.target.result, { previousUrl: state.photoDataUrl });
+    reader.readAsDataURL(file);
+  }
+
+  /* ---------------- photo editor: crop, zoom & rotate ---------------- */
+  const editor = {
+    img: null, rotation: 0, scale: 1, offsetX: 0, offsetY: 0,
+    dragging: false, lastX: 0, lastY: 0, previousUrl: null
+  };
+  const editorCanvasEl = () => $("#editorCanvas");
+
+  function openEditor(dataUrl, opts){
+    opts = opts || {};
+    editor.previousUrl = opts.previousUrl || null;
+    editor.rotation = 0; editor.scale = 1; editor.offsetX = 0; editor.offsetY = 0;
+    $("#editorZoom").value = 1;
+
+    const img = new Image();
+    img.onload = () => {
+      editor.img = img;
+      $("#photoStage").hidden = true;
+      $("#filterRow").hidden = true;
+      $("#photoActionsCamera").hidden = true;
+      $("#uploadInsteadBtn").hidden = true;
+      $("#photoActionsIdle").hidden = true;
+      $("#photoActionsRetake").hidden = true;
+      $("#photoEditor").hidden = false;
+      drawEditor();
+    };
+    img.src = dataUrl;
+  }
+
+  function editorBaseScale(){
+    const c = editorCanvasEl();
+    const swapped = editor.rotation % 180 !== 0;
+    const iw = swapped ? editor.img.height : editor.img.width;
+    const ih = swapped ? editor.img.width : editor.img.height;
+    return Math.max(c.width / iw, c.height / ih);
+  }
+
+  function clampEditorOffset(){
+    const c = editorCanvasEl();
+    const scale = editorBaseScale() * editor.scale;
+    const swapped = editor.rotation % 180 !== 0;
+    const dw = (swapped ? editor.img.height : editor.img.width) * scale;
+    const dh = (swapped ? editor.img.width : editor.img.height) * scale;
+    const maxX = Math.max(0, (dw - c.width) / 2);
+    const maxY = Math.max(0, (dh - c.height) / 2);
+    editor.offsetX = Math.min(maxX, Math.max(-maxX, editor.offsetX));
+    editor.offsetY = Math.min(maxY, Math.max(-maxY, editor.offsetY));
+  }
+
+  // Cache the 2D context once instead of re-fetching it on every redraw
+  // (getContext() is cheap but not free, and drawEditor can run dozens
+  // of times per second while dragging).
+  let editorCtx = null;
+  function getEditorCtx(){
+    if (!editorCtx) editorCtx = editorCanvasEl().getContext("2d", { alpha: false });
+    return editorCtx;
+  }
+
+  // ctx.filter (the CSS-filter-on-canvas API used for the preview filters,
+  // especially the "cartoon" SVG filter) forces a slow, software-rendered
+  // path in several mobile browsers. Applying it on every pointermove while
+  // dragging or zooming is the main source of jank on older/cheaper phones.
+  // Fix: skip the filter entirely while actively dragging or zooming (show
+  // the plain image, which stays fast), and only render the filtered
+  // version once the gesture ends. Also coalesce rapid-fire events
+  // (pointermove, the zoom slider's "input") into one draw per animation
+  // frame instead of one draw per event.
+  let editorDrawQueued = false;
+  function drawEditor(skipFilter){
+    if (!editor.img) return;
+    clampEditorOffset();
+    const c = editorCanvasEl();
+    const ctx = getEditorCtx();
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.fillStyle = "#241A14";
+    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.filter = skipFilter ? "none" : (isMangaFilter(state.filter)
+      ? mangaLiveCss(state.filter)
+      : (FILTERS[state.filter] || "none"));
+    const scale = editorBaseScale() * editor.scale;
+    ctx.save();
+    ctx.translate(c.width/2 + editor.offsetX, c.height/2 + editor.offsetY);
+    ctx.rotate(editor.rotation * Math.PI / 180);
+    ctx.scale(scale, scale);
+    ctx.drawImage(editor.img, -editor.img.width/2, -editor.img.height/2);
+    ctx.restore();
+    ctx.filter = "none";
+  }
+  function requestEditorDraw(skipFilter){
+    if (editorDrawQueued) return;
+    editorDrawQueued = true;
+    requestAnimationFrame(() => { editorDrawQueued = false; drawEditor(skipFilter); });
+  }
+
+  function editorRotate(){
+    editor.rotation = (editor.rotation + 90) % 360;
+    editor.offsetX = 0; editor.offsetY = 0;
+    drawEditor();
+  }
+
+  function editorConfirm(){
+    state.photoDataUrl = editorCanvasEl().toDataURL("image/jpeg", 0.92);
+    showPhotoPreview();
+  }
+
+  function editorCancel(){
+    $("#photoEditor").hidden = true;
+    if (editor.previousUrl){
+      state.photoDataUrl = editor.previousUrl;
+      showPhotoPreview();
+    } else {
+      state.photoDataUrl = null;
+      openCamera();
+    }
+  }
+
+  function editExistingPhoto(){
+    if (!state.photoDataUrl) return;
+    openEditor(state.photoDataUrl, { previousUrl: state.photoDataUrl });
+  }
+
+  function setupEditorDrag(){
+    const c = editorCanvasEl();
+    const ratio = () => c.width / c.getBoundingClientRect().width;
+
+    c.addEventListener("pointerdown", e => {
+      editor.dragging = true;
+      editor.lastX = e.clientX; editor.lastY = e.clientY;
+      c.setPointerCapture(e.pointerId);
+    });
+    c.addEventListener("pointermove", e => {
+      if (!editor.dragging) return;
+      const r = ratio();
+      editor.offsetX += (e.clientX - editor.lastX) * r;
+      editor.offsetY += (e.clientY - editor.lastY) * r;
+      editor.lastX = e.clientX; editor.lastY = e.clientY;
+      requestEditorDraw(true); // skip the filter while dragging, for smoothness
+    });
+    const endDrag = () => {
+      const wasDragging = editor.dragging;
+      editor.dragging = false;
+      if (wasDragging) requestEditorDraw(false); // one final draw, filter back on
+    };
+    c.addEventListener("pointerup", endDrag);
+    c.addEventListener("pointercancel", endDrag);
+    c.addEventListener("pointerleave", endDrag);
+
+    let zoomEndTimer = null;
+    $("#editorZoom").addEventListener("input", e => {
+      editor.scale = parseFloat(e.target.value);
+      requestEditorDraw(true); // skip the filter while the slider is moving
+      clearTimeout(zoomEndTimer);
+      zoomEndTimer = setTimeout(() => requestEditorDraw(false), 120);
+    });
+  }
+
+  async function applyGlowPreview(){
+    if (isMangaFilter(state.filter)){
+      const liveCartoonCss = mangaLiveCss(state.filter);
+      video().style.filter = liveCartoonCss;
+      if (!state.photoDataUrl){
+        preview().style.filter = liveCartoonCss;
+        return;
+      }
+      preview().style.filter = "";
+      const cartoonUrl = await getCartoonDataUrl();
+      if (isMangaFilter(state.filter) && cartoonUrl){
+        preview().src = cartoonUrl;
+      }
+      return;
+    }
+    if (state.photoDataUrl && preview().src !== state.photoDataUrl){
+      preview().src = state.photoDataUrl;
+    }
+    const filterCss = FILTERS[state.filter] || "";
+    preview().style.filter = filterCss;
+    video().style.filter = filterCss;
+  }
+
+  function renderFilterOptions(){
+    const wrap = $("#filterOptions");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+    FILTER_IDS.forEach(id => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip" + (state.filter===id ? " is-selected" : "");
+      chip.textContent = t(`filters.${id}`, state.lang);
+      chip.addEventListener("click", () => { state.filter = id; renderFilterOptions(); applyGlowPreview(); });
+      wrap.appendChild(chip);
+    });
+  }
+
+  /* ---------------- matching engine ---------------- */
+  const KID_CONTENT = {
+    benefits: { nl:"Een veilige, kindvriendelijke verzorging van kleine handjes met een drankje erbij.",
+                en:"Safe, kid-friendly care for little hands, paired with a drink." },
+    funfact: { nl:"We gebruiken peel-off nagellak speciaal voor kinderen — na een paar dagen kunnen ze het laagje er zelf, in één stuk, afpellen.",
+               en:"We use peel-off nail polish made for kids — after a few days they can peel the whole layer off themselves." },
+    aftercare: { nl:"Geen aceton of remover nodig — laat het laklaagje eerst goed drogen, daarna is het gewoon zelf af te pellen.",
+                 en:"No acetone or remover needed — just let the polish dry first, then it simply peels off by hand." }
+  };
+  // French text lives in lang-fr.js
+  if (window.KID_CONTENT_FR){
+    ["benefits","funfact","aftercare"].forEach(k => { KID_CONTENT[k].fr = window.KID_CONTENT_FR[k]; });
+  }
+
+  function generateMatch(){
+    if (state.profile === "kind"){
+      const drinkDef = KIDS_DRINKS.find(d => d.id === state.kidsDrink) || KIDS_DRINKS[0];
+      const homecarePick = pickHomecareProduct("hand", null, "kind");
+      const soapPick = pickSecondarySoap(homecarePick ? homecarePick.categoryId : null);
+      state.match = {
+        isKid: true,
+        treatment: { name: KIDS_TREATMENT, benefits:KID_CONTENT.benefits, funfact:KID_CONTENT.funfact, aftercare:KID_CONTENT.aftercare },
+        drinkId: drinkDef.id, drink: null,
+        milkId: "none", extrasIds: [],
+        homecarePick, soapPick
+      };
+      return;
+    }
+
+    const treatmentObj = matchTreatment(state.mood, state.profile, !!state.sunExposed, {
+      ...state.healthFlags,
+      age30Plus: state.ageBracket === "30-44" || state.ageBracket === "45plus",
+      age45Plus: state.ageBracket === "45plus"
+    }, state.complaintText);
+    let drink;
+    const wantsMilk = state.milk !== "none";
+    const isIced = state.temperature === "iced";
+
+    if (state.category === "coffee"){
+      if (isIced){
+        const list = BEVERAGES.coffeeIced[state.caffeine];
+        const bev = pickRandom(list);
+        drink = { name: bev.name, origin:null, notes: bev.notes||null };
+      } else {
+        // "Geen melk" must only ever surface black/slow-brew coffees; a milk
+        // choice must only ever surface milk-based coffees — no more mismatches.
+        const fullList = BEVERAGES.coffee[state.caffeine];
+        let list = fullList.filter(b => wantsMilk ? b.style === "milk" : b.style !== "milk");
+        if (!list.length) list = fullList; // safety net if a filter ever empties the pool
+        const bev = pickRandom(list);
+        const pool = COFFEE_ORIGINS.filter(o => o.decaf === (state.caffeine==="decaf"));
+        const origin = pool.length ? pickRandom(pool) : pickRandom(COFFEE_ORIGINS);
+        drink = { name: bev.name, origin: origin.name, notes: origin.notes };
+      }
+    } else if (state.category === "matcha"){
+      const base = wantsMilk ? "Matcha Latte" : "Matcha";
+      drink = { name: isIced ? "Iced " + base : base, origin:null, notes:null };
+    } else { // tea — always served hot; no iced plain-tea option on the menu
+      const pool = state.caffeine === "decaf" ? [...TEAS_DECAF, ...HOT_EXTRAS_DECAF] : TEAS_CAFF;
+      drink = { name: pickRandom(pool), origin:null, notes:null };
+    }
+
+    const homecarePick = pickHomecareProduct(treatmentObj.homecare.category, treatmentObj.homecare.soapHint, state.profile);
+    const soapPick = pickSecondarySoap(homecarePick ? homecarePick.categoryId : null);
+
+    // build a copy of the treatment so we can safely append a lens warning
+    // without mutating the shared catalog entry
+    let treatment = treatmentObj;
+    if (treatmentObj.lensWarning && state.healthFlags.contactLenses){
+      treatment = {
+        ...treatment,
+        aftercare: {
+          nl: treatment.aftercare.nl + " " + t("lens_warning_note", "nl"),
+          en: treatment.aftercare.en + " " + t("lens_warning_note", "en"),
+          fr: (treatment.aftercare.fr || treatment.aftercare.en) + " " + t("lens_warning_note", "fr")
+        }
+      };
+    }
+
+    state.match = {
+      isKid:false, treatment, drink,
+      milkId: state.milk, extrasIds: [...state.extras],
+      homecarePick, soapPick
+    };
+  }
+
+  /* ---------------- drink "jumps out of the screen" ----------------
+     Free and 100% client-side: a CSS 3D animation of the real drink photo
+     (from the website). With a cut-out the drink leaps over the edge of
+     its frame towards the viewer (like the LinkedIn tiger); without one
+     the photo zooms forward inside the frame. Tap to replay. */
+  function drinkPhotoFor(m){
+    const extras = m.extrasIds || [];
+    for (const id of extras){
+      const byName = DRINK_PHOTOS_BY_EXTRA[id];
+      if (byName && byName[m.drink.name]) return pickRandom(byName[m.drink.name]);
+    }
+    const list = DRINK_PHOTOS[m.drink.name];
+    return list ? pickRandom(list) : null;
+  }
+  function drinkPopHtml(m, alt){
+    const photo = drinkPhotoFor(m);
+    if (!photo) return "";
+    const cut = DRINK_CUTOUTS[photo];
+    const hot = state.temperature !== "iced";
+    return `
+      <div class="drink-pop${cut ? "" : " drink-pop--flat"} is-playing" data-action="replay-drink-pop" role="img" aria-label="${alt}">
+        <div class="drink-pop__floor" aria-hidden="true"></div>
+        <div class="drink-pop__screen"><img class="drink-pop__bg" src="${photo}" alt=""></div>
+        ${cut ? `<img class="drink-pop__cut" src="${cut}" alt="">` : ""}
+        ${hot ? `<span class="drink-pop__steam" aria-hidden="true"><i></i><i></i><i></i></span>` : ""}
+        <span class="drink-pop__hint">↻ ${t("drink_pop_replay", state.lang)}</span>
+      </div>`;
+  }
+  function replayDrinkPop(el){
+    el.classList.remove("is-playing");
+    void el.offsetWidth; // restart the CSS animation
+    el.classList.add("is-playing");
+  }
+
+  function renderResultDetails(){
+    const wrap = $("#resultDetails");
+    const m = state.match;
+    if (!wrap) return;
+    if (!m) { wrap.innerHTML = ""; return; }
+
+    let drinkFull, drinkNotes;
+    if (m.isKid){
+      const drinkDef = KIDS_DRINKS.find(d => d.id === m.drinkId) || KIDS_DRINKS[0];
+      drinkFull = drinkDef.name[state.lang];
+      drinkNotes = null;
+    } else {
+      drinkFull = m.drink.origin ? [m.drink.origin, trName(m.drink.name, state.lang)].join(" — ") : trName(m.drink.name, state.lang);
+      drinkNotes = trName(m.drink.notes, state.lang);
+    }
+
+    const milkLabel = m.milkId && m.milkId !== "none" ? t(`milk.${m.milkId}`, state.lang) : null;
+    const extrasLabel = (m.extrasIds || []).map(id => t(`extras.${id}`, state.lang));
+    const customLine = [milkLabel, ...extrasLabel].filter(Boolean).join(" · ");
+
+    const drinkPhotoHtml = !m.isKid && m.drink ? drinkPopHtml(m, drinkFull) : "";
+
+    wrap.innerHTML = `
+      <div class="result-row">
+        <span class="result-row__icon">☕</span>
+        <div>
+          <div class="result-row__label">${t("drink_label", state.lang)}</div>
+          <div class="result-row__value">${drinkFull}</div>
+          ${drinkNotes ? `<div class="result-row__notes">${drinkNotes}</div>` : ""}
+          ${customLine ? `<div class="result-row__notes">${t("with_label", state.lang)}${state.lang === "fr" ? "\u00a0:" : ":"} ${customLine}</div>` : ""}
+          ${drinkPhotoHtml}
+        </div>
+      </div>
+      <div class="result-row">
+        <span class="result-row__icon">✨</span>
+        <div>
+          <div class="result-row__label">${t("treatment_label", state.lang)}</div>
+          <div class="result-row__value">${trName(m.treatment.name, state.lang)}</div>
+        </div>
+      </div>`;
+
+    const titleEl = $("#resultTitle");
+    if (titleEl) titleEl.textContent = t(state.context === "thuis" ? "result_saved_title" : "result_title", state.lang);
+
+    updateBookingLink(m, drinkFull);
+  }
+
+  const BOOKING_EMAIL = "sandra.truong@ikmail.com";
+  const BOOKING_WHATSAPP = "32499221901"; // wa.me format: country code + number, no + or spaces
+  function drinkFullFor(m){
+    if (!m) return "";
+    if (m.isKid){
+      const d = KIDS_DRINKS.find(x => x.id === m.drinkId) || KIDS_DRINKS[0];
+      return d.name[state.lang];
+    }
+    return m.drink.origin ? [m.drink.origin, trName(m.drink.name, state.lang)].join(" — ") : trName(m.drink.name, state.lang);
+  }
+
+  function slotsText(){
+    if (typeof BOOKING_SLOTS === "undefined") return "";
+    return state.slots
+      .map(id => BOOKING_SLOTS.find(s => s.id === id))
+      .filter(Boolean)
+      .map(s => s[state.lang] || s.nl)
+      .join(", ");
+  }
+
+  function updateBookingLink(m, drinkFull){
+    if (!m) return;
+    const slots = slotsText();
+    const emailLink = $("#bookEmailCta");
+    if (emailLink){
+      const subject = t("book_email_subject", state.lang);
+      const body = t("book_email_body", state.lang)
+        .replace("{treatment}", trName(m.treatment.name, state.lang))
+        .replace("{drink}", drinkFull || "")
+        .replace("{slots}", slots);
+      emailLink.href = `mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+    const waLink = $("#bookWhatsappCta");
+    if (waLink){
+      const waText = t("book_whatsapp_text", state.lang)
+        .replace("{treatment}", trName(m.treatment.name, state.lang))
+        .replace("{drink}", drinkFull || "")
+        .replace("{slots}", slots)
+        .trim();
+      waLink.href = `https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(waText)}`;
+    }
+  }
+
+  /* ---------------- slot picker (weekend preference) ---------------- */
+  function renderSlotPicker(){
+    const wrap = $("#slotPicker");
+    if (!wrap) return;
+    if (typeof BOOKING_SLOTS === "undefined" || !BOOKING_SLOTS.length){ wrap.innerHTML = ""; return; }
+    wrap.innerHTML = `
+      <p class="slot-picker__title">${t("slots_title", state.lang)}</p>
+      <div class="slot-picker__chips">
+        ${BOOKING_SLOTS.map(s => {
+          const on = state.slots.includes(s.id);
+          return `<button type="button" class="slot-chip${on ? " is-selected" : ""}" data-action="toggle-slot" data-slot="${s.id}" aria-pressed="${on}">${s[state.lang] || s.nl}</button>`;
+        }).join("")}
+      </div>
+      <p class="slot-picker__hint">${t("slots_hint", state.lang)}</p>`;
+  }
+
+  function toggleSlot(id){
+    const i = state.slots.indexOf(id);
+    if (i >= 0) state.slots.splice(i, 1); else state.slots.push(id);
+    renderSlotPicker();
+    if (state.match) updateBookingLink(state.match, drinkFullFor(state.match));
+  }
+
+  /* ---------------- favorites + "another match" ---------------- */
+  function favKey(m){
+    const tid = m.isKid ? "kindermanicure" : m.treatment.id;
+    return tid + "|" + drinkFullFor(m);
+  }
+  function isFavorite(m){
+    return (localData.favorites || []).some(f => f.key === favKey(m));
+  }
+  function favBookHref(f){
+    const text = t("fav_book_text", state.lang).replace("{treatment}", trName(f.tname, state.lang)).replace("{drink}", f.drink).trim();
+    return `https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(text)}`;
+  }
+
+  function renderMatchTools(){
+    const wrap = $("#matchTools");
+    if (!wrap) return;
+    const m = state.match;
+    if (!m){ wrap.innerHTML = ""; return; }
+    const fav = isFavorite(m);
+    wrap.innerHTML = `
+      ${m.isKid ? "" : `<button type="button" class="btn btn--outline" data-action="another-match">${t("another_match_button", state.lang)}</button>`}
+      <button type="button" class="btn ${fav ? "btn--primary" : "btn--outline"}" data-action="toggle-fav" aria-pressed="${fav}">${t(fav ? "fav_saved" : "fav_add", state.lang)}</button>`;
+  }
+
+  function toggleFavorite(){
+    const m = state.match;
+    if (!m) return;
+    const key = favKey(m);
+    const list = localData.favorites || (localData.favorites = []);
+    const i = list.findIndex(f => f.key === key);
+    if (i >= 0){
+      list.splice(i, 1);
+      showToast(t("fav_removed_toast", state.lang));
+    } else {
+      list.unshift({ key, tname: m.treatment.name, drink: drinkFullFor(m) });
+      localData.favorites = list.slice(0, 8);
+      showToast(t("fav_added_toast", state.lang));
+    }
+    saveLocalData();
+    renderMatchTools();
+    renderReturningUserBlock();
+  }
+
+  function removeFavorite(index){
+    if (!localData.favorites) return;
+    localData.favorites.splice(index, 1);
+    saveLocalData();
+    renderReturningUserBlock();
+    renderMatchTools();
+  }
+
+  let rerolling = false;
+  async function rerollMatch(){
+    const prev = state.match;
+    if (!prev || prev.isKid || rerolling) return;
+    rerolling = true;
+    try {
+      let tries = 0;
+      do { generateMatch(); tries++; }
+      while (state.match.treatment.id === prev.treatment.id && tries < 10);
+      state.skinFact = chooseSkinFact();
+      await drawResultCanvas();
+      renderResultDetails();
+      renderResultBlocks();
+      renderMatchTools();
+      const isNew = recordDiscovery();
+      renderLoyaltyBlock();
+      trackEvent("match-rerolled");
+      if (isNew) trackEvent("new-discovery");
+      const card = $("#resultCardWrap");
+      if (card) card.scrollIntoView({ behavior:"smooth", block:"start" });
+    } finally { rerolling = false; }
+  }
+
+  /* ---------------- skin facts ("Weetje: huid, haar en voeten") ---------------- */
+  const ALL_FACTS = SKIN_FACTS
+    .concat(typeof CONDITION_FACTS !== "undefined" ? CONDITION_FACTS : [])
+    .concat(typeof PRACTICE_FACTS !== "undefined" ? PRACTICE_FACTS : [])
+    .concat(typeof CELL_FACTS !== "undefined" ? CELL_FACTS : [])
+    .concat(typeof NAIL_FACTS !== "undefined" ? NAIL_FACTS : [])
+    .concat(typeof LASH_FACTS !== "undefined" ? LASH_FACTS : [])
+    .concat(typeof FACIAL_FACTS !== "undefined" ? FACIAL_FACTS : [])
+    .concat(typeof SKINKNOW_FACTS !== "undefined" ? SKINKNOW_FACTS : []);
+  function factPoolFor(m){
+    if (m.isKid) return SKIN_FACTS.filter(f => SKIN_FACT_POOLS.kids.includes(f.theme));
+    const skinThemes = SKIN_FACT_POOLS.byTreatment[m.treatment.id] || null;
+    const condThemes = (typeof CONDITION_FACT_POOLS !== "undefined") ? (CONDITION_FACT_POOLS.byTreatment[m.treatment.id] || null) : null;
+    const pracThemes = (typeof PRACTICE_FACT_POOLS !== "undefined") ? (PRACTICE_FACT_POOLS.byTreatment[m.treatment.id] || null) : null;
+    const moreThemes = (typeof MORE_FACT_POOLS !== "undefined") ? (MORE_FACT_POOLS.byTreatment[m.treatment.id] || null) : null;
+    if (!skinThemes && !condThemes && !pracThemes && !moreThemes) return SKIN_FACTS.slice();
+    const pool = [];
+    if (skinThemes) pool.push(...SKIN_FACTS.filter(f => skinThemes.includes(f.theme)));
+    if (condThemes) pool.push(...CONDITION_FACTS.filter(f => condThemes.includes(f.theme)));
+    if (pracThemes) pool.push(...PRACTICE_FACTS.filter(f => pracThemes.includes(f.theme)));
+    if (moreThemes) {
+      if (moreThemes.includes("NA")) pool.push(...NAIL_FACTS.filter(f => moreThemes.includes(f.theme)));
+      if (moreThemes.includes("LL")) pool.push(...LASH_FACTS.filter(f => moreThemes.includes(f.theme)));
+      if (moreThemes.includes("GV") || moreThemes.includes("SK")) {
+        pool.push(...FACIAL_FACTS.filter(f => moreThemes.includes(f.theme)));
+        pool.push(...SKINKNOW_FACTS.filter(f => moreThemes.includes(f.theme)));
+      }
+    }
+    if (typeof CELL_FACTS !== "undefined" && pool.length) pool.push(...CELL_FACTS);
+    return pool.length ? pool : ALL_FACTS.slice();
+  }
+  function randomFrom(pool, avoidCode){
+    let f, n = 0;
+    do { f = pool[Math.floor(Math.random() * pool.length)]; n++; }
+    while (f.code === avoidCode && pool.length > 1 && n < 20);
+    return f.code;
+  }
+  function chooseSkinFact(){
+    if (!state.match) return null;
+    return randomFrom(factPoolFor(state.match), state.skinFact);
+  }
+  function randomFactCode(themes){
+    const pool = SKIN_FACTS.filter(f => themes.includes(f.theme));
+    if (typeof CONDITION_FACT_POOLS !== "undefined" && CONDITION_FACT_POOLS.sun) {
+      pool.push(...CONDITION_FACTS.filter(f => CONDITION_FACT_POOLS.sun.includes(f.theme)));
+    }
+    return randomFrom(pool, state.sunFact);
+  }
+  function renderSkinFact(){
+    const wrap = $("#skinFactCard");
+    if (!wrap) return;
+    const fact = ALL_FACTS.find(f => f.code === state.skinFact);
+    if (!state.match || !fact){ wrap.innerHTML = ""; return; }
+    const lang = state.lang;
+    const canMore = factPoolFor(state.match).length > 1;
+    wrap.innerHTML = `
+      <p class="skinfact__title">${t("skinfact_title", lang)}</p>
+      ${fact.kop ? `<p class="skinfact__kop">${lang === "nl" ? fact.kop : (lang === "en" ? (fact.kopEn || fact.kop) : (fact.kopFr || fact.kopEn || fact.kop))}</p>` : ""}
+      <p class="skinfact__text">${fact[lang] || fact.nl}</p>
+      ${canMore ? `<button type="button" class="skinfact__more" data-action="another-fact">${t("skinfact_more", lang)}</button>` : ""}
+      <p class="skinfact__disclaimer">${t("skinfact_disclaimer", lang)}</p>`;
+  }
+  function anotherFact(){
+    state.skinFact = chooseSkinFact();
+    renderSkinFact();
+  }
+  function renderSunFact(){
+    const el = $("#sunFact");
+    if (!el) return;
+    const fact = ALL_FACTS.find(f => f.code === state.sunFact);
+    el.innerHTML = fact ? `💡 ${fact[state.lang] || fact.nl}` : "";
+  }
+
+  /* ---------------- house rules (screen "Huisregels") ---------------- */
+  function renderHouseRulesTeaser(){
+    const wrap = $("#houseRulesTeaser");
+    if (!wrap) return;
+    const lang = state.lang;
+    wrap.innerHTML = `
+      <p class="rules-teaser__title">${t("houserules_teaser_title", lang)}</p>
+      <ul class="rules-teaser__list">
+        <li>${t("houserules_teaser_1", lang)}</li>
+        <li>${t("houserules_teaser_2", lang)}</li>
+        <li>${t("houserules_teaser_3", lang)}</li>
+      </ul>
+      <button type="button" class="rules-teaser__more" data-action="open-houserules">${t("houserules_teaser_more", lang)}</button>`;
+  }
+
+  /* Parking + map, shown in three places: the "Zo vind je me" screen, the
+     parking section of the house rules (map right under the explanation)
+     and "Praktisch om te weten" on the result screen. */
+  const ROUTE_URL = "https://www.google.com/maps/dir/?api=1&destination=Beauty%20%26%20Coffee%2C%20Barbarastraat";
+  function routeMapHtml(lang){
+    return `<a class="route-map" href="${ROUTE_URL}" target="_blank" rel="noopener">
+        <img src="assets/route-map.svg" alt="" width="789" height="658" loading="lazy">
+        <span class="route-map__caption">${t("route_map_caption", lang)}</span>
+      </a>`;
+  }
+  function renderFindMe(){
+    const body = $("#findMeBody");
+    if (!body || typeof HOUSE_RULES === "undefined") return;
+    const lang = state.lang;
+    const sec = HOUSE_RULES.find(s => s.id === "parking");
+    const items = sec ? sec.groups[0].items.slice(0, -1) : [];   // last item points to the map itself
+    body.innerHTML = `
+      ${routeMapHtml(lang)}
+      <a class="btn btn--primary btn--wide findme-route" href="${ROUTE_URL}" target="_blank" rel="noopener">${t("practical_info_route", lang)}</a>
+      <ul class="rules-list findme-list">${items.map(it => `<li>${it[lang]}</li>`).join("")}</ul>
+      <div class="findme-contact">
+        <p class="price-contact__title">${t("contact_title", lang)}</p>
+        <p class="price-contact__hint">${t("contact_hint", lang)}</p>
+        <div class="findme-contact__buttons">
+          <a class="btn btn--primary" href="tel:+${BOOKING_WHATSAPP}" data-contact="call">${t("contact_call", lang)}</a>
+          <a class="btn btn--outline" href="https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(t("contact_wa_text", lang))}" target="_blank" rel="noopener" data-contact="whatsapp">${t("contact_whatsapp", lang)}</a>
+          <a class="btn btn--outline" href="mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent(t("contact_mail_subject", lang))}" data-contact="mail">${t("contact_mail", lang)}</a>
+        </div>
+      </div>`;
+    body.querySelectorAll("[data-contact]").forEach(a => a.addEventListener("click", () => trackEvent("contact-" + a.dataset.contact)));
+  }
+
+  function renderHouseRules(){
+    const body = $("#houseRulesBody");
+    if (!body || typeof HOUSE_RULES === "undefined") return;
+    const lang = state.lang;
+    const openIds = new Set($$("#houseRulesBody details[open]").map(d => d.dataset.sec));
+    const first = openIds.size === 0 && !body.dataset.rendered;
+    body.dataset.rendered = "1";
+    body.innerHTML = HOUSE_RULES.map((sec, idx) => {
+      const open = (openIds.has(sec.id) || (first && idx === 0)) ? " open" : "";
+      return `<details class="price-section" data-sec="${sec.id}"${open}>
+        <summary><span class="price-section__icon" aria-hidden="true">${sec.icon}</span><span class="price-section__title">${sec.title[lang]}</span></summary>
+        ${sec.intro ? `<p class="rules-intro">${sec.intro[lang]}</p>` : ""}
+        ${sec.groups.map(g => `
+          ${g.title ? `<h3 class="rules-group">${g.title[lang]}</h3>` : ""}
+          <ul class="rules-list">${g.items.map(it => `<li>${it[lang]}</li>`).join("")}</ul>`).join("")}
+        ${sec.outro ? `<p class="rules-intro rules-outro">${sec.outro[lang]}</p>` : ""}
+        ${sec.id === "parking" ? routeMapHtml(lang) : ""}
+      </details>`;
+    }).join("");
+  }
+
+  /* ---------------- price list (tab "Prijslijst") ---------------- */
+  function renderPriceList(){
+    const body = $("#priceListBody");
+    if (!body || typeof PRICE_LIST === "undefined") return;
+    const lang = state.lang;
+    const q = (($("#priceSearch") || {}).value || "").trim().toLowerCase();
+    const openIds = new Set($$("#priceListBody details[open]").map(d => d.dataset.sec));
+    let html = "";
+    PRICE_LIST.forEach(sec => {
+      const items = sec.items.filter(it => {
+        if (!q) return true;
+        const hay = [it.n.nl, it.n.en, it.n.fr, it.d && it.d.nl, it.d && it.d.en, it.d && it.d.fr, sec.title.nl, sec.title.en, sec.title.fr].join(" ").toLowerCase();
+        return hay.includes(q);
+      });
+      if (!items.length) return;
+      const open = (q || openIds.has(sec.id)) ? " open" : "";
+      html += `<details class="price-section" data-sec="${sec.id}"${open}>
+        <summary><span class="price-section__icon" aria-hidden="true">${sec.icon}</span><span class="price-section__title">${sec.title[lang]}</span><span class="price-section__count">${items.length}</span></summary>
+        ${sec.note ? `<p class="price-section__note">${sec.note[lang]}</p>` : ""}
+        <ul class="price-items">
+          ${items.map(it => `<li class="price-item">
+            <div class="price-item__main"><span class="price-item__name">${it.n[lang]}</span><span class="price-item__price">${it.price}</span></div>
+            <div class="price-item__meta">${[it.time, it.d && it.d[lang]].filter(Boolean).join(" · ")}</div>
+            ${it.note ? `<div class="price-item__note">${it.note[lang]}</div>` : ""}
+          </li>`).join("")}
+        </ul>
+      </details>`;
+    });
+    body.innerHTML = html || `<p class="price-empty">${t("pricelist_empty", lang)}</p>`;
+
+    const wa = $("#priceWhatsapp");
+    if (wa) wa.href = `https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(t("pricelist_wa_text", lang))}`;
+    const mail = $("#priceMail");
+    if (mail) mail.href = `mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent(t("pricelist_mail_subject", lang))}&body=${encodeURIComponent(t("pricelist_mail_body", lang))}`;
+  }
+
+  /* Current actions (data.js → CURRENT_ACTIONS): date-windowed, bilingual */
+  // Shown on the welcome screen (so everyone sees the promo before
+  // starting) and again on the result screen, right before booking.
+  function renderActions(){
+    const wraps = [$("#actionsBlock"), $("#actionsBlockWelcome")].filter(Boolean);
+    if (!wraps.length || typeof CURRENT_ACTIONS === "undefined") return;
+    const wrap = { set innerHTML(html){ wraps.forEach(w => { w.innerHTML = html; w.hidden = !html.trim(); }); } };
+    const d = new Date();
+    const today = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+    const lang = state.lang;
+    const active = CURRENT_ACTIONS.filter(a => (!a.from || today >= a.from) && (!a.until || today <= a.until));
+    wrap.innerHTML = active.map(a => `
+      <div class="action-card">
+        <span class="action-card__icon" aria-hidden="true">${a.icon || "🎁"}</span>
+        <div class="action-card__body">
+          <p class="action-card__title">${a.title[lang] || a.title.nl}</p>
+          <p class="action-card__text">${a.text[lang] || a.text.nl}</p>
+        </div>
+      </div>`).join("");
+  }
+
+  function renderResultBlocks(){
+    renderSkinFact();
+    renderActions();
+    renderUpsell();
+    renderHouseRulesTeaser();
+    const wrap = $("#resultBlocks");
+    const m = state.match;
+    if (!m) { wrap.innerHTML = ""; return; }
+    const lang = state.lang;
+    const homecare = resolveHomecareText(m.homecarePick, lang);
+    const soapTip = resolveHomecareText(m.soapPick, lang);
+    let homecareBody = homecare
+      ? `<p class="result-block__product">${homecare.productName}</p><p>${homecare.usage}</p>`
+      : `<p>${t("homecare_generic_tip", lang)}</p>`;
+    if (soapTip){
+      homecareBody += `<p class="result-block__soaptip"><span class="result-block__product">${t("homecare_soap_tip_label", lang)} ${soapTip.productName}</span><br>${soapTip.usage}</p>`;
+    }
+
+    // extra sun-care reinforcement specifically for hair-removal treatments
+    let aftercareText = m.treatment.aftercare[lang];
+    const HAIR_REMOVAL_IDS = ["oksel","been","rug","buik","borst"];
+    if (HAIR_REMOVAL_IDS.includes(m.treatment.id)) {
+      const sunTip = lang === "nl"
+        ? "<br><br>⚠️ <strong>Zonadvies:</strong> vermijd directe zon of het solarium 24 uur na het ontharen, en gebruik nadien een hoge SPF om roodheid en pigmentvlekken te voorkomen."
+        : lang === "fr"
+        ? window.SUN_TIP_FR
+        : "<br><br>⚠️ <strong>Sun advice:</strong> avoid direct sun or a sunbed for 24 hours after hair removal, and use a high SPF afterwards to prevent redness and pigmentation.";
+      aftercareText += sunTip;
+    }
+
+    const priceRow = m.treatment.price
+      ? `<div class="result-block">
+          <div class="result-block__head"><span class="result-block__icon">💶</span><span class="result-block__title">${t("block_price", lang)}</span></div>
+          <div class="result-block__body"><p class="result-block__product">${m.treatment.price}</p></div>
+        </div>`
+      : "";
+
+    const cautionRow = m.treatment.caution
+      ? `<div class="result-block result-block--caution">
+          <div class="result-block__head"><span class="result-block__icon">⚠️</span><span class="result-block__title">${t("block_caution", lang)}</span></div>
+          <div class="result-block__body"><p>${m.treatment.caution[lang]}</p></div>
+        </div>`
+      : "";
+
+    wrap.innerHTML = `
+      ${cautionRow}
+      <div class="result-block">
+        <div class="result-block__head"><span class="result-block__icon">🌟</span><span class="result-block__title">${t("block_benefits", lang)}</span></div>
+        <div class="result-block__body"><p>${m.treatment.benefits[lang]}</p></div>
+      </div>
+      <div class="result-block">
+        <div class="result-block__head"><span class="result-block__icon">💡</span><span class="result-block__title">${t("block_funfact", lang)}</span></div>
+        <div class="result-block__body"><p>${m.treatment.funfact[lang]}</p></div>
+      </div>
+      <div class="result-block">
+        <div class="result-block__head"><span class="result-block__icon">📋</span><span class="result-block__title">${t("block_aftercare", lang)}</span></div>
+        <div class="result-block__body"><p>${aftercareText}</p></div>
+      </div>
+      <div class="result-block${m.homecare ? "" : " result-block--muted"}">
+        <div class="result-block__head"><span class="result-block__icon">🛍️</span><span class="result-block__title">${t("block_homecare", lang)}</span></div>
+        <div class="result-block__body">${homecareBody}</div>
+      </div>
+      ${priceRow}`;
+  }
+
+
+  /* ---------------- canvas composite ---------------- */
+  let logoImg = null;
+  function loadLogo(){
+    return new Promise(resolve => {
+      if (logoImg) return resolve(logoImg);
+      const img = new Image();
+      img.onload = () => { logoImg = img; resolve(img); };
+      img.src = "assets/logo-transparent.png";
+    });
+  }
+
+  /* ---------------- manga filters (client-side only) ----------------
+     "Manga" (black & white) and "Manga kleur" (colour). Both are computed
+     in the browser: inked outlines, flat cel-shaded tones, dot screentone
+     in the shadows, speed lines around the edges and a panel border.
+     Nothing is uploaded. NB: a filter keeps the real face — it does not
+     redraw it (no new anime eyes); that would need a generative AI model,
+     i.e. an external, paid service. */
+  function mangaBlur(input, w, h, sigma){
+    const N = w * h, r = Math.max(1, Math.ceil(sigma * 2.5));
+    const k = new Float32Array(2 * r + 1); let s = 0;
+    for (let i = -r; i <= r; i++){ k[i + r] = Math.exp(-(i * i) / (2 * sigma * sigma)); s += k[i + r]; }
+    for (let i = 0; i < k.length; i++) k[i] /= s;
+    const tmp = new Float32Array(N), out = new Float32Array(N);
+    for (let y = 0; y < h; y++){
+      const row = y * w;
+      for (let x = 0; x < w; x++){
+        let v = 0;
+        for (let i = -r; i <= r; i++){ const xx = x + i < 0 ? 0 : (x + i >= w ? w - 1 : x + i); v += input[row + xx] * k[i + r]; }
+        tmp[row + x] = v;
+      }
+    }
+    for (let y = 0; y < h; y++){
+      for (let x = 0; x < w; x++){
+        let v = 0;
+        for (let i = -r; i <= r; i++){ const yy = y + i < 0 ? 0 : (y + i >= h ? h - 1 : y + i); v += tmp[yy * w + x] * k[i + r]; }
+        out[y * w + x] = v;
+      }
+    }
+    return out;
+  }
+  // box mean via an integral image: fast whatever the radius
+  function mangaLocalMean(v, w, h, R){
+    const integ = new Float64Array((w + 1) * (h + 1)), out = new Float32Array(w * h);
+    for (let y = 0; y < h; y++){
+      let rowSum = 0;
+      for (let x = 0; x < w; x++){ rowSum += v[y * w + x]; integ[(y + 1) * (w + 1) + x + 1] = integ[y * (w + 1) + x + 1] + rowSum; }
+    }
+    for (let y = 0; y < h; y++){
+      const y0 = Math.max(0, y - R), y1 = Math.min(h, y + R + 1);
+      for (let x = 0; x < w; x++){
+        const x0 = Math.max(0, x - R), x1 = Math.min(w, x + R + 1);
+        out[y * w + x] = (integ[y1 * (w + 1) + x1] - integ[y0 * (w + 1) + x1] - integ[y1 * (w + 1) + x0] + integ[y0 * (w + 1) + x0]) / ((x1 - x0) * (y1 - y0));
+      }
+    }
+    return out;
+  }
+  // shared analysis: luminance (auto-levelled), smoothed luminance, ink mask, local contrast
+  function mangaAnalyse(src, w, h){
+    const N = w * h, gray = new Float32Array(N);
+    for (let i = 0, p = 0; p < N; i += 4, p++) gray[p] = (src[i] * 0.299 + src[i+1] * 0.587 + src[i+2] * 0.114) / 255;
+    const hist = new Uint32Array(256);
+    for (let p = 0; p < N; p++) hist[Math.min(255, (gray[p] * 255) | 0)]++;
+    let lo = 0, hi = 255, acc = 0;
+    for (let v = 0; v < 256; v++){ acc += hist[v]; if (acc > N * 0.01){ lo = v; break; } }
+    acc = 0;
+    for (let v = 255; v >= 0; v--){ acc += hist[v]; if (acc > N * 0.01){ hi = v; break; } }
+    const range = Math.max(1, hi - lo) / 255, low = lo / 255;
+    for (let p = 0; p < N; p++) gray[p] = Math.min(1, Math.max(0, (gray[p] - low) / range));
+    const unit = Math.max(w, h) / 720;
+    const smooth = mangaBlur(gray, w, h, 1.2 * unit);
+    const g1 = mangaBlur(gray, w, h, 0.9 * unit), g2 = mangaBlur(gray, w, h, 1.44 * unit);
+    const ink = new Uint8Array(N);
+    for (let p = 0; p < N; p++) ink[p] = (g1[p] - 0.985 * g2[p]) < -0.009 ? 1 : 0;
+    const local = mangaLocalMean(smooth, w, h, Math.round(22 * unit));
+    const sorted = Float32Array.from(smooth).sort();
+    return { gray, smooth, ink, local, unit, tBlack: sorted[Math.floor(N * 0.17)] };
+  }
+  // speed lines + panel border: returns true where the pixel must be ink-black
+  function mangaDecorator(w, h, unit){
+    const cx = w / 2, cy = h / 2, BUCKETS = 220, lines = [];
+    let seed = 7;
+    const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    for (let b = 0; b < BUCKETS; b++){
+      lines.push(rnd() < 0.55 ? { a:(b + rnd()) / BUCKETS * Math.PI * 2, w:0.0025 + rnd() * 0.006, r:0.78 + rnd() * 0.22 } : null);
+    }
+    const border = Math.max(3, Math.round(5 * unit)), margin = Math.max(3, Math.round(6 * unit));
+    return function(x, y){
+      const edge = Math.min(x, y, w - 1 - x, h - 1 - y);
+      if (edge < margin) return "paper";
+      if (edge < margin + border) return "ink";
+      const nx = (x - cx) / cx, ny = (y - cy) / cy, rho = Math.sqrt(nx * nx + ny * ny);
+      if (rho > 0.78){
+        let ang = Math.atan2(ny, nx); if (ang < 0) ang += Math.PI * 2;
+        const b = Math.floor(ang / (Math.PI * 2) * BUCKETS) % BUCKETS;
+        for (let o = -1; o <= 1; o++){
+          const L = lines[(b + o + BUCKETS) % BUCKETS];
+          if (!L || rho <= L.r) continue;
+          let da = Math.abs(ang - L.a); if (da > Math.PI) da = Math.PI * 2 - da;
+          if (da < L.w * Math.min(1, (rho - L.r) / 0.35)) return "ink";
+        }
+      }
+      return null;
+    };
+  }
+  function screentoneDot(x, y, cell, radius){
+    const c = Math.SQRT1_2, u = (x + y) * c / cell, t = (y - x) * c / cell;
+    const du = u - Math.round(u), dt = t - Math.round(t);
+    return Math.sqrt(du * du + dt * dt) < radius;
+  }
+
+  // black & white manga
+  function mangaPixels(src, w, h){
+    const A = mangaAnalyse(src, w, h), N = w * h, out = new Uint8ClampedArray(N * 4);
+    const cell = Math.max(3, Math.round(4 * A.unit)), deco = mangaDecorator(w, h, A.unit);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++){
+      const p = y * w + x, v = A.smooth[p], dv = v - A.local[p];
+      let black;
+      if (A.ink[p] || v < A.tBlack) black = true;
+      else if (dv > -0.035) black = false;
+      else black = screentoneDot(x, y, cell, dv < -0.13 ? 0.52 : (dv < -0.07 ? 0.38 : 0.24));
+      const d = deco(x, y);
+      if (d === "ink") black = true; else if (d === "paper") black = false;
+      const i = p * 4;
+      out[i] = black ? 20 : 250; out[i+1] = black ? 20 : 250; out[i+2] = black ? 22 : 246; out[i+3] = 255;
+    }
+    return out;
+  }
+
+  // colour manga / anime look: flat cel-shaded colours + ink + screentone shadows
+  function mangaColorPixels(src, w, h){
+    const A = mangaAnalyse(src, w, h), N = w * h, out = new Uint8ClampedArray(N * 4);
+    const cell = Math.max(3, Math.round(4 * A.unit)), deco = mangaDecorator(w, h, A.unit);
+    // smooth each colour channel so skin and sky become flat areas
+    const ch = [new Float32Array(N), new Float32Array(N), new Float32Array(N)];
+    for (let p = 0, i = 0; p < N; p++, i += 4){ ch[0][p] = src[i]; ch[1][p] = src[i+1]; ch[2][p] = src[i+2]; }
+    const sm = ch.map(c => mangaBlur(c, w, h, 2.4 * A.unit));
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++){
+      const p = y * w + x, i = p * 4, v = A.smooth[p], dv = v - A.local[p];
+      let r = sm[0][p], g = sm[1][p], b = sm[2][p];
+      // clean, slightly brighter colours (anime look), gentle saturation boost
+      const L = r * 0.299 + g * 0.587 + b * 0.114;
+      r = L + (r - L) * 1.18; g = L + (g - L) * 1.18; b = L + (b - L) * 1.18;
+      const lift = Math.pow(Math.max(0.02, L / 255), 0.78) / Math.max(0.02, L / 255);
+      r *= lift; g *= lift; b *= lift;
+      // flat colour areas: snap every channel to 10 steps
+      r = Math.round(r / 25.5) * 25.5; g = Math.round(g / 25.5) * 25.5; b = Math.round(b / 25.5) * 25.5;
+      // cel shadow: only where it is clearly darker than its surroundings
+      if (dv < -0.05){ r *= 0.8; g *= 0.78; b *= 0.84; }
+      // deepest shadows / hair → near-black ink with a hint of the colour
+      if (v < A.tBlack * 0.8){ r = r * 0.15 + 14; g = g * 0.15 + 12; b = b * 0.15 + 16; }
+      // screentone dots in the darker cast shadows
+      else if (dv < -0.1 && screentoneDot(x, y, cell, dv < -0.16 ? 0.42 : 0.3)){ r *= 0.62; g *= 0.62; b *= 0.66; }
+      let ink = A.ink[p] === 1;
+      const d = deco(x, y);
+      if (d === "ink") ink = true;
+      if (d === "paper"){ out[i] = 250; out[i+1] = 250; out[i+2] = 246; out[i+3] = 255; continue; }
+      if (ink){ r = 22; g = 18; b = 24; }
+      out[i] = r; out[i+1] = g; out[i+2] = b; out[i+3] = 255;
+    }
+    return out;
+  }
+
+  // "cartoon" is the old id of the black & white manga filter (label "Manga");
+  // "mangacolor" is the colour version (label "Manga kleur").
+  function isMangaFilter(id){ return id === "cartoon" || id === "mangacolor"; }
+  function mangaLiveCss(id){
+    return id === "mangacolor" ? "saturate(1.3) contrast(1.25) brightness(1.05)" : "grayscale(1) contrast(1.7) brightness(1.05)";
+  }
+  function applyCartoonEffect(img, filterId){
+    const MAX_DIM = 900;
+    const scale = Math.min(1, MAX_DIM / Math.max(img.width, img.height));
+    const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+    const c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    const ctx = c.getContext("2d");
+    ctx.drawImage(img, 0, 0, w, h);
+    const data = ctx.getImageData(0, 0, w, h).data;
+    const isColor = filterId === "mangacolor";
+    const px = isColor ? mangaColorPixels(data, w, h) : mangaPixels(data, w, h);
+    ctx.putImageData(new ImageData(px, w, h), 0, 0);
+    return isColor ? c.toDataURL("image/jpeg", 0.92) : c.toDataURL("image/png");
+  }
+
+  function getCartoonDataUrl(){
+    return new Promise(resolve => {
+      if (!state.photoDataUrl || !isMangaFilter(state.filter)){ resolve(null); return; }
+      const filterId = state.filter, src = state.photoDataUrl;
+      if (cartoonCache.sourceUrl === src && cartoonCache.filterId === filterId){ resolve(cartoonCache.resultUrl); return; }
+      const img = new Image();
+      img.onload = () => {
+        // let the browser paint first, then do the heavy pixel work
+        setTimeout(() => {
+          const result = applyCartoonEffect(img, filterId);
+          cartoonCache.sourceUrl = src; cartoonCache.filterId = filterId; cartoonCache.resultUrl = result;
+          resolve(result);
+        }, 30);
+      };
+      img.src = src;
+    });
+  }
+
+  function roundRect(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y, x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x, y+h, r);
+    ctx.arcTo(x, y+h, x, y, r);
+    ctx.arcTo(x, y, x+w, y, r);
+    ctx.closePath();
+  }
+
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight){
+    const words = text.split(" ");
+    let line = "";
+    let lines = [];
+    words.forEach(w => {
+      const test = line ? line + " " + w : w;
+      if (ctx.measureText(test).width > maxWidth && line){
+        lines.push(line); line = w;
+      } else line = test;
+    });
+    if (line) lines.push(line);
+    lines.forEach((l,i) => ctx.fillText(l, x, y + i*lineHeight));
+    return lines.length;
+  }
+
+  async function drawResultCanvas(){
+    const out = $("#resultCanvas");
+    const W = 1080, H = 1350;
+    out.width = W; out.height = H;
+    const ctx = out.getContext("2d");
+
+    if (state.photoDataUrl){
+      const isCartoon = isMangaFilter(state.filter);
+      const sourceUrl = isCartoon ? (await getCartoonDataUrl()) || state.photoDataUrl : state.photoDataUrl;
+      await new Promise(res => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.max(W/img.width, H/img.height);
+          const dw = img.width*scale, dh = img.height*scale;
+          ctx.save();
+          if (!isCartoon && FILTERS[state.filter]){ ctx.filter = FILTERS[state.filter]; }
+          ctx.drawImage(img, (W-dw)/2, (H-dh)/2, dw, dh);
+          ctx.restore();
+          res();
+        };
+        img.src = sourceUrl;
+      });
+    } else {
+      const grad = ctx.createLinearGradient(0,0,0,H);
+      grad.addColorStop(0,"#D8CEC0"); grad.addColorStop(1,"#C7BAA6");
+      ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+      // decorative bean pattern for the "saved for later" tile
+      ctx.save();
+      ctx.globalAlpha = 0.12;
+      for (let i=0;i<10;i++){
+        ctx.save();
+        ctx.translate(90 + (i%4)*280, 220 + Math.floor(i/4)*380);
+        ctx.rotate(0.35);
+        ctx.fillStyle = "#241A14";
+        ctx.beginPath();
+        ctx.ellipse(0,0,55,80,0,0,Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    const scrim = ctx.createLinearGradient(0,H*0.42,0,H);
+    scrim.addColorStop(0,"rgba(20,14,10,0)");
+    scrim.addColorStop(1,"rgba(20,14,10,0.86)");
+    ctx.fillStyle = scrim; ctx.fillRect(0,H*0.42,W,H*0.58);
+
+    const logo = await loadLogo();
+    const logoSize = 96;
+    ctx.save();
+    ctx.globalAlpha = 0.92;
+    ctx.drawImage(logo, 40, 40, logoSize, logoSize);
+    ctx.restore();
+    ctx.fillStyle = "#F6F0E6";
+    ctx.font = "600 34px 'Playfair Display', Georgia, serif";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Beauty & Coffee", 40+logoSize+18, 40+logoSize/2-10);
+    ctx.font = "italic 20px 'Playfair Display', Georgia, serif";
+    ctx.fillStyle = "rgba(246,240,230,0.85)";
+    ctx.fillText(t("overlay_tagline", state.lang), 40+logoSize+18, 40+logoSize/2+22);
+
+    const m = state.match;
+    if (m){
+      const drinkFull = m.isKid
+        ? (KIDS_DRINKS.find(d => d.id === m.drinkId) || KIDS_DRINKS[0]).name[state.lang]
+        : (m.drink.origin ? [m.drink.origin, trName(m.drink.name, state.lang)].join(" — ") : trName(m.drink.name, state.lang));
+      const pad = 44;
+      let y = H - 300;
+
+      ctx.textBaseline = "alphabetic";
+      ctx.fillStyle = "#D9AE6C";
+      ctx.font = "600 30px 'Playfair Display', Georgia, serif";
+      ctx.fillText(t("overlay_title", state.lang), pad, y);
+      y += 52;
+
+      ctx.fillStyle = "#F6F0E6";
+      ctx.font = "500 30px Jost, Arial, sans-serif";
+      const drinkLine = t("overlay_drink_prefix", state.lang) + drinkFull;
+      y += (wrapText(ctx, drinkLine, pad, y, W-pad*2, 38) -1) * 38;
+      y += 50;
+
+      ctx.font = "500 30px Jost, Arial, sans-serif";
+       const treatName = typeof m.treatment.name === "object" 
+  ? (m.treatment.name[state.lang] || m.treatment.name.nl) 
+  : trName(m.treatment.name, state.lang);
+       const treatLine = t("overlay_treatment_prefix", state.lang) + treatName;
+       wrapText(ctx, treatLine, pad, y, W-pad*2, 38);
+    }
+
+    ctx.fillStyle = "rgba(246,240,230,0.7)";
+    ctx.font = "italic 21px 'Playfair Display', Georgia, serif";
+    ctx.fillText("Where Beauty Meets Coffee", 44, H-72);
+    // Instagram handle on the image itself: Instagram (story/post) ignores any
+    // caption sent along via the share menu, so the tag must be in the picture.
+    const igHandle = socialHandle();
+    if (igHandle){
+      ctx.save();
+      ctx.textAlign = "right"; ctx.textBaseline = "alphabetic";
+      ctx.fillStyle = "rgba(246,240,230,0.92)";
+      ctx.font = "600 22px Jost, Arial, sans-serif";
+      ctx.fillText("📸 " + igHandle, W - 44, H - 72);
+      ctx.restore();
+    }
+
+    // Site link — drawn in its own high-contrast pill so it always survives
+    // sharing (WhatsApp and friends often strip any caption text you send).
+    ctx.font = "600 24px Jost, Arial, sans-serif";
+    const linkText = "🔗 " + SITE_URL_DISPLAY;
+    const linkWidth = ctx.measureText(linkText).width;
+    const pillPadX = 20, pillH = 44, pillY = H - 56;
+    roundRect(ctx, 44, pillY, linkWidth + pillPadX*2, pillH, pillH/2);
+    ctx.fillStyle = "#D9AE6C";
+    ctx.fill();
+    ctx.fillStyle = "#241A14";
+    ctx.textBaseline = "middle";
+    ctx.fillText(linkText, 44 + pillPadX, pillY + pillH/2 + 1);
+  }
+
+  /* ---------------- share / download ---------------- */
+  const SITE_URL = window.location.origin + window.location.pathname;
+  const SITE_URL_DISPLAY = (window.location.hostname + window.location.pathname).replace(/\/index\.html$/, "").replace(/\/$/, "");
+
+  function canvasToBlob(){
+    return new Promise(res => $("#resultCanvas").toBlob(res, "image/jpeg", 0.95));
+  }
+
+  async function downloadImage(){
+    const blob = await canvasToBlob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "beauty-and-coffee-match.jpg";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);   // revoking at once can break the download on some phones
+    showToast(t("toast_downloaded", state.lang));
+    trackEvent("download");
+  }
+
+  async function shareImage(){
+    const blob = await canvasToBlob();
+    const file = new File([blob], "beauty-and-coffee-match.jpg", { type:"image/jpeg" });
+    // The site link is drawn onto the image itself (see drawResultCanvas) because
+    // several share targets, WhatsApp included, drop accompanying text when an
+    // image file is shared — the caption text/url below is a bonus for apps that
+    // do keep it (Telegram, Signal, Mail, ...), not the only way the link travels.
+    const handle = socialHandle();
+    const shareText = t("share_text", state.lang) + (handle ? ` ${handle} #beautyandcoffeemechelen` : "") + " " + SITE_URL;
+    if (navigator.canShare && navigator.canShare({ files:[file] })){
+      try { await navigator.share({ files:[file], title:"Beauty & Coffee", text: shareText, url: SITE_URL }); }
+      catch(err){ /* user cancelled */ }
+      trackEvent("share");
+    } else if (navigator.share){
+      try { await navigator.share({ title:"Beauty & Coffee", text: shareText, url: SITE_URL }); }
+      catch(err){ /* user cancelled */ }
+      trackEvent("share");
+    } else {
+      showToast(t("toast_share_unsupported", state.lang));
+      downloadImage();
+    }
+  }
+
+  /* ---------------- "Installeer als app" banner ---------------- */
+  let deferredInstallPrompt = null;
+  function isStandalone(){
+    return window.matchMedia && window.matchMedia("(display-mode: standalone)").matches
+      || window.navigator.standalone === true; // legacy iOS Safari flag
+  }
+  function daysSince(iso){
+    if (!iso) return Infinity;
+    return (Date.now() - new Date(iso).getTime()) / 86400000;
+  }
+  function maybeShowInstallBanner(){
+    if (isStandalone()) return; // already installed / running as an app
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+    if (deferredInstallPrompt){
+      if (daysSince(localData.installDismissedAt) < 14) return;
+      const el = $("#installBanner");
+      if (el) el.hidden = false;
+    } else if (isIos){
+      // iOS never fires beforeinstallprompt — show manual "Add to Home Screen" instructions instead.
+      if (daysSince(localData.installIosDismissedAt) < 14) return;
+      const el = $("#installBannerIOS");
+      if (el) el.hidden = false;
+    }
+  }
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    maybeShowInstallBanner();
+  });
+  window.addEventListener("appinstalled", () => {
+    trackEvent("app-installed");
+    const el = $("#installBanner"); if (el) el.hidden = true;
+  });
+  async function installApp(){
+    const el = $("#installBanner");
+    if (!deferredInstallPrompt){ if (el) el.hidden = true; return; }
+    if (el) el.hidden = true;
+    deferredInstallPrompt.prompt();
+    try {
+      const choice = await deferredInstallPrompt.userChoice;
+      trackEvent(choice.outcome === "accepted" ? "install-accepted" : "install-dismissed");
+    } catch(e){ /* ignore */ }
+    deferredInstallPrompt = null;
+  }
+  function dismissInstallBanner(){
+    localData.installDismissedAt = new Date().toISOString();
+    saveLocalData();
+    const el = $("#installBanner"); if (el) el.hidden = true;
+  }
+  function dismissInstallBannerIOS(){
+    localData.installIosDismissedAt = new Date().toISOString();
+    saveLocalData();
+    const el = $("#installBannerIOS"); if (el) el.hidden = true;
+  }
+
+  /* ---------------- upsell card (result screen) ---------------- */
+  function renderUpsell(){
+    const wrap = $("#upsellCard");
+    if (!wrap) return;
+    const m = state.match;
+    const sug = (m && !m.isKid && typeof UPSELL_SUGGESTIONS !== "undefined") ? UPSELL_SUGGESTIONS[m.treatment.id] : null;
+    if (!sug){ wrap.innerHTML = ""; return; }
+    const lang = state.lang;
+    wrap.innerHTML = `
+      <span class="upsell-card__icon" aria-hidden="true">✨</span>
+      <span class="upsell-card__text">${sug[lang] || sug.nl}</span>
+      ${sug.price ? `<span class="upsell-card__price">${sug.price}</span>` : ""}`;
+  }
+
+  /* ---------------- newsletter signup ----------------
+     With NEWSLETTER_URL (data.js) filled in, the card shows one button to
+     the WordPress newsletter page (proper list, double opt-in, unsubscribe
+     link). Without it, the old ready-made-email fallback stays. */
+  function setupNewsletterCard(){
+    const url = (typeof NEWSLETTER_URL === "string") ? NEWSLETTER_URL.trim() : "";
+    const link = $("#newsletterWebLink"), form = $("#newsletterForm");
+    const note = document.querySelector('.newsletter-card__note');
+    if (!url || !link) return;
+    link.href = url; link.hidden = false;
+    if (form) form.hidden = true;
+    if (note) note.setAttribute("data-i18n", "newsletter_web_note");
+    link.addEventListener("click", () => trackEvent("newsletter-web"));
+  }
+  /* ---------------- news card (latest WordPress posts) ----------------
+     Reads the public WordPress.com REST API straight from the browser
+     (no backend, no key). The last result is kept in localStorage so the
+     card still shows something offline. Any error → card stays hidden. */
+  const NEWS_CACHE_KEY = "bc_news_cache_v1";
+  const news = { posts: null, offline: false };
+
+  function newsText(html){
+    // titles/excerpts come as HTML: turn them into plain text (no markup is ever injected)
+    const doc = new DOMParser().parseFromString(String(html || ""), "text/html");
+    return (doc.body.textContent || "").replace(/\s+/g, " ").trim();
+  }
+  function newsShorten(txt, max){
+    if (txt.length <= max) return txt;
+    const cut = txt.slice(0, max);
+    return cut.slice(0, Math.max(cut.lastIndexOf(" "), max - 20)).replace(/[\s,.;:–-]+$/, "") + "…";
+  }
+  function newsSafeUrl(u){
+    try { const url = new URL(u); return url.protocol === "https:" ? url.href : ""; } catch(e){ return ""; }
+  }
+  function renderNewsCard(){
+    const card = $("#newsCard"), list = $("#newsList");
+    if (!card || !list) return;
+    const posts = news.posts || [];
+    if (!posts.length){ card.hidden = true; return; }
+    const locale = { nl:"nl-BE", en:"en-GB", fr:"fr-BE" }[state.lang] || "nl-BE";
+    list.textContent = "";
+    posts.forEach(p => {
+      const a = document.createElement("a");
+      a.className = "news-item"; a.href = p.url; a.target = "_blank"; a.rel = "noopener";
+      a.addEventListener("click", () => trackEvent("news-open"));
+      if (p.img){
+        const img = document.createElement("img");
+        img.className = "news-item__img"; img.src = p.img; img.alt = ""; img.loading = "lazy";
+        img.addEventListener("error", () => img.remove());
+        a.appendChild(img);
+      }
+      const body = document.createElement("div"); body.className = "news-item__body";
+      const d = new Date(p.date);
+      if (!isNaN(d)){
+        const date = document.createElement("p"); date.className = "news-item__date";
+        date.textContent = d.toLocaleDateString(locale, { day:"numeric", month:"long", year:"numeric" });
+        body.appendChild(date);
+      }
+      const title = document.createElement("p"); title.className = "news-item__title"; title.textContent = p.title;
+      body.appendChild(title);
+      if (p.excerpt){
+        const ex = document.createElement("p"); ex.className = "news-item__excerpt"; ex.textContent = p.excerpt;
+        body.appendChild(ex);
+      }
+      const more = document.createElement("span"); more.className = "news-item__more";
+      more.textContent = (t("news_read_more", state.lang) || "Lees meer") + " →";
+      body.appendChild(more);
+      a.appendChild(body);
+      list.appendChild(a);
+    });
+    if (news.offline){
+      const n = document.createElement("p"); n.className = "news-card__note";
+      n.textContent = t("news_offline", state.lang) || "";
+      list.appendChild(n);
+    }
+    card.hidden = false;
+  }
+  function setupNewsCard(){
+    const cfg = (typeof NEWS_FEED === "object" && NEWS_FEED) ? NEWS_FEED : null;
+    if (!cfg || !cfg.site || !$("#newsCard")) return;
+    const site = String(cfg.site).replace(/^https?:\/\//, "").replace(/\/+$/, "");
+    const count = Math.min(5, Math.max(1, parseInt(cfg.count, 10) || 3));
+    const all = $("#newsAllLink");
+    if (all){
+      const own = newsSafeUrl(cfg.allUrl || "");
+      all.href = own || ("https://" + site + "/" + (cfg.category ? "category/" + encodeURIComponent(cfg.category) + "/" : ""));
+      all.addEventListener("click", () => trackEvent("news-all"));
+    }
+    try {
+      const cached = JSON.parse(localStorage.getItem(NEWS_CACHE_KEY) || "null");
+      if (cached && Array.isArray(cached.posts)) { news.posts = cached.posts; renderNewsCard(); }
+    } catch(e){}
+    // Two routes to the same posts: if a browser/ad blocker stops the first,
+    // the second (the site's own address) usually still gets through.
+    const cat = cfg.category ? encodeURIComponent(cfg.category) : "";
+    const routes = [
+      { name: "wpcom-v1.1",
+        url: "https://public-api.wordpress.com/rest/v1.1/sites/" + encodeURIComponent(site) +
+             "/posts/?number=" + count + (cat ? "&category=" + cat : ""),
+        parse: data => (data && Array.isArray(data.posts) ? data.posts : []).map(p => ({
+          title: p.title, url: p.URL, date: p.date, excerpt: p.excerpt, img: p.featured_image })) },
+      { name: "site-wp-v2",
+        url: "https://" + site + "/wp-json/wp/v2/posts?per_page=" + count +
+             "&_fields=title,link,date,excerpt,jetpack_featured_media_url",
+        parse: data => (Array.isArray(data) ? data : []).map(p => ({
+          title: p.title && p.title.rendered, url: p.link, date: p.date,
+          excerpt: p.excerpt && p.excerpt.rendered, img: p.jetpack_featured_media_url })) }
+    ];
+    if (cat) routes.pop();   // the second route can't filter by category name: then only use the first
+    const errors = [];
+    const tryRoute = i => {
+      if (i >= routes.length) return Promise.reject(new Error(errors.join(" | ")));
+      const r = routes[i];
+      return fetch(r.url, { cache:"no-cache" })
+        .then(res => { if (!res.ok) throw new Error("HTTP " + res.status); return res.json(); })
+        .then(data => {
+          const list = r.parse(data);
+          if (!list.length) throw new Error("0 posts");
+          return list;
+        })
+        .catch(err => { errors.push(r.name + ": " + (err && err.message || err)); return tryRoute(i + 1); });
+    };
+    tryRoute(0)
+      .then(list => {
+        const posts = list.map(p => {
+          const img = newsSafeUrl(p.img);
+          return {
+            title: newsText(p.title),
+            url: newsSafeUrl(p.url),
+            date: p.date || "",
+            excerpt: newsShorten(newsText(p.excerpt), 140),
+            img: img ? img.split("?")[0] + "?w=200&h=200&crop=1" : ""
+          };
+        }).filter(p => p.title && p.url).slice(0, count);
+        news.posts = posts; news.offline = false;
+        try { localStorage.setItem(NEWS_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), posts })); } catch(e){}
+        renderNewsCard();
+      })
+      .catch(err => {
+        if (news.posts && news.posts.length){ news.offline = !navigator.onLine; renderNewsCard(); }
+        // Diagnose: open the app with #newsdebug at the end of the address
+        // to see why the posts could not be loaded.
+        if (/newsdebug/.test(location.hash)){
+          const card = $("#newsCard"), list = $("#newsList");
+          if (card && list){
+            const p = document.createElement("p"); p.className = "news-card__note";
+            p.textContent = "News debug — " + (err && err.message || err);
+            list.appendChild(p); card.hidden = false;
+          }
+        }
+      });
+  }
+
+  /* ---------------- newsletter signup (mailto — no backend) ---------------- */
+  function submitNewsletter(e){
+    e.preventDefault();
+    const input = $("#newsletterEmail");
+    const email = (input && input.value || "").trim();
+    if (!email) return;
+    const lang = state.lang;
+    const subject = t("newsletter_mail_subject", lang);
+    const body = t("newsletter_mail_body", lang).replace("{email}", email);
+    window.location.href = `mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    localData.newsletterSentAt = new Date().toISOString();
+    saveLocalData();
+    showToast(t("newsletter_sent_toast", lang));
+    trackEvent("newsletter-signup");
+    if (input) input.value = "";
+  }
+
+  /* ---------------- analytics (optional, privacy-friendly) ----------------
+     No-ops until a GoatCounter (or similar) script is added in index.html —
+     see the comment there for setup instructions. Nothing is tracked without it. */
+  function trackEvent(name){
+    try {
+      if (window.goatcounter && typeof window.goatcounter.count === "function"){
+        window.goatcounter.count({ path: name, event: true });
+      }
+    } catch(e){ /* analytics should never break the app */ }
+  }
+
+  /* ---------------- reset ---------------- */
+  /* ---------------- social links + version ---------------- */
+  // "@beauty_and_coffee_mechelen", taken from the Instagram link in data.js
+  function socialHandle(){
+    const m = (SOCIAL_LINKS.instagram || "").match(/instagram\.com\/([^/?#]+)/i);
+    return m ? "@" + m[1] : "";
+  }
+  function renderSocialLinks(){
+    const links = [];
+    if (SOCIAL_LINKS.instagram) links.push(`<a class="social-link social-link--ig" href="${SOCIAL_LINKS.instagram}" target="_blank" rel="noopener">📷 Instagram</a>`);
+    if (SOCIAL_LINKS.facebook)  links.push(`<a class="social-link social-link--fb" href="${SOCIAL_LINKS.facebook}" target="_blank" rel="noopener">👍 Facebook</a>`);
+    const html = links.length ? `<p class="social-links__title">${t("social_follow", state.lang)}</p><div class="social-links__row">${links.join("")}</div>` : "";
+    const foot = $("#socialLinks"); if (foot) foot.innerHTML = html;
+    const res = $("#socialLinksResult");
+    if (res){
+      const h = socialHandle();
+      res.innerHTML = html + (h ? `<p class="social-links__tag">${t("social_tag_hint", state.lang).replace("{handle}", `<strong>${h}</strong>`)}</p>` : "");
+    }
+    const v = $("#appVersion"); if (v) v.textContent = `${t("app_version_label", state.lang)} ${APP_VERSION}`;
+  }
+
+  function resetApp(){
+    stopCamera();
+    cameraFacing = "user";
+    state.profile = null; state.ageBracket = null; state.sunExposed = null; state.kidsDrink = null;
+    state.healthFlags = { phlebitis:false, contactLenses:false, menstruation:false, pregnant:false, musclePain:false, roaccutane:false, dietExercise:false, sport:false, diet:false };
+    state.mood = null; state.category = null; state.temperature = null; state.caffeine = null; state.complaintText = "";
+    const complaintEl = $("#complaintInput"); if (complaintEl) complaintEl.value = "";
+    state.milk = "none"; state.extras = []; state.context = null;
+    state.photoDataUrl = null; state.filter = "none"; state.match = null; state.slots = []; state.skinFact = null; state.sunFact = null;
+    retakePhoto();
+    history = ["welcome"];
+    applyI18n();
+    showStep("welcome");
+  }
+
+  /* ---------------- wire up ---------------- */
+  /* ---------------- local memory (localStorage) ----------------
+     Everything below stays on this device only — no account, no
+     server, nothing ever sent to Beauty & Coffee. A stamp is only
+     added after scanning the rotating QR code in the salon (see
+     "stamp card via QR" below). */
+  const LOCAL_KEY = "beautyCoffeeLocal_v1";
+  const localData = { version:1, stamps:0, discoveredTreatments:[], discoveredDrinks:[], favorites:[], lastMatchAt:null, reviewPromptShownFor:null, savedProfile:null, savedAgeBracket:null, installDismissedAt:null, installIosDismissedAt:null, newsletterSentAt:null, lastStampDay:null };
+
+  function loadLocalData(){
+    try {
+      const saved = localStorage.getItem(LOCAL_KEY);
+      if (saved){
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === "object") Object.assign(localData, parsed);
+      }
+    } catch(e){ /* private browsing or storage disabled — app still works without memory */ }
+  }
+
+  /* ---------------- moving to the new address ----------------
+     The old address (sbw888.github.io/beauty_and_coffee_mechelen) now only
+     redirects here. Browser storage belongs to one address, so the old page
+     reads the client's stamp card etc. and passes it along once as
+     ?migrate=…; here we merge it in (never lowering anything) and remove it
+     from the address bar. */
+  function importMigratedData(){
+    try {
+      const params = new URLSearchParams(location.search);
+      const raw = params.get("migrate");
+      if (!raw) return;
+      params.delete("migrate");
+      const rest = params.toString();
+      window.history.replaceState(null, "", location.pathname + (rest ? "?" + rest : "") + location.hash);
+      const json = decodeURIComponent(escape(atob(raw.replace(/-/g, "+").replace(/_/g, "/"))));
+      const old = JSON.parse(json);
+      if (!old || typeof old !== "object") return;
+      const union = (a, b) => Array.from(new Set([...(Array.isArray(a) ? a : []), ...(Array.isArray(b) ? b : [])]));
+      const before = localData.stamps;
+      localData.stamps = Math.max(Number(localData.stamps) || 0, Math.min(Number(old.stamps) || 0, 100));
+      localData.discoveredTreatments = union(localData.discoveredTreatments, old.discoveredTreatments);
+      localData.discoveredDrinks = union(localData.discoveredDrinks, old.discoveredDrinks);
+      if (Array.isArray(old.favorites)){
+        const keys = new Set(localData.favorites.map(f => f && f.key));
+        old.favorites.forEach(f => { if (f && f.key && !keys.has(f.key)) localData.favorites.push(f); });
+      }
+      ["savedProfile","savedAgeBracket","lastMatchAt","lastStampDay","newsletterSentAt"].forEach(k => {
+        if (!localData[k] && old[k]) localData[k] = old[k];
+      });
+      saveLocalData();
+      if (localData.stamps > before) setTimeout(() => showToast(t("migrate_done", state.lang)), 1200);
+    } catch(e){ /* a broken link should never break the app */ }
+  }
+
+  function saveLocalData(){
+    try { localStorage.setItem(LOCAL_KEY, JSON.stringify(localData)); }
+    catch(e){ /* storage full/unavailable — fail silently, this is a non-critical extra */ }
+  }
+
+  function getAllDrinkNames(){
+    const names = new Set();
+    BEVERAGES.coffee.caff.forEach(b => names.add(b.name));
+    BEVERAGES.coffee.decaf.forEach(b => names.add(b.name));
+    BEVERAGES.coffeeIced.caff.forEach(b => names.add(b.name));
+    BEVERAGES.coffeeIced.decaf.forEach(b => names.add(b.name));
+    TEAS_CAFF.forEach(n => names.add(n));
+    TEAS_DECAF.forEach(n => names.add(n));
+    HOT_EXTRAS_DECAF.forEach(n => names.add(n));
+    ["Matcha","Matcha Latte","Iced Matcha","Iced Matcha Latte"].forEach(n => names.add(n));
+    KIDS_DRINKS.forEach(d => names.add(d.name.nl));
+    return names;
+  }
+
+  function recordDiscovery(){
+    if (!state.match) return false;
+    let changed = false;
+    const tid = state.match.isKid ? "kindermanicure" : state.match.treatment.id;
+    if (tid && !localData.discoveredTreatments.includes(tid)){
+      localData.discoveredTreatments.push(tid);
+      changed = true;
+    }
+    const dname = state.match.isKid
+      ? (KIDS_DRINKS.find(d => d.id === state.match.drinkId) || KIDS_DRINKS[0]).name.nl
+      : state.match.drink.name;
+    if (dname && !localData.discoveredDrinks.includes(dname)){
+      localData.discoveredDrinks.push(dname);
+      changed = true;
+    }
+    localData.lastMatchAt = new Date().toISOString();
+    saveLocalData();
+    return changed;
+  }
+
+  /* ---------------- Google review prompt ----------------
+     Shown on the welcome screen a few days after someone's last
+     generated match — a reasonable proxy for "had their treatment
+     by now" without any real appointment data. Shown once per visit
+     cycle (never repeats for the same lastMatchAt timestamp). */
+  const REVIEW_PROMPT_DELAY_DAYS = 3;
+  const GOOGLE_REVIEW_URL = "https://g.page/r/CWswrSNuP25zEAE/review";
+
+  function shouldShowReviewPrompt(){
+    if (!localData.lastMatchAt) return false;
+    if (localData.reviewPromptShownFor === localData.lastMatchAt) return false;
+    const daysSince = (Date.now() - new Date(localData.lastMatchAt).getTime()) / 86400000;
+    return daysSince >= REVIEW_PROMPT_DELAY_DAYS;
+  }
+
+  function dismissReviewPrompt(){
+    localData.reviewPromptShownFor = localData.lastMatchAt;
+    saveLocalData();
+    renderReturningUserBlock();
+  }
+
+  function renderReturningUserBlock(){
+    const block = $("#returningUserBlock");
+    if (!block) return;
+    const changeLink = $("#changeProfileLink");
+    if (changeLink) changeLink.hidden = !localData.savedProfile;
+    const favs = localData.favorites || [];
+    const hasHistory = localData.stamps > 0 || localData.discoveredTreatments.length > 0 || favs.length > 0;
+    const showReview = shouldShowReviewPrompt();
+    block.hidden = !hasHistory && !showReview;
+    if (!hasHistory && !showReview) return;
+    const totalTreatments = TREATMENTS_CATALOG.length;
+    const totalDrinks = getAllDrinkNames().size;
+    const reviewHtml = showReview ? `
+      <div class="review-prompt">
+        <p>${t("review_prompt_text", state.lang)}</p>
+        <a class="btn btn--primary" href="${GOOGLE_REVIEW_URL}" target="_blank" rel="noopener" data-action="dismiss-review">${t("review_prompt_button", state.lang)}</a>
+        <button type="button" class="btn btn--text" data-action="dismiss-review">${t("review_prompt_dismiss", state.lang)}</button>
+      </div>` : "";
+    block.innerHTML = reviewHtml + (hasHistory ? `
+      <p class="returning-user__title">${t("welcome_back_title", state.lang)}</p>
+      <div class="returning-user__stats">
+        <span>☕ ${Math.min(localData.stamps,10)}/10 ${t("stamps_label", state.lang)}</span>
+        <span>✨ ${localData.discoveredTreatments.length}/${totalTreatments} ${t("treatments_discovered_label", state.lang)}</span>
+        <span>🍵 ${localData.discoveredDrinks.length}/${totalDrinks} ${t("drinks_discovered_label", state.lang)}</span>
+      </div>
+      ${favs.length ? `
+      <p class="returning-user__title returning-user__title--fav">${t("fav_title", state.lang)}</p>
+      <ul class="fav-list">
+        ${favs.map((f, i) => `<li class="fav-item">
+          <div class="fav-item__text"><strong>${trName(f.tname, state.lang)}</strong><span>☕ ${f.drink}</span></div>
+          <div class="fav-item__actions">
+            <a class="fav-item__book" href="${favBookHref(f)}" target="_blank" rel="noopener">${t("fav_book", state.lang)}</a>
+            <button type="button" class="fav-item__remove" data-action="remove-fav" data-fav-index="${i}">${t("fav_remove", state.lang)}</button>
+          </div>
+        </li>`).join("")}
+      </ul>` : ""}` : "");
+  }
+
+  // Rendered in two places: on the result screen and on the stand-alone
+  // "Mijn stempelkaart" screen (welcome screen button / #stempelkaart link),
+  // so a client never has to redo the questions just to scan a stamp.
+  function renderLoyaltyBlock(){
+    const blocks = [$("#loyaltyBlock"), $("#loyaltyBlockStandalone")].filter(Boolean);
+    if (!blocks.length) return;
+    const block = { set innerHTML(html){ blocks.forEach(b => { b.innerHTML = html; }); } };
+    const totalTreatments = TREATMENTS_CATALOG.length;
+    const totalDrinks = getAllDrinkNames().size;
+    const stampsCapped = Math.min(localData.stamps, 10);
+    const tPct = Math.round(localData.discoveredTreatments.length / totalTreatments * 100);
+    const dPct = Math.round(localData.discoveredDrinks.length / totalDrinks * 100);
+    block.innerHTML = `
+      <div class="loyalty-card">
+        <p class="loyalty-card__title">☕ ${t("stamp_card_title", state.lang)}</p>
+        <div class="loyalty-card__stamps">
+          ${Array.from({length:10}, (_,i) => `<span class="stamp${i < stampsCapped ? " is-filled" : ""}"></span>`).join("")}
+        </div>
+        <p class="loyalty-card__hint">${t("stamp_card_hint", state.lang)}</p>
+        <button type="button" class="btn btn--outline" data-action="add-stamp">${t("stamp_card_button", state.lang)}</button>
+      </div>
+      <div class="collection-card">
+        <p class="collection-card__title">✨ ${t("collection_title", state.lang)}</p>
+        <div class="collection-card__row"><span>${t("treatments_discovered_label", state.lang)}</span><span>${localData.discoveredTreatments.length}/${totalTreatments}</span></div>
+        <div class="collection-card__bar"><div class="collection-card__fill" style="width:${tPct}%"></div></div>
+        <div class="collection-card__row"><span>${t("drinks_discovered_label", state.lang)}</span><span>${localData.discoveredDrinks.length}/${totalDrinks}</span></div>
+        <div class="collection-card__bar"><div class="collection-card__fill" style="width:${dPct}%"></div></div>
+      </div>
+      <p class="loyalty-privacy">🔒 ${t("loyalty_privacy_note", state.lang)} ${t("stamp_backup_tip", state.lang)}</p>`;
+  }
+
+  /* ---------------- stamp card via QR (salon mode) ----------------
+     Sandra opens the app with #salon on her own phone ("salon mode").
+     It shows a QR code + 6 digits that change every 30 seconds,
+     computed from SALON_STAMP_SECRET and the current time (the same
+     idea as a bank app's login codes). The client's app scans the code
+     and recomputes it; only a fresh, valid code gives a stamp. A photo
+     of an old code is useless a minute later. Max 1 stamp per day.
+     100% client-side and free: Web Crypto (built into the browser),
+     a bundled QR encoder (assets/lib/qr-encoder.js) and for scanning
+     the browser's own BarcodeDetector or else the open-source jsQR.
+     NB: the secret sits in data.js, so a programmer could in theory
+     compute codes — fine for a coffee stamp card, not bank security. */
+  const STAMP_STEP_SECONDS = 30;
+  const STAMP_QR_PREFIX = "BCSTAMP:";
+  const JSQR_SOURCES = ["assets/lib/jsQR.js", "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"];
+
+  function todayKey(){
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
+  function stampCounterNow(){ return Math.floor(Date.now() / 1000 / STAMP_STEP_SECONDS); }
+
+  let stampKeyPromise = null;
+  function getStampKey(){
+    if (!stampKeyPromise){
+      stampKeyPromise = crypto.subtle.importKey("raw", new TextEncoder().encode(SALON_STAMP_SECRET),
+        { name:"HMAC", hash:"SHA-256" }, false, ["sign"]);
+    }
+    return stampKeyPromise;
+  }
+  async function stampCodeFor(counter){
+    const key = await getStampKey();
+    const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode("BC-STAMP|" + counter)));
+    const off = sig[sig.length - 1] & 15;   // RFC 4226-style dynamic truncation
+    const num = ((sig[off] & 127) << 24) | (sig[off+1] << 16) | (sig[off+2] << 8) | sig[off+3];
+    return String(num % 1000000).padStart(6, "0");
+  }
+  function stampCryptoAvailable(){
+    return !!(window.crypto && crypto.subtle && typeof SALON_STAMP_SECRET === "string" && SALON_STAMP_SECRET);
+  }
+  // Accepts the current code and the previous ~90 s (clock differences,
+  // slow scanning) plus one step ahead (a phone clock running slow).
+  async function isValidStampCode(code){
+    if (!/^\d{6}$/.test(code)) return false;
+    const now = stampCounterNow();
+    for (let k = -3; k <= 1; k++){
+      if (await stampCodeFor(now + k) === code) return true;
+    }
+    return false;
+  }
+  function parseStampPayload(text){
+    if (!text) return null;
+    const s = String(text).trim();
+    if (s.startsWith(STAMP_QR_PREFIX)) return s.slice(STAMP_QR_PREFIX.length).trim();
+    return /^\d{6}$/.test(s) ? s : null;
+  }
+
+  function loadScript(src){
+    return new Promise((resolve, reject) => {
+      const el = document.createElement("script");
+      el.src = src; el.async = true;
+      el.onload = () => resolve(); el.onerror = () => { el.remove(); reject(new Error(src)); };
+      document.head.appendChild(el);
+    });
+  }
+  async function loadFirstScript(sources, isReady){
+    if (isReady()) return true;
+    for (const src of sources){
+      try { await loadScript(src); if (isReady()) return true; } catch(e){ /* try the next source */ }
+    }
+    return false;
+  }
+
+  /* ---- client side: scan the QR (or type the 6 digits) ---- */
+  const stampScan = { stream:null, timer:null, busy:false, detector:null, lastInvalidAt:0 };
+
+  function addStamp(){
+    if (!stampCryptoAvailable()){ showToast(t("stamp_unsupported", state.lang)); return; }
+    if (localData.lastStampDay === todayKey()){ showToast(t("stamp_already_today", state.lang)); return; }
+    openStampScanner();
+  }
+
+  function openStampScanner(){
+    closeStampScanner();
+    const ov = document.createElement("div");
+    ov.className = "stamp-overlay"; ov.id = "stampScanOverlay";
+    ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true");
+    ov.innerHTML = `
+      <div class="stamp-overlay__panel">
+        <button type="button" class="stamp-overlay__close" data-stamp="close" aria-label="${t("stamp_close", state.lang)}">✕</button>
+        <p class="stamp-overlay__title">☕ ${t("stamp_scan_title", state.lang)}</p>
+        <p class="stamp-overlay__hint" id="stampScanStatus">${t("stamp_scan_hint", state.lang)}</p>
+        <div class="stamp-scan__viewport">
+          <video id="stampScanVideo" playsinline autoplay muted></video>
+          <span class="stamp-scan__frame" aria-hidden="true"></span>
+        </div>
+        <label class="stamp-scan__label" for="stampCodeInput">${t("stamp_manual_label", state.lang)}</label>
+        <div class="stamp-scan__manual">
+          <input id="stampCodeInput" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" placeholder="000000">
+          <button type="button" class="btn btn--primary btn--sm" data-stamp="manual">${t("stamp_manual_button", state.lang)}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener("click", e => {
+      const a = e.target.closest("[data-stamp]");
+      if (e.target === ov || (a && a.dataset.stamp === "close")) closeStampScanner();
+      else if (a && a.dataset.stamp === "manual") submitStampCode($("#stampCodeInput").value, "manual");
+    });
+    $("#stampCodeInput").addEventListener("keydown", e => { if (e.key === "Enter") submitStampCode(e.target.value, "manual"); });
+    startStampCamera();
+  }
+
+  function setStampStatus(key, isError){
+    const el = $("#stampScanStatus");
+    if (!el) return;
+    el.textContent = t(key, state.lang);
+    el.classList.toggle("is-error", !!isError);
+  }
+
+  async function startStampCamera(){
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error("no camera API");
+      stampScan.stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:{ ideal:"environment" } }, audio:false });
+      const v = $("#stampScanVideo");
+      if (!v){ stopStampCamera(); return; }   // overlay closed meanwhile
+      v.srcObject = stampScan.stream;
+      await v.play().catch(()=>{});
+    } catch(e){
+      setStampStatus("stamp_camera_error", true);
+      const vp = document.querySelector(".stamp-scan__viewport"); if (vp) vp.hidden = true;
+      return;
+    }
+    // Prefer the browser's built-in QR reader; otherwise load jsQR.
+    try {
+      if ("BarcodeDetector" in window){
+        const formats = await BarcodeDetector.getSupportedFormats();
+        if (formats.includes("qr_code")) stampScan.detector = new BarcodeDetector({ formats:["qr_code"] });
+      }
+    } catch(e){ stampScan.detector = null; }
+    if (!stampScan.detector){
+      const ok = await loadFirstScript(JSQR_SOURCES, () => typeof window.jsQR === "function");
+      if (!ok){ setStampStatus("stamp_camera_error", true); return; }
+    }
+    stampScan.timer = setInterval(scanStampFrame, 180);
+  }
+
+  const stampScanCanvas = document.createElement("canvas");
+  async function scanStampFrame(){
+    const v = $("#stampScanVideo");
+    if (!v || stampScan.busy || v.readyState < 2 || !v.videoWidth) return;
+    stampScan.busy = true;
+    try {
+      let text = null;
+      if (stampScan.detector){
+        const codes = await stampScan.detector.detect(v);
+        if (codes && codes.length) text = codes[0].rawValue;
+      } else {
+        const scale = Math.min(1, 640 / Math.max(v.videoWidth, v.videoHeight));
+        const w = Math.round(v.videoWidth * scale), h = Math.round(v.videoHeight * scale);
+        stampScanCanvas.width = w; stampScanCanvas.height = h;
+        const ctx = stampScanCanvas.getContext("2d", { willReadFrequently:true });
+        ctx.drawImage(v, 0, 0, w, h);
+        const res = window.jsQR(ctx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts:"dontInvert" });
+        if (res) text = res.data;
+      }
+      if (text) await submitStampCode(text, "scan");
+    } catch(e){ /* a bad frame — just try the next one */ }
+    stampScan.busy = false;
+  }
+
+  async function submitStampCode(raw, source){
+    const code = parseStampPayload(raw);
+    if (code && await isValidStampCode(code)){
+      if (localData.lastStampDay === todayKey()){ closeStampScanner(); showToast(t("stamp_already_today", state.lang)); return; }
+      localData.stamps++;
+      localData.lastStampDay = todayKey();
+      saveLocalData();
+      closeStampScanner();
+      renderLoyaltyBlock();
+      renderReturningUserBlock();
+      if (navigator.vibrate) navigator.vibrate(60);
+      showToast(localData.stamps % 10 === 0 ? t("stamp_card_full_toast", state.lang) : t("stamp_added_toast", state.lang));
+      trackEvent("stamp-added");
+      return;
+    }
+    // Invalid: say so (not on every video frame), keep scanning.
+    if (source === "manual" || Date.now() - stampScan.lastInvalidAt > 2500){
+      stampScan.lastInvalidAt = Date.now();
+      setStampStatus("stamp_invalid", true);
+    }
+  }
+
+  function stopStampCamera(){
+    clearInterval(stampScan.timer); stampScan.timer = null;
+    if (stampScan.stream){ stampScan.stream.getTracks().forEach(tr => tr.stop()); stampScan.stream = null; }
+    stampScan.detector = null; stampScan.busy = false;
+  }
+  function closeStampScanner(){
+    stopStampCamera();
+    const ov = $("#stampScanOverlay"); if (ov) ov.remove();
+  }
+
+  /* ---- salon side: show the rotating QR code (open the app with #salon) ---- */
+  const salonMode = { timer:null, counter:null, wakeLock:null };
+
+  async function openSalonMode(){
+    if (!stampCryptoAvailable()){ showToast(t("stamp_unsupported", state.lang)); return; }
+    if (typeof SALON_MODE_PIN === "string" && SALON_MODE_PIN){
+      const entered = prompt(t("salon_pin_prompt", state.lang));
+      if (entered === null || entered.trim() !== SALON_MODE_PIN){
+        if (entered !== null) showToast(t("salon_pin_wrong", state.lang));
+        return;
+      }
+    }
+    const ok = await loadFirstScript(["assets/lib/qr-encoder.js"], () => !!window.BCQRCode);
+    if (!ok){ showToast(t("stamp_unsupported", state.lang)); return; }
+    closeSalonMode();
+    const ov = document.createElement("div");
+    ov.className = "stamp-overlay stamp-overlay--salon"; ov.id = "salonOverlay";
+    ov.innerHTML = `
+      <div class="stamp-overlay__panel">
+        <button type="button" class="stamp-overlay__close" data-salon="close" aria-label="${t("stamp_close", state.lang)}">✕</button>
+        <p class="stamp-overlay__title">${t("salon_title", state.lang)}</p>
+        <canvas id="salonQr" class="salon-qr" width="600" height="600"></canvas>
+        <p class="salon-code" id="salonCode">······</p>
+        <div class="salon-timer"><div class="salon-timer__fill" id="salonTimerFill"></div></div>
+        <p class="stamp-overlay__hint">${t("salon_hint", state.lang)}</p>
+      </div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener("click", e => { const a = e.target.closest("[data-salon]"); if (a) closeSalonMode(); });
+    try { if (navigator.wakeLock) salonMode.wakeLock = await navigator.wakeLock.request("screen"); } catch(e){ /* optional */ }
+    salonMode.counter = null;
+    await tickSalonMode();
+    salonMode.timer = setInterval(tickSalonMode, 1000);
+  }
+
+  async function tickSalonMode(){
+    const counter = stampCounterNow();
+    const secs = Date.now() / 1000;
+    const left = STAMP_STEP_SECONDS - (secs % STAMP_STEP_SECONDS);
+    const fill = $("#salonTimerFill");
+    if (fill) fill.style.width = `${(left / STAMP_STEP_SECONDS) * 100}%`;
+    if (counter === salonMode.counter) return;
+    salonMode.counter = counter;
+    const code = await stampCodeFor(counter);
+    const codeEl = $("#salonCode"); if (codeEl) codeEl.textContent = `${code.slice(0,3)} ${code.slice(3)}`;
+    drawQrToCanvas($("#salonQr"), STAMP_QR_PREFIX + code);
+  }
+
+  function drawQrToCanvas(canvas, text){
+    if (!canvas || !window.BCQRCode) return;
+    const { QRCode, ECL } = window.BCQRCode;
+    const qr = new QRCode(-1, ECL.M);
+    qr.addData(text); qr.make();
+    const n = qr.getModuleCount(), quiet = 4;
+    const size = canvas.width, cellPx = Math.floor(size / (n + quiet * 2));
+    const offset = Math.floor((size - cellPx * n) / 2);
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = "#000000";
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++){
+      if (qr.isDark(r, c)) ctx.fillRect(offset + c * cellPx, offset + r * cellPx, cellPx, cellPx);
+    }
+  }
+
+  function closeSalonMode(){
+    clearInterval(salonMode.timer); salonMode.timer = null;
+    if (salonMode.wakeLock){ salonMode.wakeLock.release().catch(()=>{}); salonMode.wakeLock = null; }
+    const ov = $("#salonOverlay"); if (ov) ov.remove();
+    if (location.hash === "#salon") window.history.replaceState(null, "", location.pathname + location.search);
+  }
+  document.addEventListener("click", e => {
+    const r = e.target.closest(".route-map, .practical-info__route");
+    if (r) trackEvent("route-maps");
+  });
+  function checkSalonHash(){
+    if (location.hash === "#salon") openSalonMode();
+    // direct link to the stamp card, e.g. a QR poster in the salon:
+    // https://beautyandcoffeemechelen.github.io/#stempelkaart
+    else if (location.hash === "#route" || location.hash === "#parkeren"){
+      window.history.replaceState(null, "", location.pathname + location.search);
+      goTo("findme");
+    }
+    else if (location.hash === "#stempelkaart" || location.hash === "#stamps"){
+      window.history.replaceState(null, "", location.pathname + location.search);
+      goTo("stampcard");
+    }
+  }
+
+  function resetLocalData(){
+    if (!confirm(t("reset_confirm_text", state.lang))) return;
+    localData.stamps = 0;
+    localData.discoveredTreatments = [];
+    localData.discoveredDrinks = [];
+    localData.favorites = [];
+    saveLocalData();
+    renderReturningUserBlock();
+    renderMatchTools();
+    renderLoyaltyBlock();
+    showToast(t("reset_done_toast", state.lang));
+  }
+
+  /* ---------------- calendar reminder (.ics download) ----------------
+     No backend means no reliable push notifications on every device —
+     a downloaded .ics file is the one reminder mechanism that genuinely
+     works everywhere, because the phone's own calendar app takes over
+     from there and handles the actual notification. */
+  function addCalendarReminder(){
+    const weeksStr = prompt(t("reminder_weeks_label", state.lang), "5");
+    if (weeksStr === null) return;
+    const weeks = parseInt(weeksStr, 10);
+    if (!weeks || weeks <= 0) return;
+
+    const start = new Date();
+    start.setDate(start.getDate() + weeks * 7);
+    start.setHours(10, 0, 0, 0);
+    const end = new Date(start.getTime() + 30 * 60 * 1000);
+
+    const fmt = d => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    const title = state.match && !state.match.isKid ? trName(state.match.treatment.name, state.lang) : t("reminder_ics_title", state.lang);
+
+    // UID, DTSTAMP and PRODID are required by the calendar standard (RFC 5545);
+    // without them some calendar apps (e.g. Outlook, older iPhones) refuse the file.
+    const ics = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Beauty & Coffee//Match app//NL",
+      "BEGIN:VEVENT",
+      `UID:${Date.now()}-${Math.random().toString(36).slice(2)}@beauty-coffee`,
+      `DTSTAMP:${fmt(new Date())}`,
+      `DTSTART:${fmt(start)}`,
+      `DTEND:${fmt(end)}`,
+      `SUMMARY:${t("reminder_ics_title", state.lang)} — ${title}`,
+      "DESCRIPTION:Beauty & Coffee",
+      "END:VEVENT",
+      "END:VCALENDAR"
+    ].join("\r\n");
+
+    const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "beauty-coffee-herinnering.ics";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);   // revoking at once can break the download on some phones
+    showToast(t("reminder_saved_toast", state.lang));
+  }
+
+  function init(){
+    loadLocalData();
+    importMigratedData();   // stamps etc. carried over from the old sbw888.github.io address
+    applyI18n();
+    renderReturningUserBlock();
+    showStep("welcome");
+    setupEditorDrag();
+    const newsletterForm = $("#newsletterForm");
+    if (newsletterForm) newsletterForm.addEventListener("submit", submitNewsletter);
+    setupNewsletterCard();
+    setupNewsCard();
+    applyI18n();
+    setTimeout(maybeShowInstallBanner, 2500); // give the page a moment to settle first
+    checkSalonHash();                                   // salon mode: open the app with #salon
+    window.addEventListener("hashchange", checkSalonHash);
+
+    $$(".lang-btn").forEach(b => b.addEventListener("click", () => setLang(b.dataset.lang)));
+
+    document.body.addEventListener("click", e => {
+      const el = e.target.closest("[data-action]");
+      if (!el) return;
+      const action = el.dataset.action;
+      if (action === "start"){
+        if (localData.savedProfile && (localData.savedProfile === "kind" || localData.savedAgeBracket)){
+          state.profile = localData.savedProfile;
+          state.ageBracket = localData.savedAgeBracket;
+          goTo(state.profile === "kind" ? "kidsDrink" : "sunCheck");
+        } else {
+          goTo("profile");
+        }
+      }
+      if (action === "change-profile"){
+        localData.savedProfile = null; localData.savedAgeBracket = null; saveLocalData();
+        state.profile = null; state.ageBracket = null;
+        goTo("profile");
+      }
+      if (action === "back") back();
+      if (action === "to-mood") goTo("mood");
+      if (action === "to-context") goTo("context");
+      if (action === "open-camera") openCamera();
+      if (action === "switch-camera") switchCamera();
+      if (action === "snap-photo") snapPhoto();
+      if (action === "cancel-camera") cancelCamera();
+      if (action === "retake") retakePhoto();
+      if (action === "edit-photo") editExistingPhoto();
+      if (action === "editor-rotate") editorRotate();
+      if (action === "editor-confirm") editorConfirm();
+      if (action === "editor-cancel") editorCancel();
+      if (action === "upload-photo") $("#fileInput").click();
+      if (action === "finish-photo") finishPhotoShare();
+      if (action === "open-photo-share") goTo("photo");
+      if (action === "share") shareImage();
+      if (action === "download") downloadImage();
+      if (action === "restart") resetApp();
+      if (action === "edit-answers") editAnswers();
+      if (action === "reload-app") window.location.reload();
+      if (action === "open-pricelist") goTo("pricelist");
+      if (action === "open-houserules") goTo("houserules");
+      if (action === "open-stampcard") goTo("stampcard");
+      if (action === "open-findme") goTo("findme");
+      if (action === "another-fact") anotherFact();
+      if (action === "install-app") installApp();
+      if (action === "dismiss-install") dismissInstallBanner();
+      if (action === "dismiss-install-ios") dismissInstallBannerIOS();
+      if (action === "toggle-slot") toggleSlot(el.dataset.slot);
+      if (action === "another-match") rerollMatch();
+      if (action === "toggle-fav") toggleFavorite();
+      if (action === "remove-fav") removeFavorite(Number(el.dataset.favIndex));
+      if (action === "add-stamp") addStamp();
+      if (action === "replay-drink-pop") replayDrinkPop(el);
+      if (action === "reset-local-data") resetLocalData();
+      if (action === "add-reminder") addCalendarReminder();
+      if (action === "dismiss-review") dismissReviewPrompt();
+    });
+
+    $("#fileInput").addEventListener("change", e => handleFileUpload(e.target.files[0]));
+
+    const priceSearch = $("#priceSearch");
+    if (priceSearch) priceSearch.addEventListener("input", renderPriceList);
+
+    const complaintEl = $("#complaintInput");
+    if (complaintEl){
+      complaintEl.addEventListener("input", () => { state.complaintText = complaintEl.value; });
+    }
+  }
+
+  async function runGeneration(){
+    goTo("loading");
+    generateMatch();
+    state.skinFact = chooseSkinFact();
+    await new Promise(r => setTimeout(r, 1600));
+    await drawResultCanvas();
+    renderResultDetails();
+    renderResultBlocks();
+    renderMatchTools();
+    renderSlotPicker();
+    const isNewDiscovery = recordDiscovery();
+    renderLoyaltyBlock();
+    goTo("result");
+    trackEvent("match-generated");
+    if (isNewDiscovery) trackEvent("new-discovery");
+    if (state.context === "thuis") showToast(t("toast_saved_home", state.lang));
+  }
+
+  async function finishPhotoShare(){
+    if (state.cameraStream) stopCamera();
+    await drawResultCanvas(); // re-bakes the share card with state.photoDataUrl if one was added
+    goTo("result");
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+
+  /* ---------------- PWA service worker ---------------- */
+  /* Updates without clearing the cache (feedback: people kept seeing old
+     prices and did not know how to clear their cache). The browser checks
+     for a new sw.js on every start and whenever the app comes back to the
+     foreground. When a new version takes over: on the welcome screen the
+     page simply reloads; in the middle of a match a small banner offers
+     "Vernieuwen", so nobody loses their answers. */
+  if ("serviceWorker" in navigator){
+    window.addEventListener("load", () => {
+      let hadController = !!navigator.serviceWorker.controller;
+      navigator.serviceWorker.register("sw.js", { updateViaCache:"none" }).then(reg => {
+        reg.update().catch(()=>{});
+        document.addEventListener("visibilitychange", () => {
+          if (document.visibilityState === "visible") reg.update().catch(()=>{});
+        });
+      }).catch(()=>{});
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (!hadController){ hadController = true; return; }   // very first install: nothing old to replace
+        const current = history[history.length - 1];
+        if (current === "welcome") window.location.reload();
+        else { const b = $("#updateBanner"); if (b) b.hidden = false; }
+      });
+    });
+  }
+})();

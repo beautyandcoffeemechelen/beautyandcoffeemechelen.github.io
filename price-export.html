@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Prijslijst-export (enkel voor Sandra)</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  body{ max-width: 900px; margin: 0 auto; padding: 24px 20px 80px; }
+  .export-head{ margin-bottom: 24px; }
+  .export-head h1{ font-family: var(--font-display); font-size: 24px; margin: 0 0 8px; }
+  .export-head p{ font-size: 14px; color: var(--espresso-60); line-height: 1.6; max-width: 640px; }
+  .export-bar{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin: 18px 0; }
+  .export-bar select, .export-bar button{
+    font-family: var(--font-body); font-size: 14px; padding: 9px 16px;
+    border-radius: 999px; border: 1px solid var(--espresso-30); background:#fff; cursor:pointer;
+  }
+  .export-bar button.btn--primary{ background: var(--gold); color:#241A14; border:none; font-weight:600; }
+  .export-status{ font-size: 13px; color: var(--gold-ink); min-height: 18px; }
+  .export-output{
+    margin-top: 12px; border: 1px solid var(--espresso-30); border-radius: var(--radius-m);
+    background: #fff; padding: 18px 22px; font-size: 14px; line-height: 1.6; color: var(--espresso);
+    max-height: 60vh; overflow-y: auto;
+  }
+  .export-output h2{ font-family: var(--font-display); font-size: 19px; margin: 22px 0 4px; }
+  .export-output h2:first-child{ margin-top: 0; }
+  .export-output p.note{ font-style: italic; color: var(--espresso-60); font-size: 13px; margin: 0 0 8px; }
+  .export-output ul{ margin: 0 0 4px; padding-left: 20px; }
+  .export-output li{ margin-bottom: 6px; }
+  .export-raw{
+    margin-top: 18px; width: 100%; min-height: 160px; font-family: monospace; font-size: 12px;
+    padding: 12px; border-radius: 8px; border: 1px solid var(--espresso-30); color: var(--espresso-60);
+    display: none;
+  }
+  .export-raw.is-visible{ display:block; }
+</style>
+</head>
+<body>
+
+<div class="export-head">
+  <h1>🔧 Prijslijst-export</h1>
+  <p>
+    Deze pagina is niet gelinkt vanuit de app en staat niet in het menu — klanten komen hier
+    niet toevallig terecht. Ze leest dezelfde <code>PRICE_LIST</code> uit <code>data.js</code>
+    die ook de app gebruikt, zodat je maar op <strong>één plek</strong> prijzen hoeft aan te
+    passen: hier en in de app staat dan altijd hetzelfde.
+  </p>
+  <p>
+    Werkwijze: pas een prijs aan in <code>data.js</code> (zoek <code>PRICE_LIST</code>), open
+    deze pagina opnieuw, kopieer de HTML hieronder, en plak die in het WordPress-blok van je
+    prijslijst-pagina (in de "Code-editor"-weergave van dat blok, niet de gewone tekstweergave).
+  </p>
+</div>
+
+<div class="export-bar">
+  <label for="langSelect" style="font-size:13px;color:var(--espresso-60);">Taal:</label>
+  <select id="langSelect">
+    <option value="nl" selected>Nederlands</option>
+    <option value="en">English</option>
+    <option value="fr">Français</option>
+  </select>
+  <button type="button" id="copyBtn" class="btn--primary">📋 Kopieer HTML</button>
+  <button type="button" id="toggleRawBtn">Toon/verberg ruwe HTML</button>
+  <span class="export-status" id="statusMsg"></span>
+</div>
+
+<div class="export-output" id="output" aria-live="polite"></div>
+<textarea class="export-raw" id="rawHtml" readonly></textarea>
+
+<script src="i18n.js"></script>
+<script src="data.js"></script>
+<script src="lang-fr.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  function escapeHtml(s){
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function buildHtml(lang){
+    if (typeof PRICE_LIST === "undefined") return "<p>PRICE_LIST niet gevonden — is data.js geladen?</p>";
+    let html = "";
+    PRICE_LIST.forEach(function(sec){
+      var title = (sec.title && (sec.title[lang] || sec.title.nl)) || "";
+      html += "<h2>" + escapeHtml(sec.icon ? sec.icon + " " + title : title) + "</h2>\n";
+      if (sec.note){
+        var note = sec.note[lang] || sec.note.nl;
+        html += "<p><em>" + escapeHtml(note) + "</em></p>\n";
+      }
+      html += "<ul>\n";
+      sec.items.forEach(function(it){
+        var name = (it.n && (it.n[lang] || it.n.nl)) || "";
+        var desc = it.d ? (it.d[lang] || it.d.nl) : "";
+        var noteTxt = it.note ? (it.note[lang] || it.note.nl) : "";
+        var line = "<strong>" + escapeHtml(name) + "</strong>";
+        if (it.time) line += " — " + escapeHtml(it.time);
+        if (it.price) line += " — <strong>" + escapeHtml(it.price) + "</strong>";
+        if (desc) line += "<br>" + escapeHtml(desc);
+        if (noteTxt) line += "<br><em>" + escapeHtml(noteTxt) + "</em>";
+        html += "  <li>" + line + "</li>\n";
+      });
+      html += "</ul>\n";
+    });
+    return html;
+  }
+
+  function render(){
+    var lang = document.getElementById("langSelect").value;
+    var html = buildHtml(lang);
+    document.getElementById("output").innerHTML = html;
+    document.getElementById("rawHtml").value = html;
+  }
+
+  document.getElementById("langSelect").addEventListener("change", render);
+
+  document.getElementById("copyBtn").addEventListener("click", async function(){
+    var text = document.getElementById("rawHtml").value;
+    var status = document.getElementById("statusMsg");
+    try {
+      await navigator.clipboard.writeText(text);
+      status.textContent = "✓ Gekopieerd — plak in de WordPress code-editor van je prijslijst-blok.";
+    } catch(e){
+      document.getElementById("rawHtml").classList.add("is-visible");
+      status.textContent = "Automatisch kopiëren lukte niet — selecteer de tekst hieronder manueel (Ctrl/Cmd+A, dan Ctrl/Cmd+C).";
+    }
+    setTimeout(function(){ status.textContent = ""; }, 6000);
+  });
+
+  document.getElementById("toggleRawBtn").addEventListener("click", function(){
+    document.getElementById("rawHtml").classList.toggle("is-visible");
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>
