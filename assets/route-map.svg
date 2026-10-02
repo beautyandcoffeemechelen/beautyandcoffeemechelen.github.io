@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -32 789 658" role="img" aria-label="Map: parking on the Jubellaan and along the parking strip in the Barbarastraat; Beauty &amp; Coffee at the end of the Barbarastraat">
+  <rect y="-32" width="789" height="658" fill="#F6F0E6"/>
+  <!-- buildings -->
+  <g fill="#E6DCCD">
+    <polygon points="397,285 676,391 645,493 384,381"/>
+    <polygon points="688,409 789,446 789,546 676,502"/>
+    <polygon points="186,211 316,254 291,322 174,279"/>
+    <polygon points="322,257 415,285 397,341 298,338"/>
+    <polygon points="155,446 214,465 198,539 140,521"/><polygon points="214,465 273,484 257,558 198,539"/><polygon points="273,487 332,505 316,580 257,561"/><polygon points="332,508 391,527 375,601 316,583"/><polygon points="391,530 450,549 434,617 375,598"/>
+    <polygon points="236,6 614,6 614,56 236,56" opacity=".7"/>
+  </g>
+  <!-- Jubellaan -->
+  <line x1="0" y1="-31" x2="789" y2="355" stroke="#C9B9A4" stroke-width="58" stroke-linecap="butt"/>
+  <line x1="0" y1="-31" x2="789" y2="355" stroke="#F6F0E6" stroke-width="2" stroke-dasharray="14 12"/>
+  <!-- Barbarastraat -->
+  <path d="M 205,71 L 99,310 Q 93,329 118,338 L 322,437 Q 434,477 595,539" fill="none" stroke="#D8CAB6" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 99,315 L 26,640" fill="none" stroke="#D8CAB6" stroke-width="30" stroke-linecap="round"/>
+  <path d="M 72,345 L 30,540" fill="none" stroke="#2F6FB5" stroke-width="16" stroke-linecap="round" opacity=".35"/>
+  <path d="M 198,161 L 347,239" fill="none" stroke="#D8CAB6" stroke-width="26" stroke-linecap="round"/>
+  <!-- no visitor parking zone -->
+  <path d="M 186,381 L 322,437 Q 434,477 595,539" fill="none" stroke="#B4534A" stroke-width="6" stroke-dasharray="4 10" stroke-linecap="round" opacity=".9"/>
+  <!-- walking route -->
+  <path d="M 200,82 L 103,314 M 50,430 L 103,314 L 322,422 Q 428,459 496,493" fill="none" stroke="#2C1E16" stroke-width="3" stroke-dasharray="2 8" stroke-linecap="round"/>
+  <!-- street names -->
+  <text x="608" y="273" transform="rotate(26 608 267)" font-family="Jost, Arial, sans-serif" font-size="30" font-weight="700" fill="#5A4636" text-anchor="middle">Jubellaan</text>
+  <text x="204" y="360" transform="rotate(25 204 360)" font-family="Jost, Arial, sans-serif" font-size="26" font-weight="700" fill="#5A4636" text-anchor="middle">Barbarastraat</text>
+  <!-- parking markers -->
+  <g font-family="Jost, Arial, sans-serif" font-weight="700" text-anchor="middle">
+    <g transform="translate(408,170)"><rect x="-25" y="-25" width="50" height="50" rx="10" fill="#2F6FB5" stroke="#fff" stroke-width="4"/><text y="12" font-size="34" fill="#fff">P</text></g>
+    <g transform="translate(67,4)"><rect x="-25" y="-25" width="50" height="50" rx="10" fill="#2F6FB5" stroke="#fff" stroke-width="4"/><text y="12" font-size="34" fill="#fff">P</text></g>
+    <g transform="translate(36,452)"><rect x="-25" y="-25" width="50" height="50" rx="10" fill="#2F6FB5" stroke="#fff" stroke-width="4"/><text y="12" font-size="34" fill="#fff">P</text></g>
+    <g transform="translate(250,455)"><circle r="24" fill="#fff" stroke="#B4534A" stroke-width="5"/><text y="10" font-size="26" fill="#B4534A">P</text><line x1="-16" y1="16" x2="16" y2="-16" stroke="#B4534A" stroke-width="5"/></g>
+  </g>
+  <!-- walking time -->
+  <g transform="translate(155,267)" font-family="Jost, Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle">
+    <rect x="-72" y="-22" width="144" height="40" rx="20" fill="#fff" stroke="#2C1E16" stroke-width="2"/><text y="7" fill="#2C1E16">🚶 ± 5 min</text>
+  </g>
+  <g transform="translate(118,418)" font-family="Jost, Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle">
+    <rect x="-58" y="-22" width="116" height="40" rx="20" fill="#fff" stroke="#2C1E16" stroke-width="2"/><text y="7" fill="#2C1E16">🚶 2 min</text>
+  </g>
+  <!-- Beauty & Coffee pin -->
+  <g transform="translate(508,502)">
+    <path d="M0,0 C-22,-28 -28,-40 -28,-52 A28,28 0 1 1 28,-52 C28,-40 22,-28 0,0 Z" fill="#B8864B" stroke="#fff" stroke-width="3"/>
+    <circle cy="-52" r="11" fill="#fff"/>
+    <rect x="-120" y="8" width="240" height="44" rx="22" fill="#2C1E16"/>
+    <text y="38" font-family="Playfair Display, Georgia, serif" font-size="26" font-weight="700" fill="#F6F0E6" text-anchor="middle">Beauty &amp; Coffee</text>
+  </g>
+</svg>
