@@ -16,7 +16,6 @@
   <path d="M 205,71 L 99,310 Q 93,329 118,338 L 322,437 Q 434,477 595,539" fill="none" stroke="#D8CAB6" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M 99,315 L 26,640" fill="none" stroke="#D8CAB6" stroke-width="30" stroke-linecap="round"/>
   <path d="M 72,345 L 30,540" fill="none" stroke="#2F6FB5" stroke-width="16" stroke-linecap="round" opacity=".35"/>
-  <path d="M 198,161 L 347,239" fill="none" stroke="#D8CAB6" stroke-width="26" stroke-linecap="round"/>
   <!-- no visitor parking zone -->
   <path d="M 186,381 L 322,437 Q 434,477 595,539" fill="none" stroke="#B4534A" stroke-width="6" stroke-dasharray="4 10" stroke-linecap="round" opacity=".9"/>
   <!-- walking route -->
