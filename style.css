@@ -761,3 +761,20 @@ body{
 .findme-contact{ margin:22px 0 6px; padding:16px; background:#fff; border-radius:var(--radius-m); box-shadow:var(--shadow-card); text-align:center; }
 .findme-contact__buttons{ display:flex; flex-direction:column; gap:8px; margin-top:10px; }
 .findme-contact__buttons .btn{ width:100%; text-decoration:none; justify-content:center; white-space:nowrap; }
+
+/* ---------- Google reviews card ---------- */
+.reviews-card{ max-width:520px; margin:26px auto 8px; padding:18px 18px 16px; background:#fff;
+  border-radius:var(--radius-l); box-shadow:var(--shadow-card); text-align:center; }
+.reviews-card[hidden]{ display:none; }
+.reviews-card__title{ font-family:var(--font-display); font-size:20px; margin:0 0 4px; }
+.reviews-card__summary{ font-size:13.5px; color:var(--espresso-60); margin:0 0 12px; }
+.reviews-card__stars, .review-quote__stars{ color:#E2A93B; letter-spacing:1px; }
+.reviews-card__stars{ margin-right:4px; }
+.reviews-card__list{ display:flex; flex-direction:column; gap:10px; text-align:left; }
+.review-quote{ margin:0; padding:12px 14px; background:var(--cream); border-radius:var(--radius-m); }
+.review-quote__stars{ font-size:13px; }
+.review-quote blockquote{ margin:4px 0 6px; font-size:14px; line-height:1.5; color:var(--espresso); }
+.review-quote figcaption{ font-size:12px; color:var(--espresso-60); }
+.reviews-card__note{ font-size:11.5px; color:var(--espresso-60); margin:10px 0 0; }
+.reviews-card__buttons{ display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+.reviews-card__buttons .btn{ width:100%; justify-content:center; text-decoration:none; }

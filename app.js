@@ -93,6 +93,7 @@
     renderSocialLinks();
     renderActions();
     if (typeof news !== "undefined" && news.posts) renderNewsCard();
+    renderReviewsCard();
   }
 
   function setLang(lang){
@@ -1867,6 +1868,33 @@
   function newsSafeUrl(u){
     try { const url = new URL(u); return url.protocol === "https:" ? url.href : ""; } catch(e){ return ""; }
   }
+  /* ---------------- Google reviews ("Wat klanten zeggen") ---------------- */
+  function renderReviewsCard(){
+    const card = $("#reviewsCard"), body = $("#reviewsBody");
+    if (!card || !body || typeof GOOGLE_REVIEWS === "undefined" || !GOOGLE_REVIEWS.items.length){ if (card) card.hidden = true; return; }
+    const lang = state.lang, G = GOOGLE_REVIEWS;
+    const stars = n => "★★★★★".slice(0, n) + "☆☆☆☆☆".slice(0, 5 - n);
+    const rating = lang === "en" ? G.rating.toFixed(1) : G.rating.toFixed(1).replace(".", ",");
+    body.innerHTML = `
+      <p class="reviews-card__summary"><span class="reviews-card__stars" aria-hidden="true">${stars(Math.round(G.rating))}</span>
+        ${t("reviews_summary", lang).replace("{rating}", rating).replace("{count}", G.count)}</p>
+      <div class="reviews-card__list">
+        ${G.items.map(r => `
+          <figure class="review-quote">
+            <div class="review-quote__stars" aria-label="${r.stars}/5">${stars(r.stars)}</div>
+            <blockquote>“${r.text}”</blockquote>
+            <figcaption>— ${r.name}${r.topic ? ` · <span>${r.topic}</span>` : ""}</figcaption>
+          </figure>`).join("")}
+      </div>
+      ${lang !== "nl" ? `<p class="reviews-card__note">${t("reviews_original_lang", lang)}</p>` : ""}
+      <div class="reviews-card__buttons">
+        <a class="btn btn--outline" href="${G.allUrl}" target="_blank" rel="noopener" data-review="all">${t("reviews_all", lang)}</a>
+        <a class="btn btn--primary" href="${GOOGLE_REVIEW_URL}" target="_blank" rel="noopener" data-review="write">${t("reviews_write", lang)}</a>
+      </div>`;
+    card.hidden = false;
+    body.querySelectorAll("[data-review]").forEach(a => a.addEventListener("click", () => trackEvent("reviews-" + a.dataset.review)));
+  }
+
   function renderNewsCard(){
     const card = $("#newsCard"), list = $("#newsList");
     if (!card || !list) return;
@@ -2590,6 +2618,7 @@
     if (newsletterForm) newsletterForm.addEventListener("submit", submitNewsletter);
     setupNewsletterCard();
     setupNewsCard();
+    renderReviewsCard();
     applyI18n();
     setTimeout(maybeShowInstallBanner, 2500); // give the page a moment to settle first
     checkSalonHash();                                   // salon mode: open the app with #salon

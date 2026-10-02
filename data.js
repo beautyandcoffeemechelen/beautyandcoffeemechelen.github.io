@@ -113,6 +113,28 @@ const KIDS_DRINKS = [
 const KIDS_TREATMENT = "Kindermanicure";
 
 /* ============================================================
+   GOOGLE REVIEWS — shown in the app as "Wat klanten zeggen".
+   A hand-picked copy of a few public Google reviews: no Google API,
+   no extra cookies, works offline. Update it now and then:
+   - rating / count: as shown on Google Maps (with the date in asOf)
+   - items: copy the text exactly as written (do not change words),
+     shorten only by cutting off whole sentences, and use first name +
+     initial. Shown in the language the review was written in.
+   ============================================================ */
+const GOOGLE_REVIEWS = {
+  rating: 4.9,
+  count: 36,
+  asOf: "2026-10-02",
+  allUrl: "https://www.google.com/maps/search/?api=1&query=Beauty%20%26%20Coffee%20Barbarastraat",
+  items: [
+    { name:"Sihm M.", stars:5, topic:"Teambuilding",
+      text:"Mijn collega’s en ik hebben genoten van onze teambuilding bij Sandra. We kozen voor een pakket op maat." },
+    { name:"Dominique R.", stars:5, topic:"Gelaatsverzorging & pedicure",
+      text:"Van een heel ontspannende, zalige gelaatsverzorging en pedicure genoten." }
+  ]
+};
+
+/* ============================================================
    NAME TRANSLATIONS — treatment, product, soap and drink names.
    The original name (as used in the salon) stays the key and is
    used for matching, photos and the booking message; this table
@@ -1242,7 +1264,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v41 · 02/10/2026";
+const APP_VERSION = "v42 · 02/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
