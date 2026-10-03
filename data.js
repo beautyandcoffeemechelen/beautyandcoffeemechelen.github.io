@@ -14,6 +14,7 @@ const CATEGORY_ICONS = { coffee:"☕", tea:"🫖", matcha:"🍵" };
    misleading than showing no photo at all. */
 const DRINK_PHOTOS = {
   "Matcha Latte": ["assets/drinks/matcha-latte-1.jpg", "assets/drinks/matcha-latte-2.jpg"],
+  "Matcha Latte met witte choco": ["assets/drinks/matcha-latte-1.jpg", "assets/drinks/matcha-latte-2.jpg"],
   "Latte": ["assets/drinks/latte.jpg"],
   "Cappuccino": ["assets/drinks/cappuccino.jpg"],
   "Latte Macchiato": ["assets/drinks/latte-macchiato.jpg"],
@@ -53,25 +54,22 @@ const TEA_EXTRA_OPTIONS = ["honey","sugar"]; // whipped cream/ice cream/biscoff/
 
 /* ---------- coffee origins & blends (with tasting notes) ---------- */
 const COFFEE_ORIGINS = [
-  { id:"peru", name:"Peru Single Origin", notes:"Dark chocolate, plum, honey", decaf:false },
-  { id:"colombia_decaf", name:"Colombia Decaf Single Origin", notes:"Nutty, cream, orange", decaf:true },
+  { id:"peru", name:"Peru La Prosperidad", region:"Cajamarca", notes:"Dark chocolate, plum, honey", decaf:false },
+  { id:"colombia_decaf", name:"Colombia Tumbaga Decaf", notes:"Tropical fruit, clementine, milk chocolate", decaf:true },
   { id:"duette", name:"Duette Blend", region:"Brazil & Malawi", notes:"Milk chocolate, caramel, honey", decaf:false },
   { id:"house", name:"House Blend", region:"Brazil, Guatemala & Colombia", notes:"Hazelnut, maple", decaf:false }
 ];
 
 /* ---------- tea selection ---------- */
+// Exactly the teas on the drinks menu (menukaart). Caffeine-free herbal
+// infusions here; real teas (and cascara) under TEAS_CAFF.
 const TEAS_DECAF = [
-  "Linden Blossom","Piña Colada Fruit Mix","Tropical Dream Fruit Mix","Cocktail Fruit Mix",
-  "Lipton Rooibos","Lipton Morocco Mint","Pickwick Chamomile"
+  "Lindebloesem","Altın Otu","Rooibos","Kamille"
 ];
 const TEAS_CAFF = [
-  "Sun of Heaven (Organic Sencha & Mango)","China Bancha","China Jasmine","Jasmine Dragon Pearl",
-  "Cascara Costa Rica Sonora","Lipton Peach Mango","Lipton Refreshing Lemon",
-  "Pickwick Original English","Pickwick Green Tea Pure","Lipton Japanese Sencha","Lord Nelson Chai",
-  "Organo Gold Organic Green Tea (with Ganoderma)"
+  "Groen & Mango","Klassiek Groen","Witte Thee","Powley Cha","Chai",
+  "Cascara","Zwarte Thee","Ambachtelijke Bloeithee"
 ];
-// Non-tea, non-coffee hot drinks — only ever surfaced for tea + decaf + hot,
-// alongside the real decaf teas (never when Iced is picked).
 const HOT_EXTRAS_DECAF = ["Hot Chocolate (Milk)", "Hot Chocolate (White)"];
 
 /* ---------- beverage menu ----------
@@ -88,10 +86,12 @@ const BEVERAGES = {
       { name:"Moka Pot", style:"slow" }, { name:"French Press", style:"slow" }
     ],
     decaf: [
-      { name:"Espresso", style:"black" }, { name:"Americano", style:"black" },
+      { name:"Espresso", style:"black" }, { name:"Doppio", style:"black" },
+      { name:"Americano", style:"black" }, { name:"Long Black", style:"black" },
       { name:"Cappuccino", style:"milk" }, { name:"Latte", style:"milk" },
-      { name:"Flat White", style:"milk" }, { name:"V60", style:"slow" },
-      { name:"French Press", style:"slow" }
+      { name:"Flat White", style:"milk" },
+      { name:"Vietnamese Phin Coffee", style:"slow" }, { name:"V60", style:"slow" },
+      { name:"Moka Pot", style:"slow" }, { name:"French Press", style:"slow" }
     ]
   },
   coffeeIced: {
@@ -144,6 +144,20 @@ const GOOGLE_REVIEWS = {
    Dutch for the English drink notes). Missing entry = original.
    ============================================================ */
 const NAME_I18N = {
+ "Double Cappuccino": {"nl": "Cappuccino Dubbel", "fr": "Cappuccino double"},
+ "Cappuccino & Choco": {"fr": "Cappuccino & choco"},
+ "Vietnamese Phin Coffee": {"nl": "Vietnamese Phin Koffie", "fr": "Café vietnamien (phin)"},
+ "V60": {"nl": "V60 Filterkoffie", "en": "V60 Filter Coffee", "fr": "Café filtre V60"},
+ "Moka Pot": {"nl": "Mokkapot", "fr": "Cafetière moka"},
+ "Matcha Latte met witte choco": {"en": "Matcha Latte with white chocolate", "fr": "Matcha latte au chocolat blanc"},
+ "Tropical fruit, clementine, milk chocolate": {"nl": "Tropisch fruit, clementine, melkchocolade", "fr": "Fruits tropicaux, clémentine, chocolat au lait"},
+ "Groen & Mango": {"en": "Green & Mango", "fr": "Vert & mangue"},
+ "Klassiek Groen": {"en": "Classic Green", "fr": "Vert classique"},
+ "Witte Thee": {"en": "White Tea", "fr": "Thé blanc"},
+ "Zwarte Thee": {"en": "Black Tea", "fr": "Thé noir"},
+ "Ambachtelijke Bloeithee": {"en": "Artisanal Blooming Tea", "fr": "Thé fleur artisanal"},
+ "Lindebloesem": {"en": "Linden Blossom", "fr": "Fleur de tilleul"},
+ "Kamille": {"en": "Chamomile", "fr": "Camomille"},
  "Hot Stone Massage": {
   "en": "Hot Stone Massage",
   "fr": "Massage aux pierres chaudes"
@@ -401,11 +415,11 @@ const NAME_I18N = {
   "fr": "Gommage matcha-mandarine"
  },
  "Hot Chocolate (Milk)": {
-  "nl": "Warme chocolademelk (melk)",
+  "nl": "Warme Chocomelk (melk)",
   "fr": "Chocolat chaud (lait)"
  },
  "Hot Chocolate (White)": {
-  "nl": "Warme chocolademelk (wit)",
+  "nl": "Warme Chocomelk (wit)",
   "fr": "Chocolat chaud (blanc)"
  },
  "Iced Coffee + Whipped Cream": {
@@ -1266,7 +1280,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v44 · 02/10/2026";
+const APP_VERSION = "v45 · 03/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".

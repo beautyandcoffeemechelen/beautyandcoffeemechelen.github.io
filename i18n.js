@@ -47,7 +47,7 @@ const I18N = {
     step2_title: "Kies je richting",
     step_temp_eyebrow: "Stap 7 · Warm of koud",
     step_temp_title: "Warm of koud?",
-    temperature_tea_hint: "Thee blijft warm — de enige koude theeoptie is een Iced Matcha Latte (cafeïnehoudend + melk).",
+    temperature_tea_hint: "Thee wordt altijd warm geserveerd. Zin in iets kouds? Kies dan koffie: Iced Coffee, Iced Latte of Affogato.",
     step3_eyebrow: "Stap 8 · Cafeïne",
     step3_title: "Met of zonder pit?",
     step4_eyebrow: "Stap 9 · Verfijning",
@@ -283,7 +283,7 @@ const I18N = {
     categories: {
       coffee: { title:"Koffie", sub:"Origins & blends" },
       tea: { title:"Thee & Infusies", sub:"Los of in zakje" },
-      matcha: { title:"Matcha", sub:"Puur, latte of iced" }
+      matcha: { title:"Matcha", sub:"Matcha Latte, ook lekker met witte choco" }
     },
     temperature: {
       hot: { title:"Warm", sub:"Klassiek gezet" },
@@ -377,7 +377,7 @@ const I18N = {
     step2_title: "Choose your direction",
     step_temp_eyebrow: "Step 7 · Hot or iced",
     step_temp_title: "Hot or iced?",
-    temperature_tea_hint: "Tea stays hot — the only cold tea option is an Iced Matcha Latte (caffeinated + milk).",
+    temperature_tea_hint: "Tea is always served hot. Fancy something cold? Choose coffee: Iced Coffee, Iced Latte or Affogato.",
     step3_eyebrow: "Step 8 · Caffeine",
     step3_title: "With or without a kick?",
     step4_eyebrow: "Step 9 · Refine",
@@ -613,7 +613,7 @@ const I18N = {
     categories: {
       coffee: { title:"Coffee", sub:"Origins & blends" },
       tea: { title:"Tea & Infusions", sub:"Loose or bagged" },
-      matcha: { title:"Matcha", sub:"Plain, latte or iced" }
+      matcha: { title:"Matcha", sub:"Matcha Latte, also lovely with white chocolate" }
     },
     temperature: {
       hot: { title:"Hot", sub:"Classically brewed" },

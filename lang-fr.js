@@ -51,7 +51,7 @@
   "step2_title": "Choisissez votre direction",
   "step_temp_eyebrow": "Étape 7 · Chaud ou glacé",
   "step_temp_title": "Chaud ou glacé ?",
-  "temperature_tea_hint": "Le thé reste chaud : la seule option de thé froid est un Iced Matcha Latte (avec caféine et lait).",
+  "temperature_tea_hint": "Le thé est toujours servi chaud. Envie de fraîcheur ? Choisissez le café : Iced Coffee, Iced Latte ou Affogato.",
   "step3_eyebrow": "Étape 8 · Caféine",
   "step3_title": "Avec ou sans coup de fouet ?",
   "step4_eyebrow": "Étape 9 · Personnalisation",
@@ -292,7 +292,7 @@
    },
    "matcha": {
     "title": "Matcha",
-    "sub": "Nature, latte ou glacé"
+    "sub": "Matcha latte, délicieux aussi au chocolat blanc"
    }
   },
   "temperature": {

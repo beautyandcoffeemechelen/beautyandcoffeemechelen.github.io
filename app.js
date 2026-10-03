@@ -342,7 +342,12 @@
       tile.innerHTML = `<span class="option-tile__icon">${CATEGORY_ICONS[id]}</span>
         <span class="option-tile__title">${data.title}</span>
         <span class="option-tile__sub">${data.sub}</span>`;
-      tile.addEventListener("click", () => { state.category = id; renderCategoryOptions(); setTimeout(()=>goTo("temperature"), 220); });
+      tile.addEventListener("click", () => {
+        state.category = id; renderCategoryOptions();
+        // Matcha Latte is only served hot: skip the hot/iced question
+        if (id === "matcha"){ state.temperature = "hot"; state.caffeine = "caff"; setTimeout(()=>goTo("toppings"), 220); }
+        else setTimeout(()=>goTo("temperature"), 220);
+      });
       wrap.appendChild(tile);
     });
   }
@@ -407,7 +412,9 @@
     if (!milkApplies && state.milk !== "none") state.milk = "none";
 
     wrap.innerHTML = "";
-    MILK_OPTIONS.forEach(id => {
+    const milkChoices = state.category === "matcha" ? MILK_OPTIONS.filter(m => m !== "none") : MILK_OPTIONS;
+    if (state.category === "matcha" && state.milk === "none") state.milk = "whole";
+    milkChoices.forEach(id => {
       const chip = document.createElement("button");
       chip.type = "button";
       chip.className = "chip" + (state.milk===id ? " is-selected" : "");
@@ -863,8 +870,9 @@
         drink = { name: bev.name, origin: origin.name, notes: origin.notes };
       }
     } else if (state.category === "matcha"){
-      const base = wantsMilk ? "Matcha Latte" : "Matcha";
-      drink = { name: isIced ? "Iced " + base : base, origin:null, notes:null };
+      // Menu: only "Matcha Latte (ook heerlijk met witte choco)" — always
+      // hot and with milk (no plain or iced matcha on the menu).
+      drink = { name: Math.random() < 0.3 ? "Matcha Latte met witte choco" : "Matcha Latte", origin:null, notes:null };
     } else { // tea — always served hot; no iced plain-tea option on the menu
       const pool = state.caffeine === "decaf" ? [...TEAS_DECAF, ...HOT_EXTRAS_DECAF] : TEAS_CAFF;
       drink = { name: pickRandom(pool), origin:null, notes:null };
@@ -2146,7 +2154,7 @@
     TEAS_CAFF.forEach(n => names.add(n));
     TEAS_DECAF.forEach(n => names.add(n));
     HOT_EXTRAS_DECAF.forEach(n => names.add(n));
-    ["Matcha","Matcha Latte","Iced Matcha","Iced Matcha Latte"].forEach(n => names.add(n));
+    ["Matcha Latte","Matcha Latte met witte choco"].forEach(n => names.add(n));
     KIDS_DRINKS.forEach(d => names.add(d.name.nl));
     return names;
   }
