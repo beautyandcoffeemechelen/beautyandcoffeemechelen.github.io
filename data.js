@@ -17,7 +17,8 @@ const DRINK_PHOTOS = {
   "Latte": ["assets/drinks/latte.jpg"],
   "Cappuccino": ["assets/drinks/cappuccino.jpg"],
   "Latte Macchiato": ["assets/drinks/latte-macchiato.jpg"],
-  "Vietnamese Phin Coffee": ["assets/drinks/vietnamese-phin.jpg"]
+  "Vietnamese Phin Coffee": ["assets/drinks/vietnamese-phin.jpg"],
+  "Long Black": ["assets/drinks/long-black.jpg"]
 };
 /* A Latte with the "pumpkin" topping shows the pumpkin spice latte photo. */
 const DRINK_PHOTOS_BY_EXTRA = {
@@ -31,7 +32,8 @@ const DRINK_CUTOUTS = {
   "assets/drinks/cappuccino.jpg": "assets/drinks/cappuccino-cut.webp",
   "assets/drinks/latte-macchiato.jpg": "assets/drinks/latte-macchiato-cut.webp",
   "assets/drinks/vietnamese-phin.jpg": "assets/drinks/vietnamese-phin-cut.webp",
-  "assets/drinks/pumpkin-spice-latte.jpg": "assets/drinks/pumpkin-spice-latte-cut.webp"
+  "assets/drinks/pumpkin-spice-latte.jpg": "assets/drinks/pumpkin-spice-latte-cut.webp",
+  "assets/drinks/long-black.jpg": "assets/drinks/long-black-cut.webp"
 };
 const CAFFEINE_ICONS = { caff:"⚡", decaf:"🌙" };
 const TEMPERATURE_ICONS = { hot:"🔥", iced:"🧊" };
@@ -1264,7 +1266,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v43 · 02/10/2026";
+const APP_VERSION = "v44 · 02/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".

@@ -778,3 +778,9 @@ body{
 .reviews-card__note{ font-size:11.5px; color:var(--espresso-60); margin:10px 0 0; }
 .reviews-card__buttons{ display:flex; flex-direction:column; gap:8px; margin-top:12px; }
 .reviews-card__buttons .btn{ width:100%; justify-content:center; text-decoration:none; }
+
+/* discovered treatments / drinks list */
+.collection-card__list{ margin:-4px 0 12px; font-size:13px; }
+.collection-card__list summary{ cursor:pointer; color:var(--gold-ink, #8A5A2B); font-weight:600; padding:4px 0; }
+.collection-card__list ul{ margin:6px 0 0; padding-left:18px; color:var(--espresso); line-height:1.55; }
+.collection-card__empty{ font-size:12.5px; color:var(--espresso-60); margin:-4px 0 12px; }

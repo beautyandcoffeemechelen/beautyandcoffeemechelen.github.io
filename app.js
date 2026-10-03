@@ -89,6 +89,7 @@
     renderSunFact();
     if (typeof HOUSE_RULES !== "undefined" && $('[data-step="houserules"]').classList.contains("is-active")) renderHouseRules();
     if ($('[data-step="findme"]') && $('[data-step="findme"]').classList.contains("is-active")) renderFindMe();
+    if (typeof localData !== "undefined" && ($("#loyaltyBlock") || $("#loyaltyBlockStandalone"))) renderLoyaltyBlock();
     if (typeof localData !== "undefined") renderReturningUserBlock();
     renderSocialLinks();
     renderActions();
@@ -2150,6 +2151,32 @@
     return names;
   }
 
+  /* "Mijn ontdekkingen": which treatments and drinks were matched before
+     (names in the client's language), shown as a fold-out list. */
+  function discoveredTreatmentNames(){
+    const lang = state.lang;
+    return localData.discoveredTreatments.map(id => {
+      if (id === "kindermanicure") return trName("Kindermanicure", lang);
+      const tr = TREATMENTS_CATALOG.find(x => x.id === id);
+      return tr ? trName(tr.name, lang) : null;
+    }).filter(Boolean).sort((a, b) => a.localeCompare(b, lang));
+  }
+  function discoveredDrinkNames(){
+    const lang = state.lang;
+    return localData.discoveredDrinks.map(name => {
+      const kid = KIDS_DRINKS.find(d => d.name && d.name.nl === name);
+      if (kid) return kid.name[lang] || kid.name.nl;
+      return trName(name, lang);
+    }).sort((a, b) => a.localeCompare(b, lang));
+  }
+  function discoveryListHtml(names){
+    if (!names.length) return `<p class="collection-card__empty">${t("collection_none", state.lang)}</p>`;
+    return `<details class="collection-card__list">
+        <summary>${t("collection_show", state.lang)} (${names.length})</summary>
+        <ul>${names.map(n => `<li>${n}</li>`).join("")}</ul>
+      </details>`;
+  }
+
   function recordDiscovery(){
     if (!state.match) return false;
     let changed = false;
@@ -2254,8 +2281,10 @@
         <p class="collection-card__title">✨ ${t("collection_title", state.lang)}</p>
         <div class="collection-card__row"><span>${t("treatments_discovered_label", state.lang)}</span><span>${localData.discoveredTreatments.length}/${totalTreatments}</span></div>
         <div class="collection-card__bar"><div class="collection-card__fill" style="width:${tPct}%"></div></div>
+        ${discoveryListHtml(discoveredTreatmentNames())}
         <div class="collection-card__row"><span>${t("drinks_discovered_label", state.lang)}</span><span>${localData.discoveredDrinks.length}/${totalDrinks}</span></div>
         <div class="collection-card__bar"><div class="collection-card__fill" style="width:${dPct}%"></div></div>
+        ${discoveryListHtml(discoveredDrinkNames())}
       </div>
       <p class="loyalty-privacy">🔒 ${t("loyalty_privacy_note", state.lang)} ${t("stamp_backup_tip", state.lang)}</p>`;
   }

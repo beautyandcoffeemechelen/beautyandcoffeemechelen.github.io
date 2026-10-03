@@ -195,6 +195,8 @@
   "route_map_title": "📍 Comment me trouver",
   "findme_button": "📍 Accès & stationnement",
   "findme_title": "Comment me trouver",
+  "collection_show": "Voir lesquels",
+  "collection_none": "Rien découvert pour l'instant — faites votre premier match !",
   "reviews_title": "⭐ Ce que disent les clients",
   "reviews_summary": "{rating} sur 5 sur Google · {count} avis",
   "reviews_all": "Tous les avis sur Google",
