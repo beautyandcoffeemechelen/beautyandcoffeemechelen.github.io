@@ -1280,7 +1280,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v45 · 03/10/2026";
+const APP_VERSION = "v46 · 03/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1322,6 +1322,15 @@ const SOCIAL_LINKS = {
    ============================================================ */
 const SALON_STAMP_SECRET = "b97d679a76827355855fbc9eb42c73b322825d8df5456e47";
 const SALON_MODE_PIN = "";
+
+/* Reward for a full stamp card (10 stamps). Change the text freely;
+   validMonths = how long after the 10th stamp the reward can be used. */
+const STAMP_REWARD = {
+  nl: "10% korting op je volgende behandeling",
+  en: "10% off your next treatment",
+  fr: "10 % de réduction sur votre prochain soin",
+  validMonths: 3
+};
 
 /* ============================================================
    PRICE LIST (tab "Prijslijst") — prices as on the website

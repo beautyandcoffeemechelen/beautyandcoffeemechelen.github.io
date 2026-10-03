@@ -91,6 +91,7 @@
 
     <button type="button" class="btn btn--primary btn--wide" data-action="start" data-i18n="start_button">Begin je match</button>
     <button type="button" class="btn btn--outline btn--wide welcome-stampcard" data-action="open-stampcard" data-i18n="stampcard_button">☕ Mijn stempelkaart</button>
+    <button type="button" class="btn btn--outline btn--wide welcome-photomoment" data-action="open-photomoment" data-i18n="pm_button">📸 Fotomoment</button>
     <button type="button" class="btn btn--outline btn--wide welcome-findme" data-action="open-findme" data-i18n="findme_button">📍 Zo vind je me &amp; parkeren</button>
     <button type="button" class="btn btn--gold-outline btn--wide welcome-pricelist" data-action="open-pricelist" data-i18n="pricelist_button">💶 Bekijk prijslijst</button>
     <button type="button" class="btn btn--text welcome-houserules" data-action="open-houserules" data-i18n="houserules_button">📋 Lees de huisregels</button>
@@ -405,6 +406,37 @@
     </div>
   </section>
 
+  <!-- PHOTO MOMENT (no questionnaire): pick treatment (+ drink) -> photo -> story card -->
+  <section class="step" data-step="photopick">
+    <div class="step__head">
+      <h2 class="step__title" data-i18n="pm_title">Fotomoment</h2>
+      <p class="step__hint" data-i18n="pm_hint"></p>
+    </div>
+    <label class="pm-label" for="pmTreatment" data-i18n="pm_treatment_label">Welke behandeling kreeg je?</label>
+    <select id="pmTreatment" class="pm-select"></select>
+    <label class="pm-label" for="pmDrink" data-i18n="pm_drink_label">En welk drankje? (optioneel)</label>
+    <select id="pmDrink" class="pm-select"></select>
+    <button type="button" class="btn btn--primary btn--wide" data-action="to-photo-quick" data-i18n="pm_next">Naar de foto</button>
+    <div class="step__nav">
+      <button type="button" class="btn btn--ghost" data-action="back" data-i18n="back_button">Terug</button>
+    </div>
+  </section>
+
+  <section class="step" data-step="photoshare">
+    <div class="step__head">
+      <h2 class="step__title" data-i18n="pm_share_title">Jouw Beauty &amp; Coffee moment</h2>
+      <p class="step__hint" data-i18n="pm_share_hint"></p>
+    </div>
+    <div class="result-card"><canvas id="quickCanvas" class="result-card__canvas"></canvas></div>
+    <div class="pm-share-actions">
+      <button type="button" class="btn btn--primary btn--wide" data-action="share" data-i18n="pm_share_button">Delen (Instagram, WhatsApp…)</button>
+      <button type="button" class="btn btn--outline btn--wide" data-action="download" data-i18n="pm_download_button">Bewaar foto</button>
+    </div>
+    <div class="step__nav">
+      <button type="button" class="btn btn--ghost" data-action="back" data-i18n="back_button">Terug</button>
+    </div>
+  </section>
+
   <section class="step" data-step="houserules">
     <div class="step__head">
       <h2 class="step__title" data-i18n="houserules_title">Huisregels</h2>
@@ -429,6 +461,7 @@
       <p class="step__hint" data-i18n="pricelist_intro">Prijzen vanaf 1/06/2026. Behandelingen enkel op afspraak.</p>
     </div>
     <input type="search" id="priceSearch" class="price-search" autocomplete="off" aria-label="Search">
+    <div class="price-cats" id="priceCats" role="tablist"></div>
     <div id="priceListBody" class="price-list"></div>
     <div class="price-contact">
       <p class="price-contact__title" data-i18n="pricelist_contact_title">Een afspraak maken?</p>

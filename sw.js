@@ -5,7 +5,7 @@
    Requests to other sites (GoatCounter statistics, Google Fonts, the
    WordPress.com news feed) are left
    alone: they go straight to the network and are never cached here. */
-const CACHE_NAME = "beauty-coffee-v45";
+const CACHE_NAME = "beauty-coffee-v46";
 const ASSETS = [
   "./",
   "./index.html",
@@ -42,7 +42,19 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   const req = event.request;
   if (req.method !== "GET") return;
-  if (new URL(req.url).origin !== self.location.origin) return;   // statistics, fonts: not ours
+  const url = new URL(req.url);
+  // jsQR (QR scanner for iPhone) from the CDN: keep a copy so scanning a
+  // stamp also works without signal in the salon.
+  if (url.hostname === "cdn.jsdelivr.net" && url.pathname.includes("/jsqr@")){
+    event.respondWith(
+      caches.match(req).then(hit => hit || fetch(req).then(res => {
+        if (res && res.ok){ const copy = res.clone(); caches.open(CACHE_NAME).then(c => c.put(req, copy)).catch(() => {}); }
+        return res;
+      }))
+    );
+    return;
+  }
+  if (url.origin !== self.location.origin) return;   // statistics, fonts, news feed: not ours
   event.respondWith(
     fetch(req, { cache:"no-cache" })
       .then(res => {

@@ -302,7 +302,7 @@ body{
   border-radius: var(--radius-l); overflow:hidden; box-shadow: var(--shadow-card);
   border:1px solid var(--espresso-12); margin-bottom:20px; background:var(--espresso);
 }
-.result-card__canvas{ display:block; width:100%; height:auto; }
+.result-card__canvas{ display:block; width:auto; max-width:100%; height:auto; max-height:72vh; margin:0 auto; }
 
 .result-details{
   background:var(--cream); border:1px solid var(--espresso-12); border-radius: var(--radius-m);
@@ -784,3 +784,38 @@ body{
 .collection-card__list summary{ cursor:pointer; color:var(--gold-ink, #8A5A2B); font-weight:600; padding:4px 0; }
 .collection-card__list ul{ margin:6px 0 0; padding-left:18px; color:var(--espresso); line-height:1.55; }
 .collection-card__empty{ font-size:12.5px; color:var(--espresso-60); margin:-4px 0 12px; }
+
+/* salon mode: three kinds of codes */
+.salon-modes{ display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin:6px 0 8px; }
+.salon-mode{ border:1.5px solid var(--espresso-30); background:#fff; border-radius:99px; padding:7px 12px; font:600 12.5px var(--font-body); color:var(--espresso); cursor:pointer; }
+.salon-mode.is-active{ background:var(--espresso); color:#fff; border-color:var(--espresso); }
+.salon-mode-hint{ font-size:12.5px; color:var(--espresso-60); margin:0 0 6px; line-height:1.4; }
+.salon-qr--redeem{ outline:8px solid #3E8E5A; outline-offset:-8px; }
+.salon-qr--undo{ outline:8px solid #B4534A; outline-offset:-8px; }
+/* reward on the stamp card */
+.reward-teaser{ font-size:12.5px; color:var(--espresso-60); margin:8px 0 2px; line-height:1.45; }
+.reward-voucher{ margin:10px 0 6px; padding:12px 14px; border:2px dashed var(--gold); border-radius:var(--radius-m); background:#fffaf0; }
+.reward-voucher.is-expired{ border-color:var(--espresso-30); opacity:.75; }
+.reward-voucher__title{ font-family:var(--font-display); font-size:18px; margin:0 0 4px; }
+.reward-voucher__text{ font-weight:600; margin:0 0 4px; }
+.reward-voucher__date{ font-size:12.5px; margin:0 0 6px; color:var(--espresso-60); }
+.reward-voucher__how{ font-size:12.5px; margin:0; line-height:1.4; }
+
+.match-why{ margin:12px 0 4px; padding:12px 14px; background:#fffaf0; border-left:4px solid var(--gold); border-radius:var(--radius-s); }
+.match-why__title{ font-weight:700; font-size:13.5px; margin:0 0 4px; }
+.match-why__text{ font-size:13.5px; line-height:1.5; margin:0; color:var(--espresso); }
+
+.repeat-last{ flex-direction:column; gap:2px; margin:10px 0 6px; line-height:1.25; }
+.repeat-last__sub{ font-size:12px; font-weight:500; opacity:.85; }
+
+.welcome-photomoment{ margin-top:10px; }
+.pm-label{ display:block; font-weight:600; font-size:14px; margin:14px 0 6px; }
+.pm-select{ width:100%; padding:12px 12px; font:500 15px var(--font-body); border:1.5px solid var(--espresso-30); border-radius:var(--radius-s); background:#fff; color:var(--espresso); margin-bottom:6px; }
+.pm-select + .btn, .pm-label + .pm-select + .btn{ margin-top:16px; }
+[data-action="to-photo-quick"]{ margin-top:18px; }
+.pm-share-actions{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+
+.price-cats{ display:flex; gap:6px; overflow-x:auto; padding:6px 0 10px; margin:0 0 4px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.price-cats::-webkit-scrollbar{ display:none; }
+.price-cat{ flex:0 0 auto; border:1.5px solid var(--espresso-30); background:#fff; border-radius:99px; padding:7px 12px; font:600 12.5px var(--font-body); color:var(--espresso); white-space:nowrap; cursor:pointer; }
+.price-cat.is-active{ background:var(--espresso); color:#fff; border-color:var(--espresso); }

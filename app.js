@@ -90,6 +90,8 @@
     if (typeof HOUSE_RULES !== "undefined" && $('[data-step="houserules"]').classList.contains("is-active")) renderHouseRules();
     if ($('[data-step="findme"]') && $('[data-step="findme"]').classList.contains("is-active")) renderFindMe();
     if (typeof localData !== "undefined" && ($("#loyaltyBlock") || $("#loyaltyBlockStandalone"))) renderLoyaltyBlock();
+    if ($('[data-step="photopick"]') && $('[data-step="photopick"]').classList.contains("is-active")) renderPhotoPick();
+    if (state.quickPhoto && $('[data-step="photoshare"]') && $('[data-step="photoshare"]').classList.contains("is-active")) drawResultCanvas();
     if (typeof localData !== "undefined") renderReturningUserBlock();
     renderSocialLinks();
     renderActions();
@@ -106,7 +108,7 @@
   function updateProgress(name){
     const w = STEP_WEIGHTS[name] ?? 0;
     $("#progressFill").style.width = w + "%";
-    $(".progress").style.visibility = (name==="welcome" || name==="pricelist" || name==="houserules" || name==="stampcard" || name==="findme") ? "hidden" : "visible";
+    $(".progress").style.visibility = (name==="welcome" || name==="pricelist" || name==="houserules" || name==="stampcard" || name==="findme" || name==="photopick" || name==="photoshare" || (name==="photo" && state.quickPhoto)) ? "hidden" : "visible";
   }
 
   function showStep(name){
@@ -898,7 +900,10 @@
     state.match = {
       isKid:false, treatment, drink,
       milkId: state.milk, extrasIds: [...state.extras],
-      homecarePick, soapPick
+      homecarePick, soapPick,
+      // the answers behind this match, for "Waarom deze match?"
+      why: { mood: state.mood, sun: !!state.sunExposed, complaint: complaintMatched(state.complaintText, treatment.id),
+             category: state.category, caffeine: state.caffeine, temperature: state.temperature }
     };
   }
 
@@ -934,6 +939,33 @@
     el.classList.remove("is-playing");
     void el.offsetWidth; // restart the CSS animation
     el.classList.add("is-playing");
+  }
+
+  // true only if the free-text complaint really steered this treatment choice
+  function complaintMatched(text, tid){
+    const words = (text || "").toLowerCase().split(/[^a-zà-ÿ'’-]+/).filter(Boolean);
+    if (!words.length || typeof COMPLAINT_KEYWORDS === "undefined") return false;
+    return COMPLAINT_KEYWORDS.some(k => k.ids.includes(tid) && k.words.some(w => words.includes(w)));
+  }
+  /* "Waarom deze match?" — a short, honest explanation built from the
+     client's own answers (mood, sun, complaint, drink choices). */
+  function whyHtml(m, drinkFull, drinkNotes){
+    if (!m || m.isKid || !m.why) return "";
+    const L = state.lang, w = m.why, tn = trName(m.treatment.name, L);
+    const parts = [];
+    if (w.mood) parts.push(t("why_mood_" + w.mood, L).replace("{treatment}", tn));
+    if (w.complaint) parts.push(t("why_complaint", L));
+    if (w.sun) parts.push(t("why_sun", L));
+    let dk;
+    if (w.category === "matcha") dk = "why_drink_matcha";
+    else if (w.temperature === "iced") dk = "why_drink_iced";
+    else if (w.category === "tea") dk = w.caffeine === "decaf" ? "why_drink_tea_decaf" : "why_drink_tea";
+    else dk = w.caffeine === "decaf" ? "why_drink_decaf" : (drinkNotes ? "why_drink_coffee_notes" : "why_drink_coffee");
+    parts.push(t(dk, L).replace("{drink}", drinkFull).replace("{notes}", (drinkNotes || "").toLowerCase()));
+    return `<div class="match-why">
+        <p class="match-why__title">💡 ${t("why_title", L)}</p>
+        <p class="match-why__text">${parts.join(" ")}</p>
+      </div>`;
   }
 
   function renderResultDetails(){
@@ -975,7 +1007,8 @@
           <div class="result-row__label">${t("treatment_label", state.lang)}</div>
           <div class="result-row__value">${trName(m.treatment.name, state.lang)}</div>
         </div>
-      </div>`;
+      </div>
+      ${whyHtml(m, drinkFull, drinkNotes)}`;
 
     const titleEl = $("#resultTitle");
     if (titleEl) titleEl.textContent = t(state.context === "thuis" ? "result_saved_title" : "result_title", state.lang);
@@ -1271,15 +1304,25 @@
     const lang = state.lang;
     const q = (($("#priceSearch") || {}).value || "").trim().toLowerCase();
     const openIds = new Set($$("#priceListBody details[open]").map(d => d.dataset.sec));
+    // category chips (tabs) for quick filtering on a phone
+    const cats = $("#priceCats");
+    if (cats){
+      cats.innerHTML = [`<button type="button" class="price-cat${!state.priceCat ? " is-active" : ""}" data-price-cat="">${t("pricelist_all", lang)}</button>`]
+        .concat(PRICE_LIST.map(sec => `<button type="button" class="price-cat${state.priceCat === sec.id ? " is-active" : ""}" data-price-cat="${sec.id}">${sec.icon} ${sec.title[lang]}</button>`)).join("");
+      cats.querySelectorAll("[data-price-cat]").forEach(b => b.addEventListener("click", () => {
+        state.priceCat = b.dataset.priceCat || ""; renderPriceList();
+      }));
+    }
     let html = "";
     PRICE_LIST.forEach(sec => {
+      if (state.priceCat && sec.id !== state.priceCat) return;
       const items = sec.items.filter(it => {
         if (!q) return true;
         const hay = [it.n.nl, it.n.en, it.n.fr, it.d && it.d.nl, it.d && it.d.en, it.d && it.d.fr, sec.title.nl, sec.title.en, sec.title.fr].join(" ").toLowerCase();
         return hay.includes(q);
       });
       if (!items.length) return;
-      const open = (q || openIds.has(sec.id)) ? " open" : "";
+      const open = (q || state.priceCat === sec.id || openIds.has(sec.id)) ? " open" : "";
       html += `<details class="price-section" data-sec="${sec.id}"${open}>
         <summary><span class="price-section__icon" aria-hidden="true">${sec.icon}</span><span class="price-section__title">${sec.title[lang]}</span><span class="price-section__count">${items.length}</span></summary>
         ${sec.note ? `<p class="price-section__note">${sec.note[lang]}</p>` : ""}
@@ -1615,8 +1658,10 @@
   }
 
   async function drawResultCanvas(){
-    const out = $("#resultCanvas");
-    const W = 1080, H = 1350;
+    // 1080 x 1920 = 9:16, the exact size of an Instagram/Facebook/WhatsApp story
+    const out = state.quickPhoto ? $("#quickCanvas") : $("#resultCanvas");
+    const W = 1080, H = 1920;
+    const TOP = 150, BOTTOM = 210;   // Instagram story safe zones (profile bar on top, reply bar below)
     out.width = W; out.height = H;
     const ctx = out.getContext("2d");
 
@@ -1661,39 +1706,46 @@
     scrim.addColorStop(1,"rgba(20,14,10,0.86)");
     ctx.fillStyle = scrim; ctx.fillRect(0,H*0.42,W,H*0.58);
 
+    // soft dark band behind the logo, so it stays readable on a bright photo
+    const topScrim = ctx.createLinearGradient(0, 0, 0, TOP + 220);
+    topScrim.addColorStop(0, "rgba(20,14,10,0.55)");
+    topScrim.addColorStop(1, "rgba(20,14,10,0)");
+    ctx.fillStyle = topScrim; ctx.fillRect(0, 0, W, TOP + 220);
     const logo = await loadLogo();
     const logoSize = 96;
     ctx.save();
     ctx.globalAlpha = 0.92;
-    ctx.drawImage(logo, 40, 40, logoSize, logoSize);
+    ctx.drawImage(logo, 40, TOP, logoSize, logoSize);
     ctx.restore();
     ctx.fillStyle = "#F6F0E6";
     ctx.font = "600 34px 'Playfair Display', Georgia, serif";
     ctx.textBaseline = "middle";
-    ctx.fillText("Beauty & Coffee", 40+logoSize+18, 40+logoSize/2-10);
+    ctx.fillText("Beauty & Coffee", 40+logoSize+18, TOP+logoSize/2-10);
     ctx.font = "italic 20px 'Playfair Display', Georgia, serif";
     ctx.fillStyle = "rgba(246,240,230,0.85)";
-    ctx.fillText(t("overlay_tagline", state.lang), 40+logoSize+18, 40+logoSize/2+22);
+    ctx.fillText(t("overlay_tagline", state.lang) + " · Mechelen", 40+logoSize+18, TOP+logoSize/2+22);
 
     const m = state.match;
     if (m){
       const drinkFull = m.isKid
         ? (KIDS_DRINKS.find(d => d.id === m.drinkId) || KIDS_DRINKS[0]).name[state.lang]
-        : (m.drink.origin ? [m.drink.origin, trName(m.drink.name, state.lang)].join(" — ") : trName(m.drink.name, state.lang));
+        : (!m.drink ? "" : (m.drink.origin ? [m.drink.origin, trName(m.drink.name, state.lang)].join(" — ") : trName(m.drink.name, state.lang)));
       const pad = 44;
-      let y = H - 300;
+      let y = H - BOTTOM - 300;
 
       ctx.textBaseline = "alphabetic";
       ctx.fillStyle = "#D9AE6C";
       ctx.font = "600 30px 'Playfair Display', Georgia, serif";
-      ctx.fillText(t("overlay_title", state.lang), pad, y);
+      ctx.fillText(t(m.quick ? "overlay_moment_title" : "overlay_title", state.lang), pad, y);
       y += 52;
 
       ctx.fillStyle = "#F6F0E6";
       ctx.font = "500 30px Jost, Arial, sans-serif";
-      const drinkLine = t("overlay_drink_prefix", state.lang) + drinkFull;
-      y += (wrapText(ctx, drinkLine, pad, y, W-pad*2, 38) -1) * 38;
-      y += 50;
+      if (drinkFull){
+        const drinkLine = t("overlay_drink_prefix", state.lang) + drinkFull;
+        y += (wrapText(ctx, drinkLine, pad, y, W-pad*2, 38) -1) * 38;
+        y += 50;
+      }
 
       ctx.font = "500 30px Jost, Arial, sans-serif";
        const treatName = typeof m.treatment.name === "object" 
@@ -1703,9 +1755,14 @@
        wrapText(ctx, treatLine, pad, y, W-pad*2, 38);
     }
 
+    // thin, stylish gold frame
+    ctx.save();
+    ctx.strokeStyle = "rgba(217,174,108,0.85)"; ctx.lineWidth = 4;
+    roundRect(ctx, 18, 18, W - 36, H - 36, 28); ctx.stroke();
+    ctx.restore();
     ctx.fillStyle = "rgba(246,240,230,0.7)";
     ctx.font = "italic 21px 'Playfair Display', Georgia, serif";
-    ctx.fillText("Where Beauty Meets Coffee", 44, H-72);
+    ctx.fillText("Where Beauty Meets Coffee", 44, H - BOTTOM - 72);
     // Instagram handle on the image itself: Instagram (story/post) ignores any
     // caption sent along via the share menu, so the tag must be in the picture.
     const igHandle = socialHandle();
@@ -1714,7 +1771,7 @@
       ctx.textAlign = "right"; ctx.textBaseline = "alphabetic";
       ctx.fillStyle = "rgba(246,240,230,0.92)";
       ctx.font = "600 22px Jost, Arial, sans-serif";
-      ctx.fillText("📸 " + igHandle, W - 44, H - 72);
+      ctx.fillText("📸 " + igHandle, W - 44, H - BOTTOM - 72);
       ctx.restore();
     }
 
@@ -1723,7 +1780,7 @@
     ctx.font = "600 24px Jost, Arial, sans-serif";
     const linkText = "🔗 " + SITE_URL_DISPLAY;
     const linkWidth = ctx.measureText(linkText).width;
-    const pillPadX = 20, pillH = 44, pillY = H - 56;
+    const pillPadX = 20, pillH = 44, pillY = H - BOTTOM - 56;
     roundRect(ctx, 44, pillY, linkWidth + pillPadX*2, pillH, pillH/2);
     ctx.fillStyle = "#D9AE6C";
     ctx.fill();
@@ -1737,7 +1794,7 @@
   const SITE_URL_DISPLAY = (window.location.hostname + window.location.pathname).replace(/\/index\.html$/, "").replace(/\/$/, "");
 
   function canvasToBlob(){
-    return new Promise(res => $("#resultCanvas").toBlob(res, "image/jpeg", 0.95));
+    return new Promise(res => (state.quickPhoto ? $("#quickCanvas") : $("#resultCanvas")).toBlob(res, "image/jpeg", 0.95));
   }
 
   async function downloadImage(){
@@ -2094,7 +2151,7 @@
      added after scanning the rotating QR code in the salon (see
      "stamp card via QR" below). */
   const LOCAL_KEY = "beautyCoffeeLocal_v1";
-  const localData = { version:1, stamps:0, discoveredTreatments:[], discoveredDrinks:[], favorites:[], lastMatchAt:null, reviewPromptShownFor:null, savedProfile:null, savedAgeBracket:null, installDismissedAt:null, installIosDismissedAt:null, newsletterSentAt:null, lastStampDay:null };
+  const localData = { version:1, stamps:0, discoveredTreatments:[], discoveredDrinks:[], favorites:[], lastMatchAt:null, reviewPromptShownFor:null, savedProfile:null, savedAgeBracket:null, installDismissedAt:null, installIosDismissedAt:null, newsletterSentAt:null, lastStampDay:null, cardFullAt:null, rewardsRedeemed:[], lastMoment:null };
 
   function loadLocalData(){
     try {
@@ -2159,6 +2216,32 @@
     return names;
   }
 
+  /* What a full card gives, and — once full — the voucher. The voucher is
+     handed in by scanning the salon's "Beloning inwisselen" code, which
+     takes 10 stamps off: it can never be used twice. */
+  function rewardExpiry(){
+    if (!localData.cardFullAt || typeof STAMP_REWARD === "undefined") return null;
+    const d = new Date(localData.cardFullAt);
+    d.setMonth(d.getMonth() + (STAMP_REWARD.validMonths || 3));
+    return d;
+  }
+  function rewardHtml(){
+    if (typeof STAMP_REWARD === "undefined") return "";
+    const lang = state.lang, text = STAMP_REWARD[lang] || STAMP_REWARD.nl;
+    if (localData.stamps < 10){
+      return `<p class="reward-teaser">🎁 ${t("reward_teaser", lang).replace("{reward}", text).replace("{months}", STAMP_REWARD.validMonths || 3)}</p>`;
+    }
+    if (!localData.cardFullAt){ localData.cardFullAt = new Date().toISOString(); saveLocalData(); }
+    const exp = rewardExpiry(), expired = exp && exp < new Date();
+    const dateStr = exp ? exp.toLocaleDateString(lang === "en" ? "en-GB" : (lang === "fr" ? "fr-BE" : "nl-BE"), { day:"numeric", month:"long", year:"numeric" }) : "";
+    return `<div class="reward-voucher${expired ? " is-expired" : ""}">
+        <p class="reward-voucher__title">🎉 ${t("reward_voucher_title", lang)}</p>
+        <p class="reward-voucher__text">${text}</p>
+        <p class="reward-voucher__date">${t(expired ? "reward_expired" : "reward_valid_until", lang).replace("{date}", dateStr)}</p>
+        <p class="reward-voucher__how">${t("reward_how", lang)}</p>
+      </div>`;
+  }
+
   /* "Mijn ontdekkingen": which treatments and drinks were matched before
      (names in the client's language), shown as a fold-out list. */
   function discoveredTreatmentNames(){
@@ -2201,6 +2284,13 @@
       changed = true;
     }
     localData.lastMatchAt = new Date().toISOString();
+    // remember the whole match so "Herhaal mijn laatste moment" can show it
+    // again (and book it) without the questionnaire
+    if (!state.match.isKid){
+      const m = state.match;
+      localData.lastMoment = { treatmentId: m.treatment.id, drink: m.drink, milkId: m.milkId, extrasIds: m.extrasIds,
+        homecarePick: m.homecarePick, soapPick: m.soapPick, why: m.why || null, context: state.context || null };
+    }
     saveLocalData();
     return changed;
   }
@@ -2224,6 +2314,40 @@
     localData.reviewPromptShownFor = localData.lastMatchAt;
     saveLocalData();
     renderReturningUserBlock();
+  }
+
+  /* "Herhaal mijn laatste Beauty & Coffee moment": straight back to the
+     last match (with booking buttons and time slots), no questions. */
+  function lastMomentButtonHtml(){
+    const lm = localData.lastMoment;
+    if (!lm) return "";
+    const tr = TREATMENTS_CATALOG.find(x => x.id === lm.treatmentId);
+    if (!tr || !lm.drink) return "";
+    const drink = lm.drink.origin ? trName(lm.drink.name, state.lang) : trName(lm.drink.name, state.lang);
+    return `<button type="button" class="btn btn--primary btn--wide repeat-last" data-action="repeat-last">
+        🔁 ${t("repeat_last_button", state.lang)}
+        <span class="repeat-last__sub">${trName(tr.name, state.lang)} + ${drink}</span>
+      </button>`;
+  }
+  async function repeatLastMoment(){
+    const lm = localData.lastMoment;
+    const tr = lm && TREATMENTS_CATALOG.find(x => x.id === lm.treatmentId);
+    if (!tr) return;
+    state.match = { isKid:false, treatment: tr, drink: lm.drink, milkId: lm.milkId || "none", extrasIds: lm.extrasIds || [],
+      homecarePick: lm.homecarePick || pickHomecareProduct(tr.homecare.category, tr.homecare.soapHint, state.profile),
+      soapPick: lm.soapPick || null, why: lm.why || null };
+    if (lm.context) state.context = lm.context;
+    if (lm.why && lm.why.temperature) state.temperature = lm.why.temperature;
+    state.quickPhoto = false;
+    state.skinFact = chooseSkinFact();
+    await drawResultCanvas();
+    renderResultDetails();
+    renderResultBlocks();
+    renderMatchTools();
+    renderSlotPicker();
+    renderLoyaltyBlock();
+    goTo("result");
+    trackEvent("repeat-last");
   }
 
   function renderReturningUserBlock(){
@@ -2251,6 +2375,7 @@
         <span>✨ ${localData.discoveredTreatments.length}/${totalTreatments} ${t("treatments_discovered_label", state.lang)}</span>
         <span>🍵 ${localData.discoveredDrinks.length}/${totalDrinks} ${t("drinks_discovered_label", state.lang)}</span>
       </div>
+      ${lastMomentButtonHtml()}
       ${favs.length ? `
       <p class="returning-user__title returning-user__title--fav">${t("fav_title", state.lang)}</p>
       <ul class="fav-list">
@@ -2282,6 +2407,7 @@
         <div class="loyalty-card__stamps">
           ${Array.from({length:10}, (_,i) => `<span class="stamp${i < stampsCapped ? " is-filled" : ""}"></span>`).join("")}
         </div>
+        ${rewardHtml()}
         <p class="loyalty-card__hint">${t("stamp_card_hint", state.lang)}</p>
         <button type="button" class="btn btn--outline" data-action="add-stamp">${t("stamp_card_button", state.lang)}</button>
       </div>
@@ -2327,9 +2453,14 @@
     }
     return stampKeyPromise;
   }
-  async function stampCodeFor(counter){
+  /* Three kinds of salon codes, each with its own (unguessable) code:
+     STAMP  = give a stamp, UNDO = take one stamp back (e.g. scanned twice),
+     REDEEM = hand in a full card for the reward (works only once). */
+  const SALON_CODE_KINDS = ["STAMP","REDEEM","UNDO"];
+  const SALON_QR_PREFIX = { STAMP:"BCSTAMP:", REDEEM:"BCREDEEM:", UNDO:"BCUNDO:" };
+  async function stampCodeFor(counter, kind){
     const key = await getStampKey();
-    const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode("BC-STAMP|" + counter)));
+    const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode("BC-" + (kind || "STAMP") + "|" + counter)));
     const off = sig[sig.length - 1] & 15;   // RFC 4226-style dynamic truncation
     const num = ((sig[off] & 127) << 24) | (sig[off+1] << 16) | (sig[off+2] << 8) | sig[off+3];
     return String(num % 1000000).padStart(6, "0");
@@ -2339,19 +2470,30 @@
   }
   // Accepts the current code and the previous ~90 s (clock differences,
   // slow scanning) plus one step ahead (a phone clock running slow).
-  async function isValidStampCode(code){
+  async function isValidStampCode(code, kind){
     if (!/^\d{6}$/.test(code)) return false;
     const now = stampCounterNow();
     for (let k = -3; k <= 1; k++){
-      if (await stampCodeFor(now + k) === code) return true;
+      if (await stampCodeFor(now + k, kind) === code) return true;
     }
     return false;
   }
+  // QR payload "BCSTAMP:123456" etc. A bare 6-digit code (typed by hand)
+  // has no kind: we then check it against all three kinds.
   function parseStampPayload(text){
     if (!text) return null;
     const s = String(text).trim();
-    if (s.startsWith(STAMP_QR_PREFIX)) return s.slice(STAMP_QR_PREFIX.length).trim();
-    return /^\d{6}$/.test(s) ? s : null;
+    for (const kind of SALON_CODE_KINDS){
+      if (s.startsWith(SALON_QR_PREFIX[kind])) return { kind, code: s.slice(SALON_QR_PREFIX[kind].length).trim() };
+    }
+    return /^\d{6}$/.test(s) ? { kind:null, code:s } : null;
+  }
+  async function resolveSalonCode(raw){
+    const p = parseStampPayload(raw);
+    if (!p) return null;
+    const kinds = p.kind ? [p.kind] : SALON_CODE_KINDS;
+    for (const kind of kinds){ if (await isValidStampCode(p.code, kind)) return kind; }
+    return null;
   }
 
   function loadScript(src){
@@ -2375,7 +2517,9 @@
 
   function addStamp(){
     if (!stampCryptoAvailable()){ showToast(t("stamp_unsupported", state.lang)); return; }
-    if (localData.lastStampDay === todayKey()){ showToast(t("stamp_already_today", state.lang)); return; }
+    // Always open the scanner: the same scanner also handles "take a stamp
+    // back" and "redeem reward" codes. The 1-stamp-per-day rule is checked
+    // when a STAMP code is scanned.
     openStampScanner();
   }
 
@@ -2468,18 +2612,31 @@
   }
 
   async function submitStampCode(raw, source){
-    const code = parseStampPayload(raw);
-    if (code && await isValidStampCode(code)){
+    const kind = await resolveSalonCode(raw);
+    if (kind === "STAMP"){
       if (localData.lastStampDay === todayKey()){ closeStampScanner(); showToast(t("stamp_already_today", state.lang)); return; }
       localData.stamps++;
       localData.lastStampDay = todayKey();
-      saveLocalData();
-      closeStampScanner();
-      renderLoyaltyBlock();
-      renderReturningUserBlock();
-      if (navigator.vibrate) navigator.vibrate(60);
-      showToast(localData.stamps % 10 === 0 ? t("stamp_card_full_toast", state.lang) : t("stamp_added_toast", state.lang));
-      trackEvent("stamp-added");
+      if (localData.stamps >= 10 && !localData.cardFullAt) localData.cardFullAt = new Date().toISOString();
+      finishSalonCode(localData.stamps === 10 ? "stamp_card_full_toast" : "stamp_added_toast", "stamp-added");
+      return;
+    }
+    if (kind === "UNDO"){
+      if (localData.stamps > 0){
+        localData.stamps--;
+        localData.lastStampDay = null;           // the correct stamp can be given again today
+        if (localData.stamps < 10) localData.cardFullAt = null;
+        finishSalonCode("stamp_undone_toast", "stamp-undone");
+      } else { closeStampScanner(); showToast(t("stamp_nothing_to_undo", state.lang)); }
+      return;
+    }
+    if (kind === "REDEEM"){
+      if (localData.stamps >= 10){
+        localData.stamps -= 10;                  // the reward can only be handed in once
+        localData.cardFullAt = localData.stamps >= 10 ? new Date().toISOString() : null;
+        localData.rewardsRedeemed = (localData.rewardsRedeemed || []).concat([new Date().toISOString()]);
+        finishSalonCode("reward_redeemed_toast", "reward-redeemed");
+      } else { closeStampScanner(); showToast(t("reward_not_full", state.lang)); }
       return;
     }
     // Invalid: say so (not on every video frame), keep scanning.
@@ -2487,6 +2644,15 @@
       stampScan.lastInvalidAt = Date.now();
       setStampStatus("stamp_invalid", true);
     }
+  }
+  function finishSalonCode(toastKey, eventName){
+    saveLocalData();
+    closeStampScanner();
+    renderLoyaltyBlock();
+    renderReturningUserBlock();
+    if (navigator.vibrate) navigator.vibrate(60);
+    showToast(t(toastKey, state.lang));
+    trackEvent(eventName);
   }
 
   function stopStampCamera(){
@@ -2500,7 +2666,7 @@
   }
 
   /* ---- salon side: show the rotating QR code (open the app with #salon) ---- */
-  const salonMode = { timer:null, counter:null, wakeLock:null };
+  const salonMode = { timer:null, counter:null, wakeLock:null, kind:"STAMP" };
 
   async function openSalonMode(){
     if (!stampCryptoAvailable()){ showToast(t("stamp_unsupported", state.lang)); return; }
@@ -2520,13 +2686,28 @@
       <div class="stamp-overlay__panel">
         <button type="button" class="stamp-overlay__close" data-salon="close" aria-label="${t("stamp_close", state.lang)}">✕</button>
         <p class="stamp-overlay__title">${t("salon_title", state.lang)}</p>
-        <canvas id="salonQr" class="salon-qr" width="600" height="600"></canvas>
+        <div class="salon-modes" role="tablist">
+          ${SALON_CODE_KINDS.map(k => `<button type="button" class="salon-mode${k === salonMode.kind ? " is-active" : ""}" data-salon-kind="${k}">${t("salon_mode_" + k.toLowerCase(), state.lang)}</button>`).join("")}
+        </div>
+        <p class="salon-mode-hint" id="salonModeHint">${t("salon_mode_hint_" + salonMode.kind.toLowerCase(), state.lang)}</p>
+        <canvas id="salonQr" class="salon-qr salon-qr--${salonMode.kind.toLowerCase()}" width="600" height="600"></canvas>
         <p class="salon-code" id="salonCode">······</p>
         <div class="salon-timer"><div class="salon-timer__fill" id="salonTimerFill"></div></div>
         <p class="stamp-overlay__hint">${t("salon_hint", state.lang)}</p>
       </div>`;
     document.body.appendChild(ov);
-    ov.addEventListener("click", e => { const a = e.target.closest("[data-salon]"); if (a) closeSalonMode(); });
+    ov.addEventListener("click", e => {
+      const k = e.target.closest("[data-salon-kind]");
+      if (k){
+        salonMode.kind = k.dataset.salonKind; salonMode.counter = null;
+        ov.querySelectorAll("[data-salon-kind]").forEach(b => b.classList.toggle("is-active", b === k));
+        const hint = $("#salonModeHint"); if (hint) hint.textContent = t("salon_mode_hint_" + salonMode.kind.toLowerCase(), state.lang);
+        const qr = $("#salonQr"); if (qr) qr.className = "salon-qr salon-qr--" + salonMode.kind.toLowerCase();
+        tickSalonMode();
+        return;
+      }
+      const a = e.target.closest("[data-salon]"); if (a) closeSalonMode();
+    });
     try { if (navigator.wakeLock) salonMode.wakeLock = await navigator.wakeLock.request("screen"); } catch(e){ /* optional */ }
     salonMode.counter = null;
     await tickSalonMode();
@@ -2541,9 +2722,11 @@
     if (fill) fill.style.width = `${(left / STAMP_STEP_SECONDS) * 100}%`;
     if (counter === salonMode.counter) return;
     salonMode.counter = counter;
-    const code = await stampCodeFor(counter);
+    const kind = salonMode.kind;
+    const code = await stampCodeFor(counter, kind);
+    if (kind !== salonMode.kind) return;            // mode switched while computing
     const codeEl = $("#salonCode"); if (codeEl) codeEl.textContent = `${code.slice(0,3)} ${code.slice(3)}`;
-    drawQrToCanvas($("#salonQr"), STAMP_QR_PREFIX + code);
+    drawQrToCanvas($("#salonQr"), SALON_QR_PREFIX[kind] + code);
   }
 
   function drawQrToCanvas(canvas, text){
@@ -2668,6 +2851,7 @@
       if (!el) return;
       const action = el.dataset.action;
       if (action === "start"){
+        state.quickPhoto = false;
         if (localData.savedProfile && (localData.savedProfile === "kind" || localData.savedAgeBracket)){
           state.profile = localData.savedProfile;
           state.ageBracket = localData.savedAgeBracket;
@@ -2705,6 +2889,9 @@
       if (action === "open-houserules") goTo("houserules");
       if (action === "open-stampcard") goTo("stampcard");
       if (action === "open-findme") goTo("findme");
+      if (action === "repeat-last") repeatLastMoment();
+      if (action === "open-photomoment"){ renderPhotoPick(); goTo("photopick"); }
+      if (action === "to-photo-quick") startQuickPhoto();
       if (action === "another-fact") anotherFact();
       if (action === "install-app") installApp();
       if (action === "dismiss-install") dismissInstallBanner();
@@ -2752,7 +2939,35 @@
   async function finishPhotoShare(){
     if (state.cameraStream) stopCamera();
     await drawResultCanvas(); // re-bakes the share card with state.photoDataUrl if one was added
-    goTo("result");
+    goTo(state.quickPhoto ? "photoshare" : "result");
+  }
+
+  /* ---------------- "Fotomoment" without the questionnaire ----------------
+     Most clients come for a booked treatment and never make a match. They
+     pick their treatment (and optionally their drink), take a photo, and
+     get the same branded 9:16 story card to share. */
+  function renderPhotoPick(){
+    const ts = $("#pmTreatment"), ds = $("#pmDrink");
+    if (!ts || !ds) return;
+    const L = state.lang, keepT = ts.value, keepD = ds.value;
+    const treatments = TREATMENTS_CATALOG.map(tr => ({ id: tr.id, label: trName(tr.name, L) }))
+      .sort((a, b) => a.label.localeCompare(b.label, L));
+    ts.innerHTML = `<option value="">${t("pm_choose_treatment", L)}</option>` +
+      treatments.map(o => `<option value="${o.id}">${o.label}</option>`).join("");
+    const drinks = Array.from(getAllDrinkNames()).map(n => ({ id:n, label: trName(n, L) }))
+      .sort((a, b) => a.label.localeCompare(b.label, L));
+    ds.innerHTML = `<option value="">${t("pm_no_drink", L)}</option>` +
+      drinks.map(o => `<option value="${o.id.replace(/"/g, "&quot;")}">${o.label}</option>`).join("");
+    ts.value = keepT; ds.value = keepD;
+  }
+  function startQuickPhoto(){
+    const tid = ($("#pmTreatment") || {}).value, dname = ($("#pmDrink") || {}).value;
+    const tr = TREATMENTS_CATALOG.find(x => x.id === tid);
+    if (!tr){ showToast(t("pm_pick_first", state.lang)); return; }
+    state.quickPhoto = true;
+    state.match = { isKid:false, quick:true, treatment: tr, drink: dname ? { name: dname, origin:null, notes:null } : null };
+    trackEvent("photo-moment");
+    goTo("photo");
   }
 
   document.addEventListener("DOMContentLoaded", init);
