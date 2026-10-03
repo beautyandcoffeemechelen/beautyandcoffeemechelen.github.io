@@ -14,6 +14,7 @@
     kidsDrink: null,      // 'water' | 'chocolate'
     mood: null,
     complaintText: "",
+    avoid: [],
     category: null,
     temperature: null,   // 'hot' | 'iced'
     caffeine: null,
@@ -346,9 +347,7 @@
         <span class="option-tile__sub">${data.sub}</span>`;
       tile.addEventListener("click", () => {
         state.category = id; renderCategoryOptions();
-        // Matcha Latte is only served hot: skip the hot/iced question
-        if (id === "matcha"){ state.temperature = "hot"; state.caffeine = "caff"; setTimeout(()=>goTo("toppings"), 220); }
-        else setTimeout(()=>goTo("temperature"), 220);
+        setTimeout(()=>goTo("temperature"), 220);
       });
       wrap.appendChild(tile);
     });
@@ -458,7 +457,30 @@
     });
     }
 
+  // "Liever niet" chips on the last question: rule out treatment groups.
+  // Remembered on this device, so a client only has to set it once.
+  function renderAvoidOptions(){
+    const wrap = $("#avoidOptions");
+    if (!wrap || typeof AVOID_GROUPS === "undefined") return;
+    if (!state.avoidLoaded && typeof localData !== "undefined"){ state.avoid = Array.isArray(localData.savedAvoid) ? [...localData.savedAvoid] : []; state.avoidLoaded = true; }
+    wrap.innerHTML = "";
+    Object.keys(AVOID_GROUPS).forEach(g => {
+      const on = state.avoid.includes(g);
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip chip--avoid" + (on ? " is-selected" : "");
+      chip.setAttribute("aria-pressed", on ? "true" : "false");
+      chip.textContent = `${AVOID_ICONS[g]} ${t("avoid." + g, state.lang)}`;
+      chip.addEventListener("click", () => {
+        state.avoid = on ? state.avoid.filter(x => x !== g) : state.avoid.concat([g]);
+        localData.savedAvoid = [...state.avoid]; saveLocalData();
+        renderAvoidOptions();
+      });
+      wrap.appendChild(chip);
+    });
+  }
   function renderContextOptions(){
+    renderAvoidOptions();
     const wrap = $("#contextOptions");
     wrap.innerHTML = "";
     [
@@ -848,6 +870,7 @@
 
     const treatmentObj = matchTreatment(state.mood, state.profile, !!state.sunExposed, {
       ...state.healthFlags,
+      avoid: state.avoid || [],
       age30Plus: state.ageBracket === "30-44" || state.ageBracket === "45plus",
       age45Plus: state.ageBracket === "45plus"
     }, state.complaintText);
@@ -872,9 +895,10 @@
         drink = { name: bev.name, origin: origin.name, notes: origin.notes };
       }
     } else if (state.category === "matcha"){
-      // Menu: only "Matcha Latte (ook heerlijk met witte choco)" — always
-      // hot and with milk (no plain or iced matcha on the menu).
-      drink = { name: Math.random() < 0.3 ? "Matcha Latte met witte choco" : "Matcha Latte", origin:null, notes:null };
+      // Matcha is always a latte (with milk); hot (optionally with white
+      // chocolate) or iced on request.
+      const hotMatcha = Math.random() < 0.3 ? "Matcha Latte met witte choco" : "Matcha Latte";
+      drink = { name: isIced ? "Iced Matcha Latte" : hotMatcha, origin:null, notes:null };
     } else { // tea — always served hot; no iced plain-tea option on the menu
       const pool = state.caffeine === "decaf" ? [...TEAS_DECAF, ...HOT_EXTRAS_DECAF] : TEAS_CAFF;
       drink = { name: pickRandom(pool), origin:null, notes:null };
@@ -1657,6 +1681,25 @@
     return lines.length;
   }
 
+  // No selfie? Then the photo of the matched drink becomes the background.
+  function drawDrinkBackground(ctx, W, H){
+    const m = state.match;
+    if (!m || m.isKid || !m.drink) return Promise.resolve(false);
+    const photo = drinkPhotoFor(m);
+    if (!photo) return Promise.resolve(false);
+    return new Promise(res => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.max(W/img.width, H/img.height);
+        const dw = img.width*scale, dh = img.height*scale;
+        ctx.drawImage(img, (W-dw)/2, (H-dh)/2, dw, dh);
+        res(true);
+      };
+      img.onerror = () => res(false);
+      img.src = photo;
+    });
+  }
+
   async function drawResultCanvas(){
     // 1080 x 1920 = 9:16, the exact size of an Instagram/Facebook/WhatsApp story
     const out = state.quickPhoto ? $("#quickCanvas") : $("#resultCanvas");
@@ -1681,6 +1724,8 @@
         };
         img.src = sourceUrl;
       });
+    } else if (await drawDrinkBackground(ctx, W, H)){
+      // the drink's own photo fills the card (no selfie taken)
     } else {
       const grad = ctx.createLinearGradient(0,0,0,H);
       grad.addColorStop(0,"#D8CEC0"); grad.addColorStop(1,"#C7BAA6");
@@ -2161,6 +2206,19 @@
         if (parsed && typeof parsed === "object") Object.assign(localData, parsed);
       }
     } catch(e){ /* private browsing or storage disabled — app still works without memory */ }
+    // Test-phase reset: when Sandra changes DATA_RESET_VERSION in data.js,
+    // every phone wipes its stamps/discoveries/favourites once.
+    if (typeof DATA_RESET_VERSION === "string"){
+      if (!localData.resetVersion){ localData.resetVersion = DATA_RESET_VERSION; saveLocalData(); }
+      else if (localData.resetVersion !== DATA_RESET_VERSION){
+        wipeLocalData(); localData.resetVersion = DATA_RESET_VERSION; saveLocalData();
+      }
+    }
+  }
+  // Everything a client collected in the app (not the language or profile)
+  function wipeLocalData(){
+    Object.assign(localData, { stamps:0, discoveredTreatments:[], discoveredDrinks:[], favorites:[], lastMatchAt:null,
+      reviewPromptShownFor:null, lastStampDay:null, cardFullAt:null, rewardsRedeemed:[], lastMoment:null });
   }
 
   /* ---------------- moving to the new address ----------------
@@ -2211,7 +2269,7 @@
     TEAS_CAFF.forEach(n => names.add(n));
     TEAS_DECAF.forEach(n => names.add(n));
     HOT_EXTRAS_DECAF.forEach(n => names.add(n));
-    ["Matcha Latte","Matcha Latte met witte choco"].forEach(n => names.add(n));
+    ["Matcha Latte","Matcha Latte met witte choco","Iced Matcha Latte"].forEach(n => names.add(n));
     KIDS_DRINKS.forEach(d => names.add(d.name.nl));
     return names;
   }
@@ -2771,10 +2829,8 @@
 
   function resetLocalData(){
     if (!confirm(t("reset_confirm_text", state.lang))) return;
-    localData.stamps = 0;
-    localData.discoveredTreatments = [];
-    localData.discoveredDrinks = [];
-    localData.favorites = [];
+    wipeLocalData();
+    localData.savedAvoid = []; state.avoid = [];
     saveLocalData();
     renderReturningUserBlock();
     renderMatchTools();

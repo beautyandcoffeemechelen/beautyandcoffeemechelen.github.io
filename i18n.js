@@ -47,7 +47,7 @@ const I18N = {
     step2_title: "Kies je richting",
     step_temp_eyebrow: "Stap 7 · Warm of koud",
     step_temp_title: "Warm of koud?",
-    temperature_tea_hint: "Thee wordt altijd warm geserveerd. Zin in iets kouds? Kies dan koffie: Iced Coffee, Iced Latte of Affogato.",
+    temperature_tea_hint: "Thee wordt altijd warm geserveerd. Zin in iets kouds? Kies dan een Iced Matcha Latte of koffie: Iced Coffee, Iced Latte of Affogato.",
     step3_eyebrow: "Stap 8 · Cafeïne",
     step3_title: "Met of zonder pit?",
     step4_eyebrow: "Stap 9 · Verfijning",
@@ -138,6 +138,9 @@ const I18N = {
     stamp_camera_error: "Camera niet beschikbaar — typ de 6 cijfers hieronder in.",
     stamp_unsupported: "Deze browser kan de stempelcode niet controleren. Probeer een recente versie van Chrome of Safari.",
     stamp_close: "Sluiten",
+    avoid_title: "Liever niet? (optioneel)",
+    avoid_hint: "Tik aan wat je níet wil, dan stellen we het ook niet voor. Dit wordt onthouden op dit toestel.",
+    avoid: {"feet": "Pedicure", "hands": "Manicure", "massage": "Massage", "waxing": "Ontharen", "face": "Gelaatsverzorging", "makeup": "Make-up", "browlash": "Wenkbrauwen & wimpers", "workshop": "Workshops"},
     pricelist_all: "Alles",
     pm_button: "📸 Fotomoment",
     pm_title: "Fotomoment",
@@ -329,7 +332,7 @@ const I18N = {
     categories: {
       coffee: { title:"Koffie", sub:"Origins & blends" },
       tea: { title:"Thee & Infusies", sub:"Los of in zakje" },
-      matcha: { title:"Matcha", sub:"Matcha Latte, ook lekker met witte choco" }
+      matcha: { title:"Matcha", sub:"Matcha Latte: warm (ook met witte choco) of iced" }
     },
     temperature: {
       hot: { title:"Warm", sub:"Klassiek gezet" },
@@ -423,7 +426,7 @@ const I18N = {
     step2_title: "Choose your direction",
     step_temp_eyebrow: "Step 7 · Hot or iced",
     step_temp_title: "Hot or iced?",
-    temperature_tea_hint: "Tea is always served hot. Fancy something cold? Choose coffee: Iced Coffee, Iced Latte or Affogato.",
+    temperature_tea_hint: "Tea is always served hot. Fancy something cold? Choose an Iced Matcha Latte or coffee: Iced Coffee, Iced Latte or Affogato.",
     step3_eyebrow: "Step 8 · Caffeine",
     step3_title: "With or without a kick?",
     step4_eyebrow: "Step 9 · Refine",
@@ -514,6 +517,9 @@ const I18N = {
     stamp_camera_error: "Camera not available — type the 6 digits below.",
     stamp_unsupported: "This browser can't check the stamp code. Try a recent version of Chrome or Safari.",
     stamp_close: "Close",
+    avoid_title: "Rather not? (optional)",
+    avoid_hint: "Tap what you do NOT want, and we won't suggest it. Remembered on this device.",
+    avoid: {"feet": "Pedicure", "hands": "Manicure", "massage": "Massage", "waxing": "Hair removal", "face": "Facials", "makeup": "Make-up", "browlash": "Brows & lashes", "workshop": "Workshops"},
     pricelist_all: "All",
     pm_button: "📸 Photo moment",
     pm_title: "Photo moment",
@@ -705,7 +711,7 @@ const I18N = {
     categories: {
       coffee: { title:"Coffee", sub:"Origins & blends" },
       tea: { title:"Tea & Infusions", sub:"Loose or bagged" },
-      matcha: { title:"Matcha", sub:"Matcha Latte, also lovely with white chocolate" }
+      matcha: { title:"Matcha", sub:"Matcha Latte: hot (also with white chocolate) or iced" }
     },
     temperature: {
       hot: { title:"Hot", sub:"Classically brewed" },

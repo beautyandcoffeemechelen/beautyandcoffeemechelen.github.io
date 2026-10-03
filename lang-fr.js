@@ -51,7 +51,7 @@
   "step2_title": "Choisissez votre direction",
   "step_temp_eyebrow": "Étape 7 · Chaud ou glacé",
   "step_temp_title": "Chaud ou glacé ?",
-  "temperature_tea_hint": "Le thé est toujours servi chaud. Envie de fraîcheur ? Choisissez le café : Iced Coffee, Iced Latte ou Affogato.",
+  "temperature_tea_hint": "Le thé est toujours servi chaud. Envie de fraîcheur ? Choisissez un Iced Matcha Latte ou un café : Iced Coffee, Iced Latte ou Affogato.",
   "step3_eyebrow": "Étape 8 · Caféine",
   "step3_title": "Avec ou sans coup de fouet ?",
   "step4_eyebrow": "Étape 9 · Personnalisation",
@@ -135,6 +135,9 @@
   "stamp_camera_error": "Caméra indisponible — tapez les 6 chiffres ci-dessous.",
   "stamp_unsupported": "Ce navigateur ne peut pas vérifier le code du tampon. Essayez une version récente de Chrome ou Safari.",
   "stamp_close": "Fermer",
+  "avoid_title": "Plutôt pas ? (facultatif)",
+  "avoid_hint": "Touchez ce que vous ne voulez PAS, nous ne le proposerons pas. Mémorisé sur cet appareil.",
+  "avoid": {"feet": "Pédicure", "hands": "Manucure", "massage": "Massage", "waxing": "Épilation", "face": "Soins du visage", "makeup": "Maquillage", "browlash": "Sourcils & cils", "workshop": "Ateliers"},
   "pricelist_all": "Tout",
   "pm_button": "📸 Moment photo",
   "pm_title": "Moment photo",
@@ -338,7 +341,7 @@
    },
    "matcha": {
     "title": "Matcha",
-    "sub": "Matcha latte, délicieux aussi au chocolat blanc"
+    "sub": "Matcha latte : chaud (aussi au chocolat blanc) ou glacé"
    }
   },
   "temperature": {
@@ -396,7 +399,7 @@
   },
   "kidsdrinks": {
    "water": "Eau plate",
-   "chocolate": "Chocolat chaud"
+   "chocolate": "Chocolat chaud (Nesquik)"
   },
   "filters": {
    "none": "Aucun",
@@ -754,7 +757,7 @@
  },
  "kidsDrinks": {
   "water": "Eau plate",
-  "chocolate": "Chocolat chaud"
+  "chocolate": "Chocolat chaud (Nesquik)"
  },
  "slots": {
   "za-vm": "Samedi matin",

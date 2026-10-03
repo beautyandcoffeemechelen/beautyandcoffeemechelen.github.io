@@ -61,14 +61,17 @@ const COFFEE_ORIGINS = [
 ];
 
 /* ---------- tea selection ---------- */
-// Exactly the teas on the drinks menu (menukaart). Caffeine-free herbal
-// infusions here; real teas (and cascara) under TEAS_CAFF.
+// All teas Sandra serves: the longer list from the shop plus the extra
+// teas from the drinks menu. (No "Cocktail Fruit Mix" — not served.)
 const TEAS_DECAF = [
-  "Lindebloesem","Altın Otu","Rooibos","Kamille"
+  "Linden Blossom","Piña Colada Fruit Mix","Tropical Dream Fruit Mix",
+  "Lipton Rooibos","Lipton Morocco Mint","Pickwick Chamomile","Altın Otu"
 ];
 const TEAS_CAFF = [
-  "Groen & Mango","Klassiek Groen","Witte Thee","Powley Cha","Chai",
-  "Cascara","Zwarte Thee","Ambachtelijke Bloeithee"
+  "Sun of Heaven (Organic Sencha & Mango)","China Bancha","China Jasmine","Jasmine Dragon Pearl",
+  "Cascara Costa Rica Sonora","Lipton Peach Mango","Lipton Refreshing Lemon",
+  "Pickwick Original English","Pickwick Green Tea Pure","Lipton Japanese Sencha","Lord Nelson Chai",
+  "Organo Gold Organic Green Tea (with Ganoderma)","Witte Thee","Powley Cha","Ambachtelijke Bloeithee"
 ];
 const HOT_EXTRAS_DECAF = ["Hot Chocolate (Milk)", "Hot Chocolate (White)"];
 
@@ -110,7 +113,7 @@ const BEVERAGES = {
 /* ---------- kids drinks (fixed, no caffeine ever) ---------- */
 const KIDS_DRINKS = [
   { id:"water", name:{ nl:"Plat water", en:"Still water" }, icon:"💧" },
-  { id:"chocolate", name:{ nl:"Warme Chocomelk", en:"Hot Chocolate" }, icon:"☕" }
+  { id:"chocolate", name:{ nl:"Warme chocomelk (Nesquik)", en:"Hot chocolate (Nesquik)" }, icon:"☕" }
 ];
 const KIDS_TREATMENT = "Kindermanicure";
 
@@ -144,6 +147,7 @@ const GOOGLE_REVIEWS = {
    Dutch for the English drink notes). Missing entry = original.
    ============================================================ */
 const NAME_I18N = {
+ "Iced Matcha Latte": {"fr": "Matcha latte glacé"},
  "Double Cappuccino": {"nl": "Cappuccino Dubbel", "fr": "Cappuccino double"},
  "Cappuccino & Choco": {"fr": "Cappuccino & choco"},
  "Vietnamese Phin Coffee": {"nl": "Vietnamese Phin Koffie", "fr": "Café vietnamien (phin)"},
@@ -415,8 +419,9 @@ const NAME_I18N = {
   "fr": "Gommage matcha-mandarine"
  },
  "Hot Chocolate (Milk)": {
-  "nl": "Warme Chocomelk (melk)",
-  "fr": "Chocolat chaud (lait)"
+  "nl": "Warme chocomelk (Nesquik)",
+  "en": "Hot chocolate (Nesquik)",
+  "fr": "Chocolat chaud (Nesquik)"
  },
  "Hot Chocolate (White)": {
   "nl": "Warme Chocomelk (wit)",
@@ -1188,6 +1193,20 @@ function boostByComplaint(pool, complaintText){
   return boosted.length ? boosted : pool;
 }
 
+/* "Liever niet": treatment groups a client can rule out before the match
+   (e.g. a man who really doesn't want a pedicure). */
+const AVOID_GROUPS = {
+  feet:     ["pedicure","pedicureexpress","manipedispa"],
+  hands:    ["manicure","manicureexpress","manipedispa","cateye"],
+  massage:  ["hotstone","cupping","cuppingpeeling","swedish","swedishbackneck","swedishlegs","backwrap","detoxback","harmonizingbody","fullbodywrap","slimmassage","harmonizingback"],
+  waxing:   ["oksel","been","rug","buik","borst","browshaping","kin","bovenlip","wenkbrauwontharing","schouders","borstbuik","volledigebenen"],
+  face:     ["hydrapeel","signaturefacial","fillme","fruitacid","liftsummere","antiagefacial","expressfacial","acnefacial"],
+  makeup:   ["glammakeup","bridaltrial","bridalpackage","weddingguest"],
+  browlash: ["browlift","hennabrows","lashlift","browtint","browshaping","lashtint","wenkbrauwontharing"],
+  workshop: ["makeupworkshop","facialworkshop","tastingbasic","tastingadvanced","baristaworkshop","teambeauty","teamcoffee","cateye"]
+};
+const AVOID_ICONS = { feet:"🦶", hands:"💅", massage:"💆", waxing:"🪒", face:"🧖", makeup:"💄", browlash:"👁️", workshop:"☕" };
+
 function matchTreatment(mood, gender, sunExposed, healthFlags, complaintText){
   healthFlags = healthFlags || {};
   const genderOk = (item) => item.genders.includes(gender);
@@ -1207,7 +1226,9 @@ function matchTreatment(mood, gender, sunExposed, healthFlags, complaintText){
   const seasonOk = (item) => !item.excludeSummer || !isSummer;
   const monthRangeOk = (item) => !item.monthRange || item.monthRange.includes(currentMonth);
 
-  const allOk = (item) => genderOk(item) && sunOk(item) && timeOk(item) && phlebitisOk(item) && dietOk(item) && menstruationOk(item) && pregnancyOk(item) && roaccutaneOk(item) && ageOk(item) && seasonOk(item) && monthRangeOk(item);
+  const avoid = Array.isArray(healthFlags.avoid) ? healthFlags.avoid : [];
+  const avoidOk = (item) => !avoid.some(g => (AVOID_GROUPS[g] || []).includes(item.id));
+  const allOk = (item) => avoidOk(item) && genderOk(item) && sunOk(item) && timeOk(item) && phlebitisOk(item) && dietOk(item) && menstruationOk(item) && pregnancyOk(item) && roaccutaneOk(item) && ageOk(item) && seasonOk(item) && monthRangeOk(item);
 
   let pool = TREATMENTS_CATALOG.filter(item => item.moods.includes(mood) && allOk(item));
 
@@ -1237,6 +1258,9 @@ function matchTreatment(mood, gender, sunExposed, healthFlags, complaintText){
 
   if (!pool.length){
     pool = TREATMENTS_CATALOG.filter(item => allOk(item) && SAFE_FALLBACK_IDS.includes(item.id));
+  }
+  if (!pool.length){
+    pool = TREATMENTS_CATALOG.filter(item => avoidOk(item) && genderOk(item) && !item.sunSensitive && !item.isMassage);
   }
   if (!pool.length){
     pool = TREATMENTS_CATALOG.filter(item => genderOk(item) && !item.sunSensitive && !item.isMassage);
@@ -1280,7 +1304,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v46 · 03/10/2026";
+const APP_VERSION = "v47 · 03/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1322,6 +1346,12 @@ const SOCIAL_LINKS = {
    ============================================================ */
 const SALON_STAMP_SECRET = "b97d679a76827355855fbc9eb42c73b322825d8df5456e47";
 const SALON_MODE_PIN = "";
+
+/* TEST-PHASE RESET: change this text (e.g. to "launch-2026-11") when the
+   app officially starts. The next time any phone opens the app, its stamps,
+   discoveries, favourites and last match are wiped once — so test data from
+   the test phase disappears everywhere. */
+const DATA_RESET_VERSION = "test-2026-10";
 
 /* Reward for a full stamp card (10 stamps). Change the text freely;
    validMonths = how long after the 10th stamp the reward can be used. */
