@@ -87,10 +87,12 @@
     <p class="step__lede" data-i18n="welcome_lede">Beantwoord een paar korte vragen.</p>
 
     <div class="actions-block actions-block--welcome" id="actionsBlockWelcome"></div>
+    <div class="appt-card" id="apptCard" hidden></div>
     <div class="returning-user" id="returningUserBlock" hidden></div>
 
     <button type="button" class="btn btn--primary btn--wide" data-action="start" data-i18n="start_button">Begin je match</button>
     <button type="button" class="btn btn--outline btn--wide welcome-stampcard" data-action="open-stampcard" data-i18n="stampcard_button">☕ Mijn stempelkaart</button>
+    <button type="button" class="btn btn--outline btn--wide welcome-myappt" data-action="open-myappt" data-i18n="appt_button">📅 Mijn afspraak</button>
     <button type="button" class="btn btn--outline btn--wide welcome-photomoment" data-action="open-photomoment" data-i18n="pm_button">📸 Fotomoment</button>
     <button type="button" class="btn btn--outline btn--wide welcome-findme" data-action="open-findme" data-i18n="findme_button">📍 Zo vind je me &amp; parkeren</button>
     <button type="button" class="btn btn--gold-outline btn--wide welcome-pricelist" data-action="open-pricelist" data-i18n="pricelist_button">💶 Bekijk prijslijst</button>
@@ -417,10 +419,12 @@
       <h2 class="step__title" data-i18n="pm_title">Fotomoment</h2>
       <p class="step__hint" data-i18n="pm_hint"></p>
     </div>
-    <label class="pm-label" for="pmTreatment" data-i18n="pm_treatment_label">Welke behandeling kreeg je?</label>
-    <select id="pmTreatment" class="pm-select"></select>
-    <label class="pm-label" for="pmDrink" data-i18n="pm_drink_label">En welk drankje? (optioneel)</label>
-    <select id="pmDrink" class="pm-select"></select>
+    <p class="pm-label" data-i18n="pm_treatment_label">Welke behandeling kreeg je?</p>
+    <div class="options options--chip" id="pmTreatCats"></div>
+    <input type="text" id="pmTreatText" class="pm-input" maxlength="40" autocomplete="off">
+    <p class="pm-label" data-i18n="pm_drink_label">En welk drankje? (optioneel)</p>
+    <div class="options options--chip" id="pmDrinkCats"></div>
+    <input type="text" id="pmDrinkText" class="pm-input" maxlength="40" autocomplete="off">
     <button type="button" class="btn btn--primary btn--wide" data-action="to-photo-quick" data-i18n="pm_next">Naar de foto</button>
     <div class="step__nav">
       <button type="button" class="btn btn--ghost" data-action="back" data-i18n="back_button">Terug</button>
@@ -437,6 +441,28 @@
       <button type="button" class="btn btn--primary btn--wide" data-action="share" data-i18n="pm_share_button">Delen (Instagram, WhatsApp…)</button>
       <button type="button" class="btn btn--outline btn--wide" data-action="download" data-i18n="pm_download_button">Bewaar foto</button>
     </div>
+    <div class="step__nav">
+      <button type="button" class="btn btn--ghost" data-action="back" data-i18n="back_button">Terug</button>
+    </div>
+  </section>
+
+  <!-- MY APPOINTMENT: a client who already booked enters it herself -->
+  <section class="step" data-step="myappt">
+    <div class="step__head">
+      <h2 class="step__title" data-i18n="appt_title">Mijn afspraak</h2>
+      <p class="step__hint" data-i18n="appt_hint"></p>
+    </div>
+    <div class="appt-row">
+      <label class="pm-label" for="apptDate" data-i18n="appt_date">Datum</label>
+      <input type="date" id="apptDate" class="pm-input">
+      <label class="pm-label" for="apptTime" data-i18n="appt_time">Uur</label>
+      <input type="time" id="apptTime" class="pm-input" step="900">
+    </div>
+    <p class="pm-label" data-i18n="appt_treatment">Welke behandeling of workshop?</p>
+    <div class="options options--chip" id="apptTreatCats"></div>
+    <input type="text" id="apptTreatText" class="pm-input" maxlength="40" autocomplete="off">
+    <button type="button" class="btn btn--primary btn--wide" data-action="save-appt" data-i18n="appt_save">Bewaar mijn afspraak</button>
+    <button type="button" class="btn btn--text" data-action="delete-appt" id="apptDeleteBtn" data-i18n="appt_delete" hidden>Afspraak verwijderen</button>
     <div class="step__nav">
       <button type="button" class="btn btn--ghost" data-action="back" data-i18n="back_button">Terug</button>
     </div>

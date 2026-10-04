@@ -5,7 +5,7 @@
    Requests to other sites (GoatCounter statistics, Google Fonts, the
    WordPress.com news feed) are left
    alone: they go straight to the network and are never cached here. */
-const CACHE_NAME = "beauty-coffee-v47";
+const CACHE_NAME = "beauty-coffee-v48";
 const ASSETS = [
   "./",
   "./index.html",
@@ -19,7 +19,21 @@ const ASSETS = [
   "./assets/icon-512.png",
   "./assets/logo-transparent.png",
   "./assets/lib/qr-encoder.js",
-  "./assets/route-map.svg"
+  "./assets/route-map.svg",
+  "./assets/drinks/cappuccino-cut.webp",
+  "./assets/drinks/cappuccino.jpg",
+  "./assets/drinks/latte-cut.webp",
+  "./assets/drinks/latte-macchiato-cut.webp",
+  "./assets/drinks/latte-macchiato.jpg",
+  "./assets/drinks/latte.jpg",
+  "./assets/drinks/long-black-cut.webp",
+  "./assets/drinks/long-black.jpg",
+  "./assets/drinks/matcha-latte-1.jpg",
+  "./assets/drinks/matcha-latte-2.jpg",
+  "./assets/drinks/pumpkin-spice-latte-cut.webp",
+  "./assets/drinks/pumpkin-spice-latte.jpg",
+  "./assets/drinks/vietnamese-phin-cut.webp",
+  "./assets/drinks/vietnamese-phin.jpg"
 ];
 
 self.addEventListener("install", event => {
