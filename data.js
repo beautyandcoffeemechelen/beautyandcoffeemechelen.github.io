@@ -13,13 +13,16 @@ const CATEGORY_ICONS = { coffee:"☕", tea:"🫖", matcha:"🍵" };
    plain "Matcha") — showing the wrong variant's photo would be more
    misleading than showing no photo at all. */
 const DRINK_PHOTOS = {
-  "Matcha Latte": ["assets/drinks/matcha-latte-1.jpg", "assets/drinks/matcha-latte-2.jpg"],
-  "Matcha Latte met witte choco": ["assets/drinks/matcha-latte-1.jpg", "assets/drinks/matcha-latte-2.jpg"],
-  "Latte": ["assets/drinks/latte.jpg"],
-  "Cappuccino": ["assets/drinks/cappuccino.jpg"],
-  "Latte Macchiato": ["assets/drinks/latte-macchiato.jpg"],
-  "Vietnamese Phin Coffee": ["assets/drinks/vietnamese-phin.jpg"],
-  "Long Black": ["assets/drinks/long-black.jpg"]
+  "Matcha Latte": ["assets/drinks/matcha-latte-1.jpg", "assets/drinks/matcha-latte-2.jpg", "assets/drinks/matcha-latte-3.jpg", "assets/drinks/matcha-latte-4.jpg", "assets/drinks/matcha-latte-5.jpg"],
+  "Matcha Latte met witte choco": ["assets/drinks/matcha-latte-3.jpg", "assets/drinks/matcha-latte-5.jpg"],
+  "Latte": ["assets/drinks/latte.jpg", "assets/drinks/latte-2.jpg"],
+  "Cappuccino": ["assets/drinks/cappuccino.jpg", "assets/drinks/cappuccino-2.jpg", "assets/drinks/cappuccino-3.jpg", "assets/drinks/cappuccino-4.jpg"],
+  "Double Cappuccino": ["assets/drinks/cappuccino-dubbel.jpg", "assets/drinks/cappuccino-3.jpg"],
+  "Latte Macchiato": ["assets/drinks/latte-macchiato.jpg", "assets/drinks/latte-macchiato-2.jpg"],
+  "Vietnamese Phin Coffee": ["assets/drinks/vietnamese-phin.jpg", "assets/drinks/phin-2.jpg", "assets/drinks/phin-3.jpg", "assets/drinks/phin-4.jpg"],
+  "Long Black": ["assets/drinks/long-black.jpg", "assets/drinks/long-black-2.jpg"],
+  "Moka Pot": ["assets/drinks/mokkapot.jpg"],
+  "Hot Chocolate (Milk)": ["assets/drinks/chocomelk.jpg"]
 };
 /* A Latte with the "pumpkin" topping shows the pumpkin spice latte photo. */
 const DRINK_PHOTOS_BY_EXTRA = {
@@ -34,7 +37,12 @@ const DRINK_CUTOUTS = {
   "assets/drinks/latte-macchiato.jpg": "assets/drinks/latte-macchiato-cut.webp",
   "assets/drinks/vietnamese-phin.jpg": "assets/drinks/vietnamese-phin-cut.webp",
   "assets/drinks/pumpkin-spice-latte.jpg": "assets/drinks/pumpkin-spice-latte-cut.webp",
-  "assets/drinks/long-black.jpg": "assets/drinks/long-black-cut.webp"
+  "assets/drinks/long-black.jpg": "assets/drinks/long-black-cut.webp",
+  "assets/drinks/cappuccino-2.jpg": "assets/drinks/cappuccino-2-cut.webp",
+  "assets/drinks/cappuccino-3.jpg": "assets/drinks/cappuccino-3-cut.webp",
+  "assets/drinks/cappuccino-4.jpg": "assets/drinks/cappuccino-4-cut.webp",
+  "assets/drinks/matcha-latte-3.jpg": "assets/drinks/matcha-latte-3-cut.webp",
+  "assets/drinks/matcha-latte-4.jpg": "assets/drinks/matcha-latte-4-cut.webp"
 };
 const CAFFEINE_ICONS = { caff:"⚡", decaf:"🌙" };
 const TEMPERATURE_ICONS = { hot:"🔥", iced:"🧊" };
@@ -73,6 +81,8 @@ const TEAS_CAFF = [
   "Pickwick Original English","Pickwick Green Tea Pure","Lipton Japanese Sencha","Lord Nelson Chai",
   "Organo Gold Organic Green Tea (with Ganoderma)","Witte Thee","Powley Cha","Ambachtelijke Bloeithee"
 ];
+// every tea on the list gets the tea photo
+TEAS_DECAF.concat(TEAS_CAFF).forEach(n => { DRINK_PHOTOS[n] = ["assets/drinks/thee.jpg"]; });
 const HOT_EXTRAS_DECAF = ["Hot Chocolate (Milk)", "Hot Chocolate (White)"];
 
 /* ---------- beverage menu ----------
@@ -1304,7 +1314,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v48 · 04/10/2026";
+const APP_VERSION = "v49 · 05/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".

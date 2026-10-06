@@ -2230,7 +2230,7 @@
      added after scanning the rotating QR code in the salon (see
      "stamp card via QR" below). */
   const LOCAL_KEY = "beautyCoffeeLocal_v1";
-  const localData = { version:1, stamps:0, discoveredTreatments:[], discoveredDrinks:[], favorites:[], lastMatchAt:null, reviewPromptShownFor:null, savedProfile:null, savedAgeBracket:null, installDismissedAt:null, installIosDismissedAt:null, newsletterSentAt:null, lastStampDay:null, cardFullAt:null, rewardsRedeemed:[], lastMoment:null, appointment:null };
+  const localData = { version:1, stamps:0, discoveredTreatments:[], discoveredDrinks:[], favorites:[], lastMatchAt:null, reviewPromptShownFor:null, savedProfile:null, savedAgeBracket:null, installDismissedAt:null, installIosDismissedAt:null, newsletterSentAt:null, lastStampDay:null, cardFullAt:null, rewardsRedeemed:[], lastMoment:null, appointment:null, appointments:[] };
 
   function loadLocalData(){
     try {
@@ -2252,7 +2252,7 @@
   // Everything a client collected in the app (not the language or profile)
   function wipeLocalData(){
     Object.assign(localData, { stamps:0, discoveredTreatments:[], discoveredDrinks:[], favorites:[], lastMatchAt:null,
-      reviewPromptShownFor:null, lastStampDay:null, cardFullAt:null, rewardsRedeemed:[], lastMoment:null, appointment:null });
+      reviewPromptShownFor:null, lastStampDay:null, cardFullAt:null, rewardsRedeemed:[], lastMoment:null, appointment:null, appointments:[] });
   }
 
   /* ---------------- moving to the new address ----------------
@@ -2442,55 +2442,91 @@
     trackEvent("repeat-last");
   }
 
-  /* ---------------- "Mijn afspraak" ----------------
-     Clients who booked by phone/WhatsApp enter their appointment here:
-     it shows on the start screen (with "in my calendar" and route), and
-     after the visit it invites them to the photo moment, prefilled. */
+  /* ---------------- "Mijn afspraken" ----------------
+     Clients who booked by phone/WhatsApp enter their appointments here
+     (as many as they like). They show on the start screen with one-tap
+     buttons for Google Agenda and Outlook, an .ics file for other calendars
+     (Apple, Infomaniak, Telenet…), and the route. After a visit the app
+     invites them to the photo moment, prefilled. */
+  function apptList(){
+    if (!Array.isArray(localData.appointments)) localData.appointments = [];
+    if (localData.appointment){ localData.appointments.push(localData.appointment); localData.appointment = null; saveLocalData(); }
+    return localData.appointments;
+  }
   function apptStart(a){ return a && a.date ? new Date(`${a.date}T${a.time || "10:00"}:00`) : null; }
   function apptTreatLabel(a){
     if (!a) return "";
     const cat = a.tcat ? t("avoid." + a.tcat, state.lang) : "";
     return a.ttext ? (cat ? `${cat} – ${a.ttext}` : a.ttext) : cat;
   }
+  function apptTitle(a){ return `Beauty & Coffee — ${apptTreatLabel(a) || t("appt_title", state.lang)}`; }
+  const APPT_LOCATION = "Beauty & Coffee, Barbarastraat, Mechelen";
+  function apptGoogleUrl(a){
+    const s = apptStart(a), e = new Date(s.getTime() + 3600000);
+    const f = d => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    return "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+      `&text=${encodeURIComponent(apptTitle(a))}&dates=${f(s)}/${f(e)}` +
+      `&location=${encodeURIComponent(APPT_LOCATION)}&details=${encodeURIComponent(SITE_URL)}`;
+  }
+  function apptOutlookUrl(a){
+    const s = apptStart(a), e = new Date(s.getTime() + 3600000);
+    return "https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent" +
+      `&subject=${encodeURIComponent(apptTitle(a))}&startdt=${encodeURIComponent(s.toISOString())}&enddt=${encodeURIComponent(e.toISOString())}` +
+      `&location=${encodeURIComponent(APPT_LOCATION)}`;
+  }
   function renderApptCard(){
     const card = $("#apptCard");
     if (!card || typeof localData === "undefined") return;
-    const a = localData.appointment, start = apptStart(a);
-    if (!start || isNaN(start)){ card.hidden = true; return; }
     const L = state.lang, loc = L === "en" ? "en-GB" : (L === "fr" ? "fr-BE" : "nl-BE");
-    const now = new Date(), past = start.getTime() + 2*3600*1000 < now.getTime();
-    const daysAgo = (now - start) / 86400000;
-    if (past && daysAgo > 14){ card.hidden = true; return; }
-    const when = start.toLocaleDateString(loc, { weekday:"long", day:"numeric", month:"long" }) + " · " +
-                 start.toLocaleTimeString(loc, { hour:"2-digit", minute:"2-digit" });
-    card.innerHTML = past ? `
+    const now = Date.now();
+    const list = apptList().map((a, i) => ({ a, i, s: apptStart(a) })).filter(x => x.s && !isNaN(x.s));
+    const upcoming = list.filter(x => x.s.getTime() + 2*3600000 >= now).sort((x, y) => x.s - y.s);
+    const recentPast = list.filter(x => x.s.getTime() + 2*3600000 < now && now - x.s.getTime() < 14*86400000).sort((x, y) => y.s - x.s)[0];
+    if (!upcoming.length && !recentPast){ card.hidden = true; return; }
+    const when = s => s.toLocaleDateString(loc, { weekday:"long", day:"numeric", month:"long" }) + " · " + s.toLocaleTimeString(loc, { hour:"2-digit", minute:"2-digit" });
+    let html = "";
+    if (recentPast) html += `
+      <div class="appt-item appt-item--past">
         <p class="appt-card__title">✨ ${t("appt_after_title", L)}</p>
-        <p class="appt-card__text">${apptTreatLabel(a)}</p>
+        <p class="appt-card__text">${apptTreatLabel(recentPast.a)}</p>
+        <div class="appt-card__buttons"><button type="button" class="btn btn--primary" data-action="open-photomoment">${t("pm_button", L)}</button></div>
+      </div>`;
+    if (upcoming.length) html += `<p class="appt-card__title">📅 ${t(upcoming.length > 1 ? "appt_card_title_many" : "appt_card_title", L)}</p>`;
+    upcoming.forEach(x => {
+      html += `
+      <div class="appt-item">
+        <p class="appt-card__when">${when(x.s)}</p>
+        <p class="appt-card__text">${apptTreatLabel(x.a)}</p>
+        <p class="appt-card__label">${t("appt_add_to", L)}</p>
         <div class="appt-card__buttons">
-          <button type="button" class="btn btn--primary" data-action="open-photomoment">${t("pm_button", L)}</button>
-        </div>` : `
-        <p class="appt-card__title">📅 ${t("appt_card_title", L)}</p>
-        <p class="appt-card__when">${when}</p>
-        <p class="appt-card__text">${apptTreatLabel(a)}</p>
-        <div class="appt-card__buttons">
-          <button type="button" class="btn btn--outline" data-action="appt-ics">${t("appt_to_calendar", L)}</button>
-          <button type="button" class="btn btn--outline" data-action="open-findme">${t("appt_route", L)}</button>
-          <button type="button" class="btn btn--text" data-action="open-myappt">${t("appt_edit", L)}</button>
-        </div>`;
+          <a class="btn btn--outline" href="${apptGoogleUrl(x.a)}" target="_blank" rel="noopener" data-cal="google">Google</a>
+          <a class="btn btn--outline" href="${apptOutlookUrl(x.a)}" target="_blank" rel="noopener" data-cal="outlook">Outlook</a>
+          <button type="button" class="btn btn--outline" data-action="appt-ics" data-appt-index="${x.i}">${t("appt_other_calendar", L)}</button>
+        </div>
+        <div class="appt-card__buttons appt-card__buttons--small">
+          <button type="button" class="btn btn--text" data-action="open-findme">📍 ${t("appt_route", L)}</button>
+          <button type="button" class="btn btn--text" data-action="edit-appt" data-appt-index="${x.i}">✏️ ${t("appt_edit", L)}</button>
+        </div>
+      </div>`;
+    });
+    html += `<button type="button" class="btn btn--text appt-add-more" data-action="new-appt">＋ ${t("appt_add_more", L)}</button>`;
+    card.innerHTML = html;
     card.hidden = false;
+    card.querySelectorAll("[data-cal]").forEach(el => el.addEventListener("click", () => trackEvent("appointment-" + el.dataset.cal)));
   }
   function renderApptForm(){
-    const a = localData.appointment || {};
-    state.apptPick = state.apptPick || { tcat: a.tcat || null };
+    state.apptPick = state.apptPick || { tcat:null };
     const tw = $("#apptTreatCats"); if (!tw) return;
     tw.innerHTML = Object.keys(AVOID_GROUPS).map(g =>
       `<button type="button" class="chip${state.apptPick.tcat === g ? " is-selected" : ""}" data-appt-t="${g}">${AVOID_ICONS[g]} ${t("avoid." + g, state.lang)}</button>`).join("");
     tw.querySelectorAll("[data-appt-t]").forEach(c => c.addEventListener("click", () => { state.apptPick.tcat = c.dataset.apptT; renderApptForm(); }));
     const tt = $("#apptTreatText"); if (tt) tt.placeholder = t("pm_text_placeholder_t", state.lang);
-    const del = $("#apptDeleteBtn"); if (del) del.hidden = !localData.appointment;
+    const del = $("#apptDeleteBtn"); if (del) del.hidden = state.apptIndex == null;
   }
-  function openMyAppt(){
-    const a = localData.appointment || {};
+  function openMyAppt(index){
+    const list = apptList();
+    state.apptIndex = (index != null && list[index]) ? index : null;
+    const a = state.apptIndex != null ? list[state.apptIndex] : {};
     state.apptPick = { tcat: a.tcat || null };
     const d = $("#apptDate"), tm = $("#apptTime"), tt = $("#apptTreatText");
     if (d){ d.value = a.date || ""; d.min = todayKey(); }
@@ -2503,7 +2539,11 @@
     const date = ($("#apptDate") || {}).value, time = ($("#apptTime") || {}).value;
     const ttext = (($("#apptTreatText") || {}).value || "").trim();
     if (!date || !time){ showToast(t("appt_need_datetime", state.lang)); return; }
-    localData.appointment = { date, time, tcat: state.apptPick && state.apptPick.tcat || null, ttext };
+    const appt = { date, time, tcat: state.apptPick && state.apptPick.tcat || null, ttext };
+    const list = apptList();
+    if (state.apptIndex != null && list[state.apptIndex]) list[state.apptIndex] = appt; else list.push(appt);
+    // keep the list tidy: drop appointments older than 30 days
+    localData.appointments = list.filter(a => { const s = apptStart(a); return s && Date.now() - s.getTime() < 30*86400000; });
     saveLocalData();
     renderApptCard();
     trackEvent("appointment-saved");
@@ -2511,24 +2551,27 @@
     goTo("welcome");
   }
   function deleteAppt(){
-    localData.appointment = null; saveLocalData(); renderApptCard();
+    const list = apptList();
+    if (state.apptIndex != null) list.splice(state.apptIndex, 1);
+    saveLocalData(); renderApptCard();
     showToast(t("appt_deleted_toast", state.lang)); goTo("welcome");
   }
-  function apptToCalendar(){
-    const a = localData.appointment, start = apptStart(a);
+  function apptToCalendar(index){
+    const a = apptList()[index], start = apptStart(a);
     if (!start) return;
     const end = new Date(start.getTime() + 60*60*1000);
     const fmt = d => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
     const ics = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Beauty & Coffee//Match app//NL","BEGIN:VEVENT",
-      `UID:${Date.now()}-appt@beauty-coffee`, `DTSTAMP:${fmt(new Date())}`, `DTSTART:${fmt(start)}`, `DTEND:${fmt(end)}`,
-      `SUMMARY:Beauty & Coffee — ${apptTreatLabel(a) || "afspraak"}`, "LOCATION:Beauty & Coffee\\, Barbarastraat\\, Mechelen",
+      `UID:${a.date}-${a.time}-${Math.random().toString(36).slice(2)}@beauty-coffee`, `DTSTAMP:${fmt(new Date())}`, `DTSTART:${fmt(start)}`, `DTEND:${fmt(end)}`,
+      `SUMMARY:${apptTitle(a)}`, "LOCATION:Beauty & Coffee\\, Barbarastraat\\, Mechelen",
       "BEGIN:VALARM","TRIGGER:-PT2H","ACTION:DISPLAY","DESCRIPTION:Beauty & Coffee","END:VALARM",
       "END:VEVENT","END:VCALENDAR"].join("\r\n");
     const url = URL.createObjectURL(new Blob([ics], { type:"text/calendar;charset=utf-8" }));
-    const link = document.createElement("a"); link.href = url; link.download = "beauty-coffee-afspraak.ics";
+    const link = document.createElement("a"); link.href = url; link.download = `beauty-coffee-afspraak-${a.date}.ics`;
     document.body.appendChild(link); link.click(); link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
-    trackEvent("appointment-calendar");
+    showToast(t("appt_ics_toast", state.lang));
+    trackEvent("appointment-ics");
   }
 
   function renderReturningUserBlock(){
@@ -3069,13 +3112,15 @@
       if (action === "open-houserules") goTo("houserules");
       if (action === "open-stampcard") goTo("stampcard");
       if (action === "open-findme") goTo("findme");
-      if (action === "open-myappt") openMyAppt();
+      if (action === "open-myappt" || action === "new-appt") openMyAppt(null);
+      if (action === "edit-appt") openMyAppt(Number(el.dataset.apptIndex));
       if (action === "save-appt") saveAppt();
       if (action === "delete-appt") deleteAppt();
-      if (action === "appt-ics") apptToCalendar();
+      if (action === "appt-ics") apptToCalendar(Number(el.dataset.apptIndex));
       if (action === "repeat-last") repeatLastMoment();
       if (action === "open-photomoment"){
-        const a = localData.appointment;
+        const a = apptList().filter(x => { const st = apptStart(x); return st && st.getTime() < Date.now() + 86400000; })
+          .sort((x, y) => apptStart(y) - apptStart(x))[0];
         if (a && (a.tcat || a.ttext)){ state.pm = state.pm || { dcat:"none" }; state.pm.tcat = a.tcat || state.pm.tcat; const tt = $("#pmTreatText"); if (tt && !tt.value) tt.value = a.ttext || ""; }
         renderPhotoPick(); goTo("photopick");
       }
@@ -3164,9 +3209,11 @@
     const typed = (q.dtext || "").trim().toLowerCase();
     const key = Object.keys(DRINK_PHOTOS).find(k => k.toLowerCase() === typed || trName(k, state.lang).toLowerCase() === typed);
     if (key) return pickRandom(DRINK_PHOTOS[key]);
-    if (q.dcat === "milkcoffee") return pickRandom(["assets/drinks/latte.jpg","assets/drinks/cappuccino.jpg","assets/drinks/latte-macchiato.jpg"]);
-    if (q.dcat === "coffee") return pickRandom(["assets/drinks/long-black.jpg","assets/drinks/vietnamese-phin.jpg"]);
+    if (q.dcat === "milkcoffee") return pickRandom(DRINK_PHOTOS["Latte"].concat(DRINK_PHOTOS["Cappuccino"], DRINK_PHOTOS["Latte Macchiato"]));
+    if (q.dcat === "coffee") return pickRandom(DRINK_PHOTOS["Long Black"].concat(DRINK_PHOTOS["Moka Pot"], DRINK_PHOTOS["Vietnamese Phin Coffee"]));
     if (q.dcat === "matcha") return pickRandom(DRINK_PHOTOS["Matcha Latte"]);
+    if (q.dcat === "tea") return "assets/drinks/thee.jpg";
+    if (q.dcat === "choco") return "assets/drinks/chocomelk.jpg";
     return null;
   }
   function startQuickPhoto(){
