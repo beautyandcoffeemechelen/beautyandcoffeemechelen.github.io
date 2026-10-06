@@ -473,6 +473,283 @@ const NAME_I18N = {
   "fr": "2 boules de glace vanille"
  }
 };
+/* Treatment names exactly as on the price list (NL/EN/FR). The catalog
+   name stays the internal key; the client always sees the price-list name
+   in the match, favourites, booking message and share card. */
+const PRICELIST_NAMES = {
+ "Hot Stone Massage": {
+  "nl": "Hot Stone Massage",
+  "en": "Hot Stone Massage",
+  "fr": "Massage aux pierres chaudes (Hot Stone)"
+ },
+ "Cuppingmassage": {
+  "nl": "Cuppingmassage",
+  "en": "Cupping massage",
+  "fr": "Massage aux ventouses (cupping)"
+ },
+ "Cupping Body Renewal": {
+  "nl": "Cupping Body Renewal",
+  "en": "Cupping Body Renewal",
+  "fr": "Cupping Body Renewal"
+ },
+ "Swedish Full Body Massage": {
+  "nl": "Zweedse full body massage",
+  "en": "Swedish full body massage",
+  "fr": "Massage suédois corps entier"
+ },
+ "Zweedse Rug-Nek-Schouder Massage": {
+  "nl": "Zweedse rug-nek-schouder massage",
+  "en": "Swedish back-neck-shoulder massage",
+  "fr": "Massage suédois dos-nuque-épaules"
+ },
+ "Zweedse Benen- & Voetenmassage": {
+  "nl": "Zweedse benen-voeten massage",
+  "en": "Swedish legs-feet massage",
+  "fr": "Massage suédois jambes-pieds"
+ },
+ "Energetic Back Wrap": {
+  "nl": "Energetische rugpakking",
+  "en": "Energising back wrap",
+  "fr": "Enveloppement énergisant du dos"
+ },
+ "Brow Lift": {
+  "nl": "Brow Lift",
+  "en": "Brow Lift",
+  "fr": "Brow Lift"
+ },
+ "Henna Brows": {
+  "nl": "Henna Brows",
+  "en": "Henna Brows",
+  "fr": "Henna Brows"
+ },
+ "Lash Lift with Tint": {
+  "nl": "Lash Lift met kleuring",
+  "en": "Lash Lift with tint",
+  "fr": "Lash Lift avec teinture"
+ },
+ "Evening / Party Glam Makeup": {
+  "nl": "Avondmake-up / Party / Glam",
+  "en": "Evening / Party / Glam make-up",
+  "fr": "Maquillage de soirée / Party / Glam"
+ },
+ "Skin-Renewing Hydra Peeling pH": {
+  "nl": "Huidvernieuwende Hydra Peeling pH",
+  "en": "Skin-renewing Hydra Peeling pH",
+  "fr": "Hydra Peeling pH régénérant"
+ },
+ "Signature Facial Treatment": {
+  "nl": "Signature gelaatsverzorging",
+  "en": "Signature facial",
+  "fr": "Soin du visage Signature"
+ },
+ "Fill Me Micro Infusion Treatment": {
+  "nl": "Fill Me Micro Infusie Treatment",
+  "en": "Fill Me Micro Infusion Treatment",
+  "fr": "Fill Me Micro Infusion Treatment"
+ },
+ "Fruit Acid Peeling Dr. Renaud": {
+  "nl": "Fruitzurenpeeling 4/26 Dr. Renaud",
+  "en": "Fruit acid peel 4/26 Dr. Renaud",
+  "fr": "Peeling aux acides de fruits 4/26 Dr. Renaud"
+ },
+ "Lift Summum": {
+  "nl": "Lift Summum",
+  "en": "Lift Summum",
+  "fr": "Lift Summum"
+ },
+ "Zuiverende Rugverzorging": {
+  "nl": "Zuiverende rugbehandeling",
+  "en": "Purifying back treatment",
+  "fr": "Soin purifiant du dos"
+ },
+ "Botanische Anti-Age": {
+  "nl": "Botanische Anti-Age",
+  "en": "Botanical Anti-Age",
+  "fr": "Anti-âge botanique"
+ },
+ "Harmoniserende Full Body Verzorging": {
+  "nl": "Harmoniserende verzorging full body",
+  "en": "Harmonising full body care",
+  "fr": "Soin harmonisant corps entier"
+ },
+ "Energetische Full Body Pakking": {
+  "nl": "Energetische lichaamspakking full body",
+  "en": "Energising full body wrap",
+  "fr": "Enveloppement énergisant corps entier"
+ },
+ "Coffee Tasting Basic": {
+  "nl": "Koffieproeverij Basis",
+  "en": "Coffee tasting – Basic",
+  "fr": "Dégustation de café – Base"
+ },
+ "Coffee Tasting Advanced": {
+  "nl": "Koffieproeverij Verdiepend",
+  "en": "Coffee tasting – Advanced",
+  "fr": "Dégustation de café – Approfondie"
+ },
+ "Private Barista Workshop": {
+  "nl": "Barista Privéworkshop",
+  "en": "Barista Private Workshop",
+  "fr": "Atelier privé barista"
+ },
+ "Extended Manicure": {
+  "nl": "Uitgebreide manicure",
+  "en": "Full manicure",
+  "fr": "Manucure complète"
+ },
+ "Express Pedicure": {
+  "nl": "Express pedicure",
+  "en": "Express pedicure",
+  "fr": "Pédicure express"
+ },
+ "Extended Pedicure": {
+  "nl": "Uitgebreide pedicure",
+  "en": "Full pedicure",
+  "fr": "Pédicure complète"
+ },
+ "Afslankingsmassage": {
+  "nl": "Afslankingsmassage",
+  "en": "Slimming massage",
+  "fr": "Massage minceur"
+ },
+ "Express Gelaatsverzorging": {
+  "nl": "Express gelaatsverzorging",
+  "en": "Express facial",
+  "fr": "Soin du visage express"
+ },
+ "Acnécontrole – Équilibre Pureté Citron Vert": {
+  "nl": "Acnécontrole – Équilibre Pureté Citron Vert",
+  "en": "Acne control – Équilibre Pureté Citron Vert",
+  "fr": "Contrôle acné – Équilibre Pureté Citron Vert"
+ },
+ "Bridal Proefmake-up": {
+  "nl": "Bridal proefmake-up",
+  "en": "Bridal trial make-up",
+  "fr": "Essai maquillage de mariée"
+ },
+ "Bridal Proefmake-up & Bruidsmake-up": {
+  "nl": "Bridal proefmake-up & bruidsmake-up",
+  "en": "Bridal trial & wedding-day make-up",
+  "fr": "Essai & maquillage de mariée"
+ },
+ "Huwelijksdag Make-up (per persoon)": {
+  "nl": "Huwelijksdag make-up, per persoon",
+  "en": "Wedding-day make-up, per person",
+  "fr": "Maquillage du jour J, par personne"
+ },
+ "Brow Tinting": {
+  "nl": "Brow Tinting (kleuren haar)",
+  "en": "Brow tinting (hair colour)",
+  "fr": "Teinture des sourcils (coloration des poils)"
+ },
+ "Lash Tinting": {
+  "nl": "Lash Tinting (kleuren wimpers)",
+  "en": "Lash tinting",
+  "fr": "Teinture des cils"
+ },
+ "Express Manicure": {
+  "nl": "Express manicure",
+  "en": "Express manicure",
+  "fr": "Manucure express"
+ },
+ "Harmoniserende Rugverzorging": {
+  "nl": "Harmoniserende verzorging rug",
+  "en": "Harmonising back care",
+  "fr": "Soin harmonisant du dos"
+ },
+ "Teambuilding Beauty & Pamper Experience": {
+  "nl": "Teambuilding Beauty & Pamper Experience",
+  "en": "Team building Beauty & Pamper Experience",
+  "fr": "Team building Beauty & Pamper Experience"
+ },
+ "Teambuilding Specialty Coffee Experience": {
+  "nl": "Teambuilding Specialty Coffee Experience",
+  "en": "Team building Specialty Coffee Experience",
+  "fr": "Team building Specialty Coffee Experience"
+ },
+ "Cat Eye & Magnetische Gellak Manicure Workshop": {
+  "nl": "Cat Eye & Magnetische Gellak Manicure Workshop",
+  "en": "Cat Eye & Magnetic Gel Polish Manicure Workshop",
+  "fr": "Atelier manucure Cat Eye & vernis gel magnétique"
+ },
+ "Okselontharing": {
+  "nl": "Ontharing – oksels",
+  "en": "Hair removal – underarms",
+  "fr": "Épilation – aisselles"
+ },
+ "Beenontharing": {
+  "nl": "Ontharing – onderbenen",
+  "en": "Hair removal – lower legs",
+  "fr": "Épilation – bas des jambes"
+ },
+ "Rugontharing": {
+  "nl": "Ontharing – rug",
+  "en": "Hair removal – back",
+  "fr": "Épilation – dos"
+ },
+ "Buikontharing": {
+  "nl": "Ontharing – buik",
+  "en": "Hair removal – stomach",
+  "fr": "Épilation – ventre"
+ },
+ "Borstontharing": {
+  "nl": "Ontharing – borst",
+  "en": "Hair removal – chest",
+  "fr": "Épilation – torse"
+ },
+ "Kinontharing": {
+  "nl": "Ontharing – kin",
+  "en": "Hair removal – chin",
+  "fr": "Épilation – menton"
+ },
+ "Bovenlipontharing": {
+  "nl": "Ontharing – bovenlip",
+  "en": "Hair removal – upper lip",
+  "fr": "Épilation – lèvre supérieure"
+ },
+ "Wenkbrauwen opschonen (zonder mapping)": {
+  "nl": "Ontharing – wenkbrauwen (zonder mapping / opschonen)",
+  "en": "Hair removal – eyebrows (no mapping / tidy-up)",
+  "fr": "Épilation – sourcils (sans cartographie / nettoyage)"
+ },
+ "Schouderontharing": {
+  "nl": "Ontharing – schouders",
+  "en": "Hair removal – shoulders",
+  "fr": "Épilation – épaules"
+ },
+ "Borst- & Buikontharing": {
+  "nl": "Ontharing – borst & buik",
+  "en": "Hair removal – chest & stomach",
+  "fr": "Épilation – torse & ventre"
+ },
+ "Volledige Beenontharing": {
+  "nl": "Ontharing – volledige benen",
+  "en": "Hair removal – full legs",
+  "fr": "Épilation – jambes complètes"
+ },
+ "Extended Manicure/Pedicure with SPA supplement": {
+  "nl": "Uitgebreide manicure & pedicure met SPA-supplement",
+  "en": "Full manicure & pedicure with SPA add-on",
+  "fr": "Manucure & pédicure complètes avec supplément SPA"
+ },
+ "Brow Shaping (mappen & ontharen)": {
+  "nl": "Brow Shaping (mappen en ontharen)",
+  "en": "Brow shaping (mapping & hair removal)",
+  "fr": "Brow shaping (cartographie & épilation)"
+ },
+ "Beauty & Skincare Workshop – Make-up": {
+  "nl": "Beauty & Skincare Workshop – make-up",
+  "en": "Beauty & Skincare Workshop – make-up",
+  "fr": "Atelier Beauty & Skincare – maquillage"
+ },
+ "Beauty & Skincare Workshop – Gelaatsverzorging": {
+  "nl": "Beauty & Skincare Workshop – gelaatsverzorging",
+  "en": "Beauty & Skincare Workshop – facial care",
+  "fr": "Atelier Beauty & Skincare – soin du visage"
+ }
+};
+Object.keys(PRICELIST_NAMES).forEach(k => { NAME_I18N[k] = Object.assign({}, NAME_I18N[k] || {}, PRICELIST_NAMES[k]); });
+
 function trName(s, lang){
   if (!s || typeof s !== "string") return s;
   const e = NAME_I18N[s];
@@ -1320,7 +1597,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v54 · 07/10/2026";
+const APP_VERSION = "v55 · 06/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
