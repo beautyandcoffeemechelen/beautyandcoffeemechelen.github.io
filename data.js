@@ -1303,7 +1303,6 @@ const BOOKING_SLOTS = [
   { id:"za-nm", nl:"Zaterdag namiddag",   en:"Saturday afternoon" },
   { id:"za-av", nl:"Zaterdagavond",       en:"Saturday evening" },
   { id:"zo-vm", nl:"Zondag voormiddag",   en:"Sunday morning" },
-  { id:"zo-nm", nl:"Zondag namiddag",     en:"Sunday afternoon" },
   { id:"zo-av", nl:"Zondagavond",         en:"Sunday evening" }
 ];
 
@@ -1314,7 +1313,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v50 · 06/10/2026";
+const APP_VERSION = "v51 · 06/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1836,7 +1835,7 @@ const PRACTICE_FACTS = [
   { code:"MV4", theme:"MV", nl:"Psoriasis is niet besmettelijk en geen reden om massage te vermijden; een zachte massage kan juist deugd doen.", en:"Psoriasis is not contagious and no reason to avoid massage; a gentle massage can actually feel very good." },
   { code:"MV5", theme:"MV", nl:"Blauwe plekken, wondjes, zonnebrand of ontstoken huid blijven ongemoeid.", en:"Bruises, small wounds, sunburn or inflamed skin are left untouched." },
   { code:"MV6", theme:"MV", nl:"Verandert een moedervlek van vorm, kleur of grootte? Laat ze bekijken door de huisarts (ABCDE-regel).", en:"Has a mole changed shape, colour or size? Have it checked by your doctor (the ABCDE rule)." },
-  { code:"MV7", theme:"MV", nl:"Bij fibromyalgie past een rustgevende massage in plaats van een diepe.", en:"For fibromyalgia, a gentle, calming massage is more suitable than a deep one." },
+  { code:"MV7", theme:"MV", nl:"Fibromyalgie is een langdurige aandoening met pijn op veel plaatsen in het lichaam en vermoeidheid. Wie dat heeft, kiest best een zachte, rustgevende massage in plaats van een diepe. Dit weetje is algemeen en zegt niets over jou.", en:"Fibromyalgia is a long-term condition with pain in many parts of the body and tiredness. People who have it are better off with a gentle, calming massage than a deep one. This is general information and says nothing about you." },
   { code:"MV8", theme:"MV", nl:"Bij een acute reumatische aanval wordt niet gemasseerd; erna kan massage gewrichten en spieren soepel houden.", en:"During an acute rheumatic flare-up, massage is not given; afterwards it can help keep joints and muscles supple." },
   { code:"MR1", theme:"MR", nl:"Essentiële oliën worden altijd verdund: 2% is de gebruikelijke sterkte voor het lichaam, 1% voor het gezicht.", en:"Essential oils are always diluted: 2% is the usual strength for the body, 1% for the face." },
   { code:"MR2", theme:"MR", nl:"Geur is sterk verbonden met emotie en herinnering. Daarom kies je de geur samen met de cliënt.", en:"Scent is strongly linked to emotion and memory. That's why you choose the scent together with the client." },

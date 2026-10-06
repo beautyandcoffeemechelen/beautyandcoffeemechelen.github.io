@@ -1652,7 +1652,7 @@
   "MV4": "Le psoriasis n'est pas contagieux et n'est pas une raison d'éviter le massage ; un massage doux peut même faire beaucoup de bien.",
   "MV5": "Les bleus, petites plaies, coups de soleil ou peau enflammée ne sont pas massés.",
   "MV6": "Un grain de beauté a changé de forme, de couleur ou de taille ? Faites-le examiner par votre médecin (règle ABCDE).",
-  "MV7": "En cas de fibromyalgie, un massage apaisant convient mieux qu'un massage profond.",
+  "MV7": "La fibromyalgie est une affection de longue durée qui provoque des douleurs à de nombreux endroits du corps et de la fatigue. Les personnes concernées choisissent de préférence un massage doux et apaisant plutôt qu'un massage profond. Cette information est générale et ne dit rien sur vous.",
   "MV8": "Lors d'une crise rhumatismale aiguë, on ne masse pas ; par la suite, le massage peut aider à garder les articulations et les muscles souples.",
   "MR1": "Les huiles essentielles sont toujours diluées : 2 % est la concentration habituelle pour le corps, 1 % pour le visage.",
   "MR2": "L'odorat est fortement lié aux émotions et aux souvenirs. C'est pourquoi le parfum se choisit avec la cliente ou le client.",

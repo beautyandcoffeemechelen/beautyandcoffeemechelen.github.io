@@ -313,12 +313,13 @@
       tile.className = "option-tile option-tile--kid" + (state.kidsDrink===d.id ? " is-selected" : "");
       tile.innerHTML = `<span class="option-tile__icon">${d.icon}</span>
         <span class="option-tile__title">${d.name[state.lang]}</span>`;
-      tile.addEventListener("click", () => { state.kidsDrink = d.id; renderKidsDrinkOptions(); setTimeout(()=>goTo("context"), 200); });
+      tile.addEventListener("click", () => { state.kidsDrink = d.id; renderKidsDrinkOptions(); setTimeout(()=>{ state.context = "salon"; runGeneration(); }, 200); });
       wrap.appendChild(tile);
     });
   }
 
   function renderMoodOptions(){
+    renderAvoidOptions();
     const wrap = $("#moodOptions");
     wrap.innerHTML = "";
     MOODS.forEach(id => {
@@ -3113,7 +3114,7 @@
       }
       if (action === "back") back();
       if (action === "to-mood") goTo("mood");
-      if (action === "to-context") goTo("context");
+      if (action === "to-context"){ state.context = "salon"; runGeneration(); }
       if (action === "open-camera") openCamera();
       if (action === "switch-camera") switchCamera();
       if (action === "snap-photo") snapPhoto();
