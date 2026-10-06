@@ -349,7 +349,9 @@
         <span class="option-tile__sub">${data.sub}</span>`;
       tile.addEventListener("click", () => {
         state.category = id; renderCategoryOptions();
-        setTimeout(()=>goTo("temperature"), 220);
+        // Tea is always served hot: skip the "warm of koud" question
+        if (id === "tea"){ state.temperature = "hot"; setTimeout(()=>goTo("caffeine"), 220); }
+        else setTimeout(()=>goTo("temperature"), 220);
       });
       wrap.appendChild(tile);
     });
@@ -415,6 +417,10 @@
     if (!milkApplies && state.milk !== "none") state.milk = "none";
 
     wrap.innerHTML = "";
+    // Tea never comes with milk: hide the whole milk group
+    const milkGroup = wrap.closest(".refine-group");
+    if (milkGroup) milkGroup.hidden = state.category === "tea";
+    if (state.category === "tea"){ state.milk = "none"; wrap.innerHTML = ""; return; }
     const milkChoices = state.category === "matcha" ? MILK_OPTIONS.filter(m => m !== "none") : MILK_OPTIONS;
     if (state.category === "matcha" && state.milk === "none") state.milk = "whole";
     milkChoices.forEach(id => {
@@ -968,15 +974,32 @@
     if (!photo) return "";
     const cut = DRINK_CUTOUTS[photo];
     const hot = state.temperature !== "iced";
+    const alts = (m.quick ? [] : (DRINK_PHOTOS[m.drink.name] || [])).filter(p => p !== photo);
     return `
       <div class="drink-pop${cut ? "" : " drink-pop--flat"} is-playing" data-action="replay-drink-pop" role="img" aria-label="${alt}">
         <div class="drink-pop__floor" aria-hidden="true"></div>
-        <div class="drink-pop__screen"><img class="drink-pop__bg" src="${photo}" alt=""></div>
-        ${cut ? `<img class="drink-pop__cut" src="${cut}" alt="">` : ""}
+        <div class="drink-pop__screen"><img class="drink-pop__bg" src="${photo}" alt="" data-alts='${JSON.stringify(alts)}' onerror="bcDrinkFallback(this)"></div>
+        ${cut ? `<img class="drink-pop__cut" src="${cut}" alt="" onerror="bcCutFallback(this)">` : ""}
         ${hot ? `<span class="drink-pop__steam" aria-hidden="true"><i></i><i></i><i></i></span>` : ""}
         <span class="drink-pop__hint">↻ ${t("drink_pop_replay", state.lang)}</span>
       </div>`;
   }
+  // A photo that can't load (e.g. not uploaded yet) never shows as a black
+  // box: try another photo of the same drink, otherwise hide the animation.
+  window.bcDrinkFallback = function(img){
+    const pop = img.closest(".drink-pop");
+    let alts = []; try { alts = JSON.parse(img.dataset.alts || "[]"); } catch(e){}
+    const cut = pop && pop.querySelector(".drink-pop__cut");
+    if (cut) cut.remove();
+    if (pop) pop.classList.add("drink-pop--flat");
+    if (alts.length){ img.dataset.alts = JSON.stringify(alts.slice(1)); img.src = alts[0]; }
+    else if (pop) pop.hidden = true;
+  };
+  window.bcCutFallback = function(cut){
+    const pop = cut.closest(".drink-pop");
+    cut.remove();
+    if (pop) pop.classList.add("drink-pop--flat");
+  };
   function replayDrinkPop(el){
     el.classList.remove("is-playing");
     void el.offsetWidth; // restart the CSS animation

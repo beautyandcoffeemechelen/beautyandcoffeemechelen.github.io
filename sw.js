@@ -5,7 +5,7 @@
    Requests to other sites (GoatCounter statistics, Google Fonts, the
    WordPress.com news feed) are left
    alone: they go straight to the network and are never cached here. */
-const CACHE_NAME = "beauty-coffee-v49";
+const CACHE_NAME = "beauty-coffee-v50";
 const ASSETS = [
   "./",
   "./index.html",
@@ -60,7 +60,8 @@ const ASSETS = [
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(ASSETS.map(u => new Request(u, { cache:"reload" }))))
+      // one by one: a single missing file must not stop the rest from being saved
+      .then(cache => Promise.allSettled(ASSETS.map(u => cache.add(new Request(u, { cache:"reload" })))))
       .catch(() => {})
   );
   self.skipWaiting();

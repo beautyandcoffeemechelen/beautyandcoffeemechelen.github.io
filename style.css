@@ -850,3 +850,5 @@ body{
 .appt-card__buttons--small{ margin-top:4px; }
 .appt-card__buttons--small .btn{ flex:0 0 auto; padding-left:6px; padding-right:6px; }
 .appt-add-more{ display:block; margin:6px auto 0; }
+
+.refine-group[hidden], .drink-pop[hidden]{ display:none; }
