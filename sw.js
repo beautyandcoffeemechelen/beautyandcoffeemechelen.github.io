@@ -5,7 +5,7 @@
    Requests to other sites (GoatCounter statistics, Google Fonts, the
    WordPress.com news feed) are left
    alone: they go straight to the network and are never cached here. */
-const CACHE_NAME = "beauty-coffee-v51";
+const CACHE_NAME = "beauty-coffee-v54";
 const ASSETS = [
   "./",
   "./index.html",
@@ -30,21 +30,27 @@ const ASSETS = [
   "./assets/drinks/cappuccino-dubbel.jpg",
   "./assets/drinks/cappuccino.jpg",
   "./assets/drinks/chocomelk.jpg",
+  "./assets/drinks/latte-2-cut.webp",
   "./assets/drinks/latte-2.jpg",
   "./assets/drinks/latte-cut.webp",
+  "./assets/drinks/latte-macchiato-2-cut.webp",
   "./assets/drinks/latte-macchiato-2.jpg",
   "./assets/drinks/latte-macchiato-cut.webp",
   "./assets/drinks/latte-macchiato.jpg",
   "./assets/drinks/latte.jpg",
+  "./assets/drinks/long-black-2-cut.webp",
   "./assets/drinks/long-black-2.jpg",
   "./assets/drinks/long-black-cut.webp",
   "./assets/drinks/long-black.jpg",
+  "./assets/drinks/matcha-latte-1-cut.webp",
   "./assets/drinks/matcha-latte-1.jpg",
+  "./assets/drinks/matcha-latte-2-cut.webp",
   "./assets/drinks/matcha-latte-2.jpg",
   "./assets/drinks/matcha-latte-3-cut.webp",
   "./assets/drinks/matcha-latte-3.jpg",
   "./assets/drinks/matcha-latte-4-cut.webp",
   "./assets/drinks/matcha-latte-4.jpg",
+  "./assets/drinks/matcha-latte-5-cut.webp",
   "./assets/drinks/matcha-latte-5.jpg",
   "./assets/drinks/mokkapot.jpg",
   "./assets/drinks/phin-2.jpg",

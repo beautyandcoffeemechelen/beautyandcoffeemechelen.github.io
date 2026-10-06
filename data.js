@@ -17,7 +17,7 @@ const DRINK_PHOTOS = {
   "Matcha Latte met witte choco": ["assets/drinks/matcha-latte-3.jpg", "assets/drinks/matcha-latte-5.jpg"],
   "Latte": ["assets/drinks/latte.jpg", "assets/drinks/latte-2.jpg"],
   "Cappuccino": ["assets/drinks/cappuccino.jpg", "assets/drinks/cappuccino-2.jpg", "assets/drinks/cappuccino-3.jpg", "assets/drinks/cappuccino-4.jpg"],
-  "Double Cappuccino": ["assets/drinks/cappuccino-dubbel.jpg", "assets/drinks/cappuccino-3.jpg"],
+  "Double Cappuccino": ["assets/drinks/cappuccino-dubbel.jpg", "assets/drinks/cappuccino-3.jpg", "assets/drinks/cappuccino-4.jpg"],
   "Latte Macchiato": ["assets/drinks/latte-macchiato.jpg", "assets/drinks/latte-macchiato-2.jpg"],
   "Vietnamese Phin Coffee": ["assets/drinks/vietnamese-phin.jpg", "assets/drinks/phin-2.jpg", "assets/drinks/phin-3.jpg", "assets/drinks/phin-4.jpg"],
   "Long Black": ["assets/drinks/long-black.jpg", "assets/drinks/long-black-2.jpg"],
@@ -42,7 +42,13 @@ const DRINK_CUTOUTS = {
   "assets/drinks/cappuccino-3.jpg": "assets/drinks/cappuccino-3-cut.webp",
   "assets/drinks/cappuccino-4.jpg": "assets/drinks/cappuccino-4-cut.webp",
   "assets/drinks/matcha-latte-3.jpg": "assets/drinks/matcha-latte-3-cut.webp",
-  "assets/drinks/matcha-latte-4.jpg": "assets/drinks/matcha-latte-4-cut.webp"
+  "assets/drinks/matcha-latte-4.jpg": "assets/drinks/matcha-latte-4-cut.webp",
+  "assets/drinks/latte-2.jpg": "assets/drinks/latte-2-cut.webp",
+  "assets/drinks/latte-macchiato-2.jpg": "assets/drinks/latte-macchiato-2-cut.webp",
+  "assets/drinks/long-black-2.jpg": "assets/drinks/long-black-2-cut.webp",
+  "assets/drinks/matcha-latte-5.jpg": "assets/drinks/matcha-latte-5-cut.webp",
+  "assets/drinks/matcha-latte-1.jpg": "assets/drinks/matcha-latte-1-cut.webp",
+  "assets/drinks/matcha-latte-2.jpg": "assets/drinks/matcha-latte-2-cut.webp"
 };
 const CAFFEINE_ICONS = { caff:"⚡", decaf:"🌙" };
 const TEMPERATURE_ICONS = { hot:"🔥", iced:"🧊" };
@@ -57,8 +63,9 @@ const AGE_BRACKETS = ["16-29","30-44","45plus"];
 const AGE_ICONS = { "16-29":"🌱", "30-44":"🌳", "45plus":"✨" };
 
 const MILK_OPTIONS = ["none","whole","oat","extra"];
-const EXTRA_OPTIONS = ["honey","sugar","cream","icecream","biscoff","pumpkin"];
-const TEA_EXTRA_OPTIONS = ["honey","sugar"]; // whipped cream/ice cream/biscoff/pumpkin spice are coffee-only toppings
+const EXTRA_OPTIONS = ["honey","sugar","cream","pumpkin"];   // vanilla ice cream only in workshops (affogato); no Biscoff for now
+const TEA_EXTRA_OPTIONS = ["honey","sugar"];
+const MATCHA_EXTRA_OPTIONS = ["sugar"];   // no honey with matcha // whipped cream/ice cream/biscoff/pumpkin spice are coffee-only toppings
 
 /* ---------- coffee origins & blends (with tasting notes) ---------- */
 const COFFEE_ORIGINS = [
@@ -110,12 +117,11 @@ const BEVERAGES = {
   coffeeIced: {
     caff: [
       { name:"Iced Coffee + Whipped Cream" },
-      { name:"Affogato", notes:"2 scoops vanilla ice cream" },
-      { name:"Iced Latte + Choco + Whipped Cream + Biscoff Crumbs" }
+      { name:"Iced Latte + Choco + Whipped Cream" }
     ],
     decaf: [
       { name:"Iced Coffee + Whipped Cream" },
-      { name:"Iced Latte + Choco + Whipped Cream + Biscoff Crumbs" }
+      { name:"Iced Latte + Choco + Whipped Cream" }
     ]
   }
 };
@@ -157,6 +163,7 @@ const GOOGLE_REVIEWS = {
    Dutch for the English drink notes). Missing entry = original.
    ============================================================ */
 const NAME_I18N = {
+ "Iced Latte + Choco + Whipped Cream": {"nl": "IJslatte + choco + slagroom", "fr": "Latte glacé + choco + chantilly"},
  "Iced Matcha Latte": {"fr": "Matcha latte glacé"},
  "Double Cappuccino": {"nl": "Cappuccino Dubbel", "fr": "Cappuccino double"},
  "Cappuccino & Choco": {"fr": "Cappuccino & choco"},
@@ -1313,7 +1320,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v51 · 06/10/2026";
+const APP_VERSION = "v54 · 07/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".

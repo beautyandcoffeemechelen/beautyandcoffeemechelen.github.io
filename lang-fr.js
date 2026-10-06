@@ -51,7 +51,7 @@
   "step2_title": "Choisissez votre direction",
   "step_temp_eyebrow": "Étape 7 · Chaud ou glacé",
   "step_temp_title": "Chaud ou glacé ?",
-  "temperature_tea_hint": "Le thé est toujours servi chaud. Envie de fraîcheur ? Choisissez un Iced Matcha Latte ou un café : Iced Coffee, Iced Latte ou Affogato.",
+  "temperature_tea_hint": "Le thé est toujours servi chaud. Envie de fraîcheur ? Choisissez un Iced Matcha Latte ou un café : Iced Coffee ou Iced Latte.",
   "step3_eyebrow": "Étape 8 · Caféine",
   "step3_title": "Avec ou sans coup de fouet ?",
   "step4_eyebrow": "Étape 9 · Personnalisation",

@@ -449,7 +449,7 @@
   function renderExtrasOptions(){
     const wrap = $("#extrasOptions");
     wrap.innerHTML = "";
-    const options = (state.category === "tea" || state.category === "matcha") ? TEA_EXTRA_OPTIONS : EXTRA_OPTIONS;
+    const options = state.category === "matcha" ? MATCHA_EXTRA_OPTIONS : (state.category === "tea" ? TEA_EXTRA_OPTIONS : EXTRA_OPTIONS);
     // drop any previously-picked extras that no longer apply (e.g. switched from coffee to tea)
     state.extras = state.extras.filter(id => options.includes(id));
     options.forEach(id => {
