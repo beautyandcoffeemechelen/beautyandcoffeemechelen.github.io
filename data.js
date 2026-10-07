@@ -1605,7 +1605,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v61 · 07/10/2026";
+const APP_VERSION = "v62 · 07/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1658,6 +1658,7 @@ const SALON_MODE_PIN = "";
      code, so each voucher works only once, and it allows at most
      maxGiftsPerClient gifts per client (= per phone).
    - LIVE SWITCH: live:false = the public sees NOTHING of the calendar
+     until liveFrom (1 December: then it goes live by itself)
      (no card, no #advent link). Sandra tests with the private link
        https://beautyandcoffeemechelen.github.io/?voorproef=<previewKey>
      (a bar at the top lets her pick any day). Set live:true when OK.
@@ -1678,6 +1679,9 @@ const SALON_MODE_PIN = "";
    - soldOut: true on an item = sold out: clients see it on their voucher
      (after you upload data.js) and the salon phone refuses it.
    - photo: a cut-out product photo shown in the voucher's square.
+   - Salon products (type "extra"): the client sees only "highlights"
+     (what's in it and what it's good for). The full "ingredients" list
+     stays here for Sandra, for questions about allergies.
    - Per item: "use" = what it is / how to use it, "ingredients" = INCI
      list as on the packaging — one text, or { nl, en, fr } — ("" = not
      shown; then the app refers to the label on the product).
@@ -1685,7 +1689,8 @@ const SALON_MODE_PIN = "";
      the app only repeats it.
    ============================================================ */
 const ADVENT = {
-  live: false,                  // false = only visible via the private preview link; true = public
+  live: false,                  // true = public right away (e.g. on 15/11 for the announcement)
+  liveFrom: "2026-12-01",       // public automatically from this day, even if live is still false
   previewKey: "BC-XMAS-7Q4K",   // the private preview link: ?voorproef=BC-XMAS-7Q4K
   year: 2026,
   teaserFrom: "2026-11-15",     // from this day the start screen announces the calendar (when live)
@@ -1727,18 +1732,18 @@ const ADVENT = {
     bathsalt: { type:"gift", homemade:true, icon:"🛁",
       photo:"assets/advent/bathsalt.webp",
       nl:"Home made badzout lavendel", en:"Home-made lavender bath salts", fr:"Sels de bain lavande faits maison",
-      use:{ nl:"Bruisend badzout met lavendel (blauw). Los een handvol op in warm badwater. Niet inslikken; buiten bereik van kinderen houden; vermijd contact met de ogen.",
-            en:"Fizzing bath salts with lavender (blue). Dissolve a handful in warm bath water. Do not swallow; keep out of reach of children; avoid contact with the eyes.",
-            fr:"Sels de bain effervescents à la lavande (bleus). Dissolvez une poignée dans l'eau chaude du bain. Ne pas avaler ; tenir hors de portée des enfants ; éviter le contact avec les yeux." },
-      ingredients:"Sodium Bicarbonate, Citric Acid, Magnesium Sulfate, Cocos Nucifera (Coconut) Oil, Lavandula Angustifolia (Lavender) Oil, Linalool*, Limonene*, CI 42090",
+      use:{ nl:"Badzout met lavendel (blauw). Los een handvol op in warm badwater. Niet inslikken; buiten bereik van kinderen houden; vermijd contact met de ogen.",
+            en:"Bath salts with lavender (blue). Dissolve a handful in warm bath water. Do not swallow; keep out of reach of children; avoid contact with the eyes.",
+            fr:"Sels de bain à la lavande (bleus). Dissolvez une poignée dans l'eau chaude du bain. Ne pas avaler ; tenir hors de portée des enfants ; éviter le contact avec les yeux." },
+      ingredients:"Sodium Bicarbonate, Magnesium Sulfate, Cocos Nucifera (Coconut) Oil, Lavandula Angustifolia (Lavender) Oil, Linalool*, Limonene*, CI 42090",
       ingredientsNote:{ nl:"* uit de etherische olie", en:"* from the essential oil", fr:"* issu de l'huile essentielle" } },
     bathsalt2: { type:"gift", homemade:true, icon:"🍊",
       photo:"assets/advent/bathsalt2.webp",
       nl:"Home made badzout mandarijn & lavendel", en:"Home-made mandarin & lavender bath salts", fr:"Sels de bain mandarine & lavande faits maison",
-      use:{ nl:"Bruisend badzout met mandarijn en lavendel. Los een handvol op in warm badwater. Niet inslikken; buiten bereik van kinderen houden; vermijd contact met de ogen.",
-            en:"Fizzing bath salts with mandarin and lavender. Dissolve a handful in warm bath water. Do not swallow; keep out of reach of children; avoid contact with the eyes.",
-            fr:"Sels de bain effervescents à la mandarine et à la lavande. Dissolvez une poignée dans l'eau chaude du bain. Ne pas avaler ; tenir hors de portée des enfants ; éviter le contact avec les yeux." },
-      ingredients:"Sodium Bicarbonate, Citric Acid, Magnesium Sulfate, Cocos Nucifera (Coconut) Oil, Citrus Reticulata (Mandarin Orange) Peel Oil, Lavandula Angustifolia (Lavender) Oil, Limonene*, Linalool*, CI 19140, CI 75470",
+      use:{ nl:"Badzout met mandarijn en lavendel. Los een handvol op in warm badwater. Niet inslikken; buiten bereik van kinderen houden; vermijd contact met de ogen.",
+            en:"Bath salts with mandarin and lavender. Dissolve a handful in warm bath water. Do not swallow; keep out of reach of children; avoid contact with the eyes.",
+            fr:"Sels de bain à la mandarine et à la lavande. Dissolvez une poignée dans l'eau chaude du bain. Ne pas avaler ; tenir hors de portée des enfants ; éviter le contact avec les yeux." },
+      ingredients:"Sodium Bicarbonate, Magnesium Sulfate, Cocos Nucifera (Coconut) Oil, Citrus Reticulata (Mandarin Orange) Peel Oil, Lavandula Angustifolia (Lavender) Oil, Limonene*, Linalool*, CI 19140, CI 75470",
       ingredientsNote:{ nl:"* uit de etherische oliën", en:"* from the essential oils", fr:"* issu des huiles essentielles" } },
     spoolie: { type:"gift", icon:"🖌️",
       photo:"assets/advent/spoolie.webp",
@@ -1764,6 +1769,7 @@ const ADVENT = {
       ingredients:"" },
     // ---- free extras with a booked treatment (valid discountDays) ----
     led: { type:"extra", icon:"💡", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Zonder product: zacht ledlicht als extra verwennerij na je verzorging.", en:"No product: gentle LED light as an extra treat after your facial.", fr:"Sans produit : une douce lumière LED pour vous chouchouter après votre soin." },
       nl:"Gratis 10 min LED-therapie", en:"Free 10-min LED therapy", fr:"10 min de LED offertes" },
     handspa: { type:"extra", icon:"🤲", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       nl:"Gratis handpeeling & -massage", en:"Free hand peeling & massage", fr:"Gommage & massage des mains offerts" },
@@ -1772,18 +1778,22 @@ const ADVENT = {
     facecupping: { type:"extra", icon:"✨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       nl:"Gratis liftende cuppingmassage voor het gelaat", en:"Free lifting cupping facial massage", fr:"Massage liftant aux ventouses du visage offert" },
     peelanti: { type:"extra", icon:"🌟", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Met kaviaarextract, hamamelis, lavendel en collageen — verstevigt en geeft de rijpere huid een frisse, gladde uitstraling.", en:"With caviar extract, witch hazel, lavender and collagen — firms and gives mature skin a fresh, smooth look.", fr:"À l'extrait de caviar, à l'hamamélis, à la lavande et au collagène — raffermit et donne aux peaux matures un aspect frais et lisse." },
       photo:"assets/advent/algo-age.webp", product:"Bio Balance Algoherbal Ageing (poedermasker + Essence Gel)",
       ingredients:"Poeder (Lavender): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Lavandula Angustifolia (Lavender) Flower, Sodium Phosphate, CI 42090, Lavandula Angustifolia (Lavender) Oil. — Essence Gel (Lavender & Caviar): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Caviar Extract, Hamamelis Virginiana Extract, Lavandula Angustifolia Extract, Carbomer, Triethanolamine, Hyaluronic Acid, Hydrolyzed Collagen, Allantoin, PEG-40 Hydrogenated Castor Oil, Parfum, CI 42090, Phenoxyethanol, Limonene, Linalool, Geraniol, Alpha-Isomethyl Ionone, CI 16035",
       nl:"Gratis anti-aging peel-off masker", en:"Free anti-ageing peel-off mask", fr:"Masque peel-off anti-âge offert" },
     peelsens: { type:"extra", icon:"🌸", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Met kamille, aloë vera en hyaluronzuur — kalmeert en verzacht de gevoelige, snel rode huid.", en:"With chamomile, aloe vera and hyaluronic acid — calms and soothes sensitive, easily reddened skin.", fr:"À la camomille, à l'aloe vera et à l'acide hyaluronique — apaise et adoucit les peaux sensibles qui rougissent facilement." },
       photo:"assets/advent/algo-sens.webp", product:"Bio Balance Algoherbal Sensitive (poedermasker + Essence Gel)",
       ingredients:"Poeder (Camomile): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Chamomilla Recutita (Matricaria) Flower, Anthemis Nobilis Flower Extract, Sodium Phosphate, CI 19140, Anthemis Nobilis Flower Oil. — Essence Gel (Camomile): Aqua, Glycerin, Butylene Glycol, Aloe Barbadensis Leaf Extract, Anthemis Nobilis Flower Extract, Hydrolyzed Collagen, Carbomer, Triethanolamine, Panthenol, Allantoin, PEG-40 Hydrogenated Castor Oil, Parfum, Hyaluronic Acid, Disodium EDTA, CI 19140, Phenoxyethanol, Limonene, Linalool, Alpha-Isomethyl Ionone",
       nl:"Gratis peel-off masker voor de gevoelige huid", en:"Free peel-off mask for sensitive skin", fr:"Masque peel-off peau sensible offert" },
     collagen: { type:"extra", icon:"🫧", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Met marien collageen en haver — liftend en verstevigend, voor een zichtbaar gladdere huid.", en:"With marine collagen and oat — lifting and firming, for visibly smoother skin.", fr:"Au collagène marin et à l'avoine — liftant et raffermissant, pour une peau visiblement plus lisse." },
       photo:"assets/advent/collagen.webp", product:"Bio Balance Super Collageen Gelmasker Lifting",
       ingredients:"Aqua, Soluble Collagen, Propanediol, Phenoxyethanol, Avena Sativa (Oat) Kernel Extract, Carbomer, Caprylyl Glycol, Sodium Hydroxide, Disodium EDTA, Sodium Benzoate",
       nl:"Gratis collageenvliesmasker", en:"Free collagen sheet mask", fr:"Masque en tissu au collagène offert" },
     goldmask: { type:"extra", icon:"👑", stock:1, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Met collageen, hyaluronzuur, centella en groene thee — hydrateert en geeft een stralende, frisse look.", en:"With collagen, hyaluronic acid, centella and green tea — hydrates and gives a radiant, fresh look.", fr:"Au collagène, à l'acide hyaluronique, à la centella et au thé vert — hydrate et donne un teint frais et éclatant." },
       photo:"assets/advent/goldmask.webp", product:"Gold Bio-Collagen Facial Mask",
       ingredients:"Aqua, Glycerin, Xanthan Gum, Mica, Chondrus Crispus Powder, Titanium Dioxide, Chlorphenesin, …, Methylparaben, Potassium Chloride, Sodium Hyaluronate, Hydrolyzed Collagen, Butylene Glycol, Centella Asiatica Extract, Polygonum Cuspidatum Root Extract, Scutellaria Baicalensis Root Extract, Camellia Sinensis Leaf Extract, Glycyrrhiza Glabra (Licorice) Root Extract, Chamomilla Recutita (Matricaria) Flower Extract, Rosmarinus Officinalis (Rosemary) Leaf Extract, Iron Oxides, Citric Acid, Potassium Citrate, PEG-40 Hydrogenated Castor Oil, …",
       ingredientsNote:{ nl:"… = onleesbaar op de verpakking; volledige lijst op de verpakking in het salon", en:"… = unreadable on the pack; full list on the pack in the salon", fr:"… = illisible sur l'emballage ; liste complète sur l'emballage au salon" },
@@ -1792,12 +1802,19 @@ const ADVENT = {
       nl:"Gratis SPA manicure", en:"Free SPA manicure", fr:"Manucure SPA offerte" },
     spapedi: { type:"extra", icon:"🦶", with:{ nl:"pedicure", en:"pedicure", fr:"pédicure" },
       nl:"Gratis SPA pedicure", en:"Free SPA pedicure", fr:"Pédicure SPA offerte" },
-    // ---- available, but not behind a door yet ----
+    // ---- more salon products ----
     luminoclear: { type:"extra", icon:"✨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Met vitamine C, melkzuur (AHA), witte lelie en berendruif — voor een egalere, stralende teint bij pigmentvlekjes.", en:"With vitamin C, lactic acid (AHA), white lily and bearberry — for a more even, radiant complexion with pigment spots.", fr:"À la vitamine C, à l'acide lactique (AHA), au lys blanc et à la busserole — pour un teint plus uniforme et éclatant en cas de taches pigmentaires." },
       photo:"assets/advent/luminoclear.webp", product:"Bio Balance LuminoClear BioCell Mask (Pigment, met AHA)",
       nl:"Gratis LuminoClear biocellulosemasker (pigmentvlekjes)", en:"Free LuminoClear biocellulose mask (pigmentation)", fr:"Masque biocellulose LuminoClear offert (taches pigmentaires)",
       ingredients:"Aqua (Water), Propylene Glycol, Glycerin, Butylene Glycol, Caprylic/Capric Triglyceride, Sodium Ascorbyl Phosphate, Sodium Stearoyl Glutamate, Lactic Acid, Parfum (Fragrance), Sodium Benzoate, 1,2-Hexanediol, Caprylyl Glycol, Xanthan Gum, Lilium Candidum Leaf Cell Extract, Sodium Phytate, Helianthus Annuus (Sunflower) Seed Oil, Linalool, Arctostaphylos Uva Ursi Leaf Extract, Geraniol, Citronellol, Limonene" },
+    peelrose: { type:"extra", icon:"🌹", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Met rozenblaadjes, rozenolie, komkommer en hyaluronzuur — hydrateert en geeft een frisse glow.", en:"With rose petals, rose oil, cucumber and hyaluronic acid — hydrates and gives a fresh glow.", fr:"Aux pétales de rose, à l'huile de rose, au concombre et à l'acide hyaluronique — hydrate et donne un éclat frais." },
+      product:"Bio Balance Algoherbal Rose (poedermasker + Essence Gel)",
+      nl:"Gratis hydraterend rozen peel-off masker", en:"Free hydrating rose peel-off mask", fr:"Masque peel-off hydratant à la rose offert",
+      ingredients:"Poeder (Rose): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Rosa Centifolia Flower, Sodium Phosphate, CI 16035, Rosa Rugosa Flower Oil. — Essence Gel (Rose): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Cucumis Sativus Fruit Extract, Hydrolyzed Collagen, Carbomer, Triethanolamine, PEG-40 Hydrogenated Castor Oil, Hyaluronic Acid, Parfum, Disodium EDTA, Phenoxyethanol, Limonene, Linalool, Alpha-Isomethyl Ionone, CI 16035" },
     peelblueberry: { type:"extra", icon:"🫐", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Met bosbes, vitamine C en kamilleolie — een kalmerend algenmasker voor de gevoelige huid.", en:"With bilberry, vitamin C and chamomile oil — a soothing seaweed mask for sensitive skin.", fr:"À la myrtille, à la vitamine C et à l'huile de camomille — un masque aux algues apaisant pour les peaux sensibles." },
       product:"Bio Balance Peel-Off Algenmasker Bosbessen (Sensitive)",
       nl:"Gratis kalmerend bosbessen peel-off masker", en:"Free soothing blueberry peel-off mask", fr:"Masque peel-off apaisant à la myrtille offert",
       ingredients:"Diatomaceous Earth, Algin, Calcium Sulfate, Tetrasodium Pyrophosphate, Sodium Ascorbate, Maltodextrin, Vaccinium Myrtillus Fruit Extract, Ormenis Multicaulis Oil, Limonene" },
@@ -1824,14 +1841,14 @@ const ADVENT = {
     { day:13, item:"facecupping",   stock:null },
     { day:14, item:"guinot",        stock:null },
     { day:15, item:"spamani",       stock:null },
-    { day:16, item:"facial10",      stock:null },
+    { day:16, item:"peelblueberry", stock:null },
     { day:17, item:"lipscrub",      stock:null },
     { day:18, item:"peelanti",      stock:null },
     { day:19, item:"eraser",        stock:null },
-    { day:20, item:"massage15",     stock:null },
+    { day:20, item:"peelrose",      stock:null },
     { day:21, item:"collagen",      stock:null },
     { day:22, item:"spapedi",       stock:null },
-    { day:23, item:"eyeflash",      stock:null },
+    { day:23, item:"luminoclear",   stock:null },
     { day:24, item:"goldmask",      stock:null },
     { day:25, item:"massage15",     stock:null }
   ]

@@ -3092,7 +3092,8 @@
   const advMemLedger = { codes:{} };
 
   function advHasConfig(){ return typeof ADVENT === "object" && ADVENT && Array.isArray(ADVENT.doors); }
-  function advVisible(){ return advHasConfig() && (ADVENT.live === true || advPreview); }
+  function advIsLive(){ return ADVENT.live === true || (!!ADVENT.liveFrom && todayKey() >= ADVENT.liveFrom); }
+  function advVisible(){ return advHasConfig() && (advIsLive() || advPreview); }
   function advTodayKey(){ return advTest || todayKey(); }
   function advParts(key){ const [y, m, d] = key.split("-").map(Number); return { y, m, d }; }
   function advKeyFor(y, m, d){ return `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`; }
@@ -3215,7 +3216,7 @@
     if (!opts.some(o => o[0] === advTest)) opts.push([advTest, advFmt(advTest)]);
     opts.sort((a, b) => a[0] < b[0] ? -1 : 1);
     return `<div class="advent-preview" data-where="${where}">
-      <p>🧪 <b>${t("adv_pv_title", state.lang)}</b> — ${t(ADVENT.live ? "adv_pv_live" : "adv_pv_hidden", state.lang)}</p>
+      <p>🧪 <b>${t("adv_pv_title", state.lang)}</b> — ${(advIsLive() ? t("adv_pv_live", state.lang) : t("adv_pv_hidden", state.lang).replace("{d}", advFmt(ADVENT.liveFrom || ADVENT.teaserFrom)))}</p>
       <label>${t("adv_pv_day", state.lang)}
         <select class="advent-preview__day" data-adv-preview="day">${opts.map(o => `<option value="${o[0]}"${o[0] === advTest ? " selected" : ""}>${o[1]}</option>`).join("")}</select>
       </label>
@@ -3310,7 +3311,7 @@
     const seen = new Set(), rows = [];
     ADVENT.doors.forEach(d0 => {
       const door = advDoor(d0.day);
-      if (!door || seen.has(door.itemId) || !door.ingredients) return;
+      if (!door || seen.has(door.itemId) || !door.ingredients || door.type !== "gift") return;
       seen.add(door.itemId);
       const note = advTxt(door.ingredientsNote);
       rows.push(`<li><b>${door.product || advDoorText(door, state.lang)}</b>: ${advTxt(door.ingredients)}${note ? ` <i>(${note})</i>` : ""}</li>`);
@@ -3390,11 +3391,14 @@
       : `<i aria-hidden="true">${door.icon}</i>`;
     const use = advTxt(door.use);
     const ingr = advTxt(door.ingredients), ingrNote = advTxt(door.ingredientsNote);
-    const infoHtml = (isGift || door.ingredients) ? `<div class="advent-voucher__info"><p>${t(isGift ? "adv_info_title" : "adv_info_used", state.lang)}</p>
-        ${door.product && !isGift ? `<p class="advent-voucher__use"><b>${door.product}</b></p>` : ""}
+    const hl = advTxt(door.highlights);
+    const infoHtml = isGift ? `<div class="advent-voucher__info"><p>${t("adv_info_title", state.lang)}</p>
         ${use ? `<p class="advent-voucher__use">${use}</p>` : ""}
         <p class="advent-voucher__ingr">${ingr ? `<b>${t("adv_ingredients", state.lang)}</b> ${ingr}${ingrNote ? ` <i>(${ingrNote})</i>` : ""}` : t("adv_ingredients_label", state.lang)}</p>
-        ${isGift ? `<p class="advent-voucher__ingr">${t("adv_ingredients_card", state.lang)}</p>` : ""}</div>` : "";
+        <p class="advent-voucher__ingr">${t("adv_ingredients_card", state.lang)}</p></div>`
+      : hl ? `<div class="advent-voucher__info"><p>${t("adv_info_good", state.lang)}</p>
+        <p class="advent-voucher__use">${hl}</p>
+        ${door.ingredients ? `<p class="advent-voucher__ingr">${t("adv_allergy_ask", state.lang)}</p>` : ""}</div>` : "";
     const waText = advFill(t("adv_book_wa_text", state.lang), door).replace("{gift}", advDoorText(door, state.lang)).replace("{code}", rec.code);
     const bookHtml = expired ? "" : `<div class="advent-voucher__book">
         <a class="btn btn--primary btn--sm" href="https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(waText)}" target="_blank" rel="noopener">💬 ${t("adv_book_wa", state.lang)}</a>
