@@ -5,7 +5,7 @@
    Requests to other sites (GoatCounter statistics, Google Fonts, the
    WordPress.com news feed) are left
    alone: they go straight to the network and are never cached here. */
-const CACHE_NAME = "beauty-coffee-v57";
+const CACHE_NAME = "beauty-coffee-v59";
 const ASSETS = [
   "./",
   "./index.html",
@@ -26,6 +26,14 @@ const ASSETS = [
   "./assets/drinks/cappuccino-3.jpg",
   "./assets/drinks/cappuccino-4-cut.webp",
   "./assets/drinks/cappuccino-4.jpg",
+  "./assets/drinks/cappuccino-dubbel-2.jpg",
+  "./assets/drinks/cappuccino-dubbel-2-cut.webp",
+  "./assets/drinks/cappuccino-dubbel-3.jpg",
+  "./assets/drinks/cappuccino-dubbel-3-cut.webp",
+  "./assets/drinks/espresso.jpg",
+  "./assets/drinks/espresso-cut.webp",
+  "./assets/drinks/espresso-2.jpg",
+  "./assets/drinks/espresso-2-cut.webp",
   "./assets/drinks/cappuccino-cut.webp",
   "./assets/drinks/cappuccino-dubbel.jpg",
   "./assets/drinks/cappuccino.jpg",

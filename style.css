@@ -951,3 +951,12 @@ body{
 .adv-result__extra{ font-size:13.5px; margin:0 0 10px; }
 .adv-result__code{ font:600 13px/1 var(--font-body); letter-spacing:.08em; color:var(--espresso-60); margin:0 0 14px; }
 .adv-result__btns{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+.advent-voucher__dates{ font-size:14px; line-height:1.4; color:var(--gold-ink); background:#fbf5ea; border:1px solid rgba(183,135,62,.35); border-radius:var(--radius-s); padding:8px 10px; margin:4px 0 8px; }
+.advent-voucher__dates.is-expired{ color:#9b2c2c; background:#fdf2f2; border-color:rgba(155,44,44,.35); }
+.advent-voucher__info{ text-align:left; font-size:12.5px; color:var(--espresso); border-top:1px solid var(--espresso-12); padding-top:10px; margin-bottom:10px; }
+.advent-voucher__info > p:first-child{ font-weight:700; margin:0 0 4px; text-transform:uppercase; letter-spacing:.06em; font-size:11px; }
+.advent-voucher__use{ margin:0 0 6px; line-height:1.45; }
+.advent-voucher__ingr{ margin:0; font-size:10.5px; line-height:1.4; color:var(--espresso-60); }
+.advent-mine__note{ font-size:12.5px; color:var(--gold-ink); margin:0 0 8px; }
+.advent-mine__item small{ display:block; font-size:11.5px; color:var(--espresso-60); }
+.advent-mine__item.is-expired{ opacity:.55; }
