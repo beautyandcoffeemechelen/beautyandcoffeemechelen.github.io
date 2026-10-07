@@ -960,3 +960,13 @@ body{
 .advent-mine__note{ font-size:12.5px; color:var(--gold-ink); margin:0 0 8px; }
 .advent-mine__item small{ display:block; font-size:11.5px; color:var(--espresso-60); }
 .advent-mine__item.is-expired{ opacity:.55; }
+/* v60: product photos + free extras in the advent calendar */
+.bc-voucher__box--photo{ padding:2%; }
+.bc-voucher__photo{ width:100%; height:100%; object-fit:contain; display:block; }
+.bc-voucher__box small{ position:absolute; bottom:6%; left:0; right:0; text-align:center; font-weight:800; font-size:clamp(9px,2.6vw,12px); letter-spacing:.12em; }
+.bc-voucher__box i + small{ }
+.advent-door__photo{ width:70%; height:auto; aspect-ratio:1/1; object-fit:contain; }
+.advent-mine__thumb{ width:34px; height:34px; flex:0 0 34px; object-fit:contain; display:inline-flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:var(--gold-ink); }
+.advent-voucher__limited{ font-size:13px; font-weight:600; color:var(--gold-ink); margin:0 0 6px; }
+.advent-voucher__soldout{ font-size:14px; font-weight:700; color:#9b2c2c; background:#fdf2f2; border:1px solid rgba(155,44,44,.35); border-radius:var(--radius-s); padding:8px 10px; margin:4px 0 8px; }
+.adv-result__photo{ width:110px; height:110px; object-fit:contain; display:block; margin:0 auto 4px; }

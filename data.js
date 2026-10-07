@@ -1603,7 +1603,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v59 · 07/10/2026";
+const APP_VERSION = "v60 · 07/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1658,7 +1658,14 @@ const SALON_MODE_PIN = "";
    - Gifts: collect within giftDays after opening, with a treatment of at
      least giftMinSpend euro. Discounts: valid for discountDays after
      opening (book and get the treatment within that time), from discountMinSpend.
-   - Per door: stock = max. number Sandra hands out (null = no limit).
+   - Types: "gift" (product), "discount" (% off), "extra" (a free add-on
+     with a booked treatment, see "with").
+   - stock on an ITEM = total number for all its doors together (e.g. 1
+     gold mask); stock on a DOOR = max. for that door. null = no limit.
+     The salon phone refuses a scan once the stock is used up.
+   - soldOut: true on an item = sold out: clients see it on their voucher
+     (after you upload data.js) and the salon phone refuses it.
+   - photo: a cut-out product photo shown in the voucher's square.
    - Per item: "use" = what it is / how to use it, "ingredients" = INCI
      list as on the packaging — one text, or { nl, en, fr } — ("" = not
      shown; then the app refers to the label on the product).
@@ -1674,6 +1681,7 @@ const ADVENT = {
   discountDays: 42,             // discounts: valid 6 weeks after opening
   discountMinSpend: 60,         // discounts: only on a treatment from €60
   maxDiscountsPerClient: null,  // discounts per client (null = no limit; they are never combinable)
+  maxExtrasPerClient: null,     // free extras per client (null = no limit; 1 per treatment)
   items: {
     lipbalm: { type:"gift", icon:"💋",
       nl:"Home made kokoslippenbalsem", en:"Home-made coconut lip balm", fr:"Baume à lèvres coco fait maison",
@@ -1688,18 +1696,21 @@ const ADVENT = {
             fr:"Gommage au sucre et à l'huile de coco. Frottez doucement un peu de produit sur les lèvres, essuyez ou rincez, puis appliquez un baume. Ne pas utiliser sur des gerçures ou plaies." },
       ingredients:"Sucrose, Cocos Nucifera (Coconut) Oil" },
     guinot: { type:"gift", icon:"🧴",
+      photo:"assets/advent/guinot.webp",
       nl:"Staaltje Guinot Éclat Parfait scrub", en:"Guinot Éclat Parfait scrub sample", fr:"Échantillon de gommage Guinot Éclat Parfait",
       use:{ nl:"Scrubcrème voor het gezicht met dubbele microkorrels (sheabutter). Breng aan op een gereinigde huid, masseer zacht met kleine cirkeltjes en spoel af met lauw water. Vermijd de oogcontour. Bevat zoete-amandelolie en parfum.",
             en:"Face exfoliating cream with double microbeads (shea). Apply to cleansed skin, massage gently in small circles and rinse with lukewarm water. Avoid the eye contour. Contains sweet almond oil and fragrance.",
             fr:"Crème exfoliante visage à double micrograins (karité). Appliquez sur peau nettoyée, massez doucement en petits cercles et rincez à l'eau tiède. Évitez le contour des yeux. Contient de l'huile d'amande douce et du parfum." },
       ingredients:"Water/Eau (Aqua), Isopropyl Palmitate, Glyceryl Stearate SE, Cetearyl Alcohol, C10-18 Triglycerides, Glycerin, Cellulose Acetate, Propanediol, Steareth-21, Pentylene Glycol, Decyl Glucoside, Butyrospermum Parkii (Shea) Butter Extract, Prunus Amygdalus Dulcis (Sweet Almond) Oil, Cetearyl Glucoside, Tocopheryl Acetate, Fragrance (Parfum), Acrylates/C10-30 Alkyl Acrylate Crosspolymer, Caprylyl Glycol, Xanthan Gum, Butylene Glycol, BHT, Disodium EDTA, Hexyl Cinnamal, Linalool, Benzyl Benzoate, Red 4 (CI 14700), Yellow 5 (CI 19140)" },
     eyeflash: { type:"gift", icon:"👁️",
+      photo:"assets/advent/eyeflash.webp",
       nl:"Ampul Janssen Cosmetics Eye Flash Fluid", en:"Janssen Cosmetics Eye Flash Fluid ampoule", fr:"Ampoule Janssen Cosmetics Eye Flash Fluid",
       use:{ nl:"Hydraterend oogserum met hyaluronzuur en peptidecomplex (1,5 ml). Doe de ampul in een tissue en breek ze met een korte ruk open. Breng de inhoud voorzichtig aan rond de ogen en klop zacht in. Alleen uitwendig gebruik.",
             en:"Hydrating eye serum with hyaluronic acid and a peptide complex (1.5 ml). Place the ampoule in a tissue and break it open with one sudden movement. Gently apply around the eyes after cleansing and pat into the skin. For external use only.",
             fr:"Sérum contour des yeux hydratant à l'acide hyaluronique et complexe peptidique (1,5 ml). Tenez l'ampoule dans un mouchoir en papier et cassez l'extrémité d'un coup sec. Appliquez en douceur sur le contour des yeux nettoyé et faites pénétrer en tapotant. Usage externe uniquement." },
       ingredients:"Aqua (Water), Butylene Glycol, Glycerin, Pentylene Glycol, Xanthan Gum, Sodium Hyaluronate, Palmitoyl Tripeptide-1, Palmitoyl Tetrapeptide-7, Carbomer, Coco-Glucoside, Trideceth-9, PEG-40 Hydrogenated Castor Oil, PEG-7 Glyceryl Cocoate, Tetrasodium Glutamate Diacetate, Propylene Glycol, Citric Acid, Sodium Hydroxide, Parfum (Fragrance), Phenoxyethanol, Sodium Benzoate, Sodium Lactate, CI 16035 (Red 40)" },
     bathsalt: { type:"gift", icon:"🛁",
+      photo:"assets/advent/bathsalt.webp",
       nl:"Home made badzout lavendel", en:"Home-made lavender bath salts", fr:"Sels de bain lavande faits maison",
       use:{ nl:"Bruisend badzout met lavendel (blauw). Los een handvol op in warm badwater. Niet inslikken; buiten bereik van kinderen houden; vermijd contact met de ogen.",
             en:"Fizzing bath salts with lavender (blue). Dissolve a handful in warm bath water. Do not swallow; keep out of reach of children; avoid contact with the eyes.",
@@ -1708,6 +1719,7 @@ const ADVENT = {
                     en:"Sodium bicarbonate, citric acid, mineral salt, coconut oil, lavender essential oil, food colouring (blue)",
                     fr:"Bicarbonate de sodium, acide citrique, sel minéral, huile de coco, huile essentielle de lavande, colorant alimentaire (bleu)" } },
     bathsalt2: { type:"gift", icon:"🍊",
+      photo:"assets/advent/bathsalt2.webp",
       nl:"Home made badzout mandarijn & lavendel", en:"Home-made mandarin & lavender bath salts", fr:"Sels de bain mandarine & lavande faits maison",
       use:{ nl:"Bruisend badzout met mandarijn en lavendel. Los een handvol op in warm badwater. Niet inslikken; buiten bereik van kinderen houden; vermijd contact met de ogen.",
             en:"Fizzing bath salts with mandarin and lavender. Dissolve a handful in warm bath water. Do not swallow; keep out of reach of children; avoid contact with the eyes.",
@@ -1716,14 +1728,17 @@ const ADVENT = {
                     en:"Sodium bicarbonate, citric acid, mineral salt, coconut oil, mandarin and lavender essential oils, food colouring (red and yellow)",
                     fr:"Bicarbonate de sodium, acide citrique, sel minéral, huile de coco, huiles essentielles de mandarine et de lavande, colorants alimentaires (rouge et jaune)" } },
     spoolie: { type:"gift", icon:"🖌️",
+      photo:"assets/advent/spoolie.webp",
       nl:"Mascaraborsteltje", en:"Mascara wand", fr:"Goupillon à mascara",
       use:{ nl:"Om je wimpers en wenkbrauwen mooi in model te kammen. Persoonlijk gebruik.", en:"To comb your lashes and brows into shape. For personal use.", fr:"Pour peigner cils et sourcils. Usage personnel." },
       ingredients:"" },
     buffer: { type:"gift", icon:"💅",
+      photo:"assets/advent/buffer.webp",
       nl:"Mini buffervijltje voor de nagels", en:"Mini nail buffer", fr:"Mini polissoir à ongles",
       use:{ nl:"Om je nagels glad te vijlen en te laten glanzen. Werk in één richting. Persoonlijk gebruik — niet delen.", en:"To smooth your nails and make them shine. Work in one direction. For personal use — do not share.", fr:"Pour lisser et faire briller les ongles. Travaillez dans un seul sens. Usage personnel — ne pas partager." },
       ingredients:"" },
     eraser: { type:"gift", icon:"✏️",
+      photo:"assets/advent/eraser.webp",
       nl:"Magic Eraser – correctiestift voor nagellak", en:"Magic Eraser – nail polish corrector pen", fr:"Magic Eraser – stylo correcteur de vernis",
       use:{ nl:"Veeg foutjes van nagellak langs je nagelriem weg met de punt van de stift. Niet in de ogen of op wondjes.", en:"Wipe away nail polish mistakes along the cuticle with the tip of the pen. Keep away from eyes and wounds.", fr:"Effacez les débordements de vernis le long des cuticules avec la pointe du stylo. Éviter les yeux et les plaies." },
       ingredients:"" },
@@ -1734,6 +1749,27 @@ const ADVENT = {
             en:"Mix a teaspoon of clay with a little water into a smooth paste. Apply to cleansed skin (not around the eyes), leave on for about 10 minutes and rinse with lukewarm water before it dries completely.",
             fr:"Mélangez une cuillère à café d'argile avec un peu d'eau pour obtenir une pâte lisse. Appliquez sur peau nettoyée (pas autour des yeux), laissez poser environ 10 minutes et rincez à l'eau tiède avant séchage complet." },
       ingredients:"" },
+    // ---- free extras with a booked treatment (valid discountDays) ----
+    led: { type:"extra", icon:"💡", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      nl:"Gratis 10 min LED-therapie", en:"Free 10-min LED therapy", fr:"10 min de LED offertes" },
+    handspa: { type:"extra", icon:"🤲", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      nl:"Gratis handpeeling & -massage", en:"Free hand peeling & massage", fr:"Gommage & massage des mains offerts" },
+    hotstoneface: { type:"extra", icon:"🪨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      nl:"Gratis Hot Stone gelaatsmassage", en:"Free Hot Stone facial massage", fr:"Massage visage aux pierres chaudes offert" },
+    facecupping: { type:"extra", icon:"✨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      nl:"Gratis liftende cuppingmassage voor het gelaat", en:"Free lifting cupping facial massage", fr:"Massage liftant aux ventouses du visage offert" },
+    peelanti: { type:"extra", icon:"🌟", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      nl:"Gratis anti-aging peel-off masker", en:"Free anti-ageing peel-off mask", fr:"Masque peel-off anti-âge offert" },
+    peelsens: { type:"extra", icon:"🌸", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      nl:"Gratis peel-off masker voor de gevoelige huid", en:"Free peel-off mask for sensitive skin", fr:"Masque peel-off peau sensible offert" },
+    collagen: { type:"extra", icon:"🫧", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      nl:"Gratis collageenvliesmasker", en:"Free collagen sheet mask", fr:"Masque en tissu au collagène offert" },
+    goldmask: { type:"extra", icon:"👑", stock:1, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      nl:"Gratis gouden collageenmasker", en:"Free gold collagen mask", fr:"Masque au collagène doré offert" },
+    spamani: { type:"extra", icon:"💅", with:{ nl:"manicure", en:"manicure", fr:"manucure" },
+      nl:"Gratis SPA manicure", en:"Free SPA manicure", fr:"Manucure SPA offerte" },
+    spapedi: { type:"extra", icon:"🦶", with:{ nl:"pedicure", en:"pedicure", fr:"pédicure" },
+      nl:"Gratis SPA pedicure", en:"Free SPA pedicure", fr:"Pédicure SPA offerte" },
     facial10: { type:"discount", icon:"🧖", value:"10%",
       nl:"10% korting op een gelaatsverzorging", en:"10% off a facial", fr:"10 % de réduction sur un soin du visage",
       treat:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" } },
@@ -1742,31 +1778,31 @@ const ADVENT = {
       treat:{ nl:"massage", en:"massage", fr:"massage" } }
   },
   doors: [
-    { day:1,  item:"lipbalm",   stock:null },
-    { day:2,  item:"guinot",    stock:null },
-    { day:3,  item:"bathsalt",  stock:null },
-    { day:4,  item:"spoolie",   stock:null },
-    { day:5,  item:"buffer",    stock:null },
-    { day:6,  item:"facial10",  stock:null },
-    { day:7,  item:"eyeflash",  stock:null },
-    { day:8,  item:"eraser",    stock:null },
-    { day:9,  item:"bathsalt2", stock:null },
-    { day:10, item:"lipscrub",  stock:null },
-    { day:11, item:"massage15", stock:null },
-    { day:12, item:"lipbalm",   stock:null },
-    { day:13, item:"bathsalt",  stock:null },
-    { day:14, item:"guinot",    stock:null },
-    { day:15, item:"buffer",    stock:null },
-    { day:16, item:"facial10",  stock:null },
-    { day:17, item:"spoolie",   stock:null },
-    { day:18, item:"eyeflash",  stock:null },
-    { day:19, item:"bathsalt2", stock:null },
-    { day:20, item:"massage15", stock:null },
-    { day:21, item:"lipscrub",  stock:null },
-    { day:22, item:"eraser",    stock:null },
-    { day:23, item:"facial10",  stock:null },
-    { day:24, item:"eyeflash",  stock:null },
-    { day:25, item:"massage15", stock:null }
+    { day:1,  item:"lipbalm",       stock:null },
+    { day:2,  item:"led",           stock:null },
+    { day:3,  item:"bathsalt",      stock:null },
+    { day:4,  item:"handspa",       stock:null },
+    { day:5,  item:"spoolie",       stock:null },
+    { day:6,  item:"facial10",      stock:null },
+    { day:7,  item:"eyeflash",      stock:null },
+    { day:8,  item:"peelsens",      stock:null },
+    { day:9,  item:"bathsalt2",     stock:null },
+    { day:10, item:"hotstoneface",  stock:null },
+    { day:11, item:"massage15",     stock:null },
+    { day:12, item:"buffer",        stock:null },
+    { day:13, item:"facecupping",   stock:null },
+    { day:14, item:"guinot",        stock:null },
+    { day:15, item:"spamani",       stock:null },
+    { day:16, item:"facial10",      stock:null },
+    { day:17, item:"lipscrub",      stock:null },
+    { day:18, item:"peelanti",      stock:null },
+    { day:19, item:"eraser",        stock:null },
+    { day:20, item:"massage15",     stock:null },
+    { day:21, item:"collagen",      stock:null },
+    { day:22, item:"spapedi",       stock:null },
+    { day:23, item:"eyeflash",      stock:null },
+    { day:24, item:"goldmask",      stock:null },
+    { day:25, item:"massage15",     stock:null }
   ]
 };
 
