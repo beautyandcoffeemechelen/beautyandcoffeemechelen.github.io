@@ -95,6 +95,7 @@
     if (state.quickPhoto && $('[data-step="photoshare"]') && $('[data-step="photoshare"]').classList.contains("is-active")) drawResultCanvas();
     if (typeof localData !== "undefined") renderReturningUserBlock();
     renderApptCard();
+    if (typeof renderAdventCard === "function"){ renderAdventCard(); if ($('[data-step="advent"]') && $('[data-step="advent"]').classList.contains("is-active")) renderAdvent(); }
     if ($('[data-step="myappt"]') && $('[data-step="myappt"]').classList.contains("is-active")) renderApptForm();
     renderSocialLinks();
     renderActions();
@@ -111,7 +112,7 @@
   function updateProgress(name){
     const w = STEP_WEIGHTS[name] ?? 0;
     $("#progressFill").style.width = w + "%";
-    $(".progress").style.visibility = (name==="welcome" || name==="pricelist" || name==="houserules" || name==="stampcard" || name==="findme" || name==="myappt" || name==="photopick" || name==="photoshare" || (name==="photo" && state.quickPhoto)) ? "hidden" : "visible";
+    $(".progress").style.visibility = (name==="welcome" || name==="pricelist" || name==="houserules" || name==="stampcard" || name==="findme" || name==="myappt" || name==="photopick" || name==="photoshare" || name==="advent" || (name==="photo" && state.quickPhoto)) ? "hidden" : "visible";
   }
 
   function showStep(name){
@@ -130,6 +131,9 @@
     }
     if (name === "findme") {
       renderFindMe();
+    }
+    if (name === "advent") {
+      renderAdvent();
     }
     if (name === "sunCheck") {
       state.sunFact = randomFactCode(SKIN_FACT_POOLS.sun);
@@ -173,6 +177,7 @@
   }
   window.addEventListener("popstate", () => {
     if (document.getElementById("stampScanOverlay")) { closeStampScanner(); return; }
+    if (document.getElementById("adventVoucherOverlay")) { closeAdventVoucher(); }
     if (history.length > 1) stepBack();
   });
   // Result screen: go back to the first question with every answer kept,
@@ -2254,7 +2259,7 @@
      added after scanning the rotating QR code in the salon (see
      "stamp card via QR" below). */
   const LOCAL_KEY = "beautyCoffeeLocal_v1";
-  const localData = { version:1, stamps:0, discoveredTreatments:[], discoveredDrinks:[], favorites:[], lastMatchAt:null, reviewPromptShownFor:null, savedProfile:null, savedAgeBracket:null, installDismissedAt:null, installIosDismissedAt:null, newsletterSentAt:null, lastStampDay:null, cardFullAt:null, rewardsRedeemed:[], lastMoment:null, appointment:null, appointments:[] };
+  const localData = { version:1, stamps:0, discoveredTreatments:[], discoveredDrinks:[], favorites:[], lastMatchAt:null, reviewPromptShownFor:null, savedProfile:null, savedAgeBracket:null, installDismissedAt:null, installIosDismissedAt:null, newsletterSentAt:null, lastStampDay:null, cardFullAt:null, rewardsRedeemed:[], lastMoment:null, appointment:null, appointments:[], advent:null };
 
   function loadLocalData(){
     try {
@@ -2762,7 +2767,7 @@
   }
 
   /* ---- client side: scan the QR (or type the 6 digits) ---- */
-  const stampScan = { stream:null, timer:null, busy:false, detector:null, lastInvalidAt:0 };
+  const stampScan = { stream:null, timer:null, busy:false, detector:null, lastInvalidAt:0, mode:"stamp" };
 
   function addStamp(){
     if (!stampCryptoAvailable()){ showToast(t("stamp_unsupported", state.lang)); return; }
@@ -2772,23 +2777,27 @@
     openStampScanner();
   }
 
-  function openStampScanner(){
+  function openStampScanner(mode){
     closeStampScanner();
+    const isAdv = mode === "advent";
+    stampScan.mode = isAdv ? "advent" : "stamp";
     const ov = document.createElement("div");
     ov.className = "stamp-overlay"; ov.id = "stampScanOverlay";
     ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true");
     ov.innerHTML = `
       <div class="stamp-overlay__panel">
         <button type="button" class="stamp-overlay__close" data-stamp="close" aria-label="${t("stamp_close", state.lang)}">✕</button>
-        <p class="stamp-overlay__title">☕ ${t("stamp_scan_title", state.lang)}</p>
-        <p class="stamp-overlay__hint" id="stampScanStatus">${t("stamp_scan_hint", state.lang)}</p>
+        <p class="stamp-overlay__title">${isAdv ? "🎄 " + t("adv_scan_title", state.lang) : "☕ " + t("stamp_scan_title", state.lang)}</p>
+        <p class="stamp-overlay__hint" id="stampScanStatus">${t(isAdv ? "adv_scan_hint" : "stamp_scan_hint", state.lang)}</p>
         <div class="stamp-scan__viewport">
           <video id="stampScanVideo" playsinline autoplay muted></video>
           <span class="stamp-scan__frame" aria-hidden="true"></span>
         </div>
-        <label class="stamp-scan__label" for="stampCodeInput">${t("stamp_manual_label", state.lang)}</label>
-        <div class="stamp-scan__manual">
-          <input id="stampCodeInput" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" placeholder="000000">
+        <label class="stamp-scan__label" for="stampCodeInput">${t(isAdv ? "adv_manual_label" : "stamp_manual_label", state.lang)}</label>
+        <div class="stamp-scan__manual${isAdv ? " stamp-scan__manual--adv" : ""}">
+          ${isAdv
+            ? `<input id="stampCodeInput" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="20" placeholder="A07-XXXXX-XXXX">`
+            : `<input id="stampCodeInput" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" placeholder="000000">`}
           <button type="button" class="btn btn--primary btn--sm" data-stamp="manual">${t("stamp_manual_button", state.lang)}</button>
         </div>
       </div>`;
@@ -2796,9 +2805,9 @@
     ov.addEventListener("click", e => {
       const a = e.target.closest("[data-stamp]");
       if (e.target === ov || (a && a.dataset.stamp === "close")) closeStampScanner();
-      else if (a && a.dataset.stamp === "manual") submitStampCode($("#stampCodeInput").value, "manual");
+      else if (a && a.dataset.stamp === "manual") submitScannedCode($("#stampCodeInput").value, "manual");
     });
-    $("#stampCodeInput").addEventListener("keydown", e => { if (e.key === "Enter") submitStampCode(e.target.value, "manual"); });
+    $("#stampCodeInput").addEventListener("keydown", e => { if (e.key === "Enter") submitScannedCode(e.target.value, "manual"); });
     startStampCamera();
   }
 
@@ -2855,11 +2864,14 @@
         const res = window.jsQR(ctx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts:"dontInvert" });
         if (res) text = res.data;
       }
-      if (text) await submitStampCode(text, "scan");
+      if (text) await submitScannedCode(text, "scan");
     } catch(e){ /* a bad frame — just try the next one */ }
     stampScan.busy = false;
   }
 
+  function submitScannedCode(raw, source){
+    return stampScan.mode === "advent" ? submitAdventCode(raw, source) : submitStampCode(raw, source);
+  }
   async function submitStampCode(raw, source){
     const kind = await resolveSalonCode(raw);
     if (kind === "STAMP"){
@@ -2936,13 +2948,14 @@
         <button type="button" class="stamp-overlay__close" data-salon="close" aria-label="${t("stamp_close", state.lang)}">✕</button>
         <p class="stamp-overlay__title">${t("salon_title", state.lang)}</p>
         <div class="salon-modes" role="tablist">
-          ${SALON_CODE_KINDS.map(k => `<button type="button" class="salon-mode${k === salonMode.kind ? " is-active" : ""}" data-salon-kind="${k}">${t("salon_mode_" + k.toLowerCase(), state.lang)}</button>`).join("")}
+          ${SALON_CODE_KINDS.concat(advHasConfig() ? ["ADVENT"] : []).map(k => `<button type="button" class="salon-mode${k === "ADVENT" ? " salon-mode--advent" : ""}${k === salonMode.kind ? " is-active" : ""}" data-salon-kind="${k}">${t("salon_mode_" + k.toLowerCase(), state.lang)}</button>`).join("")}
         </div>
         <p class="salon-mode-hint" id="salonModeHint">${t("salon_mode_hint_" + salonMode.kind.toLowerCase(), state.lang)}</p>
         <canvas id="salonQr" class="salon-qr salon-qr--${salonMode.kind.toLowerCase()}" width="600" height="600"></canvas>
         <p class="salon-code" id="salonCode">······</p>
         <div class="salon-timer"><div class="salon-timer__fill" id="salonTimerFill"></div></div>
-        <p class="stamp-overlay__hint">${t("salon_hint", state.lang)}</p>
+        <p class="stamp-overlay__hint" id="salonHint">${t("salon_hint", state.lang)}</p>
+        <div class="salon-adv" id="salonAdvent" hidden></div>
       </div>`;
     document.body.appendChild(ov);
     ov.addEventListener("click", e => {
@@ -2950,20 +2963,37 @@
       if (k){
         salonMode.kind = k.dataset.salonKind; salonMode.counter = null;
         ov.querySelectorAll("[data-salon-kind]").forEach(b => b.classList.toggle("is-active", b === k));
-        const hint = $("#salonModeHint"); if (hint) hint.textContent = t("salon_mode_hint_" + salonMode.kind.toLowerCase(), state.lang);
-        const qr = $("#salonQr"); if (qr) qr.className = "salon-qr salon-qr--" + salonMode.kind.toLowerCase();
+        applySalonKindUi();
         tickSalonMode();
+        return;
+      }
+      const adv = e.target.closest("[data-salon-adv]");
+      if (adv){
+        if (adv.dataset.salonAdv === "scan") openStampScanner("advent");
+        if (adv.dataset.salonAdv === "reset") resetAdventLedger();
         return;
       }
       const a = e.target.closest("[data-salon]"); if (a) closeSalonMode();
     });
+    applySalonKindUi();
     try { if (navigator.wakeLock) salonMode.wakeLock = await navigator.wakeLock.request("screen"); } catch(e){ /* optional */ }
     salonMode.counter = null;
     await tickSalonMode();
     salonMode.timer = setInterval(tickSalonMode, 1000);
   }
 
+  // Advent tab: no rotating code, but a scanner for the clients' vouchers
+  function applySalonKindUi(){
+    const isAdv = salonMode.kind === "ADVENT";
+    const hint = $("#salonModeHint"); if (hint) hint.textContent = t("salon_mode_hint_" + salonMode.kind.toLowerCase(), state.lang);
+    const qr = $("#salonQr"); if (qr){ qr.className = "salon-qr salon-qr--" + salonMode.kind.toLowerCase(); qr.hidden = isAdv; }
+    ["#salonCode", "#salonHint"].forEach(sel => { const el = $(sel); if (el) el.hidden = isAdv; });
+    const timer = $("#salonOverlay .salon-timer"); if (timer) timer.hidden = isAdv;
+    const box = $("#salonAdvent"); if (box){ box.hidden = !isAdv; if (isAdv) renderSalonAdvent(); }
+  }
+
   async function tickSalonMode(){
+    if (salonMode.kind === "ADVENT") return;
     const counter = stampCounterNow();
     const secs = Date.now() / 1000;
     const left = STAMP_STEP_SECONDS - (secs % STAMP_STEP_SECONDS);
@@ -2973,7 +3003,7 @@
     salonMode.counter = counter;
     const kind = salonMode.kind;
     const code = await stampCodeFor(counter, kind);
-    if (kind !== salonMode.kind) return;            // mode switched while computing
+    if (kind !== salonMode.kind || kind === "ADVENT") return;            // mode switched while computing
     const codeEl = $("#salonCode"); if (codeEl) codeEl.textContent = `${code.slice(0,3)} ${code.slice(3)}`;
     drawQrToCanvas($("#salonQr"), SALON_QR_PREFIX[kind] + code);
   }
@@ -3012,10 +3042,336 @@
       window.history.replaceState(null, "", location.pathname + location.search);
       goTo("findme");
     }
+    else if (location.hash === "#advent" || location.hash === "#adventskalender"){
+      window.history.replaceState(null, "", location.pathname + location.search);
+      goTo("advent");
+    }
     else if (location.hash === "#stempelkaart" || location.hash === "#stamps"){
       window.history.replaceState(null, "", location.pathname + location.search);
       goTo("stampcard");
     }
+  }
+
+  /* ---------------- advent calendar (1–25 December) ----------------
+     Client: one door per day, and ONLY on that day itself — a missed day
+     stays closed for good. Opening a door creates a personal voucher
+     with a one-time code + QR (no server: the code carries its own
+     HMAC check, so made-up codes are refused).
+     Salon: #salon → "Advent" → scan. Sandra's phone keeps a ledger of
+     every scanned code, so each voucher can only be used once, and it
+     counts per door against the stock in data.js.
+     Test: add ?adventtest=2026-12-07 to the address. The app then acts
+     as if it is that day, nothing is saved, and the codes start with T:
+     they only work on a salon phone that is in test mode as well. */
+  const ADV_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   // 32 signs, no 0/O/1/I
+  const ADV_QR_PREFIX = "BCADV:";
+  const ADV_LEDGER_KEY = "bc_advent_ledger_v1";
+  const ADV_DOOR_ORDER = [12,3,19,7,24,1,15,9,21,5,17,11,25,2,14,20,6,10,23,4,16,8,22,13,18];
+  const advTest = (() => {
+    try {
+      const v = new URLSearchParams(location.search).get("adventtest");
+      return v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null;
+    } catch(e){ return null; }
+  })();
+  const advMemory = { opened:{} };              // test mode: kept in memory only
+  const advMemLedger = { codes:{} };
+
+  function advHasConfig(){ return typeof ADVENT === "object" && ADVENT && Array.isArray(ADVENT.doors); }
+  function advTodayKey(){ return advTest || todayKey(); }
+  function advParts(key){ const [y, m, d] = key.split("-").map(Number); return { y, m, d }; }
+  function advKeyFor(y, m, d){ return `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`; }
+  function advAddDays(key, n){
+    const { y, m, d } = advParts(key);
+    const dt = new Date(y, m - 1, d + n);
+    return advKeyFor(dt.getFullYear(), dt.getMonth() + 1, dt.getDate());
+  }
+  function advFmt(key){ const { y, m, d } = advParts(key); return `${String(d).padStart(2,"0")}/${String(m).padStart(2,"0")}/${y}`; }
+  function advDoorDate(day){ return advKeyFor(ADVENT.year, 12, day); }
+  function advDoor(day){ return ADVENT.doors.find(x => Number(x.day) === Number(day)) || null; }
+  function advDoorText(door, lang){ return (door && (door[lang] || door.nl)) || ""; }
+  function advLastDay(){ return ADVENT.discountUntil && ADVENT.discountUntil > ADVENT.redeemUntil ? ADVENT.discountUntil : ADVENT.redeemUntil; }
+  // "before" | "teaser" | "live" | "after" | "over"
+  function advPhase(){
+    if (!advHasConfig()) return "over";
+    const today = advTodayKey();
+    if (today < ADVENT.teaserFrom) return "before";
+    if (today < advDoorDate(1)) return "teaser";
+    if (today <= advDoorDate(25)) return "live";
+    if (today <= advLastDay()) return "after";
+    return "over";
+  }
+  function advTodayDoor(){
+    const { y, m, d } = advParts(advTodayKey());
+    return (y === ADVENT.year && m === 12 && d >= 1 && d <= 25) ? d : null;
+  }
+  function advStore(){
+    if (advTest) return advMemory;
+    if (!localData.advent || typeof localData.advent !== "object" || !localData.advent.opened) localData.advent = { opened:{} };
+    if (localData.advent.year && localData.advent.year !== ADVENT.year) localData.advent = { opened:{} };   // a new year starts fresh
+    localData.advent.year = ADVENT.year;
+    return localData.advent;
+  }
+  // "opened" | "today" | "missed" | "future"
+  function advDoorState(day){
+    if (advStore().opened[day]) return "opened";
+    const key = advDoorDate(day), today = advTodayKey();
+    if (key === today) return "today";
+    return key < today ? "missed" : "future";
+  }
+  function advValidUntil(day){
+    const door = advDoor(day);
+    return door && door.type === "discount" ? (ADVENT.discountUntil || ADVENT.redeemUntil) : ADVENT.redeemUntil;
+  }
+  function advBookBy(day){ return advAddDays(advDoorDate(day), ADVENT.bookWithinDays || 21); }
+
+  async function advCheck(prefix, day, id){
+    const key = await getStampKey();
+    const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`BC-ADVENT|${prefix}|${ADVENT.year}|${day}|${id}`)));
+    return Array.from(sig.slice(0, 4)).map(b => ADV_ALPHABET[b % 32]).join("");
+  }
+  async function advMakeCode(day){
+    const prefix = advTest ? "T" : "A";
+    const rnd = new Uint8Array(5); crypto.getRandomValues(rnd);
+    const id = Array.from(rnd).map(b => ADV_ALPHABET[b % 32]).join("");
+    return `${prefix}${String(day).padStart(2,"0")}-${id}-${await advCheck(prefix, day, id)}`;
+  }
+  // accepts "BCADV:A07-K3MZQ-8HTR", "a07k3mzq8htr", spaces etc.
+  async function advParseCode(raw){
+    if (!raw) return null;
+    let s = String(raw).trim().toUpperCase();
+    if (s.startsWith(ADV_QR_PREFIX)) s = s.slice(ADV_QR_PREFIX.length);
+    s = s.replace(/[\s\-–_.]/g, "");
+    const m = s.match(/^([AT])(\d{2})([A-HJ-NP-Z2-9]{5})([A-HJ-NP-Z2-9]{4})$/);
+    if (!m) return null;
+    const prefix = m[1], day = Number(m[2]), id = m[3], chk = m[4];
+    const code = `${prefix}${m[2]}-${id}-${chk}`;
+    if (day < 1 || day > 25) return { code, valid:false };
+    return { code, prefix, day, valid: (await advCheck(prefix, day, id)) === chk };
+  }
+
+  /* ---- client: welcome card ---- */
+  function renderAdventCard(){
+    const card = $("#adventCard");
+    if (!card) return;
+    const phase = advPhase();
+    const openedCount = advHasConfig() ? Object.keys(advStore().opened).length : 0;
+    let html = "";
+    if (phase === "teaser"){
+      html = `<p class="advent-card__title">🎄 ${t("adv_title", state.lang)}</p>
+        <p class="advent-card__text">${t("adv_card_teaser", state.lang)}</p>
+        <button type="button" class="btn btn--primary btn--sm" data-action="open-advent">${t("adv_card_peek_btn", state.lang)}</button>`;
+    } else if (phase === "live"){
+      const d = advTodayDoor();
+      const st = d ? advDoorState(d) : null;
+      const line = st === "today" ? t("adv_card_today", state.lang).replace("{n}", d) : t("adv_card_done", state.lang).replace("{n}", d);
+      html = `<p class="advent-card__title">🎄 ${t("adv_title", state.lang)}</p>
+        <p class="advent-card__text">${line}</p>
+        <button type="button" class="btn btn--primary btn--sm${st === "today" ? " advent-card__pulse" : ""}" data-action="open-advent">${t("adv_card_open_btn", state.lang)}</button>`;
+    } else if (phase === "after" && openedCount){
+      html = `<p class="advent-card__title">🎁 ${t("adv_mine_title", state.lang)}</p>
+        <p class="advent-card__text">${t("adv_card_after", state.lang).replace("{n}", openedCount)}</p>
+        <button type="button" class="btn btn--primary btn--sm" data-action="open-advent">${t("adv_card_mine_btn", state.lang)}</button>`;
+    }
+    card.hidden = !html;
+    card.innerHTML = html;
+  }
+
+  /* ---- client: the 25 doors ---- */
+  function renderAdvent(){
+    const wrap = $("#adventBody");
+    if (!wrap || !advHasConfig()) return;
+    const phase = advPhase();
+    const store = advStore();
+    const testHtml = advTest ? `<p class="advent-test">🧪 ${t("adv_test_banner", state.lang).replace("{d}", advFmt(advTest))}</p>` : "";
+    let note = "";
+    if (phase === "before" || phase === "teaser") note = t("adv_note_teaser", state.lang);
+    else if (phase === "after" || phase === "over") note = t("adv_note_over", state.lang);
+    const doors = ADV_DOOR_ORDER.filter(d => advDoor(d)).map(day => {
+      const st = advDoorState(day);
+      const door = advDoor(day);
+      const inner = st === "opened" ? `<span class="advent-door__icon" aria-hidden="true">${door.type === "discount" ? (door.value || "%") : door.icon}</span>`
+        : st === "missed" ? `<span class="advent-door__tag">${t("adv_state_missed", state.lang)}</span>`
+        : st === "today" ? `<span class="advent-door__tag">${t("adv_state_today", state.lang)}</span>` : "";
+      const label = t("adv_door_label", state.lang).replace("{n}", day);
+      return `<button type="button" class="advent-door advent-door--${st}" data-action="advent-door" data-day="${day}" aria-label="${label}${st === "missed" ? " — " + t("adv_state_missed", state.lang) : ""}">
+          <span class="advent-door__num">${day}</span>${inner}</button>`;
+    }).join("");
+    const mine = Object.keys(store.opened).map(Number).sort((a, b) => a - b);
+    const mineHtml = mine.length ? `<p class="advent-mine__title">${t("adv_mine_title", state.lang)}</p>
+      <div class="advent-mine">${mine.map(day => { const door = advDoor(day); return door ? `<button type="button" class="advent-mine__item" data-action="advent-door" data-day="${day}">
+        <span>${door.type === "discount" ? "🎟️" : door.icon}</span><span>${t("adv_door_label", state.lang).replace("{n}", day)} · ${advDoorText(door, state.lang)}</span></button>` : ""; }).join("")}</div>` : "";
+    wrap.innerHTML = `${testHtml}${note ? `<p class="advent-note">${note}</p>` : ""}
+      <div class="advent-grid" id="adventGrid">${doors}</div>
+      <p class="advent-legend">${t("adv_legend", state.lang)}</p>
+      ${mineHtml}`;
+  }
+
+  async function adventDoorClick(day, btn){
+    const st = advDoorState(day);
+    if (st === "opened"){ showAdventVoucher(day); return; }
+    if (st === "missed"){ showToast(t("adv_missed_toast", state.lang)); return; }
+    if (st === "future"){ showToast(t("adv_future_toast", state.lang).replace("{n}", day)); return; }
+    if (!stampCryptoAvailable()){ showToast(t("stamp_unsupported", state.lang)); return; }
+    // st === "today": the client really tapped today's door
+    const code = await advMakeCode(day);
+    if (advDoorState(day) !== "today") return;          // double tap
+    advStore().opened[day] = { code, at:new Date().toISOString() };
+    if (!advTest) saveLocalData();
+    trackEvent("advent-open");
+    if (btn) btn.classList.add("is-opening");
+    if (navigator.vibrate) navigator.vibrate([40, 40, 80]);
+    setTimeout(() => { renderAdvent(); renderAdventCard(); showAdventVoucher(day); }, btn ? 750 : 0);
+  }
+
+  async function showAdventVoucher(day){
+    const door = advDoor(day);
+    const rec = advStore().opened[day];
+    if (!door || !rec) return;
+    closeAdventVoucher();
+    const isDiscount = door.type === "discount";
+    const until = advValidUntil(day);
+    const rules = isDiscount
+      ? t("adv_rules_discount", state.lang).replace("{book}", advFmt(advBookBy(day))).replace("{until}", advFmt(until))
+      : t("adv_rules_gift", state.lang).replace("{until}", advFmt(until));
+    const ov = document.createElement("div");
+    ov.className = "stamp-overlay advent-overlay"; ov.id = "adventVoucherOverlay";
+    ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true");
+    ov.innerHTML = `
+      <div class="stamp-overlay__panel advent-voucher">
+        <button type="button" class="stamp-overlay__close" data-adv="close" aria-label="${t("stamp_close", state.lang)}">✕</button>
+        <p class="advent-voucher__door">🎄 ${t("adv_door_label", state.lang).replace("{n}", day)} · ${advFmt(advDoorDate(day))}</p>
+        <div class="bc-voucher${isDiscount ? " bc-voucher--discount" : ""}">
+          <span class="bc-voucher__side bc-voucher__side--l">BEAUTY &amp; COFFEE<br>${t(isDiscount ? "adv_side_discount" : "adv_side_gift", state.lang)}</span>
+          <span class="bc-voucher__box">${isDiscount ? `<b>${door.value || ""}</b>` : `<i aria-hidden="true">${door.icon}</i>`}</span>
+          <span class="bc-voucher__side bc-voucher__side--r">${t("adv_valid_until", state.lang)} ${advFmt(until)}<br>${t("adv_code_nr", state.lang)} ${rec.code}</span>
+          <img class="bc-voucher__logo" src="assets/icon-192.png" alt="">
+        </div>
+        <p class="advent-voucher__name">${advDoorText(door, state.lang)}</p>
+        ${isDiscount ? `<p class="advent-voucher__book">📅 ${t("adv_book_by", state.lang).replace("{d}", advFmt(advBookBy(day)))}</p>` : ""}
+        <p class="advent-voucher__show">${t("adv_show_hint", state.lang)}</p>
+        <canvas class="advent-voucher__qr" id="adventQr" width="480" height="480"></canvas>
+        <p class="advent-voucher__code">${rec.code}</p>
+        <div class="advent-voucher__rules"><p>${t("adv_rules_title", state.lang)}</p>${rules}</div>
+        ${advTest ? `<p class="advent-test">🧪 ${t("adv_test_code", state.lang)}</p>` : ""}
+      </div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener("click", e => {
+      const a = e.target.closest("[data-adv]");
+      if (e.target === ov || (a && a.dataset.adv === "close")) closeAdventVoucher();
+    });
+    const ok = await loadFirstScript(["assets/lib/qr-encoder.js"], () => !!window.BCQRCode);
+    if (ok) drawQrToCanvas($("#adventQr"), ADV_QR_PREFIX + rec.code);
+  }
+  function closeAdventVoucher(){ const ov = $("#adventVoucherOverlay"); if (ov) ov.remove(); }
+
+  /* ---- salon: ledger of scanned vouchers (on Sandra's phone only) ---- */
+  function advLedger(){
+    if (advTest) return advMemLedger;
+    try {
+      const l = JSON.parse(localStorage.getItem(ADV_LEDGER_KEY) || "null");
+      if (l && l.codes) return l;
+    } catch(e){ /* ignore */ }
+    return { codes:{} };
+  }
+  function advSaveLedger(l){
+    if (advTest) return true;
+    try { localStorage.setItem(ADV_LEDGER_KEY, JSON.stringify(l)); return true; } catch(e){ return false; }
+  }
+  function advCountFor(l, day){ return Object.values(l.codes).filter(x => Number(x.day) === Number(day)).length; }
+  function advFmtStamp(iso){
+    const d = new Date(iso);
+    return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+  }
+
+  function renderSalonAdvent(){
+    const box = $("#salonAdvent");
+    if (!box || !advHasConfig()) return;
+    const l = advLedger();
+    const rows = ADVENT.doors.map(door => {
+      const n = advCountFor(l, door.day);
+      const stock = door.stock == null ? "∞" : door.stock;
+      const full = door.stock != null && n >= door.stock;
+      return `<tr class="${full ? "is-full" : ""}${n ? "" : " is-zero"}"><td>${door.day}</td><td>${door.type === "discount" ? "🎟️" : door.icon} ${advDoorText(door, state.lang)}</td><td>${n} / ${stock}</td></tr>`;
+    }).join("");
+    box.innerHTML = `
+      ${advTest ? `<p class="advent-test">🧪 ${t("adv_test_salon", state.lang)}</p>` : ""}
+      <button type="button" class="btn btn--primary btn--wide" data-salon-adv="scan">📷 ${t("salon_adv_scan_btn", state.lang)}</button>
+      <p class="salon-adv__total">${t("salon_adv_total", state.lang).replace("{n}", Object.keys(l.codes).length)}</p>
+      <details class="salon-adv__stats"><summary>${t("salon_adv_stats_title", state.lang)}</summary>
+        <table><tbody>${rows}</tbody></table>
+        <button type="button" class="btn btn--text" data-salon-adv="reset">${t("salon_adv_reset_btn", state.lang)}</button>
+      </details>`;
+  }
+
+  async function submitAdventCode(raw, source){
+    const p = await advParseCode(raw);
+    if (!p){
+      // not an advent code at all (e.g. a stamp QR): say so, keep scanning
+      if (source === "manual" || Date.now() - stampScan.lastInvalidAt > 2500){
+        stampScan.lastInvalidAt = Date.now();
+        setStampStatus("adv_res_invalid", true);
+      }
+      return;
+    }
+    closeStampScanner();
+    const L = state.lang;
+    if (!p.valid) return showAdventResult(false, t("adv_res_invalid", L), p.code);
+    if (p.prefix === "T" && !advTest) return showAdventResult(false, t("adv_res_test", L), p.code);
+    if (p.prefix === "A" && advTest) return showAdventResult(false, t("adv_res_real_in_test", L), p.code);
+    const door = advDoor(p.day);
+    if (!door) return showAdventResult(false, t("adv_res_invalid", L), p.code);
+    const today = advTodayKey();
+    const l = advLedger();
+    const used = l.codes[p.code];
+    if (used) return showAdventResult(false, t("adv_res_used", L).replace("{d}", advFmtStamp(used.at)), p.code, door);
+    if (advDoorDate(p.day) > today) return showAdventResult(false, t("adv_res_future", L).replace("{n}", p.day), p.code, door);
+    const until = advValidUntil(p.day);
+    if (today > until) return showAdventResult(false, t("adv_res_expired", L).replace("{d}", advFmt(until)), p.code, door);
+    const n = advCountFor(l, p.day);
+    if (door.stock != null && n >= door.stock) return showAdventResult(false, t("adv_res_soldout", L).replace("{y}", door.stock), p.code, door);
+    l.codes[p.code] = { day:p.day, at:new Date().toISOString() };
+    if (!advSaveLedger(l)) return showAdventResult(false, t("adv_res_storage", L), p.code, door);
+    if (navigator.vibrate) navigator.vibrate(80);
+    trackEvent("advent-redeemed");
+    const count = door.stock != null ? t("adv_res_count_of", L).replace("{x}", n + 1).replace("{y}", door.stock) : t("adv_res_count", L).replace("{x}", n + 1);
+    const extra = door.type === "discount" ? `<p class="adv-result__extra">📅 ${t("adv_res_bookby", L).replace("{d}", advFmt(advBookBy(p.day)))}<br>${t("adv_res_discount_note", L)}</p>` : "";
+    showAdventResult(true, t(door.type === "discount" ? "adv_res_ok_discount" : "adv_res_ok_gift", L), p.code, door, `<p class="adv-result__count">${count}</p>${extra}`);
+    renderSalonAdvent();
+  }
+
+  function showAdventResult(ok, message, code, door, extraHtml){
+    const old = $("#advResultOverlay"); if (old) old.remove();
+    const ov = document.createElement("div");
+    ov.className = "stamp-overlay adv-result-overlay"; ov.id = "advResultOverlay";
+    ov.setAttribute("role", "alertdialog"); ov.setAttribute("aria-modal", "true");
+    ov.innerHTML = `
+      <div class="stamp-overlay__panel adv-result adv-result--${ok ? "ok" : "bad"}">
+        <p class="adv-result__mark" aria-hidden="true">${ok ? "✅" : "❌"}</p>
+        <p class="adv-result__msg">${message}</p>
+        ${door ? `<p class="adv-result__gift">${door.type === "discount" ? "🎟️" : door.icon} ${advDoorText(door, state.lang)}</p>
+          <p class="adv-result__door">${t("adv_door_label", state.lang).replace("{n}", door.day)}</p>` : ""}
+        ${extraHtml || ""}
+        <p class="adv-result__code">${code || ""}</p>
+        <div class="adv-result__btns">
+          <button type="button" class="btn btn--primary" data-advres="next">📷 ${t("adv_res_next", state.lang)}</button>
+          <button type="button" class="btn btn--ghost" data-advres="close">${t("stamp_close", state.lang)}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener("click", e => {
+      const a = e.target.closest("[data-advres]");
+      if (!a) return;
+      ov.remove();
+      if (a.dataset.advres === "next") openStampScanner("advent");
+    });
+  }
+
+  function resetAdventLedger(){
+    if (!confirm(t("salon_adv_reset_confirm", state.lang))) return;
+    if (advTest) advMemLedger.codes = {};
+    else { try { localStorage.removeItem(ADV_LEDGER_KEY); } catch(e){ /* ignore */ } }
+    renderSalonAdvent();
+    showToast(t("salon_adv_reset_done", state.lang));
   }
 
   function resetLocalData(){
@@ -3088,6 +3444,13 @@
     renderReviewsCard();
     applyI18n();
     setTimeout(maybeShowInstallBanner, 2500); // give the page a moment to settle first
+    renderAdventCard();
+    // a phone left open overnight: refresh the doors when the app comes back
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState !== "visible") return;
+      renderAdventCard();
+      if ($('[data-step="advent"]').classList.contains("is-active")) renderAdvent();
+    });
     checkSalonHash();                                   // salon mode: open the app with #salon
     window.addEventListener("hashchange", checkSalonHash);
 
@@ -3135,6 +3498,8 @@
       if (action === "open-pricelist") goTo("pricelist");
       if (action === "open-houserules") goTo("houserules");
       if (action === "open-stampcard") goTo("stampcard");
+      if (action === "open-advent") goTo("advent");
+      if (action === "advent-door") adventDoorClick(Number(el.dataset.day), el);
       if (action === "open-findme") goTo("findme");
       if (action === "open-myappt" || action === "new-appt") openMyAppt(null);
       if (action === "edit-appt") openMyAppt(Number(el.dataset.apptIndex));

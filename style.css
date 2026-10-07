@@ -852,3 +852,102 @@ body{
 .appt-add-more{ display:block; margin:6px auto 0; }
 
 .refine-group[hidden], .drink-pop[hidden]{ display:none; }
+
+/* ===== Advent calendar (v57) ===== */
+.advent-card{
+  margin:4px 0 14px; padding:14px 16px; border-radius:var(--radius-m); color:#fff; text-align:left;
+  background:linear-gradient(135deg, #3b2a1f 0%, #241A14 60%, #4a3322 100%); box-shadow:var(--shadow-card);
+  position:relative; overflow:hidden;
+}
+.advent-card[hidden]{ display:none; }
+.advent-card::after{ content:"✦ ✧ ✦"; position:absolute; right:12px; top:8px; color:var(--gold-light); opacity:.6; font-size:12px; letter-spacing:4px; }
+.advent-card__title{ font-family:var(--font-display); font-size:19px; margin:0 0 4px; color:var(--gold-light); }
+.advent-card__text{ font-size:13.5px; margin:0 0 10px; opacity:.92; line-height:1.4; }
+.advent-card__pulse{ animation:advPulse 1.8s ease-in-out infinite; }
+@keyframes advPulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(217,174,108,.6); } 50%{ box-shadow:0 0 0 8px rgba(217,174,108,0); } }
+.advent-test{ font-size:12.5px; background:#fff6d6; border:1px dashed var(--gold); color:var(--gold-ink); border-radius:var(--radius-s); padding:8px 10px; margin:0 0 12px; }
+.advent-note{ font-size:13.5px; color:var(--espresso-60); margin:0 0 12px; }
+.advent-grid{ display:grid; grid-template-columns:repeat(5, 1fr); gap:7px; margin:6px 0 10px; perspective:700px; }
+.advent-door{
+  position:relative; aspect-ratio:1/1.15; border-radius:10px; border:1.5px solid rgba(110,76,30,.35); cursor:pointer;
+  background:linear-gradient(160deg, #F6F0E6, #E6DACA); color:var(--espresso); font-family:var(--font-display);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:2px;
+  transform-origin:0 50%; transition:transform .7s var(--ease), opacity .3s;
+  -webkit-tap-highlight-color:transparent;
+}
+.advent-door__num{ font-size:20px; font-weight:700; line-height:1; }
+.advent-door__tag{ font-family:var(--font-body); font-size:9.5px; letter-spacing:.04em; text-transform:uppercase; }
+.advent-door__icon{ font-family:var(--font-body); font-size:17px; line-height:1; font-weight:700; }
+.advent-door--today{
+  background:linear-gradient(160deg, var(--gold-light), var(--gold)); color:#fff; border-color:var(--gold-ink);
+  animation:advPulse 1.8s ease-in-out infinite;
+}
+.advent-door--opened{ background:#fff; border-color:var(--gold); border-style:solid; }
+.advent-door--opened .advent-door__num{ font-size:13px; color:var(--gold-ink); }
+.advent-door--missed{ background:repeating-linear-gradient(135deg, #eee 0 6px, #e4e0da 6px 12px); color:rgba(36,26,20,.38); border-color:rgba(36,26,20,.12); }
+.advent-door--missed .advent-door__num{ text-decoration:line-through; }
+.advent-door--future{ opacity:.82; }
+.advent-door.is-opening{ transform:rotateY(-105deg); opacity:.4; }
+.advent-legend{ font-size:11.5px; color:var(--espresso-60); text-align:center; margin:0 0 14px; }
+.advent-mine__title{ font-family:var(--font-display); font-size:18px; margin:6px 0 8px; }
+.advent-mine{ display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+.advent-mine__item{
+  display:flex; gap:10px; align-items:center; text-align:left; width:100%; padding:10px 12px; cursor:pointer;
+  background:#fff; border:1px solid var(--espresso-12); border-radius:var(--radius-s); font:14px var(--font-body); color:var(--espresso);
+}
+/* voucher in the style of the printed Beauty & Coffee voucher */
+.advent-voucher{ background:#fff; }
+.advent-voucher__door{ font-size:12.5px; color:var(--espresso-60); margin:0 0 10px; letter-spacing:.03em; }
+.bc-voucher{
+  position:relative; width:100%; aspect-ratio:3/2; background:#fff; border:1px solid #ddd; border-radius:4px; overflow:hidden;
+  background-image:linear-gradient(to bottom right, transparent calc(50% - 1.2px), #000 calc(50% - 1.2px), #000 calc(50% + 1.2px), transparent calc(50% + 1.2px));
+  background-size:62% 100%; background-position:center; background-repeat:no-repeat;
+  color:#000; font-family:var(--font-body);
+}
+.bc-voucher__box{
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:38%; aspect-ratio:1/1;
+  background:#fff; border:3px solid #000; display:flex; align-items:center; justify-content:center;
+}
+.bc-voucher__box b{ font-size:clamp(26px, 9vw, 40px); font-weight:800; letter-spacing:-.02em; }
+.bc-voucher__box i{ font-style:normal; font-size:clamp(34px, 12vw, 54px); line-height:1; }
+.bc-voucher__side{
+  position:absolute; top:50%; font-size:clamp(7px, 2vw, 9.5px); font-weight:800; line-height:1.25; letter-spacing:.02em;
+  writing-mode:vertical-rl; white-space:nowrap; text-align:center;
+}
+.bc-voucher__side--l{ left:4%; transform:translateY(-50%) rotate(180deg); }
+.bc-voucher__side--r{ right:3.5%; top:57%; transform:translateY(-50%); }
+.bc-voucher__logo{ position:absolute; top:4%; right:2.5%; width:10.5%; height:auto; border-radius:50%; }
+.advent-voucher__name{ font-family:var(--font-display); font-size:21px; margin:12px 0 4px; }
+.advent-voucher__book{ font-size:14px; font-weight:600; color:var(--gold-ink); margin:0 0 6px; }
+.advent-voucher__show{ font-size:13px; color:var(--espresso-60); margin:4px 0 6px; }
+.advent-voucher__qr{ width:min(62vw, 240px); height:auto; aspect-ratio:1/1; image-rendering:pixelated; display:block; margin:0 auto; }
+.advent-voucher__code{ font:600 18px/1 var(--font-body); letter-spacing:.1em; margin:6px 0 12px; }
+.advent-voucher__rules{ text-align:left; font-size:12px; color:var(--espresso-60); border-top:1px solid var(--espresso-12); padding-top:10px; }
+.advent-voucher__rules p{ font-weight:700; margin:0 0 4px; color:var(--espresso); text-transform:uppercase; letter-spacing:.06em; font-size:11px; }
+.advent-voucher__rules ul{ margin:0; padding-left:18px; }
+.advent-voucher__rules li{ margin:0 0 3px; }
+/* salon side */
+.salon-mode--advent.is-active{ background:#2f5d3a !important; color:#fff !important; }
+.salon-adv{ margin-top:6px; }
+.salon-adv[hidden], .salon-qr[hidden], .salon-code[hidden], .salon-timer[hidden], .stamp-overlay__hint[hidden]{ display:none; }
+.salon-adv__total{ font-size:13px; color:var(--espresso-60); margin:10px 0; }
+.salon-adv__stats{ text-align:left; font-size:13px; }
+.salon-adv__stats summary{ cursor:pointer; font-weight:600; margin-bottom:6px; }
+.salon-adv__stats table{ width:100%; border-collapse:collapse; margin-bottom:8px; }
+.salon-adv__stats td{ padding:4px 4px; border-bottom:1px solid var(--espresso-12); }
+.salon-adv__stats td:last-child{ text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.salon-adv__stats tr.is-zero td{ color:var(--espresso-60); }
+.salon-adv__stats tr.is-full td{ color:#9b2c2c; font-weight:600; }
+.stamp-scan__manual--adv input{ width:16ch; font-size:17px; letter-spacing:.06em; text-transform:uppercase; }
+.adv-result-overlay{ z-index:45; }
+.adv-result{ border:6px solid transparent; }
+.adv-result--ok{ border-color:#2f8a4a; background:#f1fbf3; }
+.adv-result--bad{ border-color:#b23a3a; background:#fdf2f2; }
+.adv-result__mark{ font-size:64px; line-height:1; margin:4px 0 8px; }
+.adv-result__msg{ font-size:18px; font-weight:700; margin:0 0 10px; }
+.adv-result__gift{ font-family:var(--font-display); font-size:24px; margin:0 0 2px; }
+.adv-result__door{ font-size:13px; color:var(--espresso-60); margin:0 0 10px; }
+.adv-result__count{ font-size:14px; font-weight:600; margin:0 0 8px; }
+.adv-result__extra{ font-size:13.5px; margin:0 0 10px; }
+.adv-result__code{ font:600 13px/1 var(--font-body); letter-spacing:.08em; color:var(--espresso-60); margin:0 0 14px; }
+.adv-result__btns{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }

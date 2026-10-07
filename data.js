@@ -1597,7 +1597,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v56 · 06/10/2026";
+const APP_VERSION = "v57 · 07/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1639,6 +1639,257 @@ const SOCIAL_LINKS = {
    ============================================================ */
 const SALON_STAMP_SECRET = "b97d679a76827355855fbc9eb42c73b322825d8df5456e47";
 const SALON_MODE_PIN = "";
+
+/* ============================================================
+   ADVENT CALENDAR (1–25 December)
+   - A door can only be opened ON its own day; a missed day stays closed.
+   - Behind each door: a small gift ("gift") or a voucher ("discount").
+   - The client shows the voucher in the salon; Sandra scans its QR in
+     salon mode (#salon → "Advent"). Her phone remembers every scanned
+     code, so each voucher works only once.
+   - stock: max. number Sandra hands out for that door (null = no limit).
+     The salon phone refuses scans above that number.
+   Change the texts, icons and stock freely; keep "day" 1 to 25.
+   ============================================================ */
+const ADVENT = {
+  year: 2026,
+  teaserFrom: "2026-11-15",     // from this day the start screen announces the calendar
+  redeemUntil: "2027-01-31",    // gifts: last day to collect them in the salon
+  bookWithinDays: 21,           // discounts: book the appointment within 3 weeks after opening
+  discountUntil: "2027-02-28",  // discounts: last day the appointment (and the scan) can take place
+  doors: [
+   {
+    "day": 1,
+    "type": "gift",
+    "icon": "💋",
+    "nl": "Home made lippenbalsem",
+    "en": "Home-made lip balm",
+    "fr": "Baume à lèvres fait maison",
+    "stock": null
+   },
+   {
+    "day": 2,
+    "type": "gift",
+    "icon": "🧴",
+    "nl": "Staaltje Guinot facial scrub",
+    "en": "Guinot facial scrub sample",
+    "fr": "Échantillon de gommage visage Guinot",
+    "stock": null
+   },
+   {
+    "day": 3,
+    "type": "gift",
+    "icon": "🛁",
+    "nl": "Badzout",
+    "en": "Bath salts",
+    "fr": "Sels de bain",
+    "stock": null
+   },
+   {
+    "day": 4,
+    "type": "gift",
+    "icon": "🖌️",
+    "nl": "Mascaraborsteltje",
+    "en": "Mascara wand",
+    "fr": "Goupillon à mascara",
+    "stock": null
+   },
+   {
+    "day": 5,
+    "type": "gift",
+    "icon": "🧼",
+    "nl": "Mini handgemaakt zeepje",
+    "en": "Mini handmade soap",
+    "fr": "Mini savon fait main",
+    "stock": null
+   },
+   {
+    "day": 6,
+    "type": "gift",
+    "icon": "💅",
+    "nl": "Nagelvijl",
+    "en": "Nail file",
+    "fr": "Lime à ongles",
+    "stock": null
+   },
+   {
+    "day": 7,
+    "type": "discount",
+    "icon": "🧖",
+    "value": "10%",
+    "nl": "10% korting op een gelaatsverzorging",
+    "en": "10% off a facial",
+    "fr": "10 % de réduction sur un soin du visage",
+    "stock": null
+   },
+   {
+    "day": 8,
+    "type": "gift",
+    "icon": "🌿",
+    "nl": "Staaltje Guinot dagcrème",
+    "en": "Guinot day cream sample",
+    "fr": "Échantillon de crème de jour Guinot",
+    "stock": null
+   },
+   {
+    "day": 9,
+    "type": "gift",
+    "icon": "☕",
+    "nl": "Proefzakje specialty coffee",
+    "en": "Specialty coffee tasting bag",
+    "fr": "Sachet dégustation de café de spécialité",
+    "stock": null
+   },
+   {
+    "day": 10,
+    "type": "gift",
+    "icon": "🦶",
+    "nl": "Staaltje Gehwol voetcrème",
+    "en": "Gehwol foot cream sample",
+    "fr": "Échantillon de crème pour les pieds Gehwol",
+    "stock": null
+   },
+   {
+    "day": 11,
+    "type": "gift",
+    "icon": "💧",
+    "nl": "Mini nagelriemolie",
+    "en": "Mini cuticle oil",
+    "fr": "Mini huile pour cuticules",
+    "stock": null
+   },
+   {
+    "day": 12,
+    "type": "discount",
+    "icon": "💆",
+    "value": "15%",
+    "nl": "15% korting op een massage",
+    "en": "15% off a massage",
+    "fr": "15 % de réduction sur un massage",
+    "stock": null
+   },
+   {
+    "day": 13,
+    "type": "gift",
+    "icon": "🌸",
+    "nl": "Ambachtelijke bloeithee om mee te nemen",
+    "en": "Artisanal blooming tea to take home",
+    "fr": "Thé fleur artisanal à emporter",
+    "stock": null
+   },
+   {
+    "day": 14,
+    "type": "gift",
+    "icon": "✨",
+    "nl": "Staaltje peel-off masker",
+    "en": "Peel-off mask sample",
+    "fr": "Échantillon de masque peel-off",
+    "stock": null
+   },
+   {
+    "day": 15,
+    "type": "gift",
+    "icon": "♻️",
+    "nl": "Herbruikbare wattenschijfjes",
+    "en": "Reusable cotton pads",
+    "fr": "Disques démaquillants réutilisables",
+    "stock": null
+   },
+   {
+    "day": 16,
+    "type": "discount",
+    "icon": "🧖",
+    "value": "10%",
+    "nl": "10% korting op een gelaatsverzorging",
+    "en": "10% off a facial",
+    "fr": "10 % de réduction sur un soin du visage",
+    "stock": null
+   },
+   {
+    "day": 17,
+    "type": "gift",
+    "icon": "💋",
+    "nl": "Home made lipscrub",
+    "en": "Home-made lip scrub",
+    "fr": "Gommage lèvres fait maison",
+    "stock": null
+   },
+   {
+    "day": 18,
+    "type": "gift",
+    "icon": "🛁",
+    "nl": "Badzout",
+    "en": "Bath salts",
+    "fr": "Sels de bain",
+    "stock": null
+   },
+   {
+    "day": 19,
+    "type": "gift",
+    "icon": "🖌️",
+    "nl": "Wenkbrauwborsteltje",
+    "en": "Brow brush",
+    "fr": "Brosse à sourcils",
+    "stock": null
+   },
+   {
+    "day": 20,
+    "type": "discount",
+    "icon": "💆",
+    "value": "15%",
+    "nl": "15% korting op een massage",
+    "en": "15% off a massage",
+    "fr": "15 % de réduction sur un massage",
+    "stock": null
+   },
+   {
+    "day": 21,
+    "type": "gift",
+    "icon": "🍵",
+    "nl": "Mini matcha-mandarijnscrub",
+    "en": "Mini matcha-mandarin scrub",
+    "fr": "Mini gommage matcha-mandarine",
+    "stock": null
+   },
+   {
+    "day": 22,
+    "type": "gift",
+    "icon": "🌸",
+    "nl": "Collageenvliesmasker",
+    "en": "Collagen sheet mask",
+    "fr": "Masque en tissu au collagène",
+    "stock": null
+   },
+   {
+    "day": 23,
+    "type": "gift",
+    "icon": "🧴",
+    "nl": "Staaltje Guinot facial scrub",
+    "en": "Guinot facial scrub sample",
+    "fr": "Échantillon de gommage visage Guinot",
+    "stock": null
+   },
+   {
+    "day": 24,
+    "type": "gift",
+    "icon": "🎁",
+    "nl": "Eén keer grabbelen in de grabbelton",
+    "en": "One lucky dip from the grab bag",
+    "fr": "Un tirage dans le sac à surprises",
+    "stock": null
+   },
+   {
+    "day": 25,
+    "type": "discount",
+    "icon": "💆",
+    "value": "15%",
+    "nl": "15% korting op een massage",
+    "en": "15% off a massage",
+    "fr": "15 % de réduction sur un massage",
+    "stock": null
+   }
+  ]
+};
 
 /* TEST-PHASE RESET: change this text (e.g. to "launch-2026-11") when the
    app officially starts. The next time any phone opens the app, its stamps,

@@ -87,6 +87,7 @@
     <p class="step__lede" data-i18n="welcome_lede">Beantwoord een paar korte vragen.</p>
 
     <div class="actions-block actions-block--welcome" id="actionsBlockWelcome"></div>
+    <div class="advent-card" id="adventCard" hidden></div>
     <div class="appt-card" id="apptCard" hidden></div>
     <div class="returning-user" id="returningUserBlock" hidden></div>
 
@@ -390,6 +391,18 @@
   </section>
 
   <!-- HOUSE RULES -->
+  <!-- ADVENT CALENDAR (1–25 December, see ADVENT in data.js) -->
+  <section class="step" data-step="advent">
+    <div class="step__head">
+      <h2 class="step__title" data-i18n="adv_title">Adventskalender</h2>
+      <p class="step__hint" data-i18n="adv_intro"></p>
+    </div>
+    <div id="adventBody"></div>
+    <div class="step__nav">
+      <button type="button" class="btn btn--ghost" data-action="back" data-i18n="back_button">Terug</button>
+    </div>
+  </section>
+
   <!-- STAMP CARD (reachable from the welcome screen, no match needed) -->
   <section class="step" data-step="stampcard">
     <div class="step__head">
