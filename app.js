@@ -2948,7 +2948,7 @@
         <button type="button" class="stamp-overlay__close" data-salon="close" aria-label="${t("stamp_close", state.lang)}">✕</button>
         <p class="stamp-overlay__title">${t("salon_title", state.lang)}</p>
         <div class="salon-modes" role="tablist">
-          ${SALON_CODE_KINDS.concat(advHasConfig() ? ["ADVENT"] : []).map(k => `<button type="button" class="salon-mode${k === "ADVENT" ? " salon-mode--advent" : ""}${k === salonMode.kind ? " is-active" : ""}" data-salon-kind="${k}">${t("salon_mode_" + k.toLowerCase(), state.lang)}</button>`).join("")}
+          ${SALON_CODE_KINDS.concat(advVisible() ? ["ADVENT"] : []).map(k => `<button type="button" class="salon-mode${k === "ADVENT" ? " salon-mode--advent" : ""}${k === salonMode.kind ? " is-active" : ""}" data-salon-kind="${k}">${t("salon_mode_" + k.toLowerCase(), state.lang)}</button>`).join("")}
         </div>
         <p class="salon-mode-hint" id="salonModeHint">${t("salon_mode_hint_" + salonMode.kind.toLowerCase(), state.lang)}</p>
         <canvas id="salonQr" class="salon-qr salon-qr--${salonMode.kind.toLowerCase()}" width="600" height="600"></canvas>
@@ -2971,6 +2971,7 @@
       if (adv){
         if (adv.dataset.salonAdv === "scan") openStampScanner("advent");
         if (adv.dataset.salonAdv === "reset") resetAdventLedger();
+        if (adv.dataset.salonAdv === "open") advOpenFromList(adv.dataset.code);
         return;
       }
       const a = e.target.closest("[data-salon]"); if (a) closeSalonMode();
@@ -3044,7 +3045,7 @@
     }
     else if (location.hash === "#advent" || location.hash === "#adventskalender"){
       window.history.replaceState(null, "", location.pathname + location.search);
-      goTo("advent");
+      if (advVisible()) goTo("advent");
     }
     else if (location.hash === "#stempelkaart" || location.hash === "#stamps"){
       window.history.replaceState(null, "", location.pathname + location.search);
@@ -3054,29 +3055,44 @@
 
   /* ---------------- advent calendar (1–25 December) ----------------
      Client: one door per day, and ONLY on that day itself — a missed day
-     stays closed for good. Opening a door creates a personal voucher
-     with a one-time code + QR (no server: the code carries its own
-     HMAC check, so made-up codes are refused).
+     stays closed for good. Opening a door plays a little "gift box"
+     animation and creates a personal voucher with a one-time code + QR
+     (no server: the code carries its own HMAC check, so made-up codes
+     are refused).
      Salon: #salon → "Advent" → scan. Sandra's phone keeps a ledger of
-     every scanned code, so each voucher can only be used once, and it
-     counts per door against the stock in data.js.
-     Test: add ?adventtest=2026-12-07 to the address. The app then acts
-     as if it is that day, nothing is saved, and the codes start with T:
-     they only work on a salon phone that is in test mode as well. */
+     every code: reserved (appointment booked with the code), redeemed,
+     or lapsed (appointment moved/cancelled). Each code works only once,
+     and stock / "1 gift per client" are counted on that phone.
+     Private preview: ADVENT.live = false hides everything from the public.
+     Sandra opens ?voorproef=<ADVENT.previewKey> : a bar lets her choose
+     the day, nothing is saved, codes start with T and only work on a
+     salon phone that is in preview mode too. */
   const ADV_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   // 32 signs, no 0/O/1/I
   const ADV_QR_PREFIX = "BCADV:";
   const ADV_LEDGER_KEY = "bc_advent_ledger_v1";
   const ADV_DOOR_ORDER = [12,3,19,7,24,1,15,9,21,5,17,11,25,2,14,20,6,10,23,4,16,8,22,13,18];
-  const advTest = (() => {
+  const advPreview = (() => {
     try {
-      const v = new URLSearchParams(location.search).get("adventtest");
-      return v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null;
-    } catch(e){ return null; }
+      const k = new URLSearchParams(location.search).get("voorproef");
+      return !!(k && typeof ADVENT === "object" && ADVENT.previewKey && k === ADVENT.previewKey);
+    } catch(e){ return false; }
   })();
-  const advMemory = { opened:{} };              // test mode: kept in memory only
+  let advTest = null;                          // the simulated day in preview mode
+  if (advPreview){
+    let d = null;
+    try { d = new URLSearchParams(location.search).get("dag"); } catch(e){ /* ignore */ }
+    if (d && /^\d{1,2}$/.test(d)) d = `${ADVENT.year}-12-${String(Math.min(25, Math.max(1, Number(d)))).padStart(2,"0")}`;
+    if (!d || !/^\d{4}-\d{2}-\d{2}$/.test(d)){
+      const now = todayKey();
+      d = (now >= `${ADVENT.year}-12-01` && now <= `${ADVENT.year}-12-25`) ? now : `${ADVENT.year}-12-01`;
+    }
+    advTest = d;
+  }
+  const advMemory = { opened:{} };              // preview: kept in memory only
   const advMemLedger = { codes:{} };
 
   function advHasConfig(){ return typeof ADVENT === "object" && ADVENT && Array.isArray(ADVENT.doors); }
+  function advVisible(){ return advHasConfig() && (ADVENT.live === true || advPreview); }
   function advTodayKey(){ return advTest || todayKey(); }
   function advParts(key){ const [y, m, d] = key.split("-").map(Number); return { y, m, d }; }
   function advKeyFor(y, m, d){ return `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`; }
@@ -3097,7 +3113,15 @@
       stock: d.stock == null ? null : Number(d.stock) });
   }
   function advDoorText(door, lang){ return (door && (door[lang] || door.nl)) || ""; }
-  function advLastDay(){ return advAddDays(advDoorDate(25), Math.max(ADVENT.giftDays || 21, ADVENT.discountDays || 42)); }
+  function advTxt(v){ return v && typeof v === "object" ? (v[state.lang] || v.nl || "") : (v || ""); }
+  // book the appointment (with the code) at the latest on …
+  function advBookBy(day){ return advAddDays(advDoorDate(day), ADVENT.bookWithinDays || 21); }
+  // … and the appointment itself takes place at the latest on …
+  function advUseBy(day){
+    const door = advDoor(day);
+    return advAddDays(advDoorDate(day), door && door.homemade ? (ADVENT.homemadeDays || 21) : (ADVENT.useWithinDays || 42));
+  }
+  function advLastDay(){ return advAddDays(advDoorDate(25), Math.max(ADVENT.useWithinDays || 42, ADVENT.homemadeDays || 21)); }
   // "before" | "teaser" | "live" | "after" | "over"
   function advPhase(){
     if (!advHasConfig()) return "over";
@@ -3113,7 +3137,7 @@
     return (y === ADVENT.year && m === 12 && d >= 1 && d <= 25) ? d : null;
   }
   function advStore(){
-    if (advTest) return advMemory;
+    if (advPreview) return advMemory;
     if (!localData.advent || typeof localData.advent !== "object" || !localData.advent.opened) localData.advent = { opened:{} };
     if (localData.advent.year && localData.advent.year !== ADVENT.year) localData.advent = { opened:{} };   // a new year starts fresh
     localData.advent.year = ADVENT.year;
@@ -3126,7 +3150,7 @@
     if (!st.dev || !/^[A-HJ-NP-Z2-9]{5}$/.test(st.dev)){
       const rnd = new Uint8Array(5); crypto.getRandomValues(rnd);
       st.dev = Array.from(rnd).map(b => ADV_ALPHABET[b % 32]).join("");
-      if (!advTest) saveLocalData();
+      if (!advPreview) saveLocalData();
     }
     return st.dev;
   }
@@ -3137,27 +3161,25 @@
     if (key === today) return "today";
     return key < today ? "missed" : "future";
   }
-  // gifts: collect within giftDays; discounts: valid discountDays (counted from the door's day)
-  function advValidUntil(day){
-    const door = advDoor(day);
-    return advAddDays(advDoorDate(day), door && door.type !== "gift" ? (ADVENT.discountDays || 42) : (ADVENT.giftDays || 21));
-  }
-  // fills {min} {gmin} {dmin} {treat} {max} in a text
+  // fills {gmin} {dmin} {treat} {with} {max} {book} {until} in a text
   function advFill(txt, door){
     const L = state.lang;
-    return String(txt || "")
+    let s = String(txt || "")
       .replace(/\{gmin\}/g, ADVENT.giftMinSpend || 0)
       .replace(/\{dmin\}/g, ADVENT.discountMinSpend || 0)
       .replace(/\{max\}/g, ADVENT.maxGiftsPerClient || 1)
       .replace(/\{treat\}/g, door && door.treat ? (door.treat[L] || door.treat.nl) : "")
       .replace(/\{with\}/g, door && door.with ? (door.with[L] || door.with.nl) : "");
+    if (door && door.day){ s = s.replace(/\{book\}/g, advFmt(advBookBy(door.day))).replace(/\{until\}/g, advFmt(advUseBy(door.day))); }
+    return s;
   }
+  // "gift" | "homemade" | "extra" | "discount" — picks the right texts
+  function advKind(door){ return door.type === "gift" ? (door.homemade ? "homemade" : "gift") : door.type; }
   // icon for lists: product photo, %-value or emoji
   function advThumb(door, cls){
     if (door.photo) return `<img class="${cls}" src="${door.photo}" alt="" loading="lazy">`;
     return `<span class="${cls}">${door.type === "discount" ? (door.value || "%") : door.icon}</span>`;
   }
-  function advBookBy(day){ return advAddDays(advDoorDate(day), ADVENT.bookWithinDays || 21); }
 
   async function advCheck(prefix, day, id){
     const key = await getStampKey();
@@ -3165,7 +3187,7 @@
     return Array.from(sig.slice(0, 4)).map(b => ADV_ALPHABET[b % 32]).join("");
   }
   async function advMakeCode(day){
-    const prefix = advTest ? "T" : "A";
+    const prefix = advPreview ? "T" : "A";
     const id = advDeviceId();
     return `${prefix}${String(day).padStart(2,"0")}-${id}-${await advCheck(prefix, day, id)}`;
   }
@@ -3183,12 +3205,49 @@
     return { code, prefix, day, dev:id, valid: (await advCheck(prefix, day, id)) === chk };
   }
 
+  /* ---- preview bar: pick the simulated day ---- */
+  function advPreviewBar(where){
+    if (!advPreview) return "";
+    const y = ADVENT.year;
+    const opts = [[`${y}-11-20`, t("adv_pv_teaser", state.lang)]];
+    for (let d = 1; d <= 25; d++) opts.push([advKeyFor(y, 12, d), `${d} dec`]);
+    opts.push([`${y}-12-28`, "28 dec"], [`${y + 1}-01-10`, "10 jan"], [`${y + 1}-01-20`, "20 jan"], [`${y + 1}-02-05`, "5 feb"], [`${y + 1}-03-01`, "1 mrt"]);
+    if (!opts.some(o => o[0] === advTest)) opts.push([advTest, advFmt(advTest)]);
+    opts.sort((a, b) => a[0] < b[0] ? -1 : 1);
+    return `<div class="advent-preview" data-where="${where}">
+      <p>🧪 <b>${t("adv_pv_title", state.lang)}</b> — ${t(ADVENT.live ? "adv_pv_live" : "adv_pv_hidden", state.lang)}</p>
+      <label>${t("adv_pv_day", state.lang)}
+        <select class="advent-preview__day" data-adv-preview="day">${opts.map(o => `<option value="${o[0]}"${o[0] === advTest ? " selected" : ""}>${o[1]}</option>`).join("")}</select>
+      </label>
+      <button type="button" class="btn btn--text btn--sm" data-adv-preview="wipe">${t("adv_pv_wipe", state.lang)}</button>
+    </div>`;
+  }
+  function advPreviewRerender(){
+    renderAdventCard();
+    if ($('[data-step="advent"]') && $('[data-step="advent"]').classList.contains("is-active")) renderAdvent();
+    renderSalonAdvent();
+  }
+  document.addEventListener("change", e => {
+    const sel = e.target.closest('[data-adv-preview="day"]');
+    if (!sel || !advPreview) return;
+    advTest = sel.value;
+    advPreviewRerender();
+  });
+  document.addEventListener("click", e => {
+    const b = e.target.closest('[data-adv-preview="wipe"]');
+    if (!b || !advPreview) return;
+    advMemory.opened = {}; advMemory.dev = null; advMemLedger.codes = {};
+    advPreviewRerender();
+    showToast(t("adv_pv_wiped", state.lang));
+  });
+
   /* ---- client: welcome card ---- */
   function renderAdventCard(){
     const card = $("#adventCard");
     if (!card) return;
+    if (!advVisible()){ card.hidden = true; card.innerHTML = ""; return; }
     const phase = advPhase();
-    const openedCount = advHasConfig() ? Object.keys(advStore().opened).length : 0;
+    const openedCount = Object.keys(advStore().opened).length;
     let html = "";
     if (phase === "teaser"){
       html = `<p class="advent-card__title">🎄 ${t("adv_title", state.lang)}</p>
@@ -3205,18 +3264,21 @@
       html = `<p class="advent-card__title">🎁 ${t("adv_mine_title", state.lang)}</p>
         <p class="advent-card__text">${t("adv_card_after", state.lang).replace("{n}", openedCount)}</p>
         <button type="button" class="btn btn--primary btn--sm" data-action="open-advent">${t("adv_card_mine_btn", state.lang)}</button>`;
+    } else if (advPreview){
+      html = `<p class="advent-card__title">🎄 ${t("adv_title", state.lang)}</p>
+        <button type="button" class="btn btn--primary btn--sm" data-action="open-advent">${t("adv_card_peek_btn", state.lang)}</button>`;
     }
     card.hidden = !html;
-    card.innerHTML = html;
+    card.innerHTML = advPreviewBar("card") + html;
   }
 
   /* ---- client: the 25 doors ---- */
   function renderAdvent(){
     const wrap = $("#adventBody");
     if (!wrap || !advHasConfig()) return;
+    if (!advVisible()){ wrap.innerHTML = `<p class="advent-note">${t("adv_not_yet", state.lang)}</p>`; return; }
     const phase = advPhase();
     const store = advStore();
-    const testHtml = advTest ? `<p class="advent-test">🧪 ${t("adv_test_banner", state.lang).replace("{d}", advFmt(advTest))}</p>` : "";
     let note = "";
     if (phase === "before" || phase === "teaser") note = t("adv_note_teaser", state.lang);
     else if (phase === "after" || phase === "over") note = t("adv_note_over", state.lang);
@@ -3234,13 +3296,28 @@
     const mineHtml = mine.length ? `<p class="advent-mine__title">${t("adv_mine_title", state.lang)}</p>
       ${ADVENT.maxGiftsPerClient ? `<p class="advent-mine__note">${advFill(t("adv_mine_note", state.lang))}</p>` : ""}
       <div class="advent-mine">${mine.map(day => { const door = advDoor(day); if (!door) return "";
-        const until = advValidUntil(day), expired = advTodayKey() > until;
+        const until = advUseBy(day), expired = advTodayKey() > until;
         return `<button type="button" class="advent-mine__item${expired ? " is-expired" : ""}" data-action="advent-door" data-day="${day}">
-        ${advThumb(door, "advent-mine__thumb")}<span>${t("adv_door_label", state.lang).replace("{n}", day)} · ${advDoorText(door, state.lang)}<small>${expired ? t("adv_expired_short", state.lang) : t("adv_until_short", state.lang).replace("{d}", advFmt(until))}</small></span></button>`; }).join("")}</div>` : "";
-    wrap.innerHTML = `${testHtml}${note ? `<p class="advent-note">${note}</p>` : ""}
+        ${advThumb(door, "advent-mine__thumb")}<span>${t("adv_door_label", state.lang).replace("{n}", day)} · ${advDoorText(door, state.lang)}<small>${expired ? t("adv_expired_short", state.lang) : advFill(t("adv_book_short", state.lang), door)}</small></span></button>`; }).join("")}</div>` : "";
+    wrap.innerHTML = `${advPreviewBar("advent")}${note ? `<p class="advent-note">${note}</p>` : ""}
       <div class="advent-grid" id="adventGrid">${doors}</div>
       <p class="advent-legend">${t("adv_legend", state.lang)}</p>
-      ${mineHtml}`;
+      ${mineHtml}
+      ${advIngredientsHtml()}`;
+  }
+  // every product behind a door, with its ingredients (also printed on the card with the gift)
+  function advIngredientsHtml(){
+    const seen = new Set(), rows = [];
+    ADVENT.doors.forEach(d0 => {
+      const door = advDoor(d0.day);
+      if (!door || seen.has(door.itemId) || !door.ingredients) return;
+      seen.add(door.itemId);
+      const note = advTxt(door.ingredientsNote);
+      rows.push(`<li><b>${door.product || advDoorText(door, state.lang)}</b>: ${advTxt(door.ingredients)}${note ? ` <i>(${note})</i>` : ""}</li>`);
+    });
+    if (!rows.length) return "";
+    return `<details class="advent-ingr"><summary>🧾 ${t("adv_ingr_all", state.lang)}</summary>
+      <p>${t("adv_ingr_all_hint", state.lang)}</p><ul>${rows.join("")}</ul></details>`;
   }
 
   async function adventDoorClick(day, btn){
@@ -3253,11 +3330,43 @@
     const code = await advMakeCode(day);
     if (advDoorState(day) !== "today") return;          // double tap
     advStore().opened[day] = { code, at:new Date().toISOString() };
-    if (!advTest) saveLocalData();
+    if (!advPreview) saveLocalData();
     trackEvent("advent-open");
     if (btn) btn.classList.add("is-opening");
     if (navigator.vibrate) navigator.vibrate([40, 40, 80]);
-    setTimeout(() => { renderAdvent(); renderAdventCard(); showAdventVoucher(day); }, btn ? 750 : 0);
+    setTimeout(() => { renderAdvent(); renderAdventCard(); showAdventReveal(day); }, btn ? 600 : 0);
+  }
+
+  /* ---- the gift box: lid pops off, the gift jumps out ---- */
+  function showAdventReveal(day){
+    const door = advDoor(day);
+    if (!door) return;
+    const old = $("#advReveal"); if (old) old.remove();
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce){ showAdventVoucher(day); return; }
+    const item = door.photo ? `<img src="${door.photo}" alt="">`
+      : door.type === "discount" ? `<span class="adv-reveal__ticket"><b>${door.value || "%"}</b><small>${t("adv_side_discount", state.lang)}</small></span>`
+      : `<span class="adv-reveal__emoji">${door.icon}</span>${door.type === "extra" ? `<small class="adv-reveal__free">${t("adv_free", state.lang)}</small>` : ""}`;
+    const ov = document.createElement("div");
+    ov.className = "adv-reveal"; ov.id = "advReveal";
+    ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true");
+    ov.innerHTML = `
+      <div class="adv-reveal__stage" aria-hidden="true">
+        <span class="adv-reveal__burst"></span>
+        <span class="adv-reveal__sparks"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <div class="adv-reveal__item">${item}</div>
+        <div class="adv-reveal__box">
+          <span class="adv-reveal__lid"><span class="adv-reveal__bow"></span></span>
+          <span class="adv-reveal__body"><span class="adv-reveal__num">${day}</span></span>
+        </div>
+      </div>
+      <p class="adv-reveal__title">${t("adv_reveal_title", state.lang)}</p>
+      <p class="adv-reveal__name">${advDoorText(door, state.lang)}</p>
+      <button type="button" class="btn btn--primary adv-reveal__go" data-reveal="go">🎟️ ${t("adv_reveal_btn", state.lang)}</button>`;
+    document.body.appendChild(ov);
+    const go = () => { ov.remove(); showAdventVoucher(day); };
+    ov.addEventListener("click", e => { if (e.target.closest('[data-reveal="go"]') || ov.classList.contains("is-done")) go(); });
+    setTimeout(() => ov.classList.add("is-done"), 2300);
   }
 
   async function showAdventVoucher(day){
@@ -3265,23 +3374,32 @@
     const rec = advStore().opened[day];
     if (!door || !rec) return;
     closeAdventVoucher();
-    const isDiscount = door.type === "discount", isExtra = door.type === "extra", isGift = door.type === "gift";
-    const until = advValidUntil(day);
-    const rulesKey = isDiscount ? "adv_rules_discount" : isExtra ? "adv_rules_extra" : (ADVENT.maxGiftsPerClient ? "adv_rules_gift" : "adv_rules_gift_nomax");
-    const rules = advFill(t(rulesKey, state.lang).replace("{until}", advFmt(until)), door);
-    const expired = advTodayKey() > until;
-    const dates = advFill(t(isDiscount ? "adv_dates_discount" : isExtra ? "adv_dates_extra" : "adv_dates_gift", state.lang).replace("{until}", advFmt(until)), door);
+    const kind = advKind(door), isGift = door.type === "gift";
+    const until = advUseBy(day), book = advBookBy(day), today = advTodayKey();
+    const expired = today > until;
+    const rulesKey = `adv_rules_${kind}`;
+    let rules = advFill(t(rulesKey, state.lang), door);
+    if (isGift && ADVENT.maxGiftsPerClient) rules = rules.replace("</ul>", `<li>${advFill(t("adv_rule_max", state.lang))}</li></ul>`);
+    const dates = advFill(t(`adv_dates_${kind}`, state.lang), door);
+    const late = !expired && kind !== "homemade" && today > book ? `<p class="advent-voucher__late">${advFill(t("adv_late_note", state.lang), door)}</p>` : "";
     const stockNote = door.soldOut ? `<p class="advent-voucher__soldout">😔 ${t("adv_soldout_banner", state.lang)}</p>`
       : (door.itemStock != null ? `<p class="advent-voucher__limited">${t("adv_limited", state.lang).replace("{n}", door.itemStock)}</p>` : "");
     const boxHtml = door.photo ? `<img class="bc-voucher__photo" src="${door.photo}" alt="">`
-      : isDiscount ? `<b>${door.value || ""}</b>`
-      : isExtra ? `<i aria-hidden="true">${door.icon}</i><small>${t("adv_free", state.lang)}</small>`
+      : door.type === "discount" ? `<b>${door.value || ""}</b>`
+      : door.type === "extra" ? `<i aria-hidden="true">${door.icon}</i><small>${t("adv_free", state.lang)}</small>`
       : `<i aria-hidden="true">${door.icon}</i>`;
-    const use = door.use ? (door.use[state.lang] || door.use.nl) : "";
-    const ingr = door.ingredients && typeof door.ingredients === "object" ? (door.ingredients[state.lang] || door.ingredients.nl) : door.ingredients;
-    const infoHtml = !isGift ? "" : `<div class="advent-voucher__info"><p>${t("adv_info_title", state.lang)}</p>
+    const use = advTxt(door.use);
+    const ingr = advTxt(door.ingredients), ingrNote = advTxt(door.ingredientsNote);
+    const infoHtml = (isGift || door.ingredients) ? `<div class="advent-voucher__info"><p>${t(isGift ? "adv_info_title" : "adv_info_used", state.lang)}</p>
+        ${door.product && !isGift ? `<p class="advent-voucher__use"><b>${door.product}</b></p>` : ""}
         ${use ? `<p class="advent-voucher__use">${use}</p>` : ""}
-        <p class="advent-voucher__ingr">${ingr ? `<b>${t("adv_ingredients", state.lang)}</b> ${ingr}` : t("adv_ingredients_label", state.lang)}</p></div>`;
+        <p class="advent-voucher__ingr">${ingr ? `<b>${t("adv_ingredients", state.lang)}</b> ${ingr}${ingrNote ? ` <i>(${ingrNote})</i>` : ""}` : t("adv_ingredients_label", state.lang)}</p>
+        ${isGift ? `<p class="advent-voucher__ingr">${t("adv_ingredients_card", state.lang)}</p>` : ""}</div>` : "";
+    const waText = advFill(t("adv_book_wa_text", state.lang), door).replace("{gift}", advDoorText(door, state.lang)).replace("{code}", rec.code);
+    const bookHtml = expired ? "" : `<div class="advent-voucher__book">
+        <a class="btn btn--primary btn--sm" href="https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(waText)}" target="_blank" rel="noopener">💬 ${t("adv_book_wa", state.lang)}</a>
+        <button type="button" class="btn btn--outline btn--sm" data-adv="copy">📋 ${t("adv_copy_code", state.lang)}</button>
+      </div>`;
     const ov = document.createElement("div");
     ov.className = "stamp-overlay advent-overlay"; ov.id = "adventVoucherOverlay";
     ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true");
@@ -3298,16 +3416,24 @@
         <p class="advent-voucher__name">${advDoorText(door, state.lang)}</p>
         ${stockNote}
         <p class="advent-voucher__dates${expired ? " is-expired" : ""}">${expired ? "⌛ " + t("adv_expired_long", state.lang).replace("{d}", advFmt(until)) : dates}</p>
+        ${late}
         <p class="advent-voucher__show">${t("adv_show_hint", state.lang)}</p>
         <canvas class="advent-voucher__qr" id="adventQr" width="480" height="480"></canvas>
         <p class="advent-voucher__code">${rec.code}</p>
+        ${bookHtml}
         ${infoHtml}
         <div class="advent-voucher__rules"><p>${t("adv_rules_title", state.lang)}</p>${rules}</div>
-        ${advTest ? `<p class="advent-test">🧪 ${t("adv_test_code", state.lang)}</p>` : ""}
+        ${advPreview ? `<p class="advent-test">🧪 ${t("adv_test_code", state.lang)}</p>` : ""}
       </div>`;
     document.body.appendChild(ov);
     ov.addEventListener("click", e => {
       const a = e.target.closest("[data-adv]");
+      if (a && a.dataset.adv === "copy"){
+        const done = () => showToast(t("adv_copied", state.lang));
+        try { navigator.clipboard.writeText(rec.code).then(done, () => window.prompt(t("adv_copy_code", state.lang), rec.code)); }
+        catch(err){ window.prompt(t("adv_copy_code", state.lang), rec.code); }
+        return;
+      }
       if (e.target === ov || (a && a.dataset.adv === "close")) closeAdventVoucher();
     });
     const ok = await loadFirstScript(["assets/lib/qr-encoder.js"], () => !!window.BCQRCode);
@@ -3315,9 +3441,10 @@
   }
   function closeAdventVoucher(){ const ov = $("#adventVoucherOverlay"); if (ov) ov.remove(); }
 
-  /* ---- salon: ledger of scanned vouchers (on Sandra's phone only) ---- */
+  /* ---- salon: ledger of vouchers (on Sandra's phone only) ----
+     codes[code] = { day, dev, type, item, at, status:"booked"|"used"|"void", appt, usedAt, voidAt } */
   function advLedger(){
-    if (advTest) return advMemLedger;
+    if (advPreview) return advMemLedger;
     try {
       const l = JSON.parse(localStorage.getItem(ADV_LEDGER_KEY) || "null");
       if (l && l.codes) return l;
@@ -3325,13 +3452,13 @@
     return { codes:{} };
   }
   function advSaveLedger(l){
-    if (advTest) return true;
+    if (advPreview) return true;
     try { localStorage.setItem(ADV_LEDGER_KEY, JSON.stringify(l)); return true; } catch(e){ return false; }
   }
-  function advCountFor(l, day){ return Object.values(l.codes).filter(x => Number(x.day) === Number(day)).length; }
-  function advCountItem(l, itemId){
-    return Object.values(l.codes).filter(x => (x.item || (advDoor(x.day) || {}).itemId) === itemId).length;
-  }
+  function advStatus(x){ return (x && x.status) || "used"; }          // older entries = redeemed
+  function advActive(l){ return Object.values(l.codes).filter(x => advStatus(x) !== "void"); }
+  function advCountFor(l, day){ return advActive(l).filter(x => Number(x.day) === Number(day)).length; }
+  function advCountItem(l, itemId){ return advActive(l).filter(x => (x.item || (advDoor(x.day) || {}).itemId) === itemId).length; }
   function advFmtStamp(iso){
     const d = new Date(iso);
     return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
@@ -3341,20 +3468,52 @@
     const box = $("#salonAdvent");
     if (!box || !advHasConfig()) return;
     const l = advLedger();
+    const all = Object.entries(l.codes);
+    const nUsed = all.filter(([, x]) => advStatus(x) === "used").length;
+    const booked = all.filter(([, x]) => advStatus(x) === "booked").sort((a, b) => (a[1].appt || "") < (b[1].appt || "") ? -1 : 1);
     const rows = ADVENT.doors.map(d0 => advDoor(d0.day)).filter(Boolean).map(door => {
       const n = advCountFor(l, door.day);
       const stock = door.stock == null ? "∞" : door.stock;
       const full = door.stock != null && n >= door.stock;
       return `<tr class="${full ? "is-full" : ""}${n ? "" : " is-zero"}"><td>${door.day}</td><td>${door.type === "discount" ? "🎟️" : door.icon} ${advDoorText(door, state.lang)}${door.itemStock != null ? ` <small>(${advCountItem(l, door.itemId)}/${door.itemStock} ${t("salon_adv_total_item", state.lang)})</small>` : ""}${door.soldOut ? " — ❌" : ""}</td><td>${n} / ${stock}</td></tr>`;
     }).join("");
+    const bookedHtml = booked.length ? `<div class="salon-adv__booked"><p>📅 ${t("salon_adv_booked_title", state.lang)}</p>
+      ${booked.map(([code, x]) => { const door = advDoor(x.day); return `<button type="button" class="salon-adv__bk" data-salon-adv="open" data-code="${code}">
+        <b>${x.appt ? advFmt(x.appt) : "?"}</b> · ${door ? advDoorText(door, state.lang) : ""} <small>${code}</small></button>`; }).join("")}</div>` : "";
     box.innerHTML = `
-      ${advTest ? `<p class="advent-test">🧪 ${t("adv_test_salon", state.lang)}</p>` : ""}
+      ${advPreview ? `${advPreviewBar("salon")}<p class="advent-test">🧪 ${t("adv_test_salon", state.lang)}</p>` : ""}
       <button type="button" class="btn btn--primary btn--wide" data-salon-adv="scan">📷 ${t("salon_adv_scan_btn", state.lang)}</button>
-      <p class="salon-adv__total">${t("salon_adv_total", state.lang).replace("{n}", Object.keys(l.codes).length)}</p>
+      <p class="salon-adv__total">${t("salon_adv_total2", state.lang).replace("{u}", nUsed).replace("{b}", booked.length)}</p>
+      ${bookedHtml}
       <details class="salon-adv__stats"><summary>${t("salon_adv_stats_title", state.lang)}</summary>
         <table><tbody>${rows}</tbody></table>
         <button type="button" class="btn btn--text" data-salon-adv="reset">${t("salon_adv_reset_btn", state.lang)}</button>
       </details>`;
+  }
+
+  // checks that do not depend on the ledger entry of this code
+  function advRefuseNew(p, door, l){
+    const L = state.lang, today = advTodayKey();
+    if (advDoorDate(p.day) > today) return t("adv_res_future", L).replace("{n}", p.day);
+    const bookBy = door.homemade ? advUseBy(p.day) : advBookBy(p.day);
+    if (today > bookBy) return t(door.homemade ? "adv_res_expired" : "adv_res_late", L).replace("{d}", advFmt(bookBy));
+    if (door.soldOut) return t("adv_res_soldout_flag", L);
+    if (door.itemStock != null && advCountItem(l, door.itemId) >= door.itemStock) return t("adv_res_soldout_item", L).replace("{y}", door.itemStock);
+    if (door.stock != null && advCountFor(l, p.day) >= door.stock) return t("adv_res_soldout", L).replace("{y}", door.stock);
+    const max = door.type === "discount" ? ADVENT.maxDiscountsPerClient : door.type === "extra" ? ADVENT.maxExtrasPerClient : ADVENT.maxGiftsPerClient;
+    if (max){
+      const prev = advActive(l).filter(x => x.dev === p.dev && x.type === door.type).sort((a, b) => a.at < b.at ? -1 : 1);
+      if (prev.length >= max){
+        const last = prev[prev.length - 1];
+        return t(door.type === "gift" ? "adv_res_client_gift" : "adv_res_client_discount", L).replace("{n}", last.day).replace("{d}", advFmtStamp(last.at));
+      }
+    }
+    return null;
+  }
+  function advCondNote(door){
+    const L = state.lang;
+    return door.type === "gift" ? advFill(t("adv_res_gift_note", L), door)
+      : advFill(t(door.type === "extra" ? "adv_res_extra_note" : "adv_res_discount_note", L), door);
   }
 
   async function submitAdventCode(raw, source){
@@ -3368,76 +3527,119 @@
       return;
     }
     closeStampScanner();
+    advHandleCode(p);
+  }
+  function advHandleCode(p){
     const L = state.lang;
-    if (!p.valid) return showAdventResult(false, t("adv_res_invalid", L), p.code);
-    if (p.prefix === "T" && !advTest) return showAdventResult(false, t("adv_res_test", L), p.code);
-    if (p.prefix === "A" && advTest) return showAdventResult(false, t("adv_res_real_in_test", L), p.code);
+    if (!p.valid) return showAdventResult("bad", t("adv_res_invalid", L), p.code);
+    if (p.prefix === "T" && !advPreview) return showAdventResult("bad", t("adv_res_test", L), p.code);
+    if (p.prefix === "A" && advPreview) return showAdventResult("bad", t("adv_res_real_in_test", L), p.code);
     const door = advDoor(p.day);
-    if (!door) return showAdventResult(false, t("adv_res_invalid", L), p.code);
-    const today = advTodayKey();
+    if (!door) return showAdventResult("bad", t("adv_res_invalid", L), p.code);
+    const today = advTodayKey(), useBy = advUseBy(p.day);
     const l = advLedger();
-    const used = l.codes[p.code];
-    if (used) return showAdventResult(false, t("adv_res_used", L).replace("{d}", advFmtStamp(used.at)), p.code, door);
-    if (advDoorDate(p.day) > today) return showAdventResult(false, t("adv_res_future", L).replace("{n}", p.day), p.code, door);
-    const until = advValidUntil(p.day);
-    if (today > until) return showAdventResult(false, t("adv_res_expired", L).replace("{d}", advFmt(until)), p.code, door);
-    const n = advCountFor(l, p.day);
-    if (door.soldOut) return showAdventResult(false, t("adv_res_soldout_flag", L), p.code, door);
-    const ni = door.itemId ? advCountItem(l, door.itemId) : 0;
-    if (door.itemStock != null && ni >= door.itemStock) return showAdventResult(false, t("adv_res_soldout_item", L).replace("{y}", door.itemStock), p.code, door);
-    if (door.stock != null && n >= door.stock) return showAdventResult(false, t("adv_res_soldout", L).replace("{y}", door.stock), p.code, door);
-    const max = door.type === "discount" ? ADVENT.maxDiscountsPerClient : door.type === "extra" ? ADVENT.maxExtrasPerClient : ADVENT.maxGiftsPerClient;
-    if (max){
-      const prev = Object.values(l.codes).filter(x => x.dev === p.dev && x.type === door.type).sort((a, b) => a.at < b.at ? -1 : 1);
-      if (prev.length >= max){
-        const last = prev[prev.length - 1];
-        return showAdventResult(false, t(door.type === "gift" ? "adv_res_client_gift" : "adv_res_client_discount", L)
-          .replace("{n}", last.day).replace("{d}", advFmtStamp(last.at)), p.code, door);
+    const x = l.codes[p.code];
+    if (x && advStatus(x) === "used") return showAdventResult("bad", t("adv_res_used", L).replace("{d}", advFmtStamp(x.usedAt || x.at)), p.code, door);
+    if (x && advStatus(x) === "void") return showAdventResult("bad", t("adv_res_void", L).replace("{d}", advFmtStamp(x.voidAt || x.at)), p.code, door);
+    if (x && advStatus(x) === "booked"){
+      const info = `<p class="adv-result__extra">📅 ${t("adv_res_booked_for", L).replace("{d}", x.appt ? advFmt(x.appt) : "?")}<br>${advCondNote(door)}</p>`;
+      if (today > useBy){
+        return showAdventResult("bad", t("adv_res_expired", L).replace("{d}", advFmt(useBy)), p.code, door, info, [["void", "❌ " + t("adv_btn_void", L)]], p);
       }
+      return showAdventResult("info", t("adv_res_booked", L), p.code, door, info,
+        [["redeem", "✅ " + t("adv_btn_redeem", L)], ["void", "❌ " + t("adv_btn_void", L)]], p);
     }
-    l.codes[p.code] = { day:p.day, at:new Date().toISOString(), dev:p.dev, type:door.type, item:door.itemId };
-    if (!advSaveLedger(l)) return showAdventResult(false, t("adv_res_storage", L), p.code, door);
+    const refuse = advRefuseNew(p, door, l);
+    if (refuse) return showAdventResult("bad", refuse, p.code, door);
+    const maxAppt = useBy < today ? today : useBy;
+    const reserve = `<label class="adv-result__date">${t("adv_appt_date", L)}
+        <input type="date" id="advApptDate" min="${today}" max="${maxAppt}"></label>`;
+    const info = `<p class="adv-result__extra">${advCondNote(door)}<br>${t(door.homemade ? "adv_res_rule_homemade" : "adv_res_rule_book", L)
+      .replace("{book}", advFmt(advBookBy(p.day))).replace("{until}", advFmt(useBy))}</p>${reserve}`;
+    showAdventResult("ok", t("adv_res_valid_choose", L), p.code, door, info,
+      [["redeem", "✅ " + t("adv_btn_redeem_now", L)], ["book", "📅 " + t("adv_btn_book", L)]], p);
+  }
+  // write to the ledger after Sandra chose an action
+  function advAction(action, p){
+    const L = state.lang, door = advDoor(p.day), l = advLedger();
+    // in the preview the "now" follows the simulated day
+    const now = advPreview ? new Date(`${advTodayKey()}T${new Date().toTimeString().slice(0, 8)}`).toISOString() : new Date().toISOString();
+    const x = l.codes[p.code];
+    const fresh = !x;
+    if (fresh){
+      const refuse = advRefuseNew(p, door, l);            // re-check (e.g. two phones scanning at once)
+      if (refuse) return showAdventResult("bad", refuse, p.code, door);
+    }
+    const base = x || { day:p.day, dev:p.dev, type:door.type, item:door.itemId, at:now };
+    if (action === "book"){
+      const inp = $("#advApptDate"); const appt = inp ? inp.value : "";
+      const max = advUseBy(p.day);
+      if (!appt){ showToast(t("adv_appt_need", L)); if (inp) inp.focus(); return false; }
+      if (appt > max){ showToast(t("adv_appt_too_late", L).replace("{d}", advFmt(max))); return false; }
+      l.codes[p.code] = Object.assign(base, { status:"booked", appt });
+    } else if (action === "redeem"){
+      l.codes[p.code] = Object.assign(base, { status:"used", usedAt:now });
+    } else if (action === "void"){
+      if (!confirm(t("adv_void_confirm", L))) return false;
+      l.codes[p.code] = Object.assign(base, { status:"void", voidAt:now });
+    }
+    if (!advSaveLedger(l)) return showAdventResult("bad", t("adv_res_storage", L), p.code, door);
     if (navigator.vibrate) navigator.vibrate(80);
-    trackEvent("advent-redeemed");
-    const count = door.itemStock != null ? t("adv_res_count_item", L).replace("{x}", ni + 1).replace("{y}", door.itemStock)
-      : door.stock != null ? t("adv_res_count_of", L).replace("{x}", n + 1).replace("{y}", door.stock) : t("adv_res_count", L).replace("{x}", n + 1);
-    const extra = door.type !== "gift"
-      ? `<p class="adv-result__extra">📅 ${t("adv_valid_until", L)} ${advFmt(until)}<br>${advFill(t(door.type === "extra" ? "adv_res_extra_note" : "adv_res_discount_note", L), door)}</p>`
-      : `<p class="adv-result__extra">${advFill(t("adv_res_gift_note", L), door)}</p>`;
-    showAdventResult(true, t(door.type === "discount" ? "adv_res_ok_discount" : door.type === "extra" ? "adv_res_ok_extra" : "adv_res_ok_gift", L), p.code, door, `<p class="adv-result__count">${count}</p>${extra}`);
     renderSalonAdvent();
+    if (action === "void") return showAdventResult("bad", t("adv_res_voided", L), p.code, door);
+    if (action === "book"){
+      trackEvent("advent-booked");
+      return showAdventResult("ok", t("adv_res_booked_ok", L).replace("{d}", advFmt(l.codes[p.code].appt)), p.code, door,
+        `<p class="adv-result__extra">${t("adv_res_booked_hint", L)}</p>`);
+    }
+    trackEvent("advent-redeemed");
+    const n = advCountFor(l, p.day), ni = door.itemId ? advCountItem(l, door.itemId) : 0;
+    const count = door.itemStock != null ? t("adv_res_count_item", L).replace("{x}", ni).replace("{y}", door.itemStock)
+      : door.stock != null ? t("adv_res_count_of", L).replace("{x}", n).replace("{y}", door.stock) : t("adv_res_count", L).replace("{x}", n);
+    const title = door.type === "discount" ? "adv_res_ok_discount" : door.type === "extra" ? "adv_res_ok_extra" : "adv_res_ok_gift";
+    return showAdventResult("ok", t(title, L), p.code, door, `<p class="adv-result__count">${count}</p><p class="adv-result__extra">${advCondNote(door)}</p>`);
   }
 
-  function showAdventResult(ok, message, code, door, extraHtml){
+  // mood: "ok" (green), "info" (blue, a reserved voucher), "bad" (red)
+  function showAdventResult(mood, message, code, door, extraHtml, actions, p){
     const old = $("#advResultOverlay"); if (old) old.remove();
     const ov = document.createElement("div");
     ov.className = "stamp-overlay adv-result-overlay"; ov.id = "advResultOverlay";
     ov.setAttribute("role", "alertdialog"); ov.setAttribute("aria-modal", "true");
+    const mark = mood === "ok" ? "✅" : mood === "info" ? "📅" : "❌";
+    const btns = actions && actions.length
+      ? actions.map(([a, label]) => `<button type="button" class="btn ${a === "void" ? "btn--ghost adv-result__void" : "btn--primary"}" data-advres="${a}">${label}</button>`).join("")
+        + `<button type="button" class="btn btn--ghost" data-advres="close">${t("stamp_close", state.lang)}</button>`
+      : `<button type="button" class="btn btn--primary" data-advres="next">📷 ${t("adv_res_next", state.lang)}</button>
+         <button type="button" class="btn btn--ghost" data-advres="close">${t("stamp_close", state.lang)}</button>`;
     ov.innerHTML = `
-      <div class="stamp-overlay__panel adv-result adv-result--${ok ? "ok" : "bad"}">
-        <p class="adv-result__mark" aria-hidden="true">${ok ? "✅" : "❌"}</p>
+      <div class="stamp-overlay__panel adv-result adv-result--${mood}">
+        <p class="adv-result__mark" aria-hidden="true">${mark}</p>
         <p class="adv-result__msg">${message}</p>
         ${door ? `${door.photo ? `<img class="adv-result__photo" src="${door.photo}" alt="">` : ""}<p class="adv-result__gift">${door.photo ? "" : (door.type === "discount" ? "🎟️ " : door.icon + " ")}${advDoorText(door, state.lang)}</p>
-          <p class="adv-result__door">${t("adv_door_label", state.lang).replace("{n}", door.day)}</p>` : ""}
+          <p class="adv-result__door">${t("adv_door_label", state.lang).replace("{n}", door.day)} · ${advFmt(advDoorDate(door.day))}</p>` : ""}
         ${extraHtml || ""}
         <p class="adv-result__code">${code || ""}</p>
-        <div class="adv-result__btns">
-          <button type="button" class="btn btn--primary" data-advres="next">📷 ${t("adv_res_next", state.lang)}</button>
-          <button type="button" class="btn btn--ghost" data-advres="close">${t("stamp_close", state.lang)}</button>
-        </div>
+        <div class="adv-result__btns">${btns}</div>
       </div>`;
     document.body.appendChild(ov);
     ov.addEventListener("click", e => {
       const a = e.target.closest("[data-advres]");
       if (!a) return;
-      ov.remove();
-      if (a.dataset.advres === "next") openStampScanner("advent");
+      const act = a.dataset.advres;
+      if (act === "close"){ ov.remove(); return; }
+      if (act === "next"){ ov.remove(); openStampScanner("advent"); return; }
+      if (p && (act === "redeem" || act === "book" || act === "void")) advAction(act, p);
     });
+  }
+  async function advOpenFromList(code){
+    const p = await advParseCode(code);
+    if (p) advHandleCode(p);
   }
 
   function resetAdventLedger(){
     if (!confirm(t("salon_adv_reset_confirm", state.lang))) return;
-    if (advTest) advMemLedger.codes = {};
+    if (advPreview) advMemLedger.codes = {};
     else { try { localStorage.removeItem(ADV_LEDGER_KEY); } catch(e){ /* ignore */ } }
     renderSalonAdvent();
     showToast(t("salon_adv_reset_done", state.lang));
