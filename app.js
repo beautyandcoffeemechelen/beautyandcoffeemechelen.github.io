@@ -3435,7 +3435,7 @@
     const st = advDoorState(day);
     if (st === "opened"){ showAdventVoucher(day); return; }
     if (st === "missed"){ showToast(t("adv_missed_toast", state.lang)); return; }
-    if (st === "future"){ showToast(t("adv_future_toast", state.lang).replace("{n}", day)); return; }
+    if (st === "future"){ showToast(t("adv_future_toast", state.lang).replace("{n}", state.lang === "fr" && day === 1 ? "1er" : day)); return; }   // FR: "le 1er décembre"
     if (!stampCryptoAvailable()){ showToast(t("stamp_unsupported", state.lang)); return; }
     // st === "today": the client really tapped today's door
     const code = await advMakeCode(day);

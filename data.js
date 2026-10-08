@@ -1605,7 +1605,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v69 · 08/10/2026";
+const APP_VERSION = "v70 · 08/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1663,7 +1663,8 @@ const SALON_MODE_PIN = "";
      code, so each voucher works only once, and it allows at most
      maxGiftsPerClient gifts per client (= per phone).
    - LIVE SWITCH: live:false = the public sees NOTHING of the calendar
-     until liveFrom (1 December: then it goes live by itself)
+     until liveFrom (15 November: then the announcement goes live by
+     itself; the doors still only open from 1 December, each on its day)
      (no card, no #advent link). Sandra tests with the private link
        https://beautyandcoffeemechelen.github.io/?voorproef=<previewKey>
      (a bar at the top lets her pick any day). Set live:true when OK.
@@ -1701,7 +1702,7 @@ const SALON_MODE_PIN = "";
    ============================================================ */
 const ADVENT = {
   live: false,                  // true = public right away (e.g. on 15/11 for the announcement)
-  liveFrom: "2026-12-01",       // public automatically from this day, even if live is still false
+  liveFrom: "2026-11-15",       // public automatically from this day (announcement); doors only open from 1/12, each on its own day
   previewKey: "BC-XMAS-7Q4K",   // the private preview link: ?voorproef=BC-XMAS-7Q4K
   year: 2026,
   teaserFrom: "2026-11-15",     // from this day the start screen announces the calendar (when live)
