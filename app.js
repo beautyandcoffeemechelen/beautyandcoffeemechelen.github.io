@@ -3202,7 +3202,8 @@
     const item = (ADVENT.items && ADVENT.items[d.item]) || d;
     return Object.assign({}, item, { day:Number(d.day), itemId:d.item || null,
       itemStock: item.stock == null || item === d ? null : Number(item.stock),
-      stock: d.stock == null ? null : Number(d.stock) });
+      stock: d.stock == null ? null : Number(d.stock),
+      photo: ADVENT.showPhotos === true ? (item.photo || null) : null });
   }
   function advDoorText(door, lang){ return (door && (door[lang] || door.nl)) || ""; }
   function advTxt(v){ return v && typeof v === "object" ? (v[state.lang] || v.nl || "") : (v || ""); }

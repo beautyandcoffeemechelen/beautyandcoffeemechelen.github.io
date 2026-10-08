@@ -1605,7 +1605,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v66 · 08/10/2026";
+const APP_VERSION = "v67 · 08/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1711,6 +1711,7 @@ const ADVENT = {
   discountMinSpend: 60,         // discounts: only on a treatment from €60
   maxDiscountsPerClient: null,  // discounts per client (null = no limit; they are never combinable)
   maxExtrasPerClient: null,     // free extras per client (null = no limit; 1 per treatment)
+  showPhotos: false,            // true = show the product photos (assets/advent); false = icons only
   items: {
     lipbalm: { type:"gift", homemade:true, icon:"💋",
       nl:"Home made kokoslippenbalsem", en:"Home-made coconut lip balm", fr:"Baume à lèvres coco fait maison",
