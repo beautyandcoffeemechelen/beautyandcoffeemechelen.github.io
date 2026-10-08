@@ -1605,7 +1605,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v68 · 08/10/2026";
+const APP_VERSION = "v69 · 08/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1685,7 +1685,9 @@ const SALON_MODE_PIN = "";
      The salon phone refuses a scan once the stock is used up.
    - soldOut: true on an item = sold out: clients see it on their voucher
      (after you upload data.js) and the salon phone refuses it.
-   - photo: a cut-out product photo shown in the voucher's square.
+   - photo: Sandra's pencil drawing (round medallion on cream paper,
+     640×640 webp, transparent outside the circle) in assets/advent,
+     shown in the voucher's square. Also add it to ASSETS in sw.js.
    - cond (gifts): own condition instead of "a treatment from €giftMinSpend",
      e.g. the Guinot sample only with a booked facial-care workshop.
    - Salon products (type "extra"): the client sees only "highlights"
@@ -1714,13 +1716,14 @@ const ADVENT = {
   showPhotos: true,             // true = show the drawings in assets/advent; false = icons only
   items: {
     lipbalm: { type:"gift", homemade:true, icon:"💋",
-      nl:"Home made kokoslippenbalsem", en:"Home-made coconut lip balm", fr:"Baume à lèvres coco fait maison",
+      photo:"assets/advent/lipbalm-ill.webp",
+      nl:"Homemade kokoslippenbalsem", en:"Home-made coconut lip balm", fr:"Baume à lèvres coco fait maison",
       use:{ nl:"Verzorgende lippenbalsem met bijenwas, sheaboter, kokos- en ricinusolie. Breng aan op je lippen wanneer ze droog aanvoelen.",
             en:"Nourishing lip balm with beeswax, shea butter, coconut and castor oil. Apply to your lips whenever they feel dry.",
             fr:"Baume nourrissant à la cire d'abeille, au beurre de karité et aux huiles de coco et de ricin. Appliquez sur les lèvres dès qu'elles sont sèches." },
       ingredients:"Cera Alba (Beeswax), Butyrospermum Parkii (Shea) Butter, Cocos Nucifera (Coconut) Oil, Ricinus Communis (Castor) Seed Oil, Tocopherol" },
     lipscrub: { type:"gift", homemade:true, icon:"🍯",
-      nl:"Home made lipscrub", en:"Home-made lip scrub", fr:"Gommage lèvres fait maison",
+      nl:"Homemade lipscrub", en:"Home-made lip scrub", fr:"Gommage lèvres fait maison",
       use:{ nl:"Lipscrub met suiker en kokosolie. Wrijf een beetje zacht over je lippen, veeg of spoel af en breng daarna lippenbalsem aan. Niet gebruiken op kloofjes of wondjes.",
             en:"Lip scrub with sugar and coconut oil. Gently rub a little over your lips, wipe or rinse off, then apply lip balm. Do not use on cracks or wounds.",
             fr:"Gommage au sucre et à l'huile de coco. Frottez doucement un peu de produit sur les lèvres, essuyez ou rincez, puis appliquez un baume. Ne pas utiliser sur des gerçures ou plaies." },
@@ -1733,6 +1736,7 @@ const ADVENT = {
             fr:"Crème exfoliante visage à double micrograins (karité). Appliquez sur peau nettoyée, massez doucement en petits cercles et rincez à l'eau tiède. Évitez le contour des yeux. Contient de l'huile d'amande douce et du parfum." },
       ingredients:"Water/Eau (Aqua), Isopropyl Palmitate, Glyceryl Stearate SE, Cetearyl Alcohol, C10-18 Triglycerides, Glycerin, Cellulose Acetate, Propanediol, Steareth-21, Pentylene Glycol, Decyl Glucoside, Butyrospermum Parkii (Shea) Butter Extract, Prunus Amygdalus Dulcis (Sweet Almond) Oil, Cetearyl Glucoside, Tocopheryl Acetate, Fragrance (Parfum), Acrylates/C10-30 Alkyl Acrylate Crosspolymer, Caprylyl Glycol, Xanthan Gum, Butylene Glycol, BHT, Disodium EDTA, Hexyl Cinnamal, Linalool, Benzyl Benzoate, Red 4 (CI 14700), Yellow 5 (CI 19140)" },
     eyeflash: { type:"gift", icon:"👁️",
+      photo:"assets/advent/eyeflash-ill.webp",
       nl:"Ampul Janssen Cosmetics Eye Flash Fluid", en:"Janssen Cosmetics Eye Flash Fluid ampoule", fr:"Ampoule Janssen Cosmetics Eye Flash Fluid",
       use:{ nl:"Hydraterend oogserum met hyaluronzuur en peptidecomplex (1,5 ml). Doe de ampul in een tissue en breek ze met een korte ruk open. Breng de inhoud voorzichtig aan rond de ogen en klop zacht in. Alleen uitwendig gebruik.",
             en:"Hydrating eye serum with hyaluronic acid and a peptide complex (1.5 ml). Place the ampoule in a tissue and break it open with one sudden movement. Gently apply around the eyes after cleansing and pat into the skin. For external use only.",
@@ -1740,7 +1744,7 @@ const ADVENT = {
       ingredients:"Aqua (Water), Butylene Glycol, Glycerin, Pentylene Glycol, Xanthan Gum, Sodium Hyaluronate, Palmitoyl Tripeptide-1, Palmitoyl Tetrapeptide-7, Carbomer, Coco-Glucoside, Trideceth-9, PEG-40 Hydrogenated Castor Oil, PEG-7 Glyceryl Cocoate, Tetrasodium Glutamate Diacetate, Propylene Glycol, Citric Acid, Sodium Hydroxide, Parfum (Fragrance), Phenoxyethanol, Sodium Benzoate, Sodium Lactate, CI 16035 (Red 40)" },
     bathsalt: { type:"gift", homemade:true, icon:"🛁",
       photo:"assets/advent/bathsalt-ill.webp",
-      nl:"Home made badzout – geur naar keuze", en:"Home-made bath salts – scent of your choice", fr:"Sels de bain faits maison – parfum au choix",
+      nl:"Homemade badzout – geur naar keuze", en:"Home-made bath salts – scent of your choice", fr:"Sels de bain faits maison – parfum au choix",
       use:{ nl:"Je kiest in het salon zelf: lavendel (blauw) of mandarijn & lavendel (oranje). Los een handvol op in warm badwater. Niet inslikken; buiten bereik van kinderen houden; vermijd contact met de ogen.",
             en:"You choose in the salon: lavender (blue) or mandarin & lavender (orange). Dissolve a handful in warm bath water. Do not swallow; keep out of reach of children; avoid contact with the eyes.",
             fr:"Vous choisissez au salon : lavande (bleu) ou mandarine & lavande (orange). Dissolvez une poignée dans l'eau chaude du bain. Ne pas avaler ; tenir hors de portée des enfants ; éviter le contact avec les yeux." },
@@ -1749,7 +1753,7 @@ const ADVENT = {
                     fr:"<u>Lavande</u> : Sodium Bicarbonate, Magnesium Sulfate, Cocos Nucifera (Coconut) Oil, Lavandula Angustifolia (Lavender) Oil, Linalool*, Limonene*, CI 42090 · <u>Mandarine &amp; lavande</u> : Sodium Bicarbonate, Magnesium Sulfate, Cocos Nucifera (Coconut) Oil, Citrus Reticulata (Mandarin Orange) Peel Oil, Lavandula Angustifolia (Lavender) Oil, Limonene*, Linalool*, CI 19140, CI 75470" },
       ingredientsNote:{ nl:"* uit de etherische oliën", en:"* from the essential oils", fr:"* issu des huiles essentielles" } },
     bathsalt2: { type:"gift", homemade:true, icon:"🍊",
-      nl:"Home made badzout mandarijn & lavendel", en:"Home-made mandarin & lavender bath salts", fr:"Sels de bain mandarine & lavande faits maison",
+      nl:"Homemade badzout mandarijn & lavendel", en:"Home-made mandarin & lavender bath salts", fr:"Sels de bain mandarine & lavande faits maison",
       use:{ nl:"Badzout met mandarijn en lavendel. Los een handvol op in warm badwater. Niet inslikken; buiten bereik van kinderen houden; vermijd contact met de ogen.",
             en:"Bath salts with mandarin and lavender. Dissolve a handful in warm bath water. Do not swallow; keep out of reach of children; avoid contact with the eyes.",
             fr:"Sels de bain à la mandarine et à la lavande. Dissolvez une poignée dans l'eau chaude du bain. Ne pas avaler ; tenir hors de portée des enfants ; éviter le contact avec les yeux." },

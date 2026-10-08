@@ -3317,9 +3317,12 @@
     if (!advPreview) return "";
     const y = ADVENT.year;
     const opts = [[`${y}-11-20`, t("adv_pv_teaser", state.lang)]];
-    for (let d = 1; d <= 25; d++) opts.push([advKeyFor(y, 12, d), `${d} dec`]);
+    // short date in the chosen language ("7 dec" / "7 Dec" / "7 déc.")
+    const loc = { nl:"nl-BE", en:"en-GB", fr:"fr-BE" }[state.lang] || "nl-BE";
+    const lbl = key => { const { y:yy, m, d } = advParts(key); return new Date(yy, m - 1, d).toLocaleDateString(loc, { day:"numeric", month:"short" }); };
+    for (let d = 1; d <= 25; d++) opts.push([advKeyFor(y, 12, d), lbl(advKeyFor(y, 12, d))]);
     const after = " (" + t("adv_pv_after", state.lang) + ")";
-    opts.push([`${y}-12-28`, "28 dec" + after], [`${y + 1}-01-10`, "10 jan" + after], [`${y + 1}-01-20`, "20 jan" + after], [`${y + 1}-02-05`, "5 feb" + after], [`${y + 1}-03-01`, "1 mrt" + after]);
+    [`${y}-12-28`, `${y + 1}-01-10`, `${y + 1}-01-20`, `${y + 1}-02-05`, `${y + 1}-03-01`].forEach(k => opts.push([k, lbl(k) + after]));
     if (!opts.some(o => o[0] === advTest)) opts.push([advTest, advFmt(advTest)]);
     opts.sort((a, b) => a[0] < b[0] ? -1 : 1);
     return `<div class="advent-preview" data-where="${where}">
