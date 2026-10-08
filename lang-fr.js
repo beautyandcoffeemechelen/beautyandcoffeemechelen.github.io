@@ -245,6 +245,8 @@
   "adv_pv_live": "le calendrier est déjà EN LIGNE pour tous.",
   "adv_pv_title": "Aperçu",
   "adv_pv_teaser": "20 nov (annonce)",
+  "adv_pv_after": "calendrier fini",
+  "adv_ingredients_pack": "Les ingrédients figurent sur l'emballage d'origine.",
   "adv_res_count_item": "{x} sur {y} remis (au total).",
   "salon_adv_total_item": "au total",
   "adv_res_soldout_item": "Épuisé ! Les {y} exemplaire(s) de ce cadeau ont déjà été remis.",

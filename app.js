@@ -3317,7 +3317,8 @@
     const y = ADVENT.year;
     const opts = [[`${y}-11-20`, t("adv_pv_teaser", state.lang)]];
     for (let d = 1; d <= 25; d++) opts.push([advKeyFor(y, 12, d), `${d} dec`]);
-    opts.push([`${y}-12-28`, "28 dec"], [`${y + 1}-01-10`, "10 jan"], [`${y + 1}-01-20`, "20 jan"], [`${y + 1}-02-05`, "5 feb"], [`${y + 1}-03-01`, "1 mrt"]);
+    const after = " (" + t("adv_pv_after", state.lang) + ")";
+    opts.push([`${y}-12-28`, "28 dec" + after], [`${y + 1}-01-10`, "10 jan" + after], [`${y + 1}-01-20`, "20 jan" + after], [`${y + 1}-02-05`, "5 feb" + after], [`${y + 1}-03-01`, "1 mrt" + after]);
     if (!opts.some(o => o[0] === advTest)) opts.push([advTest, advFmt(advTest)]);
     opts.sort((a, b) => a[0] < b[0] ? -1 : 1);
     return `<div class="advent-preview" data-where="${where}">
@@ -3499,8 +3500,9 @@
     const hl = advTxt(door.highlights);
     const infoHtml = isGift ? `<div class="advent-voucher__info"><p>${t("adv_info_title", state.lang)}</p>
         ${use ? `<p class="advent-voucher__use">${use}</p>` : ""}
-        <p class="advent-voucher__ingr">${ingr ? `<b>${t("adv_ingredients", state.lang)}</b> ${ingr}${ingrNote ? ` <i>(${ingrNote})</i>` : ""}` : t("adv_ingredients_label", state.lang)}</p>
-        <p class="advent-voucher__ingr">${t("adv_ingredients_card", state.lang)}</p></div>`
+        ${door.noIngredients ? "" : door.ingrOnPack ? `<p class="advent-voucher__ingr">${t("adv_ingredients_pack", state.lang)}</p>`
+          : `<p class="advent-voucher__ingr">${ingr ? `<b>${t("adv_ingredients", state.lang)}</b> ${ingr}${ingrNote ? ` <i>(${ingrNote})</i>` : ""}` : t("adv_ingredients_label", state.lang)}</p>
+        <p class="advent-voucher__ingr">${t("adv_ingredients_card", state.lang)}</p>`}</div>`
       : hl ? `<div class="advent-voucher__info"><p>${t("adv_info_good", state.lang)}</p>
         <p class="advent-voucher__use">${hl}</p>
         ${door.ingredients ? `<p class="advent-voucher__ingr">${t("adv_allergy_ask", state.lang)}</p>` : ""}</div>` : "";

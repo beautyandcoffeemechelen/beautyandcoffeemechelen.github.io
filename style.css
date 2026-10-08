@@ -1105,3 +1105,7 @@ body[data-theme] .topbar{ box-shadow:0 3px 0 -1px var(--s-line); }
 @keyframes seasonFly{ 0%{ transform:translate(0,0) rotate(-4deg); } 25%{ transform:translate(30vw,-6px) rotate(4deg); } 50%{ transform:translate(60vw,4px) rotate(-4deg); } 75%{ transform:translate(90vw,-4px) rotate(4deg); } 100%{ transform:translate(115vw,0) rotate(0); } }
 @keyframes seasonWalkTop{ 0%{ transform:translateX(0); } 100%{ transform:translateX(115vw); } }
 .season-fig--bl, .season-fig--br{ font-size:24px; opacity:.85; }
+
+/* v66: preview date picker never wider than the bar */
+.advent-preview__day{ max-width:100%; min-width:0; }
+.advent-preview label{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; }

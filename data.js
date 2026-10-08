@@ -1605,7 +1605,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v65 · 08/10/2026";
+const APP_VERSION = "v66 · 08/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1759,17 +1759,17 @@ const ADVENT = {
       photo:"assets/advent/spoolie.webp",
       nl:"Mascaraborsteltje", en:"Mascara wand", fr:"Goupillon à mascara",
       use:{ nl:"Om je wimpers en wenkbrauwen mooi in model te kammen. Persoonlijk gebruik.", en:"To comb your lashes and brows into shape. For personal use.", fr:"Pour peigner cils et sourcils. Usage personnel." },
-      ingredients:"" },
+      ingredients:"", noIngredients:true },
     buffer: { type:"gift", icon:"💅",
       photo:"assets/advent/buffer.webp",
       nl:"Mini buffervijltje voor de nagels", en:"Mini nail buffer", fr:"Mini polissoir à ongles",
       use:{ nl:"Om je nagels glad te vijlen en te laten glanzen. Werk in één richting. Persoonlijk gebruik — niet delen.", en:"To smooth your nails and make them shine. Work in one direction. For personal use — do not share.", fr:"Pour lisser et faire briller les ongles. Travaillez dans un seul sens. Usage personnel — ne pas partager." },
-      ingredients:"" },
+      ingredients:"", noIngredients:true },
     eraser: { type:"gift", icon:"✏️",
       photo:"assets/advent/eraser.webp",
       nl:"Magic Eraser – correctiestift voor nagellak", en:"Magic Eraser – nail polish corrector pen", fr:"Magic Eraser – stylo correcteur de vernis",
       use:{ nl:"Veeg foutjes van nagellak langs je nagelriem weg met de punt van de stift. Niet in de ogen of op wondjes.", en:"Wipe away nail polish mistakes along the cuticle with the tip of the pen. Keep away from eyes and wounds.", fr:"Effacez les débordements de vernis le long des cuticules avec la pointe du stylo. Éviter les yeux et les plaies." },
-      ingredients:"" },
+      ingredients:"", ingrOnPack:true },
     // not behind a door at the moment (no original packaging/label left)
     clay: { type:"gift", icon:"🏺",
       nl:"Rood kleimasker uit Marokko", en:"Red Moroccan clay mask", fr:"Masque à l'argile rouge du Maroc",
