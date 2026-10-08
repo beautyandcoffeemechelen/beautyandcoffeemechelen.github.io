@@ -1605,7 +1605,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v62 · 07/10/2026";
+const APP_VERSION = "v63 · 07/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1631,21 +1631,26 @@ const SOCIAL_LINKS = {
 };
 
 /* ============================================================
-   STAMP CARD VIA QR (salon mode)
+   STAMP CARD VIA QR (salon mode) — secured with a digital signature
    Open the app on your own phone with #salon at the end of the
-   address, e.g. https://beautyandcoffeemechelen.github.io/#salon
-   It shows a QR code + 6 digits that change every 30 seconds.
-   The client scans it in her app to get a stamp (max 1 per day).
+   address. It shows a QR code that changes every 30 seconds; the
+   client scans it in her app to get a stamp (max 1 per day).
 
-   SALON_STAMP_SECRET: a random key both phones use to compute the
-   codes. Changing it makes all older codes invalid — fine, the codes
-   only live 30 seconds anyway. Do not make it short or guessable.
-   SALON_MODE_PIN: optional code asked before salon mode opens
-   (e.g. "4821"). Leave "" to open salon mode without a PIN.
-   NB: both sit in this public file — a deterrent for casual users,
-   not real security. Good enough for a coffee stamp card.
+   Only a phone that holds the PRIVATE salon key can make valid codes.
+   That key is NOT in this public file: Sandra installs it once on her
+   own phone with her personal salon link (see the separate, secret
+   PDF). Here is only the PUBLIC key: with it every client's app can
+   check that a QR really comes from the salon, but nobody can make
+   one. Lost or leaked key? Ask for a new key pair: replace
+   SALON_PUBLIC_KEY and install the new link on your phone.
+
+   ADVENT_CODE_SECRET: check digits for the advent vouchers (stops
+   typos and made-up codes; the real protection is Sandra's salon
+   phone, which accepts every voucher only once).
+   SALON_MODE_PIN: optional extra code asked before salon mode opens.
    ============================================================ */
-const SALON_STAMP_SECRET = "b97d679a76827355855fbc9eb42c73b322825d8df5456e47";
+const SALON_PUBLIC_KEY = { kty:"EC", crv:"P-256", x:"vzH_vQj12yo9Ph-G9J0bqD7vBWqI4_j0rcsuC_gvzgA", y:"t47ymdksQYYUf3-K39kVSY2GZIH2ZEvIFUKCs16LZg4" };
+const ADVENT_CODE_SECRET = "96df64c53f6c1e4bad236a7260ee1b986d9e3952377171c4";
 const SALON_MODE_PIN = "";
 
 /* ============================================================
@@ -1679,6 +1684,8 @@ const SALON_MODE_PIN = "";
    - soldOut: true on an item = sold out: clients see it on their voucher
      (after you upload data.js) and the salon phone refuses it.
    - photo: a cut-out product photo shown in the voucher's square.
+   - cond (gifts): own condition instead of "a treatment from €giftMinSpend",
+     e.g. the Guinot sample only with a booked facial-care workshop.
    - Salon products (type "extra"): the client sees only "highlights"
      (what's in it and what it's good for). The full "ingredients" list
      stays here for Sandra, for questions about allergies.
@@ -1716,6 +1723,7 @@ const ADVENT = {
             fr:"Gommage au sucre et à l'huile de coco. Frottez doucement un peu de produit sur les lèvres, essuyez ou rincez, puis appliquez un baume. Ne pas utiliser sur des gerçures ou plaies." },
       ingredients:"Sucrose, Cocos Nucifera (Coconut) Oil" },
     guinot: { type:"gift", icon:"🧴",
+      cond:{ nl:"een geboekte gelaatsverzorgingsworkshop", en:"a booked facial-care workshop", fr:"un atelier soin du visage réservé" },
       photo:"assets/advent/guinot.webp",
       nl:"Staaltje Guinot Éclat Parfait scrub", en:"Guinot Éclat Parfait scrub sample", fr:"Échantillon de gommage Guinot Éclat Parfait",
       use:{ nl:"Scrubcrème voor het gezicht met dubbele microkorrels (sheabutter). Breng aan op een gereinigde huid, masseer zacht met kleine cirkeltjes en spoel af met lauw water. Vermijd de oogcontour. Bevat zoete-amandelolie en parfum.",
@@ -1782,11 +1790,11 @@ const ADVENT = {
       photo:"assets/advent/algo-age.webp", product:"Bio Balance Algoherbal Ageing (poedermasker + Essence Gel)",
       ingredients:"Poeder (Lavender): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Lavandula Angustifolia (Lavender) Flower, Sodium Phosphate, CI 42090, Lavandula Angustifolia (Lavender) Oil. — Essence Gel (Lavender & Caviar): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Caviar Extract, Hamamelis Virginiana Extract, Lavandula Angustifolia Extract, Carbomer, Triethanolamine, Hyaluronic Acid, Hydrolyzed Collagen, Allantoin, PEG-40 Hydrogenated Castor Oil, Parfum, CI 42090, Phenoxyethanol, Limonene, Linalool, Geraniol, Alpha-Isomethyl Ionone, CI 16035",
       nl:"Gratis anti-aging peel-off masker", en:"Free anti-ageing peel-off mask", fr:"Masque peel-off anti-âge offert" },
-    peelsens: { type:"extra", icon:"🌸", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
-      highlights:{ nl:"Met kamille, aloë vera en hyaluronzuur — kalmeert en verzacht de gevoelige, snel rode huid.", en:"With chamomile, aloe vera and hyaluronic acid — calms and soothes sensitive, easily reddened skin.", fr:"À la camomille, à l'aloe vera et à l'acide hyaluronique — apaise et adoucit les peaux sensibles qui rougissent facilement." },
-      photo:"assets/advent/algo-sens.webp", product:"Bio Balance Algoherbal Sensitive (poedermasker + Essence Gel)",
-      ingredients:"Poeder (Camomile): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Chamomilla Recutita (Matricaria) Flower, Anthemis Nobilis Flower Extract, Sodium Phosphate, CI 19140, Anthemis Nobilis Flower Oil. — Essence Gel (Camomile): Aqua, Glycerin, Butylene Glycol, Aloe Barbadensis Leaf Extract, Anthemis Nobilis Flower Extract, Hydrolyzed Collagen, Carbomer, Triethanolamine, Panthenol, Allantoin, PEG-40 Hydrogenated Castor Oil, Parfum, Hyaluronic Acid, Disodium EDTA, CI 19140, Phenoxyethanol, Limonene, Linalool, Alpha-Isomethyl Ionone",
-      nl:"Gratis peel-off masker voor de gevoelige huid", en:"Free peel-off mask for sensitive skin", fr:"Masque peel-off peau sensible offert" },
+    peelsens: { type:"extra", icon:"🌹", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Met rozenblaadjes, rozenolie, aloë vera, komkommer en hyaluronzuur — kalmeert, hydrateert en verzacht de gevoelige huid.", en:"With rose petals, rose oil, aloe vera, cucumber and hyaluronic acid — calms, hydrates and softens sensitive skin.", fr:"Aux pétales de rose, à l'huile de rose, à l'aloe vera, au concombre et à l'acide hyaluronique — apaise, hydrate et adoucit les peaux sensibles." },
+      photo:"assets/advent/algo-sens.webp", product:"Bio Balance Algoherbal Sensitive – Rose (poedermasker + Essence Gel)",
+      ingredients:"Poeder (Rose): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Rosa Centifolia Flower, Sodium Phosphate, CI 16035, Rosa Rugosa Flower Oil. — Essence Gel (Rose): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Cucumis Sativus Fruit Extract, Hydrolyzed Collagen, Carbomer, Triethanolamine, PEG-40 Hydrogenated Castor Oil, Hyaluronic Acid, Parfum, Disodium EDTA, Phenoxyethanol, Limonene, Linalool, Alpha-Isomethyl Ionone, CI 16035",
+      nl:"Gratis rozen peel-off masker voor de gevoelige huid", en:"Free rose peel-off mask for sensitive skin", fr:"Masque peel-off à la rose pour peaux sensibles offert" },
     collagen: { type:"extra", icon:"🫧", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met marien collageen en haver — liftend en verstevigend, voor een zichtbaar gladdere huid.", en:"With marine collagen and oat — lifting and firming, for visibly smoother skin.", fr:"Au collagène marin et à l'avoine — liftant et raffermissant, pour une peau visiblement plus lisse." },
       photo:"assets/advent/collagen.webp", product:"Bio Balance Super Collageen Gelmasker Lifting",
@@ -1808,11 +1816,6 @@ const ADVENT = {
       photo:"assets/advent/luminoclear.webp", product:"Bio Balance LuminoClear BioCell Mask (Pigment, met AHA)",
       nl:"Gratis LuminoClear biocellulosemasker (pigmentvlekjes)", en:"Free LuminoClear biocellulose mask (pigmentation)", fr:"Masque biocellulose LuminoClear offert (taches pigmentaires)",
       ingredients:"Aqua (Water), Propylene Glycol, Glycerin, Butylene Glycol, Caprylic/Capric Triglyceride, Sodium Ascorbyl Phosphate, Sodium Stearoyl Glutamate, Lactic Acid, Parfum (Fragrance), Sodium Benzoate, 1,2-Hexanediol, Caprylyl Glycol, Xanthan Gum, Lilium Candidum Leaf Cell Extract, Sodium Phytate, Helianthus Annuus (Sunflower) Seed Oil, Linalool, Arctostaphylos Uva Ursi Leaf Extract, Geraniol, Citronellol, Limonene" },
-    peelrose: { type:"extra", icon:"🌹", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
-      highlights:{ nl:"Met rozenblaadjes, rozenolie, komkommer en hyaluronzuur — hydrateert en geeft een frisse glow.", en:"With rose petals, rose oil, cucumber and hyaluronic acid — hydrates and gives a fresh glow.", fr:"Aux pétales de rose, à l'huile de rose, au concombre et à l'acide hyaluronique — hydrate et donne un éclat frais." },
-      product:"Bio Balance Algoherbal Rose (poedermasker + Essence Gel)",
-      nl:"Gratis hydraterend rozen peel-off masker", en:"Free hydrating rose peel-off mask", fr:"Masque peel-off hydratant à la rose offert",
-      ingredients:"Poeder (Rose): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Rosa Centifolia Flower, Sodium Phosphate, CI 16035, Rosa Rugosa Flower Oil. — Essence Gel (Rose): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Cucumis Sativus Fruit Extract, Hydrolyzed Collagen, Carbomer, Triethanolamine, PEG-40 Hydrogenated Castor Oil, Hyaluronic Acid, Parfum, Disodium EDTA, Phenoxyethanol, Limonene, Linalool, Alpha-Isomethyl Ionone, CI 16035" },
     peelblueberry: { type:"extra", icon:"🫐", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met bosbes, vitamine C en kamilleolie — een kalmerend algenmasker voor de gevoelige huid.", en:"With bilberry, vitamin C and chamomile oil — a soothing seaweed mask for sensitive skin.", fr:"À la myrtille, à la vitamine C et à l'huile de camomille — un masque aux algues apaisant pour les peaux sensibles." },
       product:"Bio Balance Peel-Off Algenmasker Bosbessen (Sensitive)",
@@ -1845,7 +1848,7 @@ const ADVENT = {
     { day:17, item:"lipscrub",      stock:null },
     { day:18, item:"peelanti",      stock:null },
     { day:19, item:"eraser",        stock:null },
-    { day:20, item:"peelrose",      stock:null },
+    { day:20, item:"massage15",     stock:null },
     { day:21, item:"collagen",      stock:null },
     { day:22, item:"spapedi",       stock:null },
     { day:23, item:"luminoclear",   stock:null },

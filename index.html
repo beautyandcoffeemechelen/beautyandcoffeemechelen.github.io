@@ -2,6 +2,10 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
+<!-- SECURITY: the browser only runs code from this site (+ statistics and the
+     QR reader, pinned to one exact version). Injected scripts are blocked. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://gc.zgo.at/count.js https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://public-api.wordpress.com https://sanmakeupstudio.wordpress.com https://beautycoffee.goatcounter.com https://cdn.jsdelivr.net; media-src 'self' blob:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https: mailto:; frame-src 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Beauty &amp; Coffee — Your Match</title>
 <meta name="description" content="Where Beauty Meets Coffee — find your personal beverage &amp; treatment match.">
@@ -365,11 +369,11 @@
       <p class="practical-info__title" data-i18n="practical_info_title">📍 Praktisch om te weten</p>
       <p data-i18n="practical_info_hours">Momenteel enkel bereikbaar in het weekend, ook 's avonds — geen afspraken op weekdagen en (tijdelijk) geen huisbezoeken, wegens avondopleiding.</p>
       <p data-i18n="practical_info_parking"></p>
-      <a class="route-map" href="https://www.google.com/maps/dir/?api=1&amp;destination=Beauty%20%26%20Coffee%2C%20Barbarastraat" target="_blank" rel="noopener" data-action-track="route">
+      <a class="route-map" href="https://www.google.com/maps/dir/?api=1&amp;destination=Beauty%20%26%20Coffee%2C%20Barbarastraat" target="_blank" rel="noopener noreferrer" data-action-track="route">
         <img src="assets/route-map.svg" alt="" width="789" height="658" loading="lazy">
         <span class="route-map__caption" data-i18n="route_map_caption">Tik op het kaartje voor de route in Google Maps.</span>
       </a>
-      <a class="btn btn--outline practical-info__route" href="https://www.google.com/maps/dir/?api=1&amp;destination=Beauty%20%26%20Coffee%2C%20Barbarastraat" target="_blank" rel="noopener" data-i18n="practical_info_route">🗺️ Route in Google Maps</a>
+      <a class="btn btn--outline practical-info__route" href="https://www.google.com/maps/dir/?api=1&amp;destination=Beauty%20%26%20Coffee%2C%20Barbarastraat" target="_blank" rel="noopener noreferrer" data-i18n="practical_info_route">🗺️ Route in Google Maps</a>
     </div>
 
     <div class="social-links social-links--result" id="socialLinksResult"></div>
@@ -382,7 +386,7 @@
       <button type="button" class="btn btn--outline btn--wide" data-action="open-photo-share" data-i18n="add_photo_button">📸 Voeg een foto toe aan je moment</button>
       <button type="button" class="btn btn--primary btn--wide" data-action="share" data-i18n="share_button">Deel jouw match</button>
       <a class="btn btn--primary btn--wide" id="bookEmailCta" href="#" data-i18n="book_email_button">📩 Boek deze afspraak per mail</a>
-      <a class="btn btn--primary btn--wide" id="bookWhatsappCta" href="#" target="_blank" rel="noopener" data-i18n="book_whatsapp_button">💬 Boek deze afspraak via WhatsApp</a>
+      <a class="btn btn--primary btn--wide" id="bookWhatsappCta" href="#" target="_blank" rel="noopener noreferrer" data-i18n="book_whatsapp_button">💬 Boek deze afspraak via WhatsApp</a>
       <button type="button" class="btn btn--outline btn--wide" data-action="download" data-i18n="download_button">Download afbeelding</button>
       <button type="button" class="btn btn--outline btn--wide" data-action="add-reminder" data-i18n="reminder_button">📅 Zet een herinnering in mijn agenda</button>
       <button type="button" class="btn btn--gold-outline btn--wide" id="menuCta" data-action="open-pricelist" data-i18n="menu_cta">Bekijk menu &amp; prijzen</button>
@@ -510,10 +514,10 @@
     <div class="price-contact">
       <p class="price-contact__title" data-i18n="pricelist_contact_title">Een afspraak maken?</p>
       <p class="price-contact__hint" data-i18n="practical_info_hours">Momenteel enkel bereikbaar in het weekend.</p>
-      <a class="btn btn--primary btn--wide" id="priceWhatsapp" href="#" target="_blank" rel="noopener" data-i18n="pricelist_wa_button">💬 Stuur een WhatsApp</a>
+      <a class="btn btn--primary btn--wide" id="priceWhatsapp" href="#" target="_blank" rel="noopener noreferrer" data-i18n="pricelist_wa_button">💬 Stuur een WhatsApp</a>
       <a class="btn btn--outline btn--wide" id="priceMail" href="#" data-i18n="pricelist_mail_button">📩 Stuur een mail</a>
       <button type="button" class="btn btn--text" data-action="open-houserules" data-i18n="houserules_button">📋 Lees de huisregels</button>
-      <a class="btn btn--text" href="https://sanmakeupstudio.wordpress.com/prijslijst-beauty-coffee/" target="_blank" rel="noopener" data-i18n="pricelist_website_link">Volledige info op de website</a>
+      <a class="btn btn--text" href="https://sanmakeupstudio.wordpress.com/prijslijst-beauty-coffee/" target="_blank" rel="noopener noreferrer" data-i18n="pricelist_website_link">Volledige info op de website</a>
     </div>
     <div class="step__nav">
       <button type="button" class="btn btn--ghost" data-action="back" data-i18n="back_button">Terug</button>
@@ -530,13 +534,13 @@
 <section class="news-card" id="newsCard" hidden aria-live="polite">
   <p class="news-card__title" data-i18n="news_title">📰 Nieuw op de blog</p>
   <div class="news-card__list" id="newsList"></div>
-  <a class="btn btn--text news-card__all" id="newsAllLink" href="#" target="_blank" rel="noopener" data-i18n="news_all">Alle berichten op de website</a>
+  <a class="btn btn--text news-card__all" id="newsAllLink" href="#" target="_blank" rel="noopener noreferrer" data-i18n="news_all">Alle berichten op de website</a>
 </section>
 
 <section class="newsletter-card" id="newsletterCard">
   <p class="newsletter-card__title" data-i18n="newsletter_title">☕ Blijf op de hoogte</p>
   <p class="newsletter-card__sub" data-i18n="newsletter_sub">Nieuwe behandelingen, acties zoals de grabbelton, en workshop-data — af en toe een mailtje, nooit spam.</p>
-  <a id="newsletterWebLink" class="btn btn--primary newsletter-card__web" href="#" target="_blank" rel="noopener" data-i18n="newsletter_web_button" hidden>Inschrijven via mijn website</a>
+  <a id="newsletterWebLink" class="btn btn--primary newsletter-card__web" href="#" target="_blank" rel="noopener noreferrer" data-i18n="newsletter_web_button" hidden>Inschrijven via mijn website</a>
   <form id="newsletterForm" class="newsletter-card__form">
     <input type="email" id="newsletterEmail" class="newsletter-card__input" required autocomplete="email" data-i18n-placeholder="newsletter_placeholder" placeholder="jij@voorbeeld.be">
     <button type="submit" class="btn btn--primary" data-i18n="newsletter_button">Inschrijven</button>

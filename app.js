@@ -47,8 +47,18 @@
   const cartoonCache = { sourceUrl: null, filterId: null, resultUrl: null };
 
   /* ---------------- helpers ---------------- */
+  // Never run inside someone else's page (click-jacking): break out of frames.
+  if (window.top !== window.self){
+    // browsers often block that silently, so the app also hides itself
+    document.documentElement.style.display = "none";
+    try { window.top.location.replace(window.location.href); } catch(e){ /* stays hidden */ }
+  }
   const $ = (sel, ctx) => (ctx||document).querySelector(sel);
   const $$ = (sel, ctx) => Array.from((ctx||document).querySelectorAll(sel));
+  // Anything a person typed or that came from outside the app goes through
+  // esc() before it is put into the page, so it can never become code.
+  const esc = v => String(v == null ? "" : v).replace(/[&<>"'`]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;", "`":"&#96;" }[c]));
+  const cleanStr = (v, max) => typeof v === "string" ? v.replace(/[<>]/g, "").slice(0, max || 120) : "";
 
   function showToast(msg){
     const el = $("#toast");
@@ -984,8 +994,8 @@
     return `
       <div class="drink-pop${cut ? "" : " drink-pop--flat"} is-playing" data-action="replay-drink-pop" role="img" aria-label="${alt}">
         <div class="drink-pop__floor" aria-hidden="true"></div>
-        <div class="drink-pop__screen"><img class="drink-pop__bg" src="${photo}" alt="" data-alts='${JSON.stringify(alts)}' onerror="bcDrinkFallback(this)"></div>
-        ${cut ? `<img class="drink-pop__cut" src="${cut}" alt="" onerror="bcCutFallback(this)">` : ""}
+        <div class="drink-pop__screen"><img class="drink-pop__bg" src="${photo}" alt="" data-alts="${esc(JSON.stringify(alts))}" data-fallback="drink"></div>
+        ${cut ? `<img class="drink-pop__cut" src="${cut}" alt="" data-fallback="cut">` : ""}
         ${hot ? `<span class="drink-pop__steam" aria-hidden="true"><i></i><i></i><i></i></span>` : ""}
         <span class="drink-pop__hint">↻ ${t("drink_pop_replay", state.lang)}</span>
       </div>`;
@@ -1006,6 +1016,13 @@
     cut.remove();
     if (pop) pop.classList.add("drink-pop--flat");
   };
+  // no inline onerror="" (blocked by the security policy): one listener for all
+  document.addEventListener("error", e => {
+    const el = e.target;
+    if (!el || !el.dataset) return;
+    if (el.dataset.fallback === "drink") window.bcDrinkFallback(el);
+    else if (el.dataset.fallback === "cut") window.bcCutFallback(el);
+  }, true);
   function replayDrinkPop(el){
     el.classList.remove("is-playing");
     void el.offsetWidth; // restart the CSS animation
@@ -1320,7 +1337,7 @@
      and "Praktisch om te weten" on the result screen. */
   const ROUTE_URL = "https://www.google.com/maps/dir/?api=1&destination=Beauty%20%26%20Coffee%2C%20Barbarastraat";
   function routeMapHtml(lang){
-    return `<a class="route-map" href="${ROUTE_URL}" target="_blank" rel="noopener">
+    return `<a class="route-map" href="${ROUTE_URL}" target="_blank" rel="noopener noreferrer">
         <img src="assets/route-map.svg" alt="" width="789" height="658" loading="lazy">
         <span class="route-map__caption">${t("route_map_caption", lang)}</span>
       </a>`;
@@ -1333,14 +1350,14 @@
     const items = sec ? sec.groups[0].items.slice(0, -1) : [];   // last item points to the map itself
     body.innerHTML = `
       ${routeMapHtml(lang)}
-      <a class="btn btn--primary btn--wide findme-route" href="${ROUTE_URL}" target="_blank" rel="noopener">${t("practical_info_route", lang)}</a>
+      <a class="btn btn--primary btn--wide findme-route" href="${ROUTE_URL}" target="_blank" rel="noopener noreferrer">${t("practical_info_route", lang)}</a>
       <ul class="rules-list findme-list">${items.map(it => `<li>${it[lang]}</li>`).join("")}</ul>
       <div class="findme-contact">
         <p class="price-contact__title">${t("contact_title", lang)}</p>
         <p class="price-contact__hint">${t("contact_hint", lang)}</p>
         <div class="findme-contact__buttons">
           <a class="btn btn--primary" href="tel:+${BOOKING_WHATSAPP}" data-contact="call">${t("contact_call", lang)}</a>
-          <a class="btn btn--outline" href="https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(t("contact_wa_text", lang))}" target="_blank" rel="noopener" data-contact="whatsapp">${t("contact_whatsapp", lang)}</a>
+          <a class="btn btn--outline" href="https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(t("contact_wa_text", lang))}" target="_blank" rel="noopener noreferrer" data-contact="whatsapp">${t("contact_whatsapp", lang)}</a>
           <a class="btn btn--outline" href="mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent(t("contact_mail_subject", lang))}" data-contact="mail">${t("contact_mail", lang)}</a>
         </div>
       </div>`;
@@ -2062,8 +2079,8 @@
       </div>
       ${lang !== "nl" ? `<p class="reviews-card__note">${t("reviews_original_lang", lang)}</p>` : ""}
       <div class="reviews-card__buttons">
-        <a class="btn btn--outline" href="${G.allUrl}" target="_blank" rel="noopener" data-review="all">${t("reviews_all", lang)}</a>
-        <a class="btn btn--primary" href="${GOOGLE_REVIEW_URL}" target="_blank" rel="noopener" data-review="write">${t("reviews_write", lang)}</a>
+        <a class="btn btn--outline" href="${G.allUrl}" target="_blank" rel="noopener noreferrer" data-review="all">${t("reviews_all", lang)}</a>
+        <a class="btn btn--primary" href="${GOOGLE_REVIEW_URL}" target="_blank" rel="noopener noreferrer" data-review="write">${t("reviews_write", lang)}</a>
       </div>`;
     card.hidden = false;
     body.querySelectorAll("[data-review]").forEach(a => a.addEventListener("click", () => trackEvent("reviews-" + a.dataset.review)));
@@ -2078,11 +2095,12 @@
     list.textContent = "";
     posts.forEach(p => {
       const a = document.createElement("a");
-      a.className = "news-item"; a.href = p.url; a.target = "_blank"; a.rel = "noopener";
+      const safe = newsSafeUrl(p.url); if (!safe) return;
+      a.className = "news-item"; a.href = safe; a.target = "_blank"; a.rel = "noopener noreferrer";
       a.addEventListener("click", () => trackEvent("news-open"));
       if (p.img){
         const img = document.createElement("img");
-        img.className = "news-item__img"; img.src = p.img; img.alt = ""; img.loading = "lazy";
+        img.className = "news-item__img"; img.src = newsSafeUrl(p.img); img.alt = ""; img.loading = "lazy";
         img.addEventListener("error", () => img.remove());
         a.appendChild(img);
       }
@@ -2225,8 +2243,8 @@
   }
   function renderSocialLinks(){
     const links = [];
-    if (SOCIAL_LINKS.instagram) links.push(`<a class="social-link social-link--ig" href="${SOCIAL_LINKS.instagram}" target="_blank" rel="noopener">📷 Instagram</a>`);
-    if (SOCIAL_LINKS.facebook)  links.push(`<a class="social-link social-link--fb" href="${SOCIAL_LINKS.facebook}" target="_blank" rel="noopener">👍 Facebook</a>`);
+    if (SOCIAL_LINKS.instagram) links.push(`<a class="social-link social-link--ig" href="${SOCIAL_LINKS.instagram}" target="_blank" rel="noopener noreferrer">📷 Instagram</a>`);
+    if (SOCIAL_LINKS.facebook)  links.push(`<a class="social-link social-link--fb" href="${SOCIAL_LINKS.facebook}" target="_blank" rel="noopener noreferrer">👍 Facebook</a>`);
     const html = links.length ? `<p class="social-links__title">${t("social_follow", state.lang)}</p><div class="social-links__row">${links.join("")}</div>` : "";
     const foot = $("#socialLinks"); if (foot) foot.innerHTML = html;
     const res = $("#socialLinksResult");
@@ -2301,17 +2319,25 @@
       const json = decodeURIComponent(escape(atob(raw.replace(/-/g, "+").replace(/_/g, "/"))));
       const old = JSON.parse(json);
       if (!old || typeof old !== "object") return;
-      const union = (a, b) => Array.from(new Set([...(Array.isArray(a) ? a : []), ...(Array.isArray(b) ? b : [])]));
+      // Only accept data handed over by the old address itself (its redirect
+      // page), not from a link someone made up to get free stamps.
+      if (!/^https:\/\/sbw888\.github\.io\//.test(document.referrer || "") || localData.migratedAt) return;
+      localData.migratedAt = new Date().toISOString();
+      const strs = a => (Array.isArray(a) ? a : []).filter(x => typeof x === "string").map(x => cleanStr(x, 80)).slice(0, 300);
+      const union = (a, b) => Array.from(new Set([...strs(a), ...strs(b)]));
       const before = localData.stamps;
-      localData.stamps = Math.max(Number(localData.stamps) || 0, Math.min(Number(old.stamps) || 0, 100));
+      localData.stamps = Math.max(Number(localData.stamps) || 0, Math.min(Math.floor(Number(old.stamps)) || 0, 10));
       localData.discoveredTreatments = union(localData.discoveredTreatments, old.discoveredTreatments);
       localData.discoveredDrinks = union(localData.discoveredDrinks, old.discoveredDrinks);
       if (Array.isArray(old.favorites)){
         const keys = new Set(localData.favorites.map(f => f && f.key));
-        old.favorites.forEach(f => { if (f && f.key && !keys.has(f.key)) localData.favorites.push(f); });
+        old.favorites.slice(0, 50).forEach(f => {
+          if (!f || typeof f.key !== "string" || keys.has(f.key)) return;
+          localData.favorites.push({ key:cleanStr(f.key, 200), tname:cleanStr(f.tname), drink:cleanStr(f.drink), at:cleanStr(f.at, 40) });
+        });
       }
       ["savedProfile","savedAgeBracket","lastMatchAt","lastStampDay","newsletterSentAt"].forEach(k => {
-        if (!localData[k] && old[k]) localData[k] = old[k];
+        if (!localData[k] && old[k] && (typeof old[k] === "string" || typeof old[k] === "number")) localData[k] = typeof old[k] === "string" ? cleanStr(old[k], 40) : old[k];
       });
       saveLocalData();
       if (localData.stamps > before) setTimeout(() => showToast(t("migrate_done", state.lang)), 1200);
@@ -2486,7 +2512,8 @@
   function apptTreatLabel(a){
     if (!a) return "";
     const cat = a.tcat ? t("avoid." + a.tcat, state.lang) : "";
-    return a.ttext ? (cat ? `${cat} – ${a.ttext}` : a.ttext) : cat;
+    const txt = a.ttext ? esc(a.ttext) : "";
+    return txt ? (cat ? `${cat} – ${txt}` : txt) : cat;
   }
   function apptTitle(a){ return `Beauty & Coffee — ${apptTreatLabel(a) || t("appt_title", state.lang)}`; }
   const APPT_LOCATION = "Beauty & Coffee, Barbarastraat, Mechelen";
@@ -2528,8 +2555,8 @@
         <p class="appt-card__text">${apptTreatLabel(x.a)}</p>
         <p class="appt-card__label">${t("appt_add_to", L)}</p>
         <div class="appt-card__buttons">
-          <a class="btn btn--outline" href="${apptGoogleUrl(x.a)}" target="_blank" rel="noopener" data-cal="google">Google</a>
-          <a class="btn btn--outline" href="${apptOutlookUrl(x.a)}" target="_blank" rel="noopener" data-cal="outlook">Outlook</a>
+          <a class="btn btn--outline" href="${apptGoogleUrl(x.a)}" target="_blank" rel="noopener noreferrer" data-cal="google">Google</a>
+          <a class="btn btn--outline" href="${apptOutlookUrl(x.a)}" target="_blank" rel="noopener noreferrer" data-cal="outlook">Outlook</a>
           <button type="button" class="btn btn--outline" data-action="appt-ics" data-appt-index="${x.i}">${t("appt_other_calendar", L)}</button>
         </div>
         <div class="appt-card__buttons appt-card__buttons--small">
@@ -2618,7 +2645,7 @@
     const reviewHtml = showReview ? `
       <div class="review-prompt">
         <p>${t("review_prompt_text", state.lang)}</p>
-        <a class="btn btn--primary" href="${GOOGLE_REVIEW_URL}" target="_blank" rel="noopener" data-action="dismiss-review">${t("review_prompt_button", state.lang)}</a>
+        <a class="btn btn--primary" href="${GOOGLE_REVIEW_URL}" target="_blank" rel="noopener noreferrer" data-action="dismiss-review">${t("review_prompt_button", state.lang)}</a>
         <button type="button" class="btn btn--text" data-action="dismiss-review">${t("review_prompt_dismiss", state.lang)}</button>
       </div>` : "";
     block.innerHTML = reviewHtml + (hasHistory ? `
@@ -2633,9 +2660,9 @@
       <p class="returning-user__title returning-user__title--fav">${t("fav_title", state.lang)}</p>
       <ul class="fav-list">
         ${favs.map((f, i) => `<li class="fav-item">
-          <div class="fav-item__text"><strong>${trName(f.tname, state.lang)}</strong><span>☕ ${f.drink}</span></div>
+          <div class="fav-item__text"><strong>${esc(trName(f.tname, state.lang))}</strong><span>☕ ${esc(f.drink)}</span></div>
           <div class="fav-item__actions">
-            <a class="fav-item__book" href="${favBookHref(f)}" target="_blank" rel="noopener">${t("fav_book", state.lang)}</a>
+            <a class="fav-item__book" href="${favBookHref(f)}" target="_blank" rel="noopener noreferrer">${t("fav_book", state.lang)}</a>
             <button type="button" class="fav-item__remove" data-action="remove-fav" data-fav-index="${i}">${t("fav_remove", state.lang)}</button>
           </div>
         </li>`).join("")}
@@ -2679,16 +2706,14 @@
 
   /* ---------------- stamp card via QR (salon mode) ----------------
      Sandra opens the app with #salon on her own phone ("salon mode").
-     It shows a QR code + 6 digits that change every 30 seconds,
-     computed from SALON_STAMP_SECRET and the current time (the same
-     idea as a bank app's login codes). The client's app scans the code
-     and recomputes it; only a fresh, valid code gives a stamp. A photo
-     of an old code is useless a minute later. Max 1 stamp per day.
-     100% client-side and free: Web Crypto (built into the browser),
-     a bundled QR encoder (assets/lib/qr-encoder.js) and for scanning
-     the browser's own BarcodeDetector or else the open-source jsQR.
-     NB: the secret sits in data.js, so a programmer could in theory
-     compute codes — fine for a coffee stamp card, not bank security. */
+     It shows a QR code that changes every 30 seconds, digitally SIGNED
+     with the salon's private key (only on Sandra's phone). The client's
+     app checks the signature with the public key in data.js; only a
+     fresh, genuine code gives a stamp. A photo of an old code is useless
+     a minute later. Max 1 stamp per day. 100% client-side and free:
+     Web Crypto (built into the browser), a bundled QR encoder
+     (assets/lib/qr-encoder.js) and for scanning the browser's own
+     BarcodeDetector or else the open-source jsQR. */
   const STAMP_STEP_SECONDS = 30;
   const STAMP_QR_PREFIX = "BCSTAMP:";
   const JSQR_SOURCES = ["assets/lib/jsQR.js", "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"];
@@ -2697,57 +2722,80 @@
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
   }
-  function stampCounterNow(){ return Math.floor(Date.now() / 1000 / STAMP_STEP_SECONDS); }
 
-  let stampKeyPromise = null;
-  function getStampKey(){
-    if (!stampKeyPromise){
-      stampKeyPromise = crypto.subtle.importKey("raw", new TextEncoder().encode(SALON_STAMP_SECRET),
-        { name:"HMAC", hash:"SHA-256" }, false, ["sign"]);
-    }
-    return stampKeyPromise;
-  }
-  /* Three kinds of salon codes, each with its own (unguessable) code:
-     STAMP  = give a stamp, UNDO = take one stamp back (e.g. scanned twice),
-     REDEEM = hand in a full card for the reward (works only once). */
+  /* Salon codes are signed with ECDSA (P-256). The PRIVATE key lives only
+     on Sandra's phone (installed once via her secret #salonkey= link);
+     data.js holds only the PUBLIC key, which can check a code but cannot
+     make one. So nobody can produce a stamp code at home by reading the
+     source. QR payload: "BCS1:" + kind letter + counter (base 36) + "." + signature. */
   const SALON_CODE_KINDS = ["STAMP","REDEEM","UNDO"];
-  const SALON_QR_PREFIX = { STAMP:"BCSTAMP:", REDEEM:"BCREDEEM:", UNDO:"BCUNDO:" };
+  const SALON_KIND_LETTER = { STAMP:"S", REDEEM:"R", UNDO:"U" };
+  const SALON_KEY_STORE = "bc_salon_key_v1";
+  const b64u = bytes => btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const unb64u = str => { const s2 = str.replace(/-/g, "+").replace(/_/g, "/"); const bin = atob(s2 + "===".slice((s2.length + 3) % 4)); return Uint8Array.from(bin, c => c.charCodeAt(0)); };
+  const ECDSA = { name:"ECDSA", namedCurve:"P-256" }, ECDSA_SIGN = { name:"ECDSA", hash:"SHA-256" };
+  let salonPubKeyPromise = null, salonPrivKeyPromise = null;
+  function getSalonPubKey(){
+    if (!salonPubKeyPromise){
+      const k = SALON_PUBLIC_KEY;
+      salonPubKeyPromise = crypto.subtle.importKey("jwk", { kty:"EC", crv:"P-256", x:k.x, y:k.y, ext:true }, ECDSA, false, ["verify"]);
+    }
+    return salonPubKeyPromise;
+  }
+  function salonKeyD(){ try { const d = localStorage.getItem(SALON_KEY_STORE); return d && /^[A-Za-z0-9_-]{43}$/.test(d) ? d : null; } catch(e){ return null; } }
+  function hasSalonKey(){ return !!salonKeyD(); }
+  function getSalonPrivKey(){
+    const d = salonKeyD();
+    if (!d) return Promise.reject(new Error("no salon key"));
+    if (!salonPrivKeyPromise){
+      const k = SALON_PUBLIC_KEY;
+      salonPrivKeyPromise = crypto.subtle.importKey("jwk", { kty:"EC", crv:"P-256", x:k.x, y:k.y, d, ext:false }, ECDSA, false, ["sign"]);
+    }
+    return salonPrivKeyPromise;
+  }
+  // #salonkey=<d> : check that the key belongs to SALON_PUBLIC_KEY, then keep it on this phone
+  async function installSalonKey(d){
+    try {
+      if (!/^[A-Za-z0-9_-]{43}$/.test(d)) return false;
+      const k = SALON_PUBLIC_KEY;
+      const priv = await crypto.subtle.importKey("jwk", { kty:"EC", crv:"P-256", x:k.x, y:k.y, d, ext:false }, ECDSA, false, ["sign"]);
+      const msg = new TextEncoder().encode("BC-KEYCHECK");
+      const sig = await crypto.subtle.sign(ECDSA_SIGN, priv, msg);
+      if (!(await crypto.subtle.verify(ECDSA_SIGN, await getSalonPubKey(), sig, msg))) return false;
+      localStorage.setItem(SALON_KEY_STORE, d);
+      salonPrivKeyPromise = null;
+      return true;
+    } catch(e){ return false; }
+  }
+  function stampCounterNow(){ return Math.floor(Date.now() / 1000 / STAMP_STEP_SECONDS); }
   async function stampCodeFor(counter, kind){
-    const key = await getStampKey();
-    const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode("BC-" + (kind || "STAMP") + "|" + counter)));
-    const off = sig[sig.length - 1] & 15;   // RFC 4226-style dynamic truncation
-    const num = ((sig[off] & 127) << 24) | (sig[off+1] << 16) | (sig[off+2] << 8) | sig[off+3];
-    return String(num % 1000000).padStart(6, "0");
+    const sig = await crypto.subtle.sign(ECDSA_SIGN, await getSalonPrivKey(), new TextEncoder().encode("BC-" + kind + "|" + counter));
+    return "BCS1:" + SALON_KIND_LETTER[kind] + counter.toString(36) + "." + b64u(sig);
   }
   function stampCryptoAvailable(){
-    return !!(window.crypto && crypto.subtle && typeof SALON_STAMP_SECRET === "string" && SALON_STAMP_SECRET);
+    return !!(window.crypto && crypto.subtle && typeof SALON_PUBLIC_KEY === "object" && SALON_PUBLIC_KEY && SALON_PUBLIC_KEY.x);
   }
   // Accepts the current code and the previous ~90 s (clock differences,
   // slow scanning) plus one step ahead (a phone clock running slow).
-  async function isValidStampCode(code, kind){
-    if (!/^\d{6}$/.test(code)) return false;
-    const now = stampCounterNow();
-    for (let k = -3; k <= 1; k++){
-      if (await stampCodeFor(now + k, kind) === code) return true;
-    }
-    return false;
-  }
-  // QR payload "BCSTAMP:123456" etc. A bare 6-digit code (typed by hand)
-  // has no kind: we then check it against all three kinds.
-  function parseStampPayload(text){
-    if (!text) return null;
-    const s = String(text).trim();
-    for (const kind of SALON_CODE_KINDS){
-      if (s.startsWith(SALON_QR_PREFIX[kind])) return { kind, code: s.slice(SALON_QR_PREFIX[kind].length).trim() };
-    }
-    return /^\d{6}$/.test(s) ? { kind:null, code:s } : null;
-  }
   async function resolveSalonCode(raw){
-    const p = parseStampPayload(raw);
-    if (!p) return null;
-    const kinds = p.kind ? [p.kind] : SALON_CODE_KINDS;
-    for (const kind of kinds){ if (await isValidStampCode(p.code, kind)) return kind; }
-    return null;
+    const m = String(raw || "").trim().match(/^BCS1:([SRU])([0-9a-z]{1,10})\.([A-Za-z0-9_-]{80,90})$/);
+    if (!m) return null;
+    const kind = SALON_CODE_KINDS.find(k => SALON_KIND_LETTER[k] === m[1]);
+    const counter = parseInt(m[2], 36), now = stampCounterNow();
+    if (!(counter >= now - 3 && counter <= now + 1)) return null;
+    try {
+      const ok = await crypto.subtle.verify(ECDSA_SIGN, await getSalonPubKey(), unb64u(m[3]), new TextEncoder().encode("BC-" + kind + "|" + counter));
+      return ok ? kind : null;
+    } catch(e){ return null; }
+  }
+  // advent vouchers: HMAC check digits (see ADVENT_CODE_SECRET in data.js)
+  let advKeyPromise = null;
+  function getAdvKey(){
+    if (!advKeyPromise){
+      advKeyPromise = crypto.subtle.importKey("raw", new TextEncoder().encode(ADVENT_CODE_SECRET),
+        { name:"HMAC", hash:"SHA-256" }, false, ["sign"]);
+    }
+    return advKeyPromise;
   }
 
   function loadScript(src){
@@ -2793,13 +2841,11 @@
           <video id="stampScanVideo" playsinline autoplay muted></video>
           <span class="stamp-scan__frame" aria-hidden="true"></span>
         </div>
-        <label class="stamp-scan__label" for="stampCodeInput">${t(isAdv ? "adv_manual_label" : "stamp_manual_label", state.lang)}</label>
-        <div class="stamp-scan__manual${isAdv ? " stamp-scan__manual--adv" : ""}">
-          ${isAdv
-            ? `<input id="stampCodeInput" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="20" placeholder="A07-XXXXX-XXXX">`
-            : `<input id="stampCodeInput" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" placeholder="000000">`}
+        ${isAdv ? `<label class="stamp-scan__label" for="stampCodeInput">${t("adv_manual_label", state.lang)}</label>
+        <div class="stamp-scan__manual stamp-scan__manual--adv">
+          <input id="stampCodeInput" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="20" placeholder="A07-XXXXX-XXXX">
           <button type="button" class="btn btn--primary btn--sm" data-stamp="manual">${t("stamp_manual_button", state.lang)}</button>
-        </div>
+        </div>` : `<p class="stamp-scan__label">${t("stamp_qr_only", state.lang)}</p>`}
       </div>`;
     document.body.appendChild(ov);
     ov.addEventListener("click", e => {
@@ -2807,7 +2853,7 @@
       if (e.target === ov || (a && a.dataset.stamp === "close")) closeStampScanner();
       else if (a && a.dataset.stamp === "manual") submitScannedCode($("#stampCodeInput").value, "manual");
     });
-    $("#stampCodeInput").addEventListener("keydown", e => { if (e.key === "Enter") submitScannedCode(e.target.value, "manual"); });
+    const ci = $("#stampCodeInput"); if (ci) ci.addEventListener("keydown", e => { if (e.key === "Enter") submitScannedCode(e.target.value, "manual"); });
     startStampCamera();
   }
 
@@ -2940,6 +2986,7 @@
     }
     const ok = await loadFirstScript(["assets/lib/qr-encoder.js"], () => !!window.BCQRCode);
     if (!ok){ showToast(t("stamp_unsupported", state.lang)); return; }
+    if (!hasSalonKey()){ showSalonNoKey(); return; }
     closeSalonMode();
     const ov = document.createElement("div");
     ov.className = "stamp-overlay stamp-overlay--salon"; ov.id = "salonOverlay";
@@ -2952,7 +2999,7 @@
         </div>
         <p class="salon-mode-hint" id="salonModeHint">${t("salon_mode_hint_" + salonMode.kind.toLowerCase(), state.lang)}</p>
         <canvas id="salonQr" class="salon-qr salon-qr--${salonMode.kind.toLowerCase()}" width="600" height="600"></canvas>
-        <p class="salon-code" id="salonCode">······</p>
+        <p class="salon-code" id="salonCode" hidden></p>
         <div class="salon-timer"><div class="salon-timer__fill" id="salonTimerFill"></div></div>
         <p class="stamp-overlay__hint" id="salonHint">${t("salon_hint", state.lang)}</p>
         <div class="salon-adv" id="salonAdvent" hidden></div>
@@ -2988,9 +3035,37 @@
     const isAdv = salonMode.kind === "ADVENT";
     const hint = $("#salonModeHint"); if (hint) hint.textContent = t("salon_mode_hint_" + salonMode.kind.toLowerCase(), state.lang);
     const qr = $("#salonQr"); if (qr){ qr.className = "salon-qr salon-qr--" + salonMode.kind.toLowerCase(); qr.hidden = isAdv; }
-    ["#salonCode", "#salonHint"].forEach(sel => { const el = $(sel); if (el) el.hidden = isAdv; });
+    const hintEl = $("#salonHint"); if (hintEl) hintEl.hidden = isAdv;
     const timer = $("#salonOverlay .salon-timer"); if (timer) timer.hidden = isAdv;
     const box = $("#salonAdvent"); if (box){ box.hidden = !isAdv; if (isAdv) renderSalonAdvent(); }
+  }
+
+  // salon mode on a phone without the private key: explain, show nothing usable
+  function showSalonNoKey(){
+    closeSalonMode();
+    const ov = document.createElement("div");
+    ov.className = "stamp-overlay stamp-overlay--salon"; ov.id = "salonOverlay";
+    ov.innerHTML = `<div class="stamp-overlay__panel">
+        <button type="button" class="stamp-overlay__close" data-salon="close" aria-label="${t("stamp_close", state.lang)}">✕</button>
+        <p class="stamp-overlay__title">🔒 ${t("salon_nokey_title", state.lang)}</p>
+        <p class="stamp-overlay__hint">${t("salon_nokey_text", state.lang)}</p>
+        <label class="stamp-scan__label" for="salonKeyInput">${t("salon_key_paste", state.lang)}</label>
+        <div class="stamp-scan__manual stamp-scan__manual--adv">
+          <input id="salonKeyInput" type="password" autocomplete="off" spellcheck="false" maxlength="200">
+          <button type="button" class="btn btn--primary btn--sm" data-salonkey="save">OK</button>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener("click", async e => {
+      if (e.target.closest('[data-salonkey="save"]')){
+        const v = ($("#salonKeyInput").value || "").trim().replace(/^.*#salonkey=/, "");
+        const ok = await installSalonKey(v);
+        showToast(t(ok ? "salon_key_ok" : "salon_key_bad", state.lang));
+        if (ok) openSalonMode();
+        return;
+      }
+      if (e.target === ov || e.target.closest("[data-salon]")) closeSalonMode();
+    });
   }
 
   async function tickSalonMode(){
@@ -3005,8 +3080,7 @@
     const kind = salonMode.kind;
     const code = await stampCodeFor(counter, kind);
     if (kind !== salonMode.kind || kind === "ADVENT") return;            // mode switched while computing
-    const codeEl = $("#salonCode"); if (codeEl) codeEl.textContent = `${code.slice(0,3)} ${code.slice(3)}`;
-    drawQrToCanvas($("#salonQr"), SALON_QR_PREFIX[kind] + code);
+    drawQrToCanvas($("#salonQr"), code);
   }
 
   function drawQrToCanvas(canvas, text){
@@ -3036,6 +3110,15 @@
     if (r) trackEvent("route-maps");
   });
   function checkSalonHash(){
+    const mk = location.hash.match(/^#salonkey=([A-Za-z0-9_-]{43})$/);
+    if (mk){
+      window.history.replaceState(null, "", location.pathname + location.search);   // don't leave the key in the address bar
+      installSalonKey(mk[1]).then(ok => {
+        showToast(t(ok ? "salon_key_ok" : "salon_key_bad", state.lang));
+        if (ok) openSalonMode();
+      });
+      return;
+    }
     if (location.hash === "#salon") openSalonMode();
     // direct link to the stamp card, e.g. a QR poster in the salon:
     // https://beautyandcoffeemechelen.github.io/#stempelkaart
@@ -3166,6 +3249,7 @@
   function advFill(txt, door){
     const L = state.lang;
     let s = String(txt || "")
+      .replace(/\{cond\}/g, door && door.cond ? (door.cond[L] || door.cond.nl) : t("adv_cond_default", L))
       .replace(/\{gmin\}/g, ADVENT.giftMinSpend || 0)
       .replace(/\{dmin\}/g, ADVENT.discountMinSpend || 0)
       .replace(/\{max\}/g, ADVENT.maxGiftsPerClient || 1)
@@ -3183,7 +3267,7 @@
   }
 
   async function advCheck(prefix, day, id){
-    const key = await getStampKey();
+    const key = await getAdvKey();
     const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`BC-ADVENT|${prefix}|${ADVENT.year}|${day}|${id}`)));
     return Array.from(sig.slice(0, 4)).map(b => ADV_ALPHABET[b % 32]).join("");
   }
@@ -3401,7 +3485,7 @@
         ${door.ingredients ? `<p class="advent-voucher__ingr">${t("adv_allergy_ask", state.lang)}</p>` : ""}</div>` : "";
     const waText = advFill(t("adv_book_wa_text", state.lang), door).replace("{gift}", advDoorText(door, state.lang)).replace("{code}", rec.code);
     const bookHtml = expired ? "" : `<div class="advent-voucher__book">
-        <a class="btn btn--primary btn--sm" href="https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(waText)}" target="_blank" rel="noopener">💬 ${t("adv_book_wa", state.lang)}</a>
+        <a class="btn btn--primary btn--sm" href="https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(waText)}" target="_blank" rel="noopener noreferrer">💬 ${t("adv_book_wa", state.lang)}</a>
         <button type="button" class="btn btn--outline btn--sm" data-adv="copy">📋 ${t("adv_copy_code", state.lang)}</button>
       </div>`;
     const ov = document.createElement("div");
