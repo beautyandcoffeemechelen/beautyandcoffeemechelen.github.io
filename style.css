@@ -1093,3 +1093,15 @@ body[data-theme] .topbar{ box-shadow:0 3px 0 -1px var(--s-line); }
 .season-figures.is-calm .season-fig--fly, .season-figures.is-calm .season-fig--walk{ display:none; }
 @media (prefers-reduced-motion: reduce){ .season-p{ display:none; } }
 @media print{ .season-deco, .season-figures{ display:none; } }
+
+/* v65: missing advent photo → big icon; calmer season decorations */
+.adv-photo-missing{ display:inline-flex !important; align-items:center; justify-content:center; font-size:64px; line-height:1; font-style:normal; font-weight:800; color:var(--espresso); }
+.bc-voucher__photo.adv-photo-missing{ font-size:clamp(34px, 12vw, 54px); width:100%; height:100%; }
+.advent-door__photo.adv-photo-missing{ font-size:17px; }
+.adv-reveal__item .adv-photo-missing{ font-size:92px; color:#fff; }
+.season-p{ opacity:.3; }
+.season-fig--fly{ top:64px !important; font-size:22px !important; opacity:.85; animation-duration:26s !important; }
+.season-fig--walk{ top:64px !important; bottom:auto !important; font-size:22px !important; opacity:.85; animation-name:seasonWalkTop !important; animation-duration:30s !important; }
+@keyframes seasonFly{ 0%{ transform:translate(0,0) rotate(-4deg); } 25%{ transform:translate(30vw,-6px) rotate(4deg); } 50%{ transform:translate(60vw,4px) rotate(-4deg); } 75%{ transform:translate(90vw,-4px) rotate(4deg); } 100%{ transform:translate(115vw,0) rotate(0); } }
+@keyframes seasonWalkTop{ 0%{ transform:translateX(0); } 100%{ transform:translateX(115vw); } }
+.season-fig--bl, .season-fig--br{ font-size:24px; opacity:.85; }

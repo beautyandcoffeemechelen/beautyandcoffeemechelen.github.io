@@ -1023,6 +1023,13 @@
     if (!el || !el.dataset) return;
     if (el.dataset.fallback === "drink") window.bcDrinkFallback(el);
     else if (el.dataset.fallback === "cut") window.bcCutFallback(el);
+    // advent: a product photo that is missing (not uploaded yet) shows its icon, never an empty box
+    else if (el.dataset.fallback === "adv"){
+      const span = document.createElement("span");
+      span.className = (el.className || "") + " adv-photo-missing";
+      span.textContent = el.dataset.emoji || "🎁";
+      el.replaceWith(span);
+    }
   }, true);
   function replayDrinkPop(el){
     el.classList.remove("is-playing");
@@ -3276,7 +3283,7 @@
   function advKind(door){ return door.type === "gift" ? (door.homemade ? "homemade" : "gift") : door.type; }
   // icon for lists: product photo, %-value or emoji
   function advThumb(door, cls){
-    if (door.photo) return `<img class="${cls}" src="${door.photo}" alt="" loading="lazy">`;
+    if (door.photo) return `<img class="${cls}" src="${door.photo}" data-fallback="adv" data-emoji="${door.type === "discount" ? (door.value || "%") : door.icon}" alt="" loading="lazy">`;
     return `<span class="${cls}">${door.type === "discount" ? (door.value || "%") : door.icon}</span>`;
   }
 
@@ -3384,7 +3391,7 @@
     const doors = ADV_DOOR_ORDER.filter(d => advDoor(d)).map(day => {
       const st = advDoorState(day);
       const door = advDoor(day);
-      const inner = st === "opened" ? (door.photo ? `<img class="advent-door__photo" src="${door.photo}" alt="">` : `<span class="advent-door__icon" aria-hidden="true">${door.type === "discount" ? (door.value || "%") : door.icon}</span>`)
+      const inner = st === "opened" ? (door.photo ? `<img class="advent-door__photo" src="${door.photo}" data-fallback="adv" data-emoji="${door.type === "discount" ? (door.value || "%") : door.icon}" alt="">` : `<span class="advent-door__icon" aria-hidden="true">${door.type === "discount" ? (door.value || "%") : door.icon}</span>`)
         : st === "missed" ? `<span class="advent-door__tag">${t("adv_state_missed", state.lang)}</span>`
         : st === "today" ? `<span class="advent-door__tag">${t("adv_state_today", state.lang)}</span>` : "";
       const label = t("adv_door_label", state.lang).replace("{n}", day);
@@ -3443,7 +3450,7 @@
     const old = $("#advReveal"); if (old) old.remove();
     const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce){ showAdventVoucher(day); return; }
-    const item = door.photo ? `<img src="${door.photo}" alt="">`
+    const item = door.photo ? `<img src="${door.photo}" data-fallback="adv" data-emoji="${door.type === "discount" ? (door.value || "%") : door.icon}" alt="">`
       : door.type === "discount" ? `<span class="adv-reveal__ticket"><b>${door.value || "%"}</b><small>${t("adv_side_discount", state.lang)}</small></span>`
       : `<span class="adv-reveal__emoji">${door.icon}</span>${door.type === "extra" ? `<small class="adv-reveal__free">${t("adv_free", state.lang)}</small>` : ""}`;
     const ov = document.createElement("div");
@@ -3483,7 +3490,7 @@
     const late = !expired && kind !== "homemade" && today > book ? `<p class="advent-voucher__late">${advFill(t("adv_late_note", state.lang), door)}</p>` : "";
     const stockNote = door.soldOut ? `<p class="advent-voucher__soldout">😔 ${t("adv_soldout_banner", state.lang)}</p>`
       : (door.itemStock != null ? `<p class="advent-voucher__limited">${t("adv_limited", state.lang).replace("{n}", door.itemStock)}</p>` : "");
-    const boxHtml = door.photo ? `<img class="bc-voucher__photo" src="${door.photo}" alt="">`
+    const boxHtml = door.photo ? `<img class="bc-voucher__photo" src="${door.photo}" data-fallback="adv" data-emoji="${door.type === "discount" ? (door.value || "%") : door.icon}" alt="">`
       : door.type === "discount" ? `<b>${door.value || ""}</b>`
       : door.type === "extra" ? `<i aria-hidden="true">${door.icon}</i><small>${t("adv_free", state.lang)}</small>`
       : `<i aria-hidden="true">${door.icon}</i>`;
@@ -3718,7 +3725,7 @@
       <div class="stamp-overlay__panel adv-result adv-result--${mood}">
         <p class="adv-result__mark" aria-hidden="true">${mark}</p>
         <p class="adv-result__msg">${message}</p>
-        ${door ? `${door.photo ? `<img class="adv-result__photo" src="${door.photo}" alt="">` : ""}<p class="adv-result__gift">${door.photo ? "" : (door.type === "discount" ? "🎟️ " : door.icon + " ")}${advDoorText(door, state.lang)}</p>
+        ${door ? `${door.photo ? `<img class="adv-result__photo" src="${door.photo}" data-fallback="adv" data-emoji="${door.type === "discount" ? (door.value || "%") : door.icon}" alt="">` : ""}<p class="adv-result__gift">${door.photo ? "" : (door.type === "discount" ? "🎟️ " : door.icon + " ")}${advDoorText(door, state.lang)}</p>
           <p class="adv-result__door">${t("adv_door_label", state.lang).replace("{n}", door.day)} · ${advFmt(advDoorDate(door.day))}</p>` : ""}
         ${extraHtml || ""}
         <p class="adv-result__code">${code || ""}</p>
