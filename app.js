@@ -105,6 +105,7 @@
     if (state.quickPhoto && $('[data-step="photoshare"]') && $('[data-step="photoshare"]').classList.contains("is-active")) drawResultCanvas();
     if (typeof localData !== "undefined") renderReturningUserBlock();
     renderApptCard();
+    if (season.theme) renderSeasonCard();
     if (typeof renderAdventCard === "function"){ renderAdventCard(); if ($('[data-step="advent"]') && $('[data-step="advent"]').classList.contains("is-active")) renderAdvent(); }
     if ($('[data-step="myappt"]') && $('[data-step="myappt"]').classList.contains("is-active")) renderApptForm();
     renderSocialLinks();
@@ -3199,13 +3200,26 @@
   function advDoorText(door, lang){ return (door && (door[lang] || door.nl)) || ""; }
   function advTxt(v){ return v && typeof v === "object" ? (v[state.lang] || v.nl || "") : (v || ""); }
   // book the appointment (with the code) at the latest on …
-  function advBookBy(day){ return advAddDays(advDoorDate(day), ADVENT.bookWithinDays || 21); }
+  // deadlines always end on the Sunday (evening) of the week they fall in:
+  // Sandra works on Saturday and Sunday
+  function advToSunday(key){
+    const { y, m, d } = advParts(key);
+    const wd = new Date(y, m - 1, d).getDay();             // 0 = Sunday
+    return wd === 0 ? key : advAddDays(key, 7 - wd);
+  }
+  function advBookBy(day){ return advToSunday(advAddDays(advDoorDate(day), ADVENT.bookWithinDays || 21)); }
   // … and the appointment itself takes place at the latest on …
   function advUseBy(day){
     const door = advDoor(day);
-    return advAddDays(advDoorDate(day), door && door.homemade ? (ADVENT.homemadeDays || 21) : (ADVENT.useWithinDays || 42));
+    return advToSunday(advAddDays(advDoorDate(day), door && door.homemade ? (ADVENT.homemadeDays || 21) : (ADVENT.useWithinDays || 42)));
   }
-  function advLastDay(){ return advAddDays(advDoorDate(25), Math.max(ADVENT.useWithinDays || 42, ADVENT.homemadeDays || 21)); }
+  function advLastDay(){ return advToSunday(advAddDays(advDoorDate(25), Math.max(ADVENT.useWithinDays || 42, ADVENT.homemadeDays || 21))); }
+  // "zondag 27/12/2026" — deadlines show the weekday
+  function advFmtDay(key){
+    const { y, m, d } = advParts(key);
+    const loc = { nl:"nl-BE", en:"en-GB", fr:"fr-BE" }[state.lang] || "nl-BE";
+    return new Date(y, m - 1, d).toLocaleDateString(loc, { weekday:"long" }) + " " + advFmt(key);
+  }
   // "before" | "teaser" | "live" | "after" | "over"
   function advPhase(){
     if (!advHasConfig()) return "over";
@@ -3255,7 +3269,7 @@
       .replace(/\{max\}/g, ADVENT.maxGiftsPerClient || 1)
       .replace(/\{treat\}/g, door && door.treat ? (door.treat[L] || door.treat.nl) : "")
       .replace(/\{with\}/g, door && door.with ? (door.with[L] || door.with.nl) : "");
-    if (door && door.day){ s = s.replace(/\{book\}/g, advFmt(advBookBy(door.day))).replace(/\{until\}/g, advFmt(advUseBy(door.day))); }
+    if (door && door.day){ s = s.replace(/\{book\}/g, advFmtDay(advBookBy(door.day))).replace(/\{until\}/g, advFmtDay(advUseBy(door.day))); }
     return s;
   }
   // "gift" | "homemade" | "extra" | "discount" — picks the right texts
@@ -3733,6 +3747,107 @@
     showToast(t("salon_adv_reset_done", state.lang));
   }
 
+  /* ---------------- seasonal looks (see seasons.js) ----------------
+     Picks today's holiday look (or else the season) and decorates the
+     app: a welcome card with a greeting + fun fact + soap-shop link,
+     little figures in the corners and a gentle falling effect. */
+  const season = { theme:null, factIndex:0 };
+  function seasonParam(name){ try { return new URLSearchParams(location.search).get(name); } catch(e){ return null; } }
+  function seasonTodayKey(){
+    const d = seasonParam("themadag");
+    return d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : todayKey();
+  }
+  function seasonDays(a, b){                       // b - a in days (keys "YYYY-MM-DD")
+    const p = k => { const [y, m, d] = k.split("-").map(Number); return Date.UTC(y, m - 1, d); };
+    return Math.round((p(b) - p(a)) / 86400000);
+  }
+  function seasonFor(key){
+    if (typeof SEASON_THEMES === "undefined") return null;
+    const forced = seasonParam("thema");
+    if (forced){ const f = SEASON_THEMES.find(x => x.id === forced); if (f) return { theme:f, year:Number(key.slice(0, 4)) }; }
+    const y = Number(key.slice(0, 4));
+    let best = null;
+    SEASON_THEMES.filter(x => !x.season).forEach(th => {
+      [y - 1, y, y + 1].forEach(yy => {
+        const md = typeof th.date === "function" ? th.date(yy) : th.date;
+        if (!md) return;
+        const diff = seasonDays(key, `${yy}-${md}`);                     // > 0: still to come
+        if (diff > (th.from || 0) || -diff > (th.to || 0)) return;
+        const score = Math.abs(diff) + (diff >= 0 ? 0 : 0.5);              // a tie goes to the upcoming one
+        if (!best || score < best.score) best = { theme:th, year:yy, score };
+      });
+    });
+    if (best) return best;
+    const md = key.slice(5);
+    const id = md >= "12-21" || md < "03-20" ? "winter" : md < "06-21" ? "lente" : md < "09-22" ? "zomer" : "herfst";
+    return { theme:SEASON_THEMES.find(x => x.id === id), year:y };
+  }
+  function seasonText(obj, year){
+    const L = state.lang;
+    let s = (obj && (obj[L] || obj.nl)) || "";
+    if (s.includes("{animal}")){
+      const list = CHINESE_ZODIAC[L] || CHINESE_ZODIAC.nl;
+      s = s.replace(/\{animal\}/g, list[((year - 2020) % 12 + 12) % 12]);
+    }
+    return s;
+  }
+  function applySeason(){
+    if (typeof SEASONS_ON === "undefined" || !SEASONS_ON) return;
+    const pick = seasonFor(seasonTodayKey());
+    if (!pick || !pick.theme) return;
+    const changed = !season.theme || season.theme.id !== pick.theme.id;
+    season.theme = pick.theme; season.year = pick.year;
+    document.body.dataset.theme = pick.theme.id;
+    if (changed){ season.factIndex = Math.floor(Math.random() * 3); buildSeasonDeco(); }
+    renderSeasonCard();
+  }
+  function renderSeasonCard(){
+    const card = $("#seasonCard");
+    if (!card || !season.theme) return;
+    const th = season.theme, L = state.lang;
+    const facts = (th.facts && (th.facts[L] || th.facts.nl)) || [];
+    const fact = facts.length ? seasonText({ [L]:facts[season.factIndex % facts.length] }, season.year) : "";
+    const promo = seasonText(th.promo || SEASON_DEFAULT_PROMO, season.year);
+    const icons = (th.deco || []).map(d => d.e).slice(0, 3).join(" ");
+    card.className = "season-card season-card--" + th.id;
+    card.innerHTML = `
+      <p class="season-card__hello"><span aria-hidden="true">${icons}</span> ${seasonText(th.hello, season.year)}</p>
+      ${fact ? `<p class="season-card__fact"><b>${t("season_did_you_know", L)}</b> ${fact}</p>` : ""}
+      <div class="season-card__btns">
+        ${facts.length > 1 ? `<button type="button" class="btn btn--text btn--sm" data-action="season-fact">🔄 ${t("season_next_fact", L)}</button>` : ""}
+        <a class="season-card__shop" href="${SOAP_SHOP_URL}" target="_blank" rel="noopener noreferrer" data-action="season-shop">${promo}</a>
+      </div>`;
+    card.hidden = false;
+  }
+  function nextSeasonFact(){ season.factIndex++; renderSeasonCard(); trackEvent("season-fact"); }
+  function buildSeasonDeco(){
+    let layer = $("#seasonDeco");
+    if (!layer){ layer = document.createElement("div"); layer.id = "seasonDeco"; layer.className = "season-deco"; layer.setAttribute("aria-hidden", "true"); document.body.appendChild(layer); }
+    let fig = $("#seasonFigures");
+    if (!fig){ fig = document.createElement("div"); fig.id = "seasonFigures"; fig.className = "season-figures"; fig.setAttribute("aria-hidden", "true"); document.body.appendChild(fig); }
+    const th = season.theme;
+    const calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // falling / rising effect
+    let fx = "";
+    const items = th.fxItems || [];
+    if (!calm && items.length && th.fx !== "flags"){
+      const n = window.innerWidth < 600 ? 10 : 16;
+      const dir = ["lanterns", "hearts", "waves"].includes(th.fx) ? "rise" : (th.fx === "bats" ? "flutter" : "fall");
+      for (let i = 0; i < n; i++){
+        const e = items[i % items.length];
+        const left = Math.round(Math.random() * 96), size = 12 + Math.round(Math.random() * 12);
+        const dur = 10 + Math.random() * 10, delay = -Math.random() * dur;
+        fx += `<span class="season-p season-p--${dir}" style="left:${left}%;font-size:${size}px;animation-duration:${dur.toFixed(1)}s;animation-delay:${delay.toFixed(1)}s">${e}</span>`;
+      }
+    }
+    if (th.fx === "flags") fx += `<div class="season-bunting">${"<i></i><i></i><i></i>".repeat(8)}</div>`;
+    layer.innerHTML = fx;
+    fig.innerHTML = (th.deco || []).map(d => d.at === "spider"
+      ? `<span class="season-fig season-fig--spider"><i class="season-fig__thread"></i>${d.e}</span>`
+      : `<span class="season-fig season-fig--${d.at}">${d.e}</span>`).join("");
+    fig.classList.toggle("is-calm", !!calm);
+  }
+
   function resetLocalData(){
     if (!confirm(t("reset_confirm_text", state.lang))) return;
     wipeLocalData();
@@ -3804,10 +3919,12 @@
     applyI18n();
     setTimeout(maybeShowInstallBanner, 2500); // give the page a moment to settle first
     renderAdventCard();
+    applySeason();
     // a phone left open overnight: refresh the doors when the app comes back
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState !== "visible") return;
       renderAdventCard();
+      applySeason();
       if ($('[data-step="advent"]').classList.contains("is-active")) renderAdvent();
     });
     checkSalonHash();                                   // salon mode: open the app with #salon
@@ -3858,6 +3975,8 @@
       if (action === "open-houserules") goTo("houserules");
       if (action === "open-stampcard") goTo("stampcard");
       if (action === "open-advent") goTo("advent");
+      if (action === "season-fact") nextSeasonFact();
+      if (action === "season-shop") trackEvent("season-shop");
       if (action === "advent-door") adventDoorClick(Number(el.dataset.day), el);
       if (action === "open-findme") goTo("findme");
       if (action === "open-myappt" || action === "new-appt") openMyAppt(null);

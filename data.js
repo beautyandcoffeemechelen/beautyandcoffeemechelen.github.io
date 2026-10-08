@@ -1605,7 +1605,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v63 · 07/10/2026";
+const APP_VERSION = "v64 · 08/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1668,6 +1668,8 @@ const SALON_MODE_PIN = "";
        https://beautyandcoffeemechelen.github.io/?voorproef=<previewKey>
      (a bar at the top lets her pick any day). Set live:true when OK.
    - Booking rules (dates counted from the day the door was opened):
+       * every deadline ends on the SUNDAY evening of the week in which
+         it falls (Sandra works on Saturday and Sunday);
        * every voucher: book the appointment WITH the code within
          bookWithinDays (3 weeks); the appointment itself may be up to
          useWithinDays (6 weeks) later; moving or cancelling the
@@ -1777,8 +1779,11 @@ const ADVENT = {
       ingredients:"" },
     // ---- free extras with a booked treatment (valid discountDays) ----
     led: { type:"extra", icon:"💡", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
-      highlights:{ nl:"Zonder product: zacht ledlicht als extra verwennerij na je verzorging.", en:"No product: gentle LED light as an extra treat after your facial.", fr:"Sans produit : une douce lumière LED pour vous chouchouter après votre soin." },
-      nl:"Gratis 10 min LED-therapie", en:"Free 10-min LED therapy", fr:"10 min de LED offertes" },
+      photo:"assets/advent/led.webp", product:"LED-lichttunnel",
+      highlights:{ nl:"10 minuten in de LED-lichttunnel, afgestemd op jouw huid. <b>Rood</b>: stimuleert collageen en celvernieuwing — anti-aging, minder rimpels. <b>Groen</b>: vermindert roodheid. <b>Blauw</b>: zuiverend bij onzuiverheden en acné. <b>Oranje</b>: revitaliserend, voor een elastischere huid.",
+                   en:"10 minutes in the LED light tunnel, matched to your skin. <b>Red</b>: stimulates collagen and cell renewal — anti-ageing, fewer wrinkles. <b>Green</b>: reduces redness. <b>Blue</b>: purifying for blemishes and acne. <b>Orange</b>: revitalising, for more elastic skin.",
+                   fr:"10 minutes dans le tunnel de lumière LED, adapté à votre peau. <b>Rouge</b> : stimule le collagène et le renouvellement cellulaire — anti-âge, moins de rides. <b>Vert</b> : atténue les rougeurs. <b>Bleu</b> : purifiant pour les imperfections et l'acné. <b>Orange</b> : revitalisant, pour une peau plus élastique." },
+      nl:"Gratis 10 min LED-lichttherapie", en:"Free 10-min LED light therapy", fr:"10 min de luminothérapie LED offertes" },
     handspa: { type:"extra", icon:"🤲", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       nl:"Gratis handpeeling & -massage", en:"Free hand peeling & massage", fr:"Gommage & massage des mains offerts" },
     hotstoneface: { type:"extra", icon:"🪨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },

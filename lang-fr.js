@@ -191,6 +191,8 @@
   "adv_res_soldout": "Épuisé ! Le maximum de {y} pour cette porte est atteint.",
   "adv_res_storage": "Impossible d'enregistrer sur ce téléphone (stockage plein ou fenêtre privée). Non remis.",
   "adv_res_next": "Scanner le suivant",
+  "season_next_fact": "Une autre anecdote",
+  "season_did_you_know": "Le saviez-vous ?",
   "salon_key_paste": "Sandra : collez ici votre clé du salon (ou le lien complet) :",
   "adv_cond_default": "un soin d'au moins {gmin} €",
   "salon_key_bad": "Cette clé du salon n'est pas valable. Rien n'a été modifié.",
