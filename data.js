@@ -1632,25 +1632,13 @@ const CURRENT_ACTIONS = [
 ];
 
 /* ============================================================
-   CLOSED DAYS — no appointments possible on these days.
-   "MM-DD"      = every year on that date
-   "YYYY-MM-DD" = only that one day (e.g. this year only)
-   "cny"        = the first day of Chinese New Year (LUNAR_DATES in seasons.js)
-   "herfstvakantie" = every year Saturday to Friday around the Flemish autumn
-                  holiday (the Saturday before its Monday, which falls between
-                  27 October and 2 November, up to the Friday after it)
-   Shown on the season card and above the booking buttons when such a day
-   is coming up (within noticeDays days). Days next to each other are shown
-   as one period. Personal days are shown without a reason.
+   CLOSED DAYS — public holidays on which no appointments are possible.
+   "MM-DD" = every year; "cny" = first day of Chinese New Year
+   (LUNAR_DATES in seasons.js). Shown on the season card and above the
+   booking buttons when such a day is coming up (within noticeDays days).
+   Only general holidays belong here: this file is public.
    ============================================================ */
-const CLOSED_DAYS = { days:[
-  "12-25", "12-31", "01-01",            // Christmas, New Year's Eve, New Year
-  "cny",                                // first day of Chinese New Year
-  "08-15",                              // Mother's Day (Antwerp tradition), family day
-  "04-06", "12-02", "02-16",            // personal days, every year
-  "herfstvakantie",                     // away Saturday → Friday, every year
-  "2026-12-26", "2026-12-27", "2026-12-28"   // only this year
-], noticeDays:28 };
+const CLOSED_DAYS = { days:["12-25", "12-31", "01-01", "cny", "08-15"], noticeDays:28 };
 
 /* ============================================================
    BOOKING SLOTS — chips shown above the booking buttons.
@@ -1672,7 +1660,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v83 · 09/10/2026";
+const APP_VERSION = "v84 · 09/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
