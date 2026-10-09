@@ -3339,7 +3339,7 @@
     return Object.entries(SALON_PRODUCTS).filter(([id]) => !op.has(id)).map(([id, p]) => {
       if (sandra) return [id, p];
       const used = (p.usedIn || []).filter(u => !ingrIsAdventUse(u));
-      return used.length || !(p.usedIn || []).length ? [id, Object.assign({}, p, { usedIn: used })] : null;
+      return used.length ? [id, Object.assign({}, p, { usedIn: used })] : null;   // not linked yet → only Sandra sees it
     }).filter(Boolean);
   }
   // which allergy groups does the query point to? → INCI keys to look for
