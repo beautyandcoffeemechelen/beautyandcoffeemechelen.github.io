@@ -1605,7 +1605,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v73 · 09/10/2026";
+const APP_VERSION = "v74 · 09/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1730,7 +1730,6 @@ const ADVENT = {
             fr:"Gommage au sucre et à l'huile de coco. Frottez doucement un peu de produit sur les lèvres, essuyez ou rincez, puis appliquez un baume. Ne pas utiliser sur des gerçures ou plaies." },
       ingredients:"Sucrose, Cocos Nucifera (Coconut) Oil" },
     guinot: { type:"gift", icon:"🧴",
-      photo:"assets/advent/guinot-ill.webp",
       cond:{ nl:"een geboekte gelaatsverzorgingsworkshop", en:"a booked facial-care workshop", fr:"un atelier soin du visage réservé" },
       nl:"Staaltje Guinot Éclat Parfait scrub", en:"Guinot Éclat Parfait scrub sample", fr:"Échantillon de gommage Guinot Éclat Parfait",
       use:{ nl:"Scrubcrème voor het gezicht met dubbele microkorrels (sheabutter). Breng aan op een gereinigde huid, masseer zacht met kleine cirkeltjes en spoel af met lauw water. Vermijd de oogcontour. Bevat zoete-amandelolie en parfum.",
@@ -1797,11 +1796,18 @@ const ADVENT = {
       product:"Indulge BuffingSeaSalt Oil Scrub + MellowMoist Lotion (daarna Gerlasan handcrème)",
       ingredients:"Scrub: Carthamus Tinctorius Seed Oil, Helianthus Annuus Seed Oil, Vitis Vinifera Seed Oil, Prunus Armeniaca Kernel Oil, Magnesium Sulfate, Sodium Chloride, Dead Sea Salts, Macrocystis Pyrifera Extract, Dextrose Monohydrate, Fragrance. — Lotion: Aloe Barbadensis Leaf Juice, Aqua, Helianthus Annuus Seed Oil, Isopropyl Palmitate, Glyceryl Stearate SE, Cetyl Alcohol, Stearic Acid, Simmondsia Chinensis Seed Oil, Panthenol, Tocopheryl Acetate, Camellia Sinensis Leaf Extract, Glycerin, Butyrospermum Parkii Butter, Xanthan Gum, Phenoxyethanol, Ethylhexylglycerin, Fragrance. (Volledige lijsten: zie Ingrediënten & allergieën.)",
       nl:"Gratis handpeeling & -massage", en:"Free hand peeling & massage", fr:"Gommage & massage des mains offerts" },
+    paraffinmask: { type:"extra", icon:"🕯️", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Eerst een verjongend serum met marien DNA en co-enzym Q10, daarna een warm paraffinemasker dat alles laat intrekken — voor een diep gehydrateerde, stralende huid. Bevat parfum en colofonium (hars).",
+                   en:"First a rejuvenating serum with marine DNA and coenzyme Q10, then a warm paraffin mask that helps it all sink in — for deeply hydrated, radiant skin. Contains fragrance and colophony (rosin).",
+                   fr:"D'abord un sérum rajeunissant à l'ADN marin et à la coenzyme Q10, puis un masque chaud à la paraffine qui fait tout pénétrer — pour une peau profondément hydratée et éclatante. Contient du parfum et de la colophane." },
+      product:"Depilève Waxceutical DNA Rejuvenating Serum + DNA Thermo Mask (paraffine)",
+      ingredients:"Zie Ingrediënten & allergieën: DNA Thermo Mask, DNA Rejuvenating Serum (en eventueel Hya-Lift+).",
+      nl:"Gratis anti-aging paraffinemasker", en:"Free anti-ageing paraffin mask", fr:"Masque anti-âge à la paraffine offert" },
     hotstoneface: { type:"extra", icon:"🪨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       nl:"Gratis Hot Stone gelaatsmassage", en:"Free Hot Stone facial massage", fr:"Massage visage aux pierres chaudes offert" },
     facecupping: { type:"extra", icon:"✨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       nl:"Gratis liftende cuppingmassage voor het gelaat", en:"Free lifting cupping facial massage", fr:"Massage liftant aux ventouses du visage offert" },
-    peelanti: { type:"extra", icon:"🌟", stock:6, photo:"assets/advent/algoageing-ill.webp", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+    peelanti: { type:"extra", icon:"🌟", stock:6, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met kaviaarextract, hamamelis, lavendel en collageen — verstevigt en geeft de rijpere huid een frisse, gladde uitstraling.", en:"With caviar extract, witch hazel, lavender and collagen — firms and gives mature skin a fresh, smooth look.", fr:"À l'extrait de caviar, à l'hamamélis, à la lavande et au collagène — raffermit et donne aux peaux matures un aspect frais et lisse." },
       product:"Bio Balance Algoherbal Ageing (poedermasker + Essence Gel)",
       ingredients:"Poeder (Lavender): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Lavandula Angustifolia (Lavender) Flower, Sodium Phosphate, CI 42090, Lavandula Angustifolia (Lavender) Oil. — Essence Gel (Lavender & Caviar): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Caviar Extract, Hamamelis Virginiana Extract, Lavandula Angustifolia Extract, Carbomer, Triethanolamine, Hyaluronic Acid, Hydrolyzed Collagen, Allantoin, PEG-40 Hydrogenated Castor Oil, Parfum, CI 42090, Phenoxyethanol, Limonene, Linalool, Geraniol, Alpha-Isomethyl Ionone, CI 16035",
@@ -1816,7 +1822,7 @@ const ADVENT = {
       product:"Bio Balance Super Collageen Gelmasker Lifting",
       ingredients:"Aqua, Soluble Collagen, Propanediol, Phenoxyethanol, Avena Sativa (Oat) Kernel Extract, Carbomer, Caprylyl Glycol, Sodium Hydroxide, Disodium EDTA, Sodium Benzoate",
       nl:"Gratis collageenvliesmasker", en:"Free collagen sheet mask", fr:"Masque en tissu au collagène offert" },
-    goldmask: { type:"extra", icon:"👑", stock:1, photo:"assets/advent/goldmask-ill.webp", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+    goldmask: { type:"extra", icon:"👑", stock:1, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met collageen, hyaluronzuur, centella en groene thee — hydrateert en geeft een stralende, frisse look. Volgens de verpakking niet voor de gevoelige huid.", en:"With collagen, hyaluronic acid, centella and green tea — hydrates and gives a radiant, fresh look. According to the pack, not for sensitive skin.", fr:"Au collagène, à l'acide hyaluronique, à la centella et au thé vert — hydrate et donne un teint frais et éclatant. Selon l'emballage, ne convient pas aux peaux sensibles." },
       product:"Gold Bio-Collagen Facial Mask",
       ingredients:"Aqua, Glycerin, Xanthan Gum, Mica, Chondrus Crispus Powder, Titanium Dioxide, Chlorphenesin, Glucomannan, Algin, Methylparaben, Potassium Chloride, Sodium Hyaluronate, Hydrolyzed Collagen, Butylene Glycol, Centella Asiatica Extract, Polygonum Cuspidatum Root Extract, Scutellaria Baicalensis Root Extract, Camellia Sinensis Leaf Extract, Glycyrrhiza Glabra (Licorice) Root Extract, Chamomilla Recutita (Matricaria) Flower Extract, Rosmarinus Officinalis (Rosemary) Leaf Extract, Iron Oxides, Citric Acid, Potassium Citrate, PEG-40 Hydrogenated Castor Oil, Fragrance",

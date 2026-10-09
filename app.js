@@ -3216,7 +3216,8 @@
   function ingrParts(txt){ return txt.split(/[,;·—:]/).map(x => x.replace(/\*/g, "").trim()).filter(Boolean); }
   function ingrHit(part, keys){
     const n = " " + ingrNorm(part) + " ";
-    return keys.some(k => { const kk = ingrNorm(k); const i = n.indexOf(kk); return i > 0 && !/[a-z0-9]/.test(n[i - 1]); });
+    // "=word" = the whole ingredient must be that word (e.g. "=alcohol", not "Cetyl Alcohol")
+    return keys.some(k => { if (k[0] === "=") return n.trim() === ingrNorm(k.slice(1)); const kk = ingrNorm(k); const i = n.indexOf(kk); return i > 0 && !/[a-z0-9]/.test(n[i - 1]); });
   }
   function ingrTreatName(id){
     const L = state.lang;
