@@ -5,13 +5,14 @@
    Requests to other sites (GoatCounter statistics, Google Fonts, the
    WordPress.com news feed) are left
    alone: they go straight to the network and are never cached here. */
-const CACHE_NAME = "beauty-coffee-v70";
+const CACHE_NAME = "beauty-coffee-v72";
 const ASSETS = [
   "./",
   "./index.html",
   "./style.css",
   "./i18n.js",
   "./data.js",
+  "./ingredients.js",
   "./lang-fr.js",
   "./seasons.js",
   "./assets/advent/bathsalt-ill.webp",

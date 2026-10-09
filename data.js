@@ -1605,7 +1605,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v70 · 08/10/2026";
+const APP_VERSION = "v72 · 09/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1795,38 +1795,37 @@ const ADVENT = {
       nl:"Gratis Hot Stone gelaatsmassage", en:"Free Hot Stone facial massage", fr:"Massage visage aux pierres chaudes offert" },
     facecupping: { type:"extra", icon:"✨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       nl:"Gratis liftende cuppingmassage voor het gelaat", en:"Free lifting cupping facial massage", fr:"Massage liftant aux ventouses du visage offert" },
-    peelanti: { type:"extra", icon:"🌟", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+    peelanti: { type:"extra", icon:"🌟", stock:5, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met kaviaarextract, hamamelis, lavendel en collageen — verstevigt en geeft de rijpere huid een frisse, gladde uitstraling.", en:"With caviar extract, witch hazel, lavender and collagen — firms and gives mature skin a fresh, smooth look.", fr:"À l'extrait de caviar, à l'hamamélis, à la lavande et au collagène — raffermit et donne aux peaux matures un aspect frais et lisse." },
       product:"Bio Balance Algoherbal Ageing (poedermasker + Essence Gel)",
       ingredients:"Poeder (Lavender): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Lavandula Angustifolia (Lavender) Flower, Sodium Phosphate, CI 42090, Lavandula Angustifolia (Lavender) Oil. — Essence Gel (Lavender & Caviar): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Caviar Extract, Hamamelis Virginiana Extract, Lavandula Angustifolia Extract, Carbomer, Triethanolamine, Hyaluronic Acid, Hydrolyzed Collagen, Allantoin, PEG-40 Hydrogenated Castor Oil, Parfum, CI 42090, Phenoxyethanol, Limonene, Linalool, Geraniol, Alpha-Isomethyl Ionone, CI 16035",
       nl:"Gratis anti-aging peel-off masker", en:"Free anti-ageing peel-off mask", fr:"Masque peel-off anti-âge offert" },
-    peelsens: { type:"extra", icon:"🌹", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+    peelsens: { type:"extra", icon:"🌹", stock:1, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met rozenblaadjes, rozenolie, aloë vera, komkommer en hyaluronzuur — kalmeert, hydrateert en verzacht de gevoelige huid.", en:"With rose petals, rose oil, aloe vera, cucumber and hyaluronic acid — calms, hydrates and softens sensitive skin.", fr:"Aux pétales de rose, à l'huile de rose, à l'aloe vera, au concombre et à l'acide hyaluronique — apaise, hydrate et adoucit les peaux sensibles." },
       product:"Bio Balance Algoherbal Sensitive – Rose (poedermasker + Essence Gel)",
       ingredients:"Poeder (Rose): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Rosa Centifolia Flower, Sodium Phosphate, CI 16035, Rosa Rugosa Flower Oil. — Essence Gel (Rose): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Cucumis Sativus Fruit Extract, Hydrolyzed Collagen, Carbomer, Triethanolamine, PEG-40 Hydrogenated Castor Oil, Hyaluronic Acid, Parfum, Disodium EDTA, Phenoxyethanol, Limonene, Linalool, Alpha-Isomethyl Ionone, CI 16035",
       nl:"Gratis rozen peel-off masker voor de gevoelige huid", en:"Free rose peel-off mask for sensitive skin", fr:"Masque peel-off à la rose pour peaux sensibles offert" },
-    collagen: { type:"extra", icon:"🫧", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+    collagen: { type:"extra", icon:"🫧", stock:4, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met marien collageen en haver — liftend en verstevigend, voor een zichtbaar gladdere huid.", en:"With marine collagen and oat — lifting and firming, for visibly smoother skin.", fr:"Au collagène marin et à l'avoine — liftant et raffermissant, pour une peau visiblement plus lisse." },
       product:"Bio Balance Super Collageen Gelmasker Lifting",
       ingredients:"Aqua, Soluble Collagen, Propanediol, Phenoxyethanol, Avena Sativa (Oat) Kernel Extract, Carbomer, Caprylyl Glycol, Sodium Hydroxide, Disodium EDTA, Sodium Benzoate",
       nl:"Gratis collageenvliesmasker", en:"Free collagen sheet mask", fr:"Masque en tissu au collagène offert" },
     goldmask: { type:"extra", icon:"👑", stock:1, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
-      highlights:{ nl:"Met collageen, hyaluronzuur, centella en groene thee — hydrateert en geeft een stralende, frisse look.", en:"With collagen, hyaluronic acid, centella and green tea — hydrates and gives a radiant, fresh look.", fr:"Au collagène, à l'acide hyaluronique, à la centella et au thé vert — hydrate et donne un teint frais et éclatant." },
+      highlights:{ nl:"Met collageen, hyaluronzuur, centella en groene thee — hydrateert en geeft een stralende, frisse look. Volgens de verpakking niet voor de gevoelige huid.", en:"With collagen, hyaluronic acid, centella and green tea — hydrates and gives a radiant, fresh look. According to the pack, not for sensitive skin.", fr:"Au collagène, à l'acide hyaluronique, à la centella et au thé vert — hydrate et donne un teint frais et éclatant. Selon l'emballage, ne convient pas aux peaux sensibles." },
       product:"Gold Bio-Collagen Facial Mask",
-      ingredients:"Aqua, Glycerin, Xanthan Gum, Mica, Chondrus Crispus Powder, Titanium Dioxide, Chlorphenesin, …, Methylparaben, Potassium Chloride, Sodium Hyaluronate, Hydrolyzed Collagen, Butylene Glycol, Centella Asiatica Extract, Polygonum Cuspidatum Root Extract, Scutellaria Baicalensis Root Extract, Camellia Sinensis Leaf Extract, Glycyrrhiza Glabra (Licorice) Root Extract, Chamomilla Recutita (Matricaria) Flower Extract, Rosmarinus Officinalis (Rosemary) Leaf Extract, Iron Oxides, Citric Acid, Potassium Citrate, PEG-40 Hydrogenated Castor Oil, …",
-      ingredientsNote:{ nl:"… = onleesbaar op de verpakking; volledige lijst op de verpakking in het salon", en:"… = unreadable on the pack; full list on the pack in the salon", fr:"… = illisible sur l'emballage ; liste complète sur l'emballage au salon" },
+      ingredients:"Aqua, Glycerin, Xanthan Gum, Mica, Chondrus Crispus Powder, Titanium Dioxide, Chlorphenesin, Glucomannan, Algin, Methylparaben, Potassium Chloride, Sodium Hyaluronate, Hydrolyzed Collagen, Butylene Glycol, Centella Asiatica Extract, Polygonum Cuspidatum Root Extract, Scutellaria Baicalensis Root Extract, Camellia Sinensis Leaf Extract, Glycyrrhiza Glabra (Licorice) Root Extract, Chamomilla Recutita (Matricaria) Flower Extract, Rosmarinus Officinalis (Rosemary) Leaf Extract, Iron Oxides, Citric Acid, Potassium Citrate, PEG-40 Hydrogenated Castor Oil, Fragrance",
       nl:"Gratis gouden collageenmasker", en:"Free gold collagen mask", fr:"Masque au collagène doré offert" },
     spamani: { type:"extra", icon:"💅", with:{ nl:"manicure", en:"manicure", fr:"manucure" },
       nl:"Gratis SPA manicure", en:"Free SPA manicure", fr:"Manucure SPA offerte" },
     spapedi: { type:"extra", icon:"🦶", with:{ nl:"pedicure", en:"pedicure", fr:"pédicure" },
       nl:"Gratis SPA pedicure", en:"Free SPA pedicure", fr:"Pédicure SPA offerte" },
     // ---- more salon products ----
-    luminoclear: { type:"extra", icon:"✨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+    luminoclear: { type:"extra", icon:"✨", stock:2, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met vitamine C, melkzuur (AHA), witte lelie en berendruif — voor een egalere, stralende teint bij pigmentvlekjes.", en:"With vitamin C, lactic acid (AHA), white lily and bearberry — for a more even, radiant complexion with pigment spots.", fr:"À la vitamine C, à l'acide lactique (AHA), au lys blanc et à la busserole — pour un teint plus uniforme et éclatant en cas de taches pigmentaires." },
       product:"Bio Balance LuminoClear BioCell Mask (Pigment, met AHA)",
       nl:"Gratis LuminoClear biocellulosemasker (pigmentvlekjes)", en:"Free LuminoClear biocellulose mask (pigmentation)", fr:"Masque biocellulose LuminoClear offert (taches pigmentaires)",
       ingredients:"Aqua (Water), Propylene Glycol, Glycerin, Butylene Glycol, Caprylic/Capric Triglyceride, Sodium Ascorbyl Phosphate, Sodium Stearoyl Glutamate, Lactic Acid, Parfum (Fragrance), Sodium Benzoate, 1,2-Hexanediol, Caprylyl Glycol, Xanthan Gum, Lilium Candidum Leaf Cell Extract, Sodium Phytate, Helianthus Annuus (Sunflower) Seed Oil, Linalool, Arctostaphylos Uva Ursi Leaf Extract, Geraniol, Citronellol, Limonene" },
-    peelblueberry: { type:"extra", icon:"🫐", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+    peelblueberry: { type:"extra", icon:"🫐", stock:4, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met bosbes, vitamine C en kamilleolie — een kalmerend algenmasker voor de gevoelige huid.", en:"With bilberry, vitamin C and chamomile oil — a soothing seaweed mask for sensitive skin.", fr:"À la myrtille, à la vitamine C et à l'huile de camomille — un masque aux algues apaisant pour les peaux sensibles." },
       product:"Bio Balance Peel-Off Algenmasker Bosbessen (Sensitive)",
       nl:"Gratis kalmerend bosbessen peel-off masker", en:"Free soothing blueberry peel-off mask", fr:"Masque peel-off apaisant à la myrtille offert",

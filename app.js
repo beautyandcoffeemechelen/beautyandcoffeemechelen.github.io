@@ -108,6 +108,7 @@
     if (season.theme) renderSeasonCard();
     if (typeof renderAdventCard === "function"){ renderAdventCard(); if ($('[data-step="advent"]') && $('[data-step="advent"]').classList.contains("is-active")) renderAdvent(); }
     if ($('[data-step="myappt"]') && $('[data-step="myappt"]').classList.contains("is-active")) renderApptForm();
+    if ($('[data-step="ingredients"]') && $('[data-step="ingredients"]').classList.contains("is-active")) renderIngredients();
     renderSocialLinks();
     renderActions();
     if (typeof news !== "undefined" && news.posts) renderNewsCard();
@@ -123,7 +124,7 @@
   function updateProgress(name){
     const w = STEP_WEIGHTS[name] ?? 0;
     $("#progressFill").style.width = w + "%";
-    $(".progress").style.visibility = (name==="welcome" || name==="pricelist" || name==="houserules" || name==="stampcard" || name==="findme" || name==="myappt" || name==="photopick" || name==="photoshare" || name==="advent" || (name==="photo" && state.quickPhoto)) ? "hidden" : "visible";
+    $(".progress").style.visibility = (name==="welcome" || name==="pricelist" || name==="houserules" || name==="stampcard" || name==="findme" || name==="myappt" || name==="photopick" || name==="photoshare" || name==="advent" || name==="ingredients" || (name==="photo" && state.quickPhoto)) ? "hidden" : "visible";
   }
 
   function showStep(name){
@@ -136,6 +137,10 @@
     }
     if (name === "houserules") {
       renderHouseRules();
+      const il = $("#rulesIngrLink"); if (il) il.hidden = !(typeof ingrIsLive === "function" && ingrIsLive());
+    }
+    if (name === "ingredients") {
+      renderIngredients();
     }
     if (name === "stampcard") {
       renderLoyaltyBlock();
@@ -3011,6 +3016,7 @@
         <div class="salon-timer"><div class="salon-timer__fill" id="salonTimerFill"></div></div>
         <p class="stamp-overlay__hint" id="salonHint">${t("salon_hint", state.lang)}</p>
         <div class="salon-adv" id="salonAdvent" hidden></div>
+        <button type="button" class="btn btn--text btn--sm salon-ingr" data-salon-ingr="1">${t("ingr_open_btn", state.lang)}</button>
       </div>`;
     document.body.appendChild(ov);
     ov.addEventListener("click", e => {
@@ -3022,6 +3028,7 @@
         tickSalonMode();
         return;
       }
+      if (e.target.closest("[data-salon-ingr]")){ ingr.unlocked = true; closeSalonMode(); goTo("ingredients"); return; }
       const adv = e.target.closest("[data-salon-adv]");
       if (adv){
         if (adv.dataset.salonAdv === "scan") openStampScanner("advent");
@@ -3138,10 +3145,173 @@
       window.history.replaceState(null, "", location.pathname + location.search);
       if (advVisible()) goTo("advent");
     }
+    else if (/^#(ingredienten|ingrediënten|ingredients|allergie|allergieen|allergies)$/i.test(decodeURIComponent(location.hash))){
+      window.history.replaceState(null, "", location.pathname + location.search);
+      ingrOpen();
+    }
     else if (location.hash === "#stempelkaart" || location.hash === "#stamps"){
       window.history.replaceState(null, "", location.pathname + location.search);
       goTo("stampcard");
     }
+  }
+
+  /* ---------------- ingredients & allergies (ingredients.js) ----------------
+     Search an allergy → which products contain it, in which treatments,
+     what to skip or swap. Also: full lists per treatment, and what is still
+     missing. Opened via #ingredienten, a button in salon mode, and (if
+     live, see INGREDIENTS_LIVE) a link on the house-rules screen.
+     Test phase: before liveFrom only Sandra (private link or salon mode). */
+  const ingr = { tab:"search", q:"", treat:"", unlocked:false };
+  function ingrIsLive(){
+    const L = typeof INGREDIENTS_LIVE === "object" && INGREDIENTS_LIVE;
+    return !L || !L.liveFrom || todayKey() >= L.liveFrom;
+  }
+  const ingrPreview = (() => {
+    try {
+      const k = new URLSearchParams(location.search).get("voorproef");
+      return !!(k && typeof INGREDIENTS_LIVE === "object" && INGREDIENTS_LIVE.previewKey && k === INGREDIENTS_LIVE.previewKey);
+    } catch(e){ return false; }
+  })();
+  // may this phone see the screen? (live, private link, or opened from salon mode)
+  function ingrAllowed(){ return ingrIsLive() || ingrPreview || ingr.unlocked; }
+  function ingrOpen(){ if (ingrAllowed()) goTo("ingredients"); }
+  const ingrName = p => p.name && typeof p.name === "object" ? (p.name[state.lang] || p.name.nl) : (p.name || "");
+  function ingrHasConfig(){ return typeof SALON_PRODUCTS === "object" && SALON_PRODUCTS && typeof ALLERGEN_GROUPS !== "undefined"; }
+  const ingrNorm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  function ingrStrip(s){ return String(s || "").replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim(); }
+  // full INCI text of a product (own list, or taken from the advent item)
+  function ingrInci(p){
+    if (p.fromAdvent && typeof ADVENT === "object" && ADVENT.items && ADVENT.items[p.fromAdvent]){
+      const v = ADVENT.items[p.fromAdvent].ingredients;
+      return ingrStrip(v && typeof v === "object" ? (v.nl || v.en || "") : v);
+    }
+    return ingrStrip(p.inci);
+  }
+  // one ingredient per piece, without "Poeder (Lavender)" style headers
+  function ingrParts(txt){ return txt.split(/[,;·—:]/).map(x => x.replace(/\*/g, "").trim()).filter(Boolean); }
+  function ingrHit(part, keys){
+    const n = " " + ingrNorm(part) + " ";
+    return keys.some(k => { const kk = ingrNorm(k); const i = n.indexOf(kk); return i > 0 && !/[a-z0-9]/.test(n[i - 1]); });
+  }
+  function ingrTreatName(id){
+    const L = state.lang;
+    if (id === "advent") return t("ingr_use_advent", L);
+    if (id === "extra-facial") return t("ingr_use_extra_facial", L);
+    const tr = (typeof TREATMENTS_CATALOG !== "undefined") && TREATMENTS_CATALOG.find(x => x.id === id);
+    if (tr) return tr.name;
+    const a = typeof ADVENT === "object" && ADVENT.items && ADVENT.items[id];
+    if (a) return (a[L] || a.nl) + " (" + t("ingr_extra_short", L) + ")";
+    return id;
+  }
+  function ingrTreatments(){
+    const ids = (typeof TREATMENTS_CATALOG !== "undefined" ? TREATMENTS_CATALOG : []).map(x => x.id)
+      .filter(id => !(typeof INGREDIENTS_SKIP_TREATMENTS !== "undefined" && INGREDIENTS_SKIP_TREATMENTS.includes(id)));
+    Object.values(SALON_PRODUCTS).forEach(p => (p.usedIn || []).forEach(id => { if (!ids.includes(id)) ids.push(id); }));
+    return ids;
+  }
+  const ingrProductsFor = id => Object.entries(SALON_PRODUCTS).filter(([, p]) => (p.usedIn || []).includes(id));
+  // which allergy groups does the query point to? → INCI keys to look for
+  function ingrQuery(q){
+    const nq = ingrNorm(q).trim();
+    if (nq.length < 2) return null;
+    const byLabel = ALLERGEN_GROUPS.filter(g => Object.values(g.label).some(l => ingrNorm(l) === nq));
+    const groups = byLabel.length ? byLabel : ALLERGEN_GROUPS.filter(g => g.id === nq || g.terms.some(tm => { const nt = ingrNorm(tm); return nt === nq || (nq.length >= 3 && (nt.startsWith(nq) || nq.startsWith(nt) && nt.length >= 4)); }));
+    const keys = groups.length ? [...new Set(groups.flatMap(g => g.match))] : [nq];
+    return { groups, keys };
+  }
+  function renderIngredients(){
+    const body = $("#ingrBody");
+    if (!body) return;
+    const L = state.lang;
+    if (!ingrHasConfig()){ body.innerHTML = `<p class="ingr-note">${t("ingr_none_config", L)}</p>`; return; }
+    if (!ingrAllowed()){ body.innerHTML = `<p class="ingr-note">${t("ingr_not_yet", L)}</p>`; return; }
+    const tabs = ["search", "treat", "todo"].map(k => `<button type="button" class="chip${ingr.tab === k ? " is-selected" : ""}" data-action="ingr-tab" data-tab="${k}" aria-pressed="${ingr.tab === k}">${t("ingr_tab_" + k, L)}</button>`).join("");
+    let html = ingrIsLive() ? "" : `<div class="advent-preview ingr-preview"><p>🧪 <b>${t("ingr_pv_title", L)}</b> — ${t("ingr_pv_text", L).replace("{d}", advFmt(INGREDIENTS_LIVE.liveFrom))}</p></div>`;
+    html += `<div class="ingr-tabs" role="tablist">${tabs}</div>`;
+    if (ingr.tab === "search"){
+      html += `<label class="ingr-label" for="ingrSearch">${t("ingr_search_label", L)}</label>
+        <input type="search" id="ingrSearch" class="price-search" autocomplete="off" value="${esc(ingr.q)}" placeholder="${esc(t("ingr_search_ph", L))}">
+        <div class="ingr-chips">${ALLERGEN_GROUPS.map(g => `<button type="button" class="chip chip--sm" data-action="ingr-chip" data-group="${esc(g.id)}">${esc(g.label[L] || g.label.nl)}</button>`).join("")}</div>
+        <div id="ingrResults" aria-live="polite"></div>`;
+    } else if (ingr.tab === "treat"){
+      const opts = ingrTreatments().map(id => [id, ingrTreatName(id)]).sort((a, b) => a[1].localeCompare(b[1]));
+      html += `<label class="ingr-label" for="ingrTreat">${t("ingr_choose_treat", L)}</label>
+        <select id="ingrTreat" class="ingr-select"><option value="">—</option>${opts.map(o => `<option value="${esc(o[0])}"${o[0] === ingr.treat ? " selected" : ""}>${esc(o[1])}</option>`).join("")}</select>
+        <div id="ingrTreatBody"></div>`;
+    } else {
+      const noInci = Object.values(SALON_PRODUCTS).filter(p => !ingrInci(p));
+      const noProd = ingrTreatments().filter(id => !ingrProductsFor(id).length);
+      html += `<p class="ingr-note">${t("ingr_todo_intro", L)}</p>
+        <h3 class="ingr-h">${t("ingr_todo_noinci", L)} (${noInci.length})</h3>
+        <ul class="ingr-list">${noInci.map(p => `<li>${esc(ingrName(p))} — <span class="ingr-muted">${esc((p.usedIn || []).map(ingrTreatName).join(", "))}</span></li>`).join("") || `<li>✓</li>`}</ul>
+        <h3 class="ingr-h">${t("ingr_todo_noprod", L)} (${noProd.length})</h3>
+        <ul class="ingr-list ingr-list--cols">${noProd.map(id => `<li>${esc(ingrTreatName(id))}</li>`).join("") || `<li>✓</li>`}</ul>`;
+    }
+    html += `<p class="ingr-disclaimer">${t("ingr_disclaimer", L)}</p>`;
+    body.innerHTML = html;
+    if (ingr.tab === "search"){
+      const inp = $("#ingrSearch");
+      inp.addEventListener("input", () => { ingr.q = inp.value; renderIngrResults(); });
+      renderIngrResults();
+    }
+    if (ingr.tab === "treat"){
+      const sel = $("#ingrTreat");
+      sel.addEventListener("change", () => { ingr.treat = sel.value; renderIngrTreat(); });
+      renderIngrTreat();
+    }
+  }
+  function ingrProductCard(id, p, keys){
+    const L = state.lang, inci = ingrInci(p);
+    const hits = keys ? ingrParts(inci).filter(x => ingrHit(x, keys)) : [];
+    return `<div class="ingr-card">
+        <p class="ingr-card__name">${esc(ingrName(p))}</p>
+        ${hits.length ? `<p class="ingr-card__hit">⚠️ ${t("ingr_contains", L)} <b>${esc([...new Set(hits)].join(", "))}</b></p>` : ""}
+        ${p.note ? `<p class="ingr-card__note">${esc(p.note[L] || p.note.nl)}</p>` : ""}
+        <p class="ingr-muted">${t("ingr_used_in", L)} ${esc((p.usedIn || []).map(ingrTreatName).join(", ") || "—")}</p>
+        <details class="ingr-inci"><summary>${t("ingr_full_list", L)}</summary><p>${inci ? esc(inci) : t("ingr_inci_missing", L)}</p></details>
+      </div>`;
+  }
+  function renderIngrResults(){
+    const box = $("#ingrResults");
+    if (!box) return;
+    const L = state.lang, Q = ingrQuery(ingr.q);
+    if (!Q){ box.innerHTML = `<p class="ingr-muted">${t("ingr_search_hint", L)}</p>`; return; }
+    const all = Object.entries(SALON_PRODUCTS);
+    const hit = all.filter(([, p]) => ingrParts(ingrInci(p)).some(x => ingrHit(x, Q.keys)));
+    const hitIds = new Set(hit.map(([id]) => id));
+    const unknown = all.filter(([, p]) => !ingrInci(p));
+    let html = Q.groups.length ? `<p class="ingr-muted">${t("ingr_search_groups", L)} <b>${esc(Q.groups.map(g => g.label[L] || g.label.nl).join(", "))}</b></p>` : "";
+    if (!hit.length){
+      html += `<p class="ingr-ok">✅ ${t("ingr_none_found", L)}</p>`;
+    } else {
+      // per treatment: what to skip or swap
+      const treat = {};
+      hit.forEach(([id, p]) => (p.usedIn || []).forEach(tid => { (treat[tid] = treat[tid] || []).push(id); }));
+      html += `<h3 class="ingr-h">${t("ingr_per_treat", L)}</h3><ul class="ingr-list">` + Object.entries(treat).map(([tid, pids]) => {
+        const items = pids.map(pid => {
+          const p = SALON_PRODUCTS[pid];
+          const alts = p.slot ? all.filter(([aid, a]) => a.slot === p.slot && !hitIds.has(aid) && ingrInci(a) && (a.usedIn || []).some(u => (p.usedIn || []).includes(u))).map(([, a]) => ingrName(a)) : [];
+          return `<b>${esc(ingrName(p))}</b>${alts.length ? ` <span class="ingr-alt">→ ${t("ingr_alt", L)} ${esc(alts.join(" / "))}</span>` : ""}`;
+        });
+        const miss = ingrProductsFor(tid).filter(([, a]) => !ingrInci(a)).map(([, a]) => ingrName(a));
+        return `<li><span class="ingr-treat">${esc(ingrTreatName(tid))}</span> — ${t("ingr_skip", L)} ${items.join("; ")}${miss.length ? `<br><span class="ingr-warn">❓ ${t("ingr_check_too", L)} ${esc(miss.join(", "))}</span>` : ""}</li>`;
+      }).join("") + `</ul>`;
+      html += `<h3 class="ingr-h">${t("ingr_products_found", L).replace("{n}", hit.length)}</h3>` + hit.map(([id, p]) => ingrProductCard(id, p, Q.keys)).join("");
+    }
+    const noProd = ingrTreatments().filter(id => !ingrProductsFor(id).length).length;
+    if (unknown.length || noProd){
+      html += `<p class="ingr-warn">❓ ${t("ingr_incomplete", L).replace("{p}", unknown.length).replace("{t}", noProd)}</p>`;
+    }
+    box.innerHTML = html;
+  }
+  function renderIngrTreat(){
+    const box = $("#ingrTreatBody");
+    if (!box) return;
+    const L = state.lang;
+    if (!ingr.treat){ box.innerHTML = ""; return; }
+    const prods = ingrProductsFor(ingr.treat);
+    box.innerHTML = prods.length ? prods.map(([id, p]) => ingrProductCard(id, p, null)).join("") : `<p class="ingr-warn">❓ ${t("ingr_no_products", L)}</p>`;
+    box.querySelectorAll("details.ingr-inci").forEach(d => { d.open = true; });
   }
 
   /* ---------------- advent calendar (1–25 December) ----------------
@@ -3986,6 +4156,9 @@
       if (action === "reload-app") window.location.reload();
       if (action === "open-pricelist") goTo("pricelist");
       if (action === "open-houserules") goTo("houserules");
+      if (action === "open-ingredients") ingrOpen();
+      if (action === "ingr-tab"){ ingr.tab = el.dataset.tab; renderIngredients(); }
+      if (action === "ingr-chip"){ const g = ALLERGEN_GROUPS.find(x => x.id === el.dataset.group); ingr.q = g ? (g.label[state.lang] || g.label.nl) : ""; const inp = $("#ingrSearch"); if (inp) inp.value = ingr.q; renderIngrResults(); }
       if (action === "open-stampcard") goTo("stampcard");
       if (action === "open-advent") goTo("advent");
       if (action === "season-fact") nextSeasonFact();

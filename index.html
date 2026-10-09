@@ -486,6 +486,18 @@
     </div>
   </section>
 
+  <!-- INGREDIENTS & ALLERGIES (ingredients.js) — link: …/#ingredienten -->
+  <section class="step" data-step="ingredients">
+    <div class="step__head">
+      <h2 class="step__title" data-i18n="ingr_title">Ingrediënten &amp; allergieën</h2>
+      <p class="step__hint" data-i18n="ingr_intro">Zoek een allergie en zie welke producten je moet overslaan of vervangen.</p>
+    </div>
+    <div id="ingrBody" class="ingr"></div>
+    <div class="step__nav">
+      <button type="button" class="btn btn--ghost" data-action="back" data-i18n="back_button">Terug</button>
+    </div>
+  </section>
+
   <section class="step" data-step="houserules">
     <div class="step__head">
       <h2 class="step__title" data-i18n="houserules_title">Huisregels</h2>
@@ -498,6 +510,7 @@
       <a class="btn btn--primary btn--wide" id="rulesPhone" href="tel:+32499221901">📞 +32 499 22 19 01</a>
       <p class="rules-thanks" data-i18n="houserules_thanks"></p>
     </div>
+    <button type="button" class="btn btn--outline btn--wide" id="rulesIngrLink" data-action="open-ingredients" data-i18n="ingr_open_btn" hidden>🧾 Ingrediënten &amp; allergieën</button>
     <div class="step__nav">
       <button type="button" class="btn btn--ghost" data-action="back" data-i18n="back_button">Terug</button>
     </div>
@@ -574,6 +587,7 @@
 
 <script src="i18n.js"></script>
 <script src="data.js"></script>
+<script src="ingredients.js"></script>
 <script src="lang-fr.js"></script>
 <script src="seasons.js"></script>
 <script src="app.js"></script>
