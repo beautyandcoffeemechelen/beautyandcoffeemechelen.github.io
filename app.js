@@ -1452,18 +1452,44 @@
     const wraps = [$("#actionsBlock"), $("#actionsBlockWelcome")].filter(Boolean);
     if (!wraps.length || typeof CURRENT_ACTIONS === "undefined") return;
     const wrap = { set innerHTML(html){ wraps.forEach(w => { w.innerHTML = html; w.hidden = !html.trim(); }); } };
-    const d = new Date();
-    const today = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+    let today;
+    try { today = seasonTodayKey(); } catch(e){ today = todayKey(); }   // preview: follows the chosen date
     const lang = state.lang;
-    const active = CURRENT_ACTIONS.filter(a => (!a.from || today >= a.from) && (!a.until || today <= a.until));
+    const active = CURRENT_ACTIONS.map(a => actionWindow(a, today)).filter(a => a && (!a.from || today >= a.from) && (!a.until || today <= a.until))
+      .sort((x, y) => (y.yearly ? 1 : 0) - (x.yearly ? 1 : 0));   // seasonal actions first
+    const fill = (txt, a) => String(txt || "").replace(/\{value\}/g, lang === "fr" ? String(a.value || "").replace("%", " %") : (a.value || ""))
+      .replace(/\{from\}/g, actionFmt(a.dealFrom, lang)).replace(/\{until\}/g, actionFmt(a.until, lang));
     wrap.innerHTML = active.map(a => `
-      <div class="action-card">
+      <div class="action-card${a.yearly ? " action-card--" + esc(a.id) : ""}">
         <span class="action-card__icon" aria-hidden="true">${a.icon || "🎁"}</span>
         <div class="action-card__body">
-          <p class="action-card__title">${a.title[lang] || a.title.nl}</p>
-          <p class="action-card__text">${a.text[lang] || a.text.nl}</p>
+          <p class="action-card__title">${fill(a.title[lang] || a.title.nl, a)}</p>
+          <p class="action-card__text">${fill(a.text[lang] || a.text.nl, a)}</p>
         </div>
       </div>`).join("");
+  }
+  // yearly actions (e.g. Valentine): work out this year's weekends
+  function actionWindow(a, today){
+    if (!a.yearly) return a;
+    const y = a.yearly, base = Number(today.slice(0, 4));
+    const key = dt => `${dt.getUTCFullYear()}-${String(dt.getUTCMonth()+1).padStart(2,"0")}-${String(dt.getUTCDate()).padStart(2,"0")}`;
+    const win = year => {
+      const [m, d] = y.anchorMD.split("-").map(Number);
+      const anchor = new Date(Date.UTC(year, m - 1, d));
+      const sat0 = new Date(anchor.getTime() - ((anchor.getUTCDay() + 1) % 7) * 864e5);   // Saturday of the Valentine weekend
+      const first = new Date(sat0.getTime() - 7 * (y.weekendsBefore || 0) * 864e5);
+      const last = new Date(sat0.getTime() + (7 * (y.weekendsAfter || 0) + 1) * 864e5);   // a Sunday
+      return { from: key(new Date(first.getTime() - (y.showDaysBefore || 0) * 864e5)), dealFrom: key(first), until: key(last) };
+    };
+    let w = win(base);
+    if (today > w.until) w = win(base + 1);
+    return Object.assign({}, a, w);
+  }
+  function actionFmt(k, lang){
+    if (!k) return "";
+    const [y, m, d] = k.split("-").map(Number);
+    try { return new Date(y, m - 1, d).toLocaleDateString(lang === "fr" ? "fr-BE" : lang === "en" ? "en-GB" : "nl-BE", { day:"numeric", month:"long" }); }
+    catch(e){ return `${d}/${m}`; }
   }
 
   function renderResultBlocks(){
@@ -3496,7 +3522,7 @@
     let s = String(txt || "")
       .replace(/\{cond\}/g, door && door.cond ? (door.cond[L] || door.cond.nl) : t("adv_cond_default", L))
       .replace(/\{gmin\}/g, ADVENT.giftMinSpend || 0)
-      .replace(/\{dmin\}/g, ADVENT.discountMinSpend || 0)
+      .replace(/\{dmin\}/g, door && door.dmin ? door.dmin : (ADVENT.discountMinSpend || 0))
       .replace(/\{max\}/g, ADVENT.maxGiftsPerClient || 1)
       .replace(/\{treat\}/g, door && door.treat ? (door.treat[L] || door.treat.nl) : "")
       .replace(/\{with\}/g, door && door.with ? (door.with[L] || door.with.nl) : "");

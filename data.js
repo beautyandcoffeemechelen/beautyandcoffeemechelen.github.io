@@ -1582,7 +1582,22 @@ const CURRENT_ACTIONS = [
   { id:"grabbelton", icon:"🎁", from:null, until:null,
     title:{ nl:"Grabbelton", en:"Lucky dip" },
     text:{ nl:"Besteed je €75 of meer tijdens dezelfde afspraak? Dan mag je één keer grabbelen in de grabbelton. Zolang de voorraad strekt.",
-           en:"Spend €75 or more during the same appointment and you get one grab from the lucky dip. While stocks last." } }
+           en:"Spend €75 or more during the same appointment and you get one grab from the lucky dip. While stocks last." } },
+  /* EVERY YEAR AGAIN — Valentine: massage discount on the weekends around
+     14 February (Sandra works on Saturday and Sunday). The dates are worked
+     out by the app each year: weekendsBefore weekends before the Valentine
+     weekend, the Valentine weekend itself, and weekendsAfter weekends after
+     it. The banner shows from showDaysBefore days before the first weekend
+     until the last Sunday. {value} {from} {until} are filled in.
+     Preview: …/?voorproef=BC-XMAS-7Q4K&datum=2027-01-20 */
+  { id:"valentijn", icon:"💕", value:"15%",
+    yearly:{ anchorMD:"02-14", weekendsBefore:3, weekendsAfter:2, showDaysBefore:12 },
+    title:{ nl:"Valentijnsactie: {value} korting op alle massages",
+            en:"Valentine’s offer: {value} off all massages",
+            fr:"Action Saint-Valentin : {value} de réduction sur tous les massages" },
+    text:{ nl:"Verwen jezelf of je lief: {value} korting op elke massage, voor afspraken in de weekends van <b>{from} tot en met {until}</b>. Hot stone, cupping, Zweedse massage, afslankingsmassage … Vermeld “Valentijn” als je boekt. Niet combineerbaar met andere acties of kortingen.",
+           en:"Treat yourself or your love: {value} off every massage, for appointments on the weekends from <b>{from} to {until}</b>. Hot stone, cupping, Swedish massage, slimming massage … Mention “Valentine” when you book. Cannot be combined with other offers or discounts.",
+           fr:"Faites-vous plaisir ou gâtez votre moitié : {value} de réduction sur chaque massage, pour les rendez-vous les week-ends du <b>{from} au {until}</b>. Pierres chaudes, ventouses, massage suédois, massage amincissant … Mentionnez « Saint-Valentin » en réservant. Non cumulable avec d’autres actions ou réductions." } }
 ];
 
 /* ============================================================
@@ -1605,7 +1620,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v76 · 09/10/2026";
+const APP_VERSION = "v77 · 09/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1710,7 +1725,8 @@ const PREVIEW_KEY = "BC-XMAS-7Q4K";
    dates (announcement 15/11, doors 1–25/12). What is behind the doors is set
    per year in doorsByYear below. A year without a list, or a door that is
    left out, is filled automatically with 15% off a massage — one by one from
-   autoFill.massages (only massages from €60, the discount rule). */
+   autoFill.massages. Cheaper massages carry their own minimum (dmin = their
+   price), so the rule on the voucher stays correct. */
 const ADVENT = {
   live: false,                  // true = public right away (e.g. on 15/11 for the announcement)
   liveFromMD: "11-15",          // public automatically from this day (announcement); doors only open from 1/12, each on its own day
@@ -1865,9 +1881,12 @@ const ADVENT = {
     { id:"hotstone",        nl:"Hot Stone massage",                      en:"Hot Stone massage",                   fr:"massage aux pierres chaudes" },
     { id:"cupping",         nl:"cuppingmassage",                         en:"cupping massage",                     fr:"massage aux ventouses" },
     { id:"swedish",         nl:"Zweedse massage (volledig lichaam)",     en:"full-body Swedish massage",           fr:"massage suédois complet" },
+    { id:"slimmassage",     nl:"afslankingsmassage",                     en:"slimming massage",                    fr:"massage amincissant", dmin:55 },
     { id:"cuppingpeeling",  nl:"Cupping Body Renewal",                   en:"Cupping Body Renewal",                fr:"soin Cupping Body Renewal" },
+    { id:"swedishbackneck", nl:"Zweedse rug-, nek- en schoudermassage",  en:"Swedish back, neck & shoulder massage", fr:"massage suédois dos, nuque et épaules", dmin:40 },
     { id:"backwrap",        nl:"Energetic Back Wrap",                    en:"back wrap (Energetic Back Wrap)",     fr:"soin Energetic Back Wrap" },
     { id:"harmonizingbody", nl:"harmoniserende full body verzorging",    en:"harmonising full-body treatment",     fr:"soin harmonisant complet du corps" },
+    { id:"swedishlegs",     nl:"Zweedse benen- en voetenmassage",        en:"Swedish leg & foot massage",          fr:"massage suédois jambes et pieds", dmin:40 },
     { id:"fullbodywrap",    nl:"energetische full body pakking",         en:"energising full-body wrap",           fr:"enveloppement énergétique complet" }
   ]},
   doorsByYear: {
@@ -1923,7 +1942,7 @@ const ADVENT = {
     const m = list[k++ % list.length], id = "auto_" + m.id;
     if (!ADVENT.items[id]) ADVENT.items[id] = { type:"discount", icon:"💆", value:v, auto:true,
       nl:`${v} korting op een ${m.nl}`, en:`${v} off a ${m.en}`, fr:`${v.replace("%", " %")} de réduction sur un ${m.fr}`,
-      treat:{ nl:m.nl, en:m.en, fr:m.fr } };
+      treat:{ nl:m.nl, en:m.en, fr:m.fr }, dmin: m.dmin || null };
     ADVENT.doors.push({ day, item:id, stock:null });
   }
 })();
