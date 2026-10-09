@@ -559,7 +559,46 @@
     }
   }
 
-  async function openCamera(facing){
+  /* Camera (since v92):
+     - the back camera asks for its native 4:3 picture (asking for a portrait
+       size made some phones crop the sensor = "zoomed in");
+     - digital zoom with a slider (and pinch): 1 = the whole picture;
+       the back camera starts at 1, the selfie camera as before (filled);
+     - the switch button walks through ALL cameras (front, main, wide…)
+       when the phone has more than two;
+     - "Manga" and "Manga kleur" are shown live, with the same effect as
+       on the result. The photo = exactly what you see in the frame. */
+  const cam = { zoom:1, minZoom:1, maxZoom:4, deviceId:null, live:null, liveBusy:false };
+  function camStageSize(){ const r = $("#photoStage").getBoundingClientRect(); return { w: r.width || 360, h: r.height || 450 }; }
+  function camFit(){
+    const v = video(), st = camStageSize();
+    const vw = v.videoWidth || 4, vh = v.videoHeight || 3;
+    const s0 = Math.min(st.w / vw, st.h / vh), s1 = Math.max(st.w / vw, st.h / vh);
+    return { vw, vh, st, s0, cover: s1 / s0 };
+  }
+  // part of the video that is visible at the current zoom (video pixels)
+  function camRegion(){
+    const f = camFit(), s = f.s0 * cam.zoom;
+    const sw = Math.min(f.vw, f.st.w / s), sh = Math.min(f.vh, f.st.h / s);
+    return { sx:(f.vw - sw) / 2, sy:(f.vh - sh) / 2, sw, sh, f };
+  }
+  function setCamZoom(z, quiet){
+    cam.zoom = Math.min(cam.maxZoom, Math.max(cam.minZoom, z || 1));
+    video().style.setProperty("--cz", String(cam.zoom));
+    const sl = $("#cameraZoom");
+    if (sl && !quiet) sl.value = String(cam.zoom);
+  }
+  function camInitZoom(){
+    const f = camFit();
+    cam.minZoom = 1;
+    cam.maxZoom = Math.max(4, f.cover * 3);
+    const sl = $("#cameraZoom");
+    if (sl){ sl.min = "1"; sl.max = String(cam.maxZoom.toFixed(2)); sl.step = "0.01"; }
+    setCamZoom(cameraFacing === "user" ? f.cover : 1);
+    $("#cameraZoomWrap").hidden = false;
+  }
+
+  async function openCamera(facing, deviceId){
     if (facing) cameraFacing = facing;
     stopCamera();
     $("#photoEditor").hidden = true;
@@ -569,22 +608,31 @@
     video().hidden = true;
     preview().hidden = true;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: cameraFacing },
-          width: { ideal: 1080 },
-          height: { ideal: 1350 }
-        },
-        audio: false
-      });
+      const size = cameraFacing === "user"
+        ? { width:{ ideal:1080 }, height:{ ideal:1350 } }
+        : { width:{ ideal:1920 }, height:{ ideal:1440 } };
+      const vc = deviceId ? Object.assign({ deviceId:{ exact:deviceId } }, size)
+                          : Object.assign({ facingMode:{ ideal:cameraFacing } }, size);
+      const stream = await navigator.mediaDevices.getUserMedia({ video: vc, audio: false });
       state.cameraStream = stream;
+      const track = stream.getVideoTracks()[0];
+      try {
+        const set = track.getSettings ? track.getSettings() : {};
+        cam.deviceId = set.deviceId || deviceId || null;
+        if (set.facingMode === "user" || set.facingMode === "environment") cameraFacing = set.facingMode;
+        // start the lens itself fully zoomed out
+        const caps = track.getCapabilities ? track.getCapabilities() : {};
+        if (caps.zoom && typeof caps.zoom.min === "number") await track.applyConstraints({ advanced:[{ zoom: caps.zoom.min }] });
+      } catch(e){ /* not supported: fine */ }
       const v = video();
       v.srcObject = stream;
       v.hidden = false;
       v.classList.toggle("is-mirrored", cameraFacing === "user");
       placeholder().hidden = true;
-      applyGlowPreview();
       try { await v.play(); } catch(e){ /* some browsers auto-play once metadata loads */ }
+      if (!v.videoWidth) await new Promise(r => { v.onloadedmetadata = () => r(); setTimeout(r, 1500); });
+      camInitZoom();
+      applyGlowPreview();
       $("#photoActionsIdle").hidden = true;
       $("#photoActionsCamera").hidden = false;
       $("#photoActionsRetake").hidden = true;
@@ -597,43 +645,127 @@
       $("#uploadInsteadBtn").hidden = true;
       $("#photoActionsIdle").hidden = false;
       $("#switchCameraBtn").hidden = true;
+      $("#cameraZoomWrap").hidden = true;
       showToast(t("toast_camera_denied", state.lang));
     }
   }
 
+  async function camList(){
+    try { return (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === "videoinput"); }
+    catch(e){ return []; }
+  }
   async function updateSwitchCameraVisibility(){
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const cams = devices.filter(d => d.kind === "videoinput");
-      $("#switchCameraBtn").hidden = cams.length < 2;
-    } catch(e){
-      $("#switchCameraBtn").hidden = false; // let the user try regardless if we can't enumerate
-    }
+    const cams = await camList();
+    $("#switchCameraBtn").hidden = cams.length ? cams.length < 2 : false;
   }
 
-  function switchCamera(){
+  // front ↔ back; with 3+ cameras (main, wide, tele…) walk through all of them
+  async function switchCamera(){
+    const cams = await camList();
+    if (cams.length > 2 && cams.every(c => c.deviceId)){
+      const front = c => /front|user|voor|selfie/i.test(c.label || "");
+      const ordered = cams.filter(front).concat(cams.filter(c => !front(c)));
+      let i = ordered.findIndex(c => c.deviceId === cam.deviceId);
+      const next = ordered[(i + 1) % ordered.length];
+      await openCamera(front(next) ? "user" : "environment", next.deviceId);
+      const pos = ordered.findIndex(c => c.deviceId === cam.deviceId);
+      showToast(t("camera_lens", state.lang).replace("{n}", String((pos < 0 ? 0 : pos) + 1)).replace("{t}", String(ordered.length)));
+      return;
+    }
     openCamera(cameraFacing === "user" ? "environment" : "user");
   }
 
   function stopCamera(){
+    stopLiveFilter();
     if (state.cameraStream){
       state.cameraStream.getTracks().forEach(tr => tr.stop());
       state.cameraStream = null;
     }
     video().hidden = true;
     $("#switchCameraBtn").hidden = true;
+    const zw = $("#cameraZoomWrap"); if (zw) zw.hidden = true;
   }
 
+  /* live manga preview: process small frames of the visible part, one at a time */
+  function startLiveFilter(){
+    const lc = $("#liveFilterCanvas");
+    if (!lc || !state.cameraStream || !isMangaFilter(state.filter)){ stopLiveFilter(); return; }
+    lc.hidden = false;
+    video().classList.add("is-under-live");
+    if (cam.live) return;
+    cam.live = true;
+    const off = document.createElement("canvas");
+    const tick = () => {
+      if (!cam.live) return;
+      const v = video();
+      if (!state.cameraStream || !v.videoWidth || !isMangaFilter(state.filter)){ cam.liveTimer = setTimeout(tick, 120); return; }
+      const R = camRegion(), st = R.f.st;
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      const W = Math.round(st.w * dpr), H = Math.round(st.h * dpr);
+      if (lc.width !== W || lc.height !== H){ lc.width = W; lc.height = H; }
+      // destination of the visible region inside the frame (contain at zoom)
+      const s = R.f.s0 * cam.zoom, dw = R.sw * s * dpr, dh = R.sh * s * dpr;
+      const dx = (W - dw) / 2, dy = (H - dh) / 2;
+      const MAX = 380, k = Math.min(1, MAX / Math.max(R.sw, R.sh));
+      const ow = Math.max(8, Math.round(R.sw * k)), oh = Math.max(8, Math.round(R.sh * k));
+      off.width = ow; off.height = oh;
+      const octx = off.getContext("2d", { willReadFrequently:true });
+      octx.save();
+      if (cameraFacing === "user"){ octx.translate(ow, 0); octx.scale(-1, 1); }
+      octx.drawImage(v, R.sx, R.sy, R.sw, R.sh, 0, 0, ow, oh);
+      octx.restore();
+      try {
+        const d = octx.getImageData(0, 0, ow, oh).data;
+        const px = state.filter === "mangacolor" ? mangaColorPixels(d, ow, oh) : mangaPixels(d, ow, oh);
+        octx.putImageData(new ImageData(px, ow, oh), 0, 0);
+      } catch(e){ /* keep the plain frame */ }
+      const ctx = lc.getContext("2d");
+      ctx.fillStyle = "#241A14"; ctx.fillRect(0, 0, W, H);
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(off, dx, dy, dw, dh);
+      cam.liveTimer = setTimeout(() => requestAnimationFrame(tick), 30);
+    };
+    tick();
+  }
+  function stopLiveFilter(){
+    cam.live = null;
+    clearTimeout(cam.liveTimer);
+    const lc = $("#liveFilterCanvas"); if (lc) lc.hidden = true;
+    const v = $("#cameraVideo"); if (v) v.classList.remove("is-under-live");
+  }
+
+  function setupCameraZoom(){
+    const sl = $("#cameraZoom"), stage = $("#photoStage");
+    if (sl) sl.addEventListener("input", e => setCamZoom(parseFloat(e.target.value), true));
+    // pinch to zoom on the frame
+    const pts = new Map(); let startDist = 0, startZoom = 1;
+    const dist = () => { const a = [...pts.values()]; return Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y); };
+    stage.addEventListener("pointerdown", e => {
+      if (!state.cameraStream) return;
+      pts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+      if (pts.size === 2){ startDist = dist(); startZoom = cam.zoom; }
+    });
+    stage.addEventListener("pointermove", e => {
+      if (!pts.has(e.pointerId)) return;
+      pts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+      if (pts.size === 2 && startDist > 0) setCamZoom(startZoom * dist() / startDist);
+    });
+    const up = e => { pts.delete(e.pointerId); if (pts.size < 2) startDist = 0; };
+    ["pointerup","pointercancel","pointerleave"].forEach(ev => stage.addEventListener(ev, up));
+  }
+
+  // the photo = exactly the part you see in the frame
   function snapPhoto(){
     const v = video();
     const c = canvas();
-    c.width = v.videoWidth; c.height = v.videoHeight;
+    const R = camRegion();
+    c.width = Math.round(R.sw); c.height = Math.round(R.sh);
     const ctx = c.getContext("2d");
     if (cameraFacing === "user"){
       ctx.translate(c.width, 0);
       ctx.scale(-1, 1);
     }
-    ctx.drawImage(v, 0, 0, c.width, c.height);
+    ctx.drawImage(v, R.sx, R.sy, R.sw, R.sh, 0, 0, c.width, c.height);
     const dataUrl = c.toDataURL("image/jpeg", 0.92);
     stopCamera();
     useTakenPhoto(dataUrl);
@@ -853,7 +985,8 @@
   async function applyGlowPreview(){
     if (isMangaFilter(state.filter)){
       const liveCartoonCss = mangaLiveCss(state.filter);
-      video().style.filter = liveCartoonCss;
+      video().style.filter = "";
+      if (state.cameraStream) startLiveFilter();
       if (!state.photoDataUrl){
         preview().style.filter = liveCartoonCss;
         return;
@@ -868,6 +1001,7 @@
     if (state.photoDataUrl && preview().src !== state.photoDataUrl){
       preview().src = state.photoDataUrl;
     }
+    stopLiveFilter();
     const filterCss = FILTERS[state.filter] || "";
     preview().style.filter = filterCss;
     video().style.filter = filterCss;
@@ -4494,6 +4628,7 @@
     renderReturningUserBlock();
     showStep("welcome");
     setupEditorDrag();
+    setupCameraZoom();
     const newsletterForm = $("#newsletterForm");
     if (newsletterForm) newsletterForm.addEventListener("submit", submitNewsletter);
     setupNewsletterCard();
@@ -4539,6 +4674,8 @@
       if (action === "to-context"){ state.context = "salon"; runGeneration(); }
       if (action === "open-camera") openCamera();
       if (action === "switch-camera") switchCamera();
+      if (action === "cam-zoom-in") setCamZoom(cam.zoom * 1.25);
+      if (action === "cam-zoom-out") setCamZoom(cam.zoom / 1.25);
       if (action === "snap-photo") snapPhoto();
       if (action === "cancel-camera") cancelCamera();
       if (action === "retake") retakePhoto();

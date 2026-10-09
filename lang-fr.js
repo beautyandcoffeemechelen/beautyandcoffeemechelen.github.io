@@ -85,6 +85,7 @@
   "skip_photo_button": "Passer cette étape",
   "photo_placeholder": "Aucune photo sélectionnée",
   "camera_starting": "Démarrage de l'appareil photo…",
+  "camera_lens": "Caméra {n} sur {t}",
   "camera_denied_text": "Appareil photo indisponible. Choisissez une photo ci-dessous.",
   "upload_instead_button": "Ou importez plutôt une photo",
   "rotate_button": "Pivoter",

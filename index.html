@@ -282,12 +282,18 @@
 
     <div class="photo-stage" id="photoStage">
       <video id="cameraVideo" class="photo-stage__video" playsinline autoplay muted hidden></video>
+      <canvas id="liveFilterCanvas" class="photo-stage__live" hidden></canvas>
       <canvas id="captureCanvas" class="photo-stage__canvas" hidden></canvas>
       <img id="photoPreview" class="photo-stage__preview" alt="" hidden>
       <div class="photo-stage__placeholder" id="photoPlaceholder">
         <p data-i18n="camera_starting">Camera wordt gestart…</p>
       </div>
       <button type="button" class="camera-switch-btn" id="switchCameraBtn" data-action="switch-camera" hidden aria-label="Switch camera">🔄</button>
+      <div class="camera-zoom" id="cameraZoomWrap" hidden>
+        <button type="button" class="camera-zoom__btn" data-action="cam-zoom-out" aria-label="Zoom out">−</button>
+        <input type="range" id="cameraZoom" class="camera-zoom__range" min="1" max="4" step="0.01" value="1" aria-label="Zoom">
+        <button type="button" class="camera-zoom__btn" data-action="cam-zoom-in" aria-label="Zoom in">+</button>
+      </div>
     </div>
 
     <!-- crop / zoom / rotate editor -->
