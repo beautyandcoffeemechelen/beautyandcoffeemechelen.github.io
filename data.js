@@ -1605,7 +1605,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v74 · 09/10/2026";
+const APP_VERSION = "v75 · 09/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1801,20 +1801,20 @@ const ADVENT = {
                    en:"First a rejuvenating serum with marine DNA and coenzyme Q10, then a warm paraffin mask that helps it all sink in — for deeply hydrated, radiant skin. Contains fragrance and colophony (rosin).",
                    fr:"D'abord un sérum rajeunissant à l'ADN marin et à la coenzyme Q10, puis un masque chaud à la paraffine qui fait tout pénétrer — pour une peau profondément hydratée et éclatante. Contient du parfum et de la colophane." },
       product:"Depilève Waxceutical DNA Rejuvenating Serum + DNA Thermo Mask (paraffine)",
-      ingredients:"Zie Ingrediënten & allergieën: DNA Thermo Mask, DNA Rejuvenating Serum (en eventueel Hya-Lift+).",
+      ingredients:"Zie Ingrediënten & allergieën: DNA Thermo Mask en DNA Rejuvenating Serum.",
       nl:"Gratis anti-aging paraffinemasker", en:"Free anti-ageing paraffin mask", fr:"Masque anti-âge à la paraffine offert" },
     hotstoneface: { type:"extra", icon:"🪨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       nl:"Gratis Hot Stone gelaatsmassage", en:"Free Hot Stone facial massage", fr:"Massage visage aux pierres chaudes offert" },
     facecupping: { type:"extra", icon:"✨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       nl:"Gratis liftende cuppingmassage voor het gelaat", en:"Free lifting cupping facial massage", fr:"Massage liftant aux ventouses du visage offert" },
     peelanti: { type:"extra", icon:"🌟", stock:6, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
-      highlights:{ nl:"Met kaviaarextract, hamamelis, lavendel en collageen — verstevigt en geeft de rijpere huid een frisse, gladde uitstraling.", en:"With caviar extract, witch hazel, lavender and collagen — firms and gives mature skin a fresh, smooth look.", fr:"À l'extrait de caviar, à l'hamamélis, à la lavande et au collagène — raffermit et donne aux peaux matures un aspect frais et lisse." },
-      product:"Bio Balance Algoherbal Ageing (poedermasker + Essence Gel)",
+      highlights:{ nl:"Met kaviaarextract, hamamelis, lavendel en collageen — verstevigt en geeft de rijpere huid een frisse, gladde uitstraling. Vooraf een hyaluronzuurserum met komkommer voor extra vocht.", en:"With caviar extract, witch hazel, lavender and collagen — firms and gives mature skin a fresh, smooth look. First a hyaluronic acid serum with cucumber for extra moisture.", fr:"À l'extrait de caviar, à l'hamamélis, à la lavande et au collagène — raffermit et donne aux peaux matures un aspect frais et lisse. D'abord un sérum à l'acide hyaluronique et au concombre pour plus d'hydratation." },
+      product:"Bio Balance Algoherbal Ageing (poedermasker + Essence Gel) + Hya-Lift+ serum",
       ingredients:"Poeder (Lavender): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Lavandula Angustifolia (Lavender) Flower, Sodium Phosphate, CI 42090, Lavandula Angustifolia (Lavender) Oil. — Essence Gel (Lavender & Caviar): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Caviar Extract, Hamamelis Virginiana Extract, Lavandula Angustifolia Extract, Carbomer, Triethanolamine, Hyaluronic Acid, Hydrolyzed Collagen, Allantoin, PEG-40 Hydrogenated Castor Oil, Parfum, CI 42090, Phenoxyethanol, Limonene, Linalool, Geraniol, Alpha-Isomethyl Ionone, CI 16035",
       nl:"Gratis anti-aging peel-off masker", en:"Free anti-ageing peel-off mask", fr:"Masque peel-off anti-âge offert" },
     peelsens: { type:"extra", icon:"🌹", stock:1, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
-      highlights:{ nl:"Met rozenblaadjes, rozenolie, aloë vera, komkommer en hyaluronzuur — kalmeert, hydrateert en verzacht de gevoelige huid.", en:"With rose petals, rose oil, aloe vera, cucumber and hyaluronic acid — calms, hydrates and softens sensitive skin.", fr:"Aux pétales de rose, à l'huile de rose, à l'aloe vera, au concombre et à l'acide hyaluronique — apaise, hydrate et adoucit les peaux sensibles." },
-      product:"Bio Balance Algoherbal Sensitive – Rose (poedermasker + Essence Gel)",
+      highlights:{ nl:"Met rozenblaadjes, rozenolie, aloë vera, komkommer en hyaluronzuur — kalmeert, hydrateert en verzacht de gevoelige huid. Vooraf een mild hyaluronzuurserum zonder parfum.", en:"With rose petals, rose oil, aloe vera, cucumber and hyaluronic acid — calms, hydrates and softens sensitive skin. First a mild, fragrance-free hyaluronic acid serum.", fr:"Aux pétales de rose, à l'huile de rose, à l'aloe vera, au concombre et à l'acide hyaluronique — apaise, hydrate et adoucit les peaux sensibles. D'abord un sérum doux à l'acide hyaluronique, sans parfum." },
+      product:"Bio Balance Algoherbal Sensitive – Rose (poedermasker + Essence Gel) + Hya-Lift+ serum",
       ingredients:"Poeder (Rose): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Rosa Centifolia Flower, Sodium Phosphate, CI 16035, Rosa Rugosa Flower Oil. — Essence Gel (Rose): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Cucumis Sativus Fruit Extract, Hydrolyzed Collagen, Carbomer, Triethanolamine, PEG-40 Hydrogenated Castor Oil, Hyaluronic Acid, Parfum, Disodium EDTA, Phenoxyethanol, Limonene, Linalool, Alpha-Isomethyl Ionone, CI 16035",
       nl:"Gratis rozen peel-off masker voor de gevoelige huid", en:"Free rose peel-off mask for sensitive skin", fr:"Masque peel-off à la rose pour peaux sensibles offert" },
     collagen: { type:"extra", icon:"🫧", stock:4, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
@@ -1874,7 +1874,7 @@ const ADVENT = {
     { day:22, item:"spapedi",       stock:null },
     { day:23, item:"luminoclear",   stock:null },
     { day:24, item:"goldmask",      stock:null },
-    { day:25, item:"massage15",     stock:null }
+    { day:25, item:"paraffinmask",  stock:null }   // gratis anti-aging paraffinemasker (Sandra, 09/10)
   ]
 };
 
