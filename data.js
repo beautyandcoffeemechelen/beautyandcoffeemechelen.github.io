@@ -1611,6 +1611,16 @@ const CURRENT_ACTIONS = [
     text:{ nl:"Verwen je mama (of jezelf): {value} korting op een <b>{treat}</b>. Geldig voor afspraken in de weekends van {from} <b>tot en met {until}</b>. Liever cadeau doen? Vraag naar een cadeaubon. Vermeld “Moederdag” als je boekt. Niet combineerbaar met andere acties of kortingen.",
            en:"Treat your mum (or yourself): {value} off a <b>{treat}</b>. Valid for appointments on the weekends from {from} <b>until {until}</b>. Rather give it as a present? Ask for a gift voucher. Mention “Mother’s Day” when you book. Cannot be combined with other offers or discounts.",
            fr:"Gâtez votre maman (ou vous-même) : {value} de réduction sur un <b>{treat}</b>. Valable pour les rendez-vous les week-ends du {from} <b>au {until} inclus</b>. Plutôt l’offrir ? Demandez un bon cadeau. Mentionnez « fête des Mères » en réservant. Non cumulable avec d’autres actions ou réductions." } },
+  /* Mother's Day on 15 August (Antwerp tradition): 2 weekends before and 2 after.
+     Sandra is closed on 15/8 itself (see CLOSED_DAYS). */
+  { id:"moederdag15aug", icon:"🌷", value:"10%", massage:{ offset:1, byYear:{} },
+    yearly:{ anchorMD:"08-15", weekendsBefore:2, weekendsAfter:2, showDaysBefore:12 },
+    title:{ nl:"Moederdag 15 augustus: {value} korting op een {treat}",
+            en:"Mother’s Day 15 August: {value} off a {treat}",
+            fr:"Fête des Mères du 15 août : {value} de réduction sur un {treat}" },
+    text:{ nl:"Vier je Moederdag op 15 augustus? Verwen je mama (of jezelf): {value} korting op een <b>{treat}</b>. Geldig voor afspraken in de weekends van {from} <b>tot en met {until}</b>, behalve op 15 augustus zelf. Liever cadeau doen? Vraag naar een cadeaubon. Vermeld “Moederdag” als je boekt. Niet combineerbaar met andere acties of kortingen.",
+           en:"Celebrating Mother’s Day on 15 August? Treat your mum (or yourself): {value} off a <b>{treat}</b>. Valid for appointments on the weekends from {from} <b>until {until}</b>, except on 15 August itself. Rather give it as a present? Ask for a gift voucher. Mention “Mother’s Day” when you book. Cannot be combined with other offers or discounts.",
+           fr:"Vous fêtez les mères le 15 août ? Gâtez votre maman (ou vous-même) : {value} de réduction sur un <b>{treat}</b>. Valable pour les rendez-vous les week-ends du {from} <b>au {until} inclus</b>, sauf le 15 août lui-même. Plutôt l’offrir ? Demandez un bon cadeau. Mentionnez « fête des Mères » en réservant. Non cumulable avec d’autres actions ou réductions." } },
   { id:"vaderdag", icon:"☕", value:"10%", massage:{ offset:8, byYear:{} },
     yearly:{ anchor:"fathersday", weekendsBefore:2, weekendsAfter:1, showDaysBefore:12 },
     title:{ nl:"Vaderdagactie: {value} korting op een {treat}",
@@ -1624,11 +1634,12 @@ const CURRENT_ACTIONS = [
 /* ============================================================
    CLOSED DAYS — every year, no appointments possible on these days.
    "MM-DD" = fixed date; "cny" = the first day of Chinese New Year
-   (date from LUNAR_DATES in seasons.js). Shown on the season card and
+   (date from LUNAR_DATES in seasons.js); "08-15" = 15 August, Mother's Day
+   in the Antwerp tradition (family day). Shown on the season card and
    above the booking buttons when such a day is coming up (within
    noticeDays days).
    ============================================================ */
-const CLOSED_DAYS = { days:["12-25", "12-31", "01-01", "cny"], noticeDays:28 };
+const CLOSED_DAYS = { days:["12-25", "12-31", "01-01", "cny", "08-15"], noticeDays:28 };
 
 /* ============================================================
    BOOKING SLOTS — chips shown above the booking buttons.
@@ -1650,7 +1661,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v78 · 09/10/2026";
+const APP_VERSION = "v79 · 09/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".

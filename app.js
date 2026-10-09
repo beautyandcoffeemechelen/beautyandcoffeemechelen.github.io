@@ -1195,7 +1195,7 @@
     const list = closedDaysAhead(today, (CLOSED_DAYS && CLOSED_DAYS.noticeDays) || 28);
     if (!list.length) return "";
     const L = state.lang;
-    const names = { "12-25":"closed_xmas", "12-31":"closed_nye", "01-01":"closed_ny", cny:"closed_cny" };
+    const names = { "12-25":"closed_xmas", "12-31":"closed_nye", "01-01":"closed_ny", "08-15":"closed_aug15", cny:"closed_cny" };
     const dates = list.map(c => `<b>${actionFmt(c.key, L, true)}</b>${names[c.kind] ? ` (${t(names[c.kind], L)})` : ""}`).join(", ");
     return `<p class="closed-note">🚫 ${t("closed_note", L).replace("{dates}", dates)}</p>`;
   }
@@ -3281,7 +3281,7 @@
     return ingrStrip(p.inci);
   }
   // one ingredient per piece, without "Poeder (Lavender)" style headers
-  function ingrParts(txt){ return txt.split(/[,;·—:]/).map(x => x.replace(/\*/g, "").trim()).filter(Boolean); }
+  function ingrParts(txt){ return txt.split(/,(?!\d)|[;·—:]/).map(x => x.replace(/\*/g, "").trim()).filter(Boolean); }
   function ingrHit(part, keys){
     const n = " " + ingrNorm(part) + " ";
     // "=word" = the whole ingredient must be that word (e.g. "=alcohol", not "Cetyl Alcohol")
