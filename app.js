@@ -3777,8 +3777,12 @@
   // every product behind a door, with its ingredients (also printed on the card with the gift)
   function advIngredientsHtml(){
     const seen = new Set(), rows = [];
+    // only the gifts behind doors this client has already opened (no spoilers);
+    // Sandra's preview shows all of them
+    const opened = (advStore() && advStore().opened) || {};
     ADVENT.doors.forEach(d0 => {
-      const door = advDoor(d0.day);
+      if (!advPreview && !opened[d0.day]) return;
+      const door = advDoorClient(d0.day);
       if (!door || seen.has(door.itemId) || !door.ingredients || door.type !== "gift") return;
       seen.add(door.itemId);
       const note = advTxt(door.ingredientsNote);
