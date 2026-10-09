@@ -1605,7 +1605,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v75 · 09/10/2026";
+const APP_VERSION = "v76 · 09/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1700,12 +1700,23 @@ const SALON_MODE_PIN = "";
      The printed label/card with the product is what the law requires;
      the app only repeats it.
    ============================================================ */
+/* PRIVATE PREVIEW for the whole app, all year round (only Sandra knows it):
+     https://beautyandcoffeemechelen.github.io/?voorproef=BC-XMAS-7Q4K
+   add &datum=2027-06-01 to see the app as on that day (seasonal looks,
+   advent, …); a yellow bar at the top lets you pick another date. */
+const PREVIEW_KEY = "BC-XMAS-7Q4K";
+
+/* EVERY YEAR AGAIN: the calendar comes back by itself each year on the same
+   dates (announcement 15/11, doors 1–25/12). What is behind the doors is set
+   per year in doorsByYear below. A year without a list, or a door that is
+   left out, is filled automatically with 15% off a massage — one by one from
+   autoFill.massages (only massages from €60, the discount rule). */
 const ADVENT = {
   live: false,                  // true = public right away (e.g. on 15/11 for the announcement)
-  liveFrom: "2026-11-15",       // public automatically from this day (announcement); doors only open from 1/12, each on its own day
-  previewKey: "BC-XMAS-7Q4K",   // the private preview link: ?voorproef=BC-XMAS-7Q4K
-  year: 2026,
-  teaserFrom: "2026-11-15",     // from this day the start screen announces the calendar (when live)
+  liveFromMD: "11-15",          // public automatically from this day (announcement); doors only open from 1/12, each on its own day
+  teaserFromMD: "11-15",        // from this day the start screen announces the calendar
+  previewKey: PREVIEW_KEY,
+  // year, liveFrom, teaserFrom and doors are filled in automatically (see the end of this block)
   bookWithinDays: 21,           // book the appointment with the code within 3 weeks after opening
   useWithinDays: 42,            // the appointment takes place at the latest 6 weeks after opening
   homemadeDays: 21,             // homemade products: the appointment within 3 weeks (shelf life)
@@ -1849,7 +1860,18 @@ const ADVENT = {
       nl:"15% korting op een massage", en:"15% off a massage", fr:"15 % de réduction sur un massage",
       treat:{ nl:"massage", en:"massage", fr:"massage" } }
   },
-  doors: [
+  // the massages for empty doors (in this order, then again from the top)
+  autoFill: { value:"15%", massages:[
+    { id:"hotstone",        nl:"Hot Stone massage",                      en:"Hot Stone massage",                   fr:"massage aux pierres chaudes" },
+    { id:"cupping",         nl:"cuppingmassage",                         en:"cupping massage",                     fr:"massage aux ventouses" },
+    { id:"swedish",         nl:"Zweedse massage (volledig lichaam)",     en:"full-body Swedish massage",           fr:"massage suédois complet" },
+    { id:"cuppingpeeling",  nl:"Cupping Body Renewal",                   en:"Cupping Body Renewal",                fr:"soin Cupping Body Renewal" },
+    { id:"backwrap",        nl:"Energetic Back Wrap",                    en:"back wrap (Energetic Back Wrap)",     fr:"soin Energetic Back Wrap" },
+    { id:"harmonizingbody", nl:"harmoniserende full body verzorging",    en:"harmonising full-body treatment",     fr:"soin harmonisant complet du corps" },
+    { id:"fullbodywrap",    nl:"energetische full body pakking",         en:"energising full-body wrap",           fr:"enveloppement énergétique complet" }
+  ]},
+  doorsByYear: {
+  2026: [
     { day:1,  item:"lipbalm",       stock:null },
     { day:2,  item:"led",           stock:null },
     { day:3,  item:"bathsalt",      stock:null },
@@ -1875,8 +1897,36 @@ const ADVENT = {
     { day:23, item:"luminoclear",   stock:null },
     { day:24, item:"goldmask",      stock:null },
     { day:25, item:"paraffinmask",  stock:null }   // gratis anti-aging paraffinemasker (Sandra, 09/10)
-  ]
+  ],
+  // 2027: [ { day:1, item:"lipbalm", stock:null }, … ]   ← keep or change doors; missing days = massage discount
+  }
 };
+// Which calendar year is "on"? From March: this year's; in January/February
+// still last year's (its vouchers run until February). Then fill the doors.
+(function setupAdventYear(){
+  let d = new Date();
+  try {
+    const q = new URLSearchParams(location.search), dt = q.get("datum");
+    if (q.get("voorproef") === PREVIEW_KEY && dt && /^\d{4}-\d{2}-\d{2}$/.test(dt)) d = new Date(dt + "T12:00:00");
+  } catch(e){ /* ignore */ }
+  const y = d.getMonth() + 1 >= 3 ? d.getFullYear() : d.getFullYear() - 1;
+  ADVENT.year = y;
+  ADVENT.liveFrom = `${y}-${ADVENT.liveFromMD}`;
+  ADVENT.teaserFrom = `${y}-${ADVENT.teaserFromMD}`;
+  const plan = (ADVENT.doorsByYear && ADVENT.doorsByYear[y]) || [];
+  const list = ADVENT.autoFill.massages, v = ADVENT.autoFill.value;
+  let k = 0;
+  ADVENT.doors = [];
+  for (let day = 1; day <= 25; day++){
+    const own = plan.find(x => x && Number(x.day) === day && ADVENT.items[x.item]);
+    if (own){ ADVENT.doors.push(own); continue; }
+    const m = list[k++ % list.length], id = "auto_" + m.id;
+    if (!ADVENT.items[id]) ADVENT.items[id] = { type:"discount", icon:"💆", value:v, auto:true,
+      nl:`${v} korting op een ${m.nl}`, en:`${v} off a ${m.en}`, fr:`${v.replace("%", " %")} de réduction sur un ${m.fr}`,
+      treat:{ nl:m.nl, en:m.en, fr:m.fr } };
+    ADVENT.doors.push({ day, item:id, stock:null });
+  }
+})();
 
 /* TEST-PHASE RESET: change this text (e.g. to "launch-2026-11") when the
    app officially starts. The next time any phone opens the app, its stamps,

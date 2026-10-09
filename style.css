@@ -1158,3 +1158,7 @@ body[data-theme] .topbar{ box-shadow:0 3px 0 -1px var(--s-line); }
 .adv-repl{ margin:12px 0 0; padding:10px; border:1.5px dashed var(--gold); border-radius:var(--radius-s); background:#fffaf0; }
 .adv-repl p{ font-size:13px; margin:0 0 8px; }
 .adv-repl__qr{ width:min(220px, 70vw); height:auto; display:block; margin:0 auto; background:#fff; }
+
+/* year-round private preview bar */
+.preview-bar{ margin:10px 0 14px; }
+.preview-bar input[type="date"]{ font:inherit; padding:4px 6px; border:1px solid var(--gold); border-radius:6px; background:#fff; }

@@ -111,6 +111,7 @@
     if ($('[data-step="ingredients"]') && $('[data-step="ingredients"]').classList.contains("is-active")) renderIngredients();
     renderSocialLinks();
     renderActions();
+    if (typeof renderPreviewBar === "function") renderPreviewBar();
     if (typeof news !== "undefined" && news.posts) renderNewsCard();
     renderReviewsCard();
   }
@@ -3189,7 +3190,7 @@
   const ingr = { tab:"search", q:"", treat:"", unlocked:false };
   function ingrIsLive(){
     const L = typeof INGREDIENTS_LIVE === "object" && INGREDIENTS_LIVE;
-    return !L || !L.liveFrom || todayKey() >= L.liveFrom;
+    return !L || !L.liveFrom || ((advPreview && advTest) ? advTest : todayKey()) >= L.liveFrom;
   }
   const ingrPreview = (() => {
     try {
@@ -3358,7 +3359,8 @@
      salon phone that is in preview mode too. */
   const ADV_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   // 32 signs, no 0/O/1/I
   const ADV_QR_PREFIX = "BCADV:";
-  const ADV_LEDGER_KEY = "bc_advent_ledger_v1";
+  // one ledger per calendar year (2026 keeps its original name)
+  const ADV_LEDGER_KEY = (typeof ADVENT === "object" && ADVENT.year && ADVENT.year !== 2026) ? "bc_advent_ledger_v1_" + ADVENT.year : "bc_advent_ledger_v1";
   const ADV_DOOR_ORDER = [12,3,19,7,24,1,15,9,21,5,17,11,25,2,14,20,6,10,23,4,16,8,22,13,18];
   const advPreview = (() => {
     try {
@@ -3368,14 +3370,33 @@
   })();
   let advTest = null;                          // the simulated day in preview mode
   if (advPreview){
-    let d = null;
-    try { d = new URLSearchParams(location.search).get("dag"); } catch(e){ /* ignore */ }
-    if (d && /^\d{1,2}$/.test(d)) d = `${ADVENT.year}-12-${String(Math.min(25, Math.max(1, Number(d)))).padStart(2,"0")}`;
-    if (!d || !/^\d{4}-\d{2}-\d{2}$/.test(d)){
-      const now = todayKey();
-      d = (now >= `${ADVENT.year}-12-01` && now <= `${ADVENT.year}-12-25`) ? now : `${ADVENT.year}-12-01`;
-    }
+    // &datum=JJJJ-MM-DD = the app as on that day (all year round); &dag=7 = 7 December; else today
+    let d = null, dt = null;
+    try { const q = new URLSearchParams(location.search); d = q.get("dag"); dt = q.get("datum"); } catch(e){ /* ignore */ }
+    if (dt && /^\d{4}-\d{2}-\d{2}$/.test(dt)) d = dt;
+    else if (d && /^\d{1,2}$/.test(d)) d = `${ADVENT.year}-12-${String(Math.min(25, Math.max(1, Number(d)))).padStart(2,"0")}`;
+    if (!d || !/^\d{4}-\d{2}-\d{2}$/.test(d)) d = todayKey();
     advTest = d;
+  }
+  // yellow bar on every screen in preview: pick the date the app should behave as
+  function renderPreviewBar(){
+    if (!advPreview) return;
+    let bar = $("#previewBar");
+    if (!bar){
+      bar = document.createElement("div"); bar.id = "previewBar"; bar.className = "advent-preview preview-bar";
+      const app = $("#app"); if (app) app.insertBefore(bar, app.firstChild); else document.body.prepend(bar);
+      bar.addEventListener("change", e => {
+        const inp = e.target.closest("#previewDate"); if (!inp || !/^\d{4}-\d{2}-\d{2}$/.test(inp.value)) return;
+        try { const q = new URLSearchParams(location.search); q.delete("dag"); q.set("datum", inp.value); location.search = q.toString(); } catch(err){ /* ignore */ }
+      });
+      bar.addEventListener("click", e => {
+        if (!e.target.closest("[data-preview-today]")) return;
+        try { const q = new URLSearchParams(location.search); q.delete("dag"); q.delete("datum"); location.search = q.toString(); } catch(err){ /* ignore */ }
+      });
+    }
+    bar.innerHTML = `<p>🧪 <b>${t("pv_bar_title", state.lang)}</b> — ${t("pv_bar_text", state.lang)}</p>
+      <label>${t("pv_bar_date", state.lang)} <input type="date" id="previewDate" value="${advTest}"></label>
+      <button type="button" class="btn btn--text btn--sm" data-preview-today="1">${t("pv_bar_today", state.lang)}</button>`;
   }
   const advMemory = { opened:{} };              // preview: kept in memory only
   const advMemLedger = { codes:{} };
@@ -3546,6 +3567,7 @@
     advTest = sel.value;
     advPreviewRerender();
     applySeason();
+    renderPreviewBar();
   });
   document.addEventListener("click", e => {
     const b = e.target.closest('[data-adv-preview="wipe"]');

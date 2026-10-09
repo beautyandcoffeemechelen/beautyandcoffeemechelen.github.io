@@ -30,7 +30,7 @@
    ============================================================ */
 const INGREDIENTS_LIVE = {
   liveFrom: "2026-12-01",        // public from this day
-  previewKey: "BC-XMAS-7Q4K"     // same private key as the advent preview
+  previewKey: PREVIEW_KEY          // the same private preview key as the rest of the app (data.js)
 };
 
 // Treatments without cosmetic products (not listed on the screen)
