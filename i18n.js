@@ -104,7 +104,7 @@ const I18N = {
     menu_cta: "Bekijk menu & prijzen",
     pricelist_button: "Bekijk prijslijst",
     pricelist_title: "Prijslijst",
-    pricelist_intro: "Prijzen vanaf 1/06/2026. Behandelingen enkel op afspraak.",
+    pricelist_intro: "Prijzen vanaf 1/06/2026. Prijzen zijn eindprijzen, vrijgesteld van btw. Behandelingen enkel op afspraak.",
     pricelist_search: "Zoek een behandeling…",
     pricelist_empty: "Niets gevonden. Probeer een ander woord.",
     pricelist_contact_title: "Een afspraak maken?",
@@ -524,6 +524,7 @@ const I18N = {
 
     footer_privacy: "Jouw foto's blijven altijd op je eigen toestel — 100% privé.",
     footer_reset_button: "Wis mijn lokale gegevens",
+    footer_legal: "Beauty &amp; Coffee · Sandra Truong · Barbarastraat 25, 2800 Mechelen<br>0499 22 19 01 · sandra.truong@ikmail.com<br>Ondernemingsnummer 1033.711.875 · vrijgesteld van btw: prijzen zijn eindprijzen",
 
     reminder_button: "Zet een herinnering in mijn agenda",
     book_email_button: "📩 Boek deze afspraak per mail",
@@ -739,7 +740,7 @@ const I18N = {
     menu_cta: "View menu & pricing",
     pricelist_button: "View price list",
     pricelist_title: "Price list",
-    pricelist_intro: "Prices as of 1 June 2026. Treatments by appointment only.",
+    pricelist_intro: "Prices as of 1 June 2026. Prices are final prices, VAT-exempt. Treatments by appointment only.",
     pricelist_search: "Search a treatment…",
     pricelist_empty: "Nothing found. Try another word.",
     pricelist_contact_title: "Want to book?",
@@ -1159,6 +1160,7 @@ const I18N = {
 
     footer_privacy: "Your photos always stay on your own device — 100% private.",
     footer_reset_button: "Wipe my local data",
+    footer_legal: "Beauty &amp; Coffee · Sandra Truong · Barbarastraat 25, 2800 Mechelen (Belgium)<br>+32 499 22 19 01 · sandra.truong@ikmail.com<br>Company number 1033.711.875 · VAT-exempt: prices are final prices",
 
     reminder_button: "Add a reminder to my calendar",
     book_email_button: "📩 Book this appointment by email",

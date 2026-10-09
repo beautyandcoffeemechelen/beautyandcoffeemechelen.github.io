@@ -1419,7 +1419,7 @@
     body.innerHTML = HOUSE_RULES.map((sec, idx) => {
       const open = (openIds.has(sec.id) || (first && idx === 0)) ? " open" : "";
       return `<details class="price-section" data-sec="${sec.id}"${open}>
-        <summary><span class="price-section__icon" aria-hidden="true">${sec.icon}</span><span class="price-section__title">${sec.title[lang]}</span></summary>
+        <summary><span class="price-section__icon" aria-hidden="true"></span><span class="price-section__title">${sec.title[lang]}</span></summary>
         ${sec.intro ? `<p class="rules-intro">${sec.intro[lang]}</p>` : ""}
         ${sec.groups.map(g => `
           ${g.title ? `<h3 class="rules-group">${g.title[lang]}</h3>` : ""}
@@ -1441,7 +1441,7 @@
     const cats = $("#priceCats");
     if (cats){
       cats.innerHTML = [`<button type="button" class="price-cat${!state.priceCat ? " is-active" : ""}" data-price-cat="">${t("pricelist_all", lang)}</button>`]
-        .concat(PRICE_LIST.map(sec => `<button type="button" class="price-cat${state.priceCat === sec.id ? " is-active" : ""}" data-price-cat="${sec.id}">${sec.icon} ${sec.title[lang]}</button>`)).join("");
+        .concat(PRICE_LIST.map(sec => `<button type="button" class="price-cat${state.priceCat === sec.id ? " is-active" : ""}" data-price-cat="${sec.id}">${sec.title[lang]}</button>`)).join("");
       cats.querySelectorAll("[data-price-cat]").forEach(b => b.addEventListener("click", () => {
         state.priceCat = b.dataset.priceCat || ""; renderPriceList();
       }));
@@ -1457,7 +1457,7 @@
       if (!items.length) return;
       const open = (q || state.priceCat === sec.id || openIds.has(sec.id)) ? " open" : "";
       html += `<details class="price-section" data-sec="${sec.id}"${open}>
-        <summary><span class="price-section__icon" aria-hidden="true">${sec.icon}</span><span class="price-section__title">${sec.title[lang]}</span><span class="price-section__count">${items.length}</span></summary>
+        <summary><span class="price-section__icon" aria-hidden="true"></span><span class="price-section__title">${sec.title[lang]}</span><span class="price-section__count">${items.length}</span></summary>
         ${sec.note ? `<p class="price-section__note">${sec.note[lang]}</p>` : ""}
         <ul class="price-items">
           ${items.map(it => `<li class="price-item">
@@ -4360,7 +4360,7 @@
     const facts = (th.facts && (th.facts[L] || th.facts.nl)) || [];
     const fact = facts.length ? seasonText({ [L]:facts[season.factIndex % facts.length] }, season.year) : "";
     const promo = seasonText(th.promo || SEASON_DEFAULT_PROMO, season.year);
-    const icons = (th.deco || []).map(d => d.e).slice(0, 3).join(" ");
+    const icons = (th.deco || []).map(d => d.e).slice(0, 1).join(" ");
     card.className = "season-card season-card--" + th.id;
     card.innerHTML = `
       <p class="season-card__hello"><span aria-hidden="true">${icons}</span> ${seasonText(th.hello, season.year)}</p>
@@ -4368,8 +4368,8 @@
       ${fact ? `<p class="season-card__fact"><b>${t("season_did_you_know", L)}</b> ${fact}</p>` : ""}
       ${closedNoticeHtml()}
       <div class="season-card__btns">
-        ${facts.length > 1 ? `<button type="button" class="btn btn--text btn--sm" data-action="season-fact">🔄 ${t("season_next_fact", L)}</button>` : ""}
-        <a class="season-card__shop" href="${SOAP_SHOP_URL}" target="_blank" rel="noopener noreferrer" data-action="season-shop">${promo}</a>
+        ${facts.length > 1 ? `<button type="button" class="btn btn--text btn--sm" data-action="season-fact">${t("season_next_fact", L)} ›</button>` : ""}
+        <p class="season-card__shop">${promo}</p>
       </div>`;
     card.hidden = false;
   }
@@ -4384,7 +4384,7 @@
       const [m, d] = md.split("-").map(Number), mon = new Date(Date.UTC(year, m - 1, d + 1));
       txt += ` ${t("season_and", L)} ${actionFmt(`${year}-${String(mon.getUTCMonth()+1).padStart(2,"0")}-${String(mon.getUTCDate()).padStart(2,"0")}`, L, false)}`;
     }
-    return `<p class="season-card__date">📅 ${txt}</p>`;
+    return `<p class="season-card__date">${txt}</p>`;
   }
   function nextSeasonFact(){ season.factIndex++; renderSeasonCard(); trackEvent("season-fact"); }
   function buildSeasonDeco(){

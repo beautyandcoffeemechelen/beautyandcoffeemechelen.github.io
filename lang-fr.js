@@ -101,7 +101,7 @@
   "menu_cta": "Voir la carte et les tarifs",
   "pricelist_button": "Voir les tarifs",
   "pricelist_title": "Tarifs",
-  "pricelist_intro": "Tarifs en vigueur depuis le 1/06/2026. Soins uniquement sur rendez-vous.",
+  "pricelist_intro": "Tarifs en vigueur depuis le 1/06/2026. Prix finaux, exonérés de TVA. Soins uniquement sur rendez-vous.",
   "pricelist_search": "Rechercher un soin…",
   "pricelist_empty": "Aucun résultat. Essayez un autre mot.",
   "pricelist_contact_title": "Prendre rendez-vous ?",
@@ -520,6 +520,7 @@
   "restart_button": "Recommencer",
   "footer_privacy": "Vos photos restent toujours sur votre appareil — 100 % privé.",
   "footer_reset_button": "Effacer mes données locales",
+  "footer_legal": "Beauty &amp; Coffee · Sandra Truong · Barbarastraat 25, 2800 Malines<br>0499 22 19 01 · sandra.truong@ikmail.com<br>Numéro d’entreprise 1033.711.875 · exonérée de TVA : les prix sont des prix finaux",
   "reminder_button": "Ajouter un rappel à mon agenda",
   "book_email_button": "📩 Réserver ce rendez-vous par e-mail",
   "book_email_subject": "Réservation - Beauty & Coffee",
@@ -1574,45 +1575,45 @@
   },
   "hygiene": {
    "title": "Hygiène et soins",
-   "intro": "Pour un soin agréable et professionnel, j'attends de chaque personne ce qui suit :",
+   "intro": "Pour que nous profitions ensemble d’un moment soigné et détendu :",
    "outro": null,
    "groups": [
     {
-     "title": "Hygiène des mains",
+     "title": "Mains",
      "items": [
-      "Mains et ongles propres : pas de saleté visible sous les ongles ni de décoloration foncée sur la peau.",
-      "Pas de mains collantes ou grasses (par exemple à cause de nourriture, d'huile ou de pommade).",
-      "Vous avez une infection ou des plaies ouvertes ? Signalez-le à l'avance pour la manucure. Il se peut que nous déplacions le rendez-vous à une autre date afin de ne pas aggraver la plaie."
+      "Venez avec des mains fraîchement lavées, nous pourrons commencer tout de suite.",
+      "De préférence pas de crème ni d’huile juste avant la manucure : le vernis tient mieux.",
+      "Vous avez une inflammation ou une petite plaie ? Dites-le-moi à l’avance. Il vaut parfois mieux déplacer le rendez-vous pour qu’elle guérisse tranquillement."
      ]
     },
     {
-     "title": "Hygiène des pieds (pour les soins des pieds)",
+     "title": "Pieds (pour les soins des pieds)",
      "items": [
-      "Les pieds sont lavés avant le rendez-vous.",
-      "Pas de saleté visible ni de forte odeur due à un manque d'hygiène.",
-      "En cas de transpiration excessive : l'usage d'une poudre pour pieds ou d'un déodorant est vivement conseillé.",
+      "Venez de préférence avec des pieds fraîchement lavés, nous pourrons en profiter tout de suite.",
+      "Astuce : un spray rafraîchissant pour les pieds après la douche fait des merveilles.",
+      "Portez des chaussures confortables, pour que vos pieds respirent après le soin.",
       "Apportez des tongs si vous souhaitez un vernis ou un vernis gel lors de la pédicure.",
-      "Vous avez une infection ou des plaies ouvertes ? Signalez-le à l'avance pour la pédicure. Il se peut que nous déplacions le rendez-vous à une autre date afin de ne pas aggraver la plaie.",
-      "Les affections médicales comme l'hyperhidrose (transpiration excessive) ou les mycoses doivent être signalées à l'avance."
+      "Vous avez une inflammation ou une petite plaie ? Dites-le-moi à l’avance. Il vaut parfois mieux déplacer le rendez-vous pour qu’elle guérisse tranquillement.",
+      "Vous avez une affection aux pieds, comme une mycose ? Signalez-le à l’avance, j’adapterai le soin et mes mesures d’hygiène."
      ]
     },
     {
-     "title": "Hygiène intime (pour les soins du corps comme l'épilation et le massage)",
+     "title": "Soins du corps (épilation et massage)",
      "items": [
-      "La peau est propre et fraîchement lavée le jour du soin.",
-      "Pas d'odeurs désagréables dues à un manque d'hygiène.",
-      "En cas d'hygiène insuffisante, le soin peut être refusé sans remboursement.",
-      "Portez des vêtements amples pour l'épilation du corps.",
-      "Vous avez une infection ou des plaies ouvertes ? Signalez-le à l'avance pour le massage du corps."
+      "Venez fraîchement lavé·e à votre soin, vous vous sentirez tout de suite à l’aise.",
+      "Une douche chaude avant rend la peau souple, idéal pour l’épilation ou le massage.",
+      "Pour garantir à chacun un soin soigné, je ne peux malheureusement pas réaliser le soin en cas d’hygiène insuffisante. Le rendez-vous compte alors comme une annulation.",
+      "Portez des vêtements amples et confortables pour l’épilation du corps.",
+      "Vous avez une inflammation ou une petite plaie ? Dites-le-moi avant le massage du corps."
      ]
     },
     {
-     "title": "Politique des odeurs (tabac, cannabis, fortes odeurs corporelles)",
+     "title": "Un espace calme et frais",
      "items": [
-      "Fumer et consommer du cannabis juste avant le soin est déconseillé.",
-      "Si une forte odeur de tabac, de cannabis ou autre est perçue comme gênante, le soin peut être refusé sans remboursement.",
-      "Transpirer normalement n'est pas un problème, mais si l'odeur est gênante en raison d'un manque d'hygiène, le soin peut être raccourci ou refusé.",
-      "Le parfum et les crèmes fortement parfumées ne sont pas souhaités, car ils peuvent gêner la praticienne et les autres clients."
+      "De préférence ne pas fumer juste avant votre soin : l’espace reste frais pour tous.",
+      "Une forte odeur de tabac ou de cannabis dérange lors d’un soin de près. Dans ce cas, je ne peux malheureusement pas réaliser le soin.",
+      "Laissez le parfum et les crèmes très parfumées à la maison ce jour-là : vous profiterez pleinement des senteurs du soin.",
+      "Nez sensible ou allergie aux parfums ? Dites-le-moi, je travaillerai avec des produits sans parfum."
      ]
     },
     {

@@ -10,7 +10,7 @@
    To switch it all off: SEASONS_ON = false
    ============================================================ */
 const SEASONS_ON = true;
-const SOAP_SHOP_URL = "https://zeepmechelenhofstade.wixsite.com/sandra";
+// (no shop link: home-made products are no longer offered — EU cosmetics rules)
 
 // Chinese calendar dates (they move every year) — source: qppstudio.net
 const LUNAR_DATES = {
@@ -34,8 +34,7 @@ const SEASON_THEMES = [
     facts:{
       nl:["Halloween komt van ‘All Hallows’ Eve’: de avond vóór Allerheiligen.","De eerste lantaarns in Ierland waren uitgeholde rapen, geen pompoenen. 🎃","Volgens oud bijgeloof brengt een spin in huis geluk — laat ze dus maar zitten! 🕷️"],
       en:["Halloween comes from ‘All Hallows’ Eve’: the evening before All Saints’ Day.","The first lanterns in Ireland were hollowed-out turnips, not pumpkins. 🎃","Old folklore says a spider in the house brings luck — so let it be! 🕷️"],
-      fr:["Halloween vient de « All Hallows’ Eve » : la veille de la Toussaint.","Les premières lanternes en Irlande étaient des navets évidés, pas des citrouilles. 🎃","Selon une vieille croyance, une araignée dans la maison porte bonheur — laissez-la ! 🕷️"] },
-    promo:{ nl:"Iets lekkers zonder suiker? Een handgemaakt zeepje voor je griezelfeestje!", en:"A sugar-free treat? A handmade soap for your spooky party!", fr:"Une friandise sans sucre ? Un savon fait main pour votre fête d’Halloween !" } },
+      fr:["Halloween vient de « All Hallows’ Eve » : la veille de la Toussaint.","Les premières lanternes en Irlande étaient des navets évidés, pas des citrouilles. 🎃","Selon une vieille croyance, une araignée dans la maison porte bonheur — laissez-la ! 🕷️"] } },
 
   { id:"sintemette", date:"11-11", from:10, to:0, fx:"stars", fxItems:["✨","🍬"],
     deco:[{ e:"🏮", at:"tl" }, { e:"🍬", at:"br" }, { e:"🧥", at:"bl" }],
@@ -51,8 +50,7 @@ const SEASON_THEMES = [
     facts:{
       nl:["Sinterklaas is gebaseerd op Sint-Nicolaas, een bisschop uit Myra, in het huidige Turkije.","Een wortel in je schoen voor het paard? Die traditie gaat al heel lang mee. 🥕","Kinderen zingen liedjes bij de schoorsteen in de hoop op een cadeautje op 6 december."],
       en:["Sinterklaas is based on Saint Nicholas, a bishop from Myra in today’s Turkey.","A carrot in your shoe for the horse? A tradition that goes back a long way. 🥕","Children sing songs by the chimney hoping for a present on 6 December."],
-      fr:["Saint Nicolas était un évêque de Myre, dans l’actuelle Turquie.","Une carotte dans la chaussure pour le cheval ? Une tradition très ancienne. 🥕","Les enfants chantent près de la cheminée en espérant un cadeau le 6 décembre."] },
-    promo:{ nl:"Een handgemaakt zeepje past perfect in de schoen! 👞", en:"A handmade soap fits perfectly in the shoe! 👞", fr:"Un savon fait main tient parfaitement dans la chaussure ! 👞" } },
+      fr:["Saint Nicolas était un évêque de Myre, dans l’actuelle Turquie.","Une carotte dans la chaussure pour le cheval ? Une tradition très ancienne. 🥕","Les enfants chantent près de la cheminée en espérant un cadeau le 6 décembre."] } },
 
   { id:"kerst", date:"12-25", from:18, to:1, fx:"snow", fxItems:["❄️","·","✦"],
     deco:[{ e:"🎄", at:"bl" }, { e:"⭐", at:"tr" }, { e:"🎁", at:"br" }, { e:"🔔", at:"tl" }],
@@ -60,8 +58,7 @@ const SEASON_THEMES = [
     facts:{
       nl:["De versierde kerstboom werd in de 19de eeuw populair in onze streken.","In de Sint-Romboutstoren in Mechelen hangen twee volledige beiaarden — kerstklanken gegarandeerd. 🔔","Elektrische kerstlichtjes bestaan sinds 1882; daarvoor hingen er echte kaarsjes in de boom."],
       en:["The decorated Christmas tree became popular in our region in the 19th century.","St Rumbold’s Tower in Mechelen holds two complete carillons — Christmas tunes guaranteed. 🔔","Electric Christmas lights have existed since 1882; before that, real candles hung in the tree."],
-      fr:["Le sapin décoré est devenu populaire chez nous au XIXe siècle.","La tour Saint-Rombaut de Malines abrite deux carillons complets — mélodies de Noël garanties. 🔔","Les guirlandes électriques existent depuis 1882 ; avant, on mettait de vraies bougies dans le sapin."] },
-    promo:{ nl:"Nog een cadeautje onder de boom nodig? Handgemaakte zeepjes of een cadeaubon!", en:"Need a gift under the tree? Handmade soaps or a gift voucher!", fr:"Encore un cadeau sous le sapin ? Des savons faits main ou un bon cadeau !" } },
+      fr:["Le sapin décoré est devenu populaire chez nous au XIXe siècle.","La tour Saint-Rombaut de Malines abrite deux carillons complets — mélodies de Noël garanties. 🔔","Les guirlandes électriques existent depuis 1882 ; avant, on mettait de vraies bougies dans le sapin."] } },
 
   { id:"nieuwjaar", date:"01-01", from:5, to:14, fx:"confetti", fxItems:["🎉","✨","🎊"],
     deco:[{ e:"🥂", at:"bl" }, { e:"🎆", at:"tr" }, { e:"🎇", at:"tl" }],
@@ -85,8 +82,7 @@ const SEASON_THEMES = [
     facts:{
       nl:["Valentijn was een priester uit de 3de eeuw; pas in de middeleeuwen werd zijn feestdag aan de liefde gekoppeld.","Rode rozen staan voor liefde, roze rozen voor dankbaarheid. 🌹","Een kus verbruikt een paar calorieën — de leukste training die er is. 😉"],
       en:["Valentine was a 3rd-century priest; only in the Middle Ages did his feast become linked to love.","Red roses mean love, pink roses mean gratitude. 🌹","A kiss burns a few calories — the nicest workout there is. 😉"],
-      fr:["Valentin était un prêtre du IIIe siècle ; ce n’est qu’au Moyen Âge que sa fête a été liée à l’amour.","Les roses rouges disent l’amour, les roses roses la gratitude. 🌹","Un baiser brûle quelques calories — le plus agréable des entraînements. 😉"] },
-    promo:{ nl:"Verras je lief met een handgemaakt zeepje of een cadeaubon 💕", en:"Surprise your love with a handmade soap or a gift voucher 💕", fr:"Surprenez votre moitié avec un savon fait main ou un bon cadeau 💕" } },
+      fr:["Valentin était un prêtre du IIIe siècle ; ce n’est qu’au Moyen Âge que sa fête a été liée à l’amour.","Les roses rouges disent l’amour, les roses roses la gratitude. 🌹","Un baiser brûle quelques calories — le plus agréable des entraînements. 😉"] } },
 
   { id:"pasen", date:y => easterMMDD(y), from:14, to:1, fx:"eggs", fxItems:["🥚","🌷","🐣"],
     deco:[{ e:"🔔", at:"fly" }, { e:"🐣", at:"bl" }, { e:"🐰", at:"br" }, { e:"🌷", at:"tl" }],
@@ -94,8 +90,7 @@ const SEASON_THEMES = [
     facts:{
       nl:["In België brengen de paasklokken de eitjes: ze vliegen naar Rome en strooien op de terugweg eieren in de tuin. 🔔","Pasen valt op de eerste zondag na de eerste volle maan van de lente.","Het grootste chocolade-ei ooit was meer dan 10 meter hoog."],
       en:["In Belgium the Easter bells bring the eggs: they fly to Rome and drop eggs in the garden on the way back. 🔔","Easter falls on the first Sunday after the first full moon of spring.","The largest chocolate egg ever was more than 10 metres tall."],
-      fr:["En Belgique, ce sont les cloches de Pâques qui apportent les œufs : elles volent à Rome et les sèment au retour. 🔔","Pâques tombe le premier dimanche après la première pleine lune du printemps.","Le plus grand œuf en chocolat jamais réalisé mesurait plus de 10 mètres."] },
-    promo:{ nl:"Een eitje is lekker, een handgemaakt zeepje blijft langer 🐣", en:"An egg is tasty, a handmade soap lasts longer 🐣", fr:"Un œuf, c’est bon ; un savon fait main dure plus longtemps 🐣" } },
+      fr:["En Belgique, ce sont les cloches de Pâques qui apportent les œufs : elles volent à Rome et les sèment au retour. 🔔","Pâques tombe le premier dimanche après la première pleine lune du printemps.","Le plus grand œuf en chocolat jamais réalisé mesurait plus de 10 mètres."] } },
 
   { id:"moederdag", date:y => nthSundayMMDD(y, 5, 2), from:14, to:0, fx:"petals", fxItems:["🌸","💐","💗"],
     deco:[{ e:"💐", at:"bl" }, { e:"🌸", at:"tr" }],
@@ -103,8 +98,7 @@ const SEASON_THEMES = [
     facts:{
       nl:["In het grootste deel van België is het Moederdag op de tweede zondag van mei; in Antwerpen-stad op 15 augustus!","Anna Jarvis zette in 1908 de eerste Moederdag op in de Verenigde Staten.","Een verwenmoment cadeau doen? Een cadeaubon van Beauty & Coffee kan altijd."],
       en:["In most of Belgium, Mother’s Day is the second Sunday of May; in the city of Antwerp it’s 15 August!","Anna Jarvis started the first Mother’s Day in the United States in 1908.","Want to give some pampering? A Beauty & Coffee gift voucher always works."],
-      fr:["Dans la plupart de la Belgique, la fête des mères est le deuxième dimanche de mai ; à Anvers-ville, le 15 août !","Anna Jarvis a lancé la première fête des mères aux États-Unis en 1908.","Offrir un moment de bien-être ? Un bon cadeau Beauty & Coffee fait toujours plaisir."] },
-    promo:{ nl:"Voor mama: handgemaakte zeepjes of een cadeaubon 💐", en:"For mum: handmade soaps or a gift voucher 💐", fr:"Pour maman : des savons faits main ou un bon cadeau 💐" } },
+      fr:["Dans la plupart de la Belgique, la fête des mères est le deuxième dimanche de mai ; à Anvers-ville, le 15 août !","Anna Jarvis a lancé la première fête des mères aux États-Unis en 1908.","Offrir un moment de bien-être ? Un bon cadeau Beauty & Coffee fait toujours plaisir."] } },
 
   { id:"vaderdag", date:y => nthSundayMMDD(y, 6, 2), from:14, to:0, fx:"stars", fxItems:["⭐","☕","✨"],
     deco:[{ e:"👔", at:"tr" }, { e:"☕", at:"bl" }],
@@ -112,8 +106,7 @@ const SEASON_THEMES = [
     facts:{
       nl:["In België is het Vaderdag op de tweede zondag van juni.","Ook mannen zijn van harte welkom voor een gelaatsverzorging of massage!","Sonora Smart Dodd vierde in 1910 de eerste Vaderdag in de Verenigde Staten."],
       en:["In Belgium, Father’s Day is the second Sunday of June.","Men are very welcome for a facial or a massage too!","Sonora Smart Dodd held the first Father’s Day in the United States in 1910."],
-      fr:["En Belgique, la fête des pères est le deuxième dimanche de juin.","Les hommes sont aussi les bienvenus pour un soin du visage ou un massage !","Sonora Smart Dodd a célébré la première fête des pères aux États-Unis en 1910."] },
-    promo:{ nl:"Voor papa: een handgemaakt zeepje of een massagebon ☕", en:"For dad: a handmade soap or a massage voucher ☕", fr:"Pour papa : un savon fait main ou un bon massage ☕" } },
+      fr:["En Belgique, la fête des pères est le deuxième dimanche de juin.","Les hommes sont aussi les bienvenus pour un soin du visage ou un massage !","Sonora Smart Dodd a célébré la première fête des pères aux États-Unis en 1910."] } },
 
   { id:"drakenboot", date:y => LUNAR_DATES.dragonboat[y] || null, from:14, to:0, fx:"waves", fxItems:["🌊","🐉","🍃"],
     deco:[{ e:"🐉", at:"walk" }, { e:"🛶", at:"bl" }, { e:"🍙", at:"br" }],
@@ -170,9 +163,9 @@ const SEASON_THEMES = [
       fr:["Même par temps nuageux, une grande partie des UV passe : protégez-vous ! ☀️","Le cold brew infuse 12 à 24 heures dans de l’eau froide, d’où son goût plus doux.","Autour du 21 juin, c’est le jour le plus long de l’année."] } }
 ];
 const SEASON_DEFAULT_PROMO = {
-  nl:"Op zoek naar een cadeautje? Ontdek mijn handgemaakte zeepjes 🧼",
-  en:"Looking for a little gift? Discover my handmade soaps 🧼",
-  fr:"Envie d’un petit cadeau ? Découvrez mes savons faits main 🧼"
+  nl:"Op zoek naar een cadeau? Een cadeaubon voor een verzorging doet altijd plezier.",
+  en:"Looking for a gift? A voucher for a treatment always delights.",
+  fr:"Vous cherchez un cadeau ? Un bon pour un soin fait toujours plaisir."
 };
 
 // Easter Sunday (Gregorian, anonymous algorithm) → "MM-DD"

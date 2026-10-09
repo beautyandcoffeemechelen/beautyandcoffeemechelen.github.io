@@ -853,7 +853,7 @@ const PRODUCT_CATEGORIES = {
   },
   soap: {
     label: { nl:"Ambachtelijke Zepen", en:"Artisan Soaps" },
-    inStock: true,
+    inStock: false,   // home-made soaps no longer offered (EU cosmetics rules) — never recommended
     products: [
       { id:"geitenmelk", name:"Geitenmelkzeep", tag:"dry",
         usage:{ nl:"Voedende zeep voor de droge huid — dagelijks gebruiken bij het douchen of wassen.",
@@ -1668,7 +1668,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v88 · 09/10/2026";
+const APP_VERSION = "v89 · 09/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1791,19 +1791,6 @@ const ADVENT = {
   maxExtrasPerClient: null,     // free extras per client (null = no limit; 1 per treatment)
   showPhotos: true,             // true = show the drawings in assets/advent; false = icons only
   items: {
-    lipbalm: { type:"gift", homemade:true, icon:"💋",
-      photo:"assets/advent/lipbalm-ill.webp",
-      nl:"Homemade kokoslippenbalsem", en:"Home-made coconut lip balm", fr:"Baume à lèvres coco fait maison",
-      use:{ nl:"Verzorgende lippenbalsem met bijenwas, sheaboter, kokos- en ricinusolie. Breng aan op je lippen wanneer ze droog aanvoelen.",
-            en:"Nourishing lip balm with beeswax, shea butter, coconut and castor oil. Apply to your lips whenever they feel dry.",
-            fr:"Baume nourrissant à la cire d'abeille, au beurre de karité et aux huiles de coco et de ricin. Appliquez sur les lèvres dès qu'elles sont sèches." },
-      ingredients:"Cera Alba (Beeswax), Butyrospermum Parkii (Shea) Butter, Cocos Nucifera (Coconut) Oil, Ricinus Communis (Castor) Seed Oil, Tocopherol" },
-    lipscrub: { type:"gift", homemade:true, icon:"🍯",
-      nl:"Homemade lipscrub", en:"Home-made lip scrub", fr:"Gommage lèvres fait maison",
-      use:{ nl:"Lipscrub met suiker en kokosolie. Wrijf een beetje zacht over je lippen, veeg of spoel af en breng daarna lippenbalsem aan. Niet gebruiken op kloofjes of wondjes.",
-            en:"Lip scrub with sugar and coconut oil. Gently rub a little over your lips, wipe or rinse off, then apply lip balm. Do not use on cracks or wounds.",
-            fr:"Gommage au sucre et à l'huile de coco. Frottez doucement un peu de produit sur les lèvres, essuyez ou rincez, puis appliquez un baume. Ne pas utiliser sur des gerçures ou plaies." },
-      ingredients:"Sucrose, Cocos Nucifera (Coconut) Oil" },
     guinot: { type:"gift", icon:"🧴",
       cond:{ nl:"een geboekte gelaatsverzorgingsworkshop", en:"a booked facial-care workshop", fr:"un atelier soin du visage réservé" },
       nl:"Staaltje Guinot Éclat Parfait scrub", en:"Guinot Éclat Parfait scrub sample", fr:"Échantillon de gommage Guinot Éclat Parfait",
@@ -1818,23 +1805,6 @@ const ADVENT = {
             en:"Hydrating eye serum with hyaluronic acid and a peptide complex (1.5 ml). Place the ampoule in a tissue and break it open with one sudden movement. Gently apply around the eyes after cleansing and pat into the skin. For external use only.",
             fr:"Sérum contour des yeux hydratant à l'acide hyaluronique et complexe peptidique (1,5 ml). Tenez l'ampoule dans un mouchoir en papier et cassez l'extrémité d'un coup sec. Appliquez en douceur sur le contour des yeux nettoyé et faites pénétrer en tapotant. Usage externe uniquement." },
       ingredients:"Aqua (Water), Butylene Glycol, Glycerin, Pentylene Glycol, Xanthan Gum, Sodium Hyaluronate, Palmitoyl Tripeptide-1, Palmitoyl Tetrapeptide-7, Carbomer, Coco-Glucoside, Trideceth-9, PEG-40 Hydrogenated Castor Oil, PEG-7 Glyceryl Cocoate, Tetrasodium Glutamate Diacetate, Propylene Glycol, Citric Acid, Sodium Hydroxide, Parfum (Fragrance), Phenoxyethanol, Sodium Benzoate, Sodium Lactate, CI 16035 (Red 40)" },
-    bathsalt: { type:"gift", homemade:true, icon:"🛁",
-      photo:"assets/advent/bathsalt-ill.webp",
-      nl:"Homemade badzout – geur naar keuze", en:"Home-made bath salts – scent of your choice", fr:"Sels de bain faits maison – parfum au choix",
-      use:{ nl:"Je kiest in het salon zelf: lavendel (blauw) of mandarijn & lavendel (oranje). Los een handvol op in warm badwater. Niet inslikken; buiten bereik van kinderen houden; vermijd contact met de ogen.",
-            en:"You choose in the salon: lavender (blue) or mandarin & lavender (orange). Dissolve a handful in warm bath water. Do not swallow; keep out of reach of children; avoid contact with the eyes.",
-            fr:"Vous choisissez au salon : lavande (bleu) ou mandarine & lavande (orange). Dissolvez une poignée dans l'eau chaude du bain. Ne pas avaler ; tenir hors de portée des enfants ; éviter le contact avec les yeux." },
-      ingredients:{ nl:"<u>Lavendel</u>: Sodium Bicarbonate, Magnesium Sulfate, Cocos Nucifera (Coconut) Oil, Lavandula Angustifolia (Lavender) Oil, Linalool*, Limonene*, CI 42090 · <u>Mandarijn &amp; lavendel</u>: Sodium Bicarbonate, Magnesium Sulfate, Cocos Nucifera (Coconut) Oil, Citrus Reticulata (Mandarin Orange) Peel Oil, Lavandula Angustifolia (Lavender) Oil, Limonene*, Linalool*, CI 19140, CI 75470",
-                    en:"<u>Lavender</u>: Sodium Bicarbonate, Magnesium Sulfate, Cocos Nucifera (Coconut) Oil, Lavandula Angustifolia (Lavender) Oil, Linalool*, Limonene*, CI 42090 · <u>Mandarin &amp; lavender</u>: Sodium Bicarbonate, Magnesium Sulfate, Cocos Nucifera (Coconut) Oil, Citrus Reticulata (Mandarin Orange) Peel Oil, Lavandula Angustifolia (Lavender) Oil, Limonene*, Linalool*, CI 19140, CI 75470",
-                    fr:"<u>Lavande</u> : Sodium Bicarbonate, Magnesium Sulfate, Cocos Nucifera (Coconut) Oil, Lavandula Angustifolia (Lavender) Oil, Linalool*, Limonene*, CI 42090 · <u>Mandarine &amp; lavande</u> : Sodium Bicarbonate, Magnesium Sulfate, Cocos Nucifera (Coconut) Oil, Citrus Reticulata (Mandarin Orange) Peel Oil, Lavandula Angustifolia (Lavender) Oil, Limonene*, Linalool*, CI 19140, CI 75470" },
-      ingredientsNote:{ nl:"* uit de etherische oliën", en:"* from the essential oils", fr:"* issu des huiles essentielles" } },
-    bathsalt2: { type:"gift", homemade:true, icon:"🍊",
-      nl:"Homemade badzout mandarijn & lavendel", en:"Home-made mandarin & lavender bath salts", fr:"Sels de bain mandarine & lavande faits maison",
-      use:{ nl:"Badzout met mandarijn en lavendel. Los een handvol op in warm badwater. Niet inslikken; buiten bereik van kinderen houden; vermijd contact met de ogen.",
-            en:"Bath salts with mandarin and lavender. Dissolve a handful in warm bath water. Do not swallow; keep out of reach of children; avoid contact with the eyes.",
-            fr:"Sels de bain à la mandarine et à la lavande. Dissolvez une poignée dans l'eau chaude du bain. Ne pas avaler ; tenir hors de portée des enfants ; éviter le contact avec les yeux." },
-      ingredients:"Sodium Bicarbonate, Magnesium Sulfate, Cocos Nucifera (Coconut) Oil, Citrus Reticulata (Mandarin Orange) Peel Oil, Lavandula Angustifolia (Lavender) Oil, Limonene*, Linalool*, CI 19140, CI 75470",
-      ingredientsNote:{ nl:"* uit de etherische oliën", en:"* from the essential oils", fr:"* issu des huiles essentielles" } },
     spoolie: { type:"gift", icon:"🖌️",
       photo:"assets/advent/spoolie-ill.webp",
       nl:"Mascaraborsteltje", en:"Mascara wand", fr:"Goupillon à mascara",
@@ -1939,15 +1909,12 @@ const ADVENT = {
   ]},
   doorsByYear: {
   2026: [
-    { day:1,  item:"lipbalm",       stock:null },
     { day:2,  item:"led",           stock:null },
-    { day:3,  item:"bathsalt",      stock:null },
     { day:4,  item:"handspa",       stock:null },
     { day:5,  item:"spoolie",       stock:null },
     { day:6,  item:"facial10",      stock:null },
     { day:7,  item:"eyeflash",      stock:null },
     { day:8,  item:"peelsens",      stock:null },
-    { day:9,  item:"bathsalt" ,     stock:null },
     { day:10, item:"hotstoneface",  stock:null },
     { day:11, item:"massage15",     stock:null },
     { day:12, item:"buffer",        stock:null },
@@ -1955,7 +1922,6 @@ const ADVENT = {
     { day:14, item:"guinot",        stock:null },
     { day:15, item:"spamani",       stock:null },
     { day:16, item:"peelblueberry", stock:null },
-    { day:17, item:"lipscrub",      stock:null },
     { day:18, item:"peelanti",      stock:null },
     { day:19, item:"eraser",        stock:null },
     { day:20, item:"handspa",       stock:null },   // extra hand peeling: uses up the MellowMoist lotion (Sandra, 09/10)
@@ -1965,7 +1931,7 @@ const ADVENT = {
     { day:24, item:"goldmask",      stock:null },
     { day:25, item:"paraffinmask",  stock:null }   // gratis anti-aging paraffinemasker (Sandra, 09/10)
   ],
-  // 2027: [ { day:1, item:"lipbalm", stock:null }, … ]   ← keep or change doors; missing days = massage discount
+  // 2027: [ { day:1, item:"eyeflash", stock:null }, … ]   ← keep or change doors; missing days = massage discount
   }
 };
 // Which calendar year is "on"? From March: this year's; in January/February
@@ -2169,33 +2135,33 @@ const HOUSE_RULES = [
       R("Route nodig? Tik op het kaartje hieronder: Google Maps opent met de route naar mij.","Need directions? Tap the map below: Google Maps opens with directions to me.")
     ]}] },
   { id:"hygiene", icon:"🧼", title:R("Hygiëne en verzorging","Hygiene and care"),
-    intro:R("Voor een aangename en professionele behandeling verwacht ik van elke klant het volgende:","For a pleasant and professional treatment I expect the following from every client:"), outro:null,
+    intro:R("Zo genieten we samen van een verzorgd en ontspannen moment:","This way we both enjoy a well-cared-for, relaxed moment:"), outro:null,
     groups:[
-      { title:R("Handhygiëne","Hand hygiene"), items:[
-        R("Propere handen en nagels: geen zichtbaar vuil onder de nagels of donkere verkleuring op de huid.","Clean hands and nails: no visible dirt under the nails or dark discolouration on the skin."),
-        R("Geen plakkerige of vettige handen (bv. van eten, olie of zalf).","No sticky or greasy hands (e.g. from food, oil or ointment)."),
-        R("Heb je infecties of open wonden? Geef dit vooraf aan voor de manicure. Mogelijk verplaatsen we de afspraak naar een andere datum om de wonde niet te verergeren.","Do you have infections or open wounds? Please tell me in advance for the manicure. We may move the appointment to another date so the wound doesn't get worse.")
+      { title:R("Handen","Hands"), items:[
+        R("Kom met frisgewassen handen, dan kunnen we meteen beginnen.","Come with freshly washed hands, then we can start right away."),
+        R("Liefst geen crème of olie vlak voor de manicure: zo hecht de lak mooier.","Preferably no cream or oil just before the manicure: the polish then adheres more beautifully."),
+        R("Heb je een ontsteking of een open wondje? Laat het me gerust vooraf weten. Soms is het beter om de afspraak even te verplaatsen, zodat het rustig kan genezen.","Do you have an inflammation or an open wound? Just let me know beforehand. Sometimes it’s better to move the appointment so it can heal in peace.")
       ]},
-      { title:R("Voethygiëne (bij voetverzorging)","Foot hygiene (for foot care)"), items:[
-        R("Voeten zijn gewassen voor de afspraak.","Feet are washed before the appointment."),
-        R("Geen zichtbaar vuil of sterke geur door gebrek aan hygiëne.","No visible dirt or strong odour due to lack of hygiene."),
-        R("Bij overmatig zweten: het gebruik van voetpoeder of deodorant wordt sterk aangeraden.","In case of excessive sweating: using foot powder or deodorant is strongly recommended."),
+      { title:R("Voeten (bij voetverzorging)","Feet (for foot care)"), items:[
+        R("Kom bij voorkeur met frisgewassen voeten, dan kunnen we meteen genieten.","Preferably come with freshly washed feet, then we can enjoy straight away."),
+        R("Tip: een frisse voetspray na het douchen doet wonderen.","Tip: a refreshing foot spray after showering works wonders."),
+        R("Draag gerust makkelijke schoenen, zodat je voeten na de verzorging kunnen ademen.","Feel free to wear comfortable shoes, so your feet can breathe after the treatment."),
         R("Neem teenslippers mee als je nagellak of gellak wilt bij de pedicure.","Bring flip-flops if you would like nail polish or gel polish with your pedicure."),
-        R("Heb je infecties of open wonden? Geef dit vooraf aan voor de pedicure. Mogelijk verplaatsen we de afspraak naar een andere datum om de wonde niet te verergeren.","Do you have infections or open wounds? Please tell me in advance for the pedicure. We may move the appointment to another date so the wound doesn't get worse."),
-        R("Medische aandoeningen zoals hyperhidrosis (overmatige zweetproductie) of schimmelinfecties moeten vooraf gemeld worden.","Medical conditions such as hyperhidrosis (excessive sweating) or fungal infections must be reported in advance.")
+        R("Heb je een ontsteking of een open wondje? Laat het me gerust vooraf weten. Soms is het beter om de afspraak even te verplaatsen, zodat het rustig kan genezen.","Do you have an inflammation or an open wound? Just let me know beforehand. Sometimes it’s better to move the appointment so it can heal in peace."),
+        R("Heb je een aandoening aan je voeten, zoals een schimmelinfectie? Meld het vooraf, dan stem ik de verzorging en mijn hygiënemaatregelen erop af.","Do you have a foot condition, such as a fungal infection? Mention it beforehand, then I’ll adapt the treatment and my hygiene measures.")
       ]},
-      { title:R("Intieme hygiëne (bij lichaamsbehandelingen zoals lichaamsontharing en -massage)","Intimate hygiene (for body treatments such as body hair removal and massage)"), items:[
-        R("De huid is proper en fris gewassen op de dag van de behandeling.","Skin is clean and freshly washed on the day of the treatment."),
-        R("Geen onaangename geuren door gebrek aan hygiëne.","No unpleasant odours due to lack of hygiene."),
-        R("Bij onvoldoende hygiëne kan de behandeling geweigerd worden zonder terugbetaling.","In case of insufficient hygiene the treatment may be refused without refund."),
-        R("Draag losse kledij voor de lichaamsontharing.","Wear loose clothing for body hair removal."),
-        R("Heb je infecties of open wonden? Geef dit vooraf aan voor de lichaamsmassage.","Do you have infections or open wounds? Please tell me in advance for the body massage.")
+      { title:R("Lichaamsbehandelingen (ontharing en massage)","Body treatments (hair removal and massage)"), items:[
+        R("Kom fris gewassen naar je behandeling, dan voel je je meteen op je gemak.","Come freshly washed to your treatment, so you feel at ease right away."),
+        R("Een warme douche vooraf maakt de huid soepel, ideaal voor ontharing of massage.","A warm shower beforehand makes the skin supple, ideal for hair removal or massage."),
+        R("Om iedereen een verzorgde behandeling te garanderen, kan ik bij onvoldoende hygiëne de behandeling helaas niet uitvoeren. De afspraak telt dan als annulering.","To guarantee everyone a well-cared-for treatment, I unfortunately cannot carry out a treatment when hygiene is insufficient. The appointment then counts as a cancellation."),
+        R("Draag losse, comfortabele kledij voor de lichaamsontharing.","Wear loose, comfortable clothing for body hair removal."),
+        R("Heb je een ontsteking of een open wondje? Laat het me gerust vooraf weten voor de lichaamsmassage.","Do you have an inflammation or an open wound? Just let me know before the body massage.")
       ]},
-      { title:R("Geurbeleid (roken, cannabis, sterke lichaamsgeuren)","Odour policy (smoking, cannabis, strong body odours)"), items:[
-        R("Roken en cannabisgebruik vlak voor de behandeling zijn afgeraden.","Smoking and cannabis use right before the treatment are discouraged."),
-        R("Heb je een sterke tabaks-, wiet- of andere geur die als storend wordt ervaren, dan kan de behandeling geweigerd worden zonder terugbetaling.","If you have a strong tobacco, cannabis or other smell that is experienced as disturbing, the treatment may be refused without refund."),
-        R("Normaal transpireren is geen probleem. Is de geur hinderlijk door gebrek aan hygiëne, dan kan de behandeling ingekort of geweigerd worden.","Normal perspiration is not a problem. If the odour is bothersome due to lack of hygiene, the treatment may be shortened or refused."),
-        R("Parfum en sterk geparfumeerde crèmes zijn niet gewenst, omdat die hinderlijk kunnen zijn voor de behandelaar en andere klanten.","Perfume and strongly scented creams are not wanted, as they can be bothersome for the practitioner and other clients.")
+      { title:R("Een rustige, frisse ruimte","A calm, fresh space"), items:[
+        R("Liefst niet roken vlak voor je behandeling: zo blijft de ruimte fris voor iedereen.","Preferably don’t smoke just before your treatment: that keeps the room fresh for everyone."),
+        R("Een sterke tabaks- of cannabisgeur is storend bij een behandeling van dichtbij. In dat geval kan ik de behandeling helaas niet uitvoeren.","A strong smell of tobacco or cannabis is disturbing during a close-up treatment. In that case I unfortunately cannot carry out the treatment."),
+        R("Laat parfum en sterk geparfumeerde crèmes die dag liever thuis: zo geniet je volop van de geuren van de verzorging zelf.","Leave perfume and strongly scented creams at home that day: then you can fully enjoy the scents of the treatment itself."),
+        R("Gevoelige neus of een allergie voor geurstoffen? Zeg het gerust, dan werk ik met parfumvrije producten.","Sensitive nose or an allergy to fragrances? Just tell me, then I’ll work with fragrance-free products.")
       ]},
       { title:R("Gelaatsverzorging, lash lifts en brow styling","Facials, lash lifts and brow styling"), items:[
         R("Kom bij voorkeur zonder make-up.","Preferably come without make-up."),
