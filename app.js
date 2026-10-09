@@ -2265,7 +2265,13 @@
       const h = socialHandle();
       res.innerHTML = html + (h ? `<p class="social-links__tag">${t("social_tag_hint", state.lang).replace("{handle}", `<strong>${h}</strong>`)}</p>` : "");
     }
-    const v = $("#appVersion"); if (v) v.textContent = `${t("app_version_label", state.lang)} ${APP_VERSION}`;
+    // the version is only shown on Sandra's phone (salon key) or with her private preview link
+    const v = $("#appVersion");
+    if (v){
+      let own = false;
+      try { const k = new URLSearchParams(location.search).get("voorproef"); own = hasSalonKey() || (!!k && ((typeof ADVENT === "object" && k === ADVENT.previewKey) || (typeof INGREDIENTS_LIVE === "object" && k === INGREDIENTS_LIVE.previewKey))); } catch(e){ own = false; }
+      v.hidden = !own; v.textContent = own ? `${t("app_version_label", state.lang)} ${APP_VERSION}` : "";
+    }
   }
 
   function resetApp(){
@@ -2932,6 +2938,7 @@
     return stampScan.mode === "advent" ? submitAdventCode(raw, source) : submitStampCode(raw, source);
   }
   async function submitStampCode(raw, source){
+    if (/^BCR1:/.test(String(raw || "").trim())) return advAcceptReplacement(raw);
     const kind = await resolveSalonCode(raw);
     if (kind === "STAMP"){
       if (localData.lastStampDay === todayKey()){ closeStampScanner(); showToast(t("stamp_already_today", state.lang)); return; }
@@ -3008,7 +3015,7 @@
         <button type="button" class="stamp-overlay__close" data-salon="close" aria-label="${t("stamp_close", state.lang)}">✕</button>
         <p class="stamp-overlay__title">${t("salon_title", state.lang)}</p>
         <div class="salon-modes" role="tablist">
-          ${SALON_CODE_KINDS.concat(advVisible() ? ["ADVENT"] : []).map(k => `<button type="button" class="salon-mode${k === "ADVENT" ? " salon-mode--advent" : ""}${k === salonMode.kind ? " is-active" : ""}" data-salon-kind="${k}">${t("salon_mode_" + k.toLowerCase(), state.lang)}</button>`).join("")}
+          ${SALON_CODE_KINDS.concat(advVisible() ? ["ADVENT"] : []).concat(stockItems().length ? ["STOCK"] : []).map(k => `<button type="button" class="salon-mode${k === "ADVENT" || k === "STOCK" ? " salon-mode--advent" : ""}${k === salonMode.kind ? " is-active" : ""}" data-salon-kind="${k}">${t("salon_mode_" + k.toLowerCase(), state.lang)}</button>`).join("")}
         </div>
         <p class="salon-mode-hint" id="salonModeHint">${t("salon_mode_hint_" + salonMode.kind.toLowerCase(), state.lang)}</p>
         <canvas id="salonQr" class="salon-qr salon-qr--${salonMode.kind.toLowerCase()}" width="600" height="600"></canvas>
@@ -3016,6 +3023,7 @@
         <div class="salon-timer"><div class="salon-timer__fill" id="salonTimerFill"></div></div>
         <p class="stamp-overlay__hint" id="salonHint">${t("salon_hint", state.lang)}</p>
         <div class="salon-adv" id="salonAdvent" hidden></div>
+        <div class="salon-adv salon-stock" id="salonStock" hidden></div>
         <button type="button" class="btn btn--text btn--sm salon-ingr" data-salon-ingr="1">${t("ingr_open_btn", state.lang)}</button>
       </div>`;
     document.body.appendChild(ov);
@@ -3026,6 +3034,15 @@
         ov.querySelectorAll("[data-salon-kind]").forEach(b => b.classList.toggle("is-active", b === k));
         applySalonKindUi();
         tickSalonMode();
+        return;
+      }
+      const sk = e.target.closest("[data-salon-stock]");
+      if (sk){
+        const a = sk.dataset.salonStock;
+        if (a === "use") stockAdjust(sk.dataset.item, -1, "manual");
+        if (a === "add") stockAdjust(sk.dataset.item, +1, "manual");
+        if (a === "hooktest"){ const first = stockItems()[0]; showToast(first && stockWebhook(first[0], "test", true) ? t("stock_hook_tested", state.lang) : t("stock_hook_off", state.lang)); }
+        if (a === "hookdel"){ try { localStorage.removeItem(STOCK_HOOK_KEY); } catch(err){ /* ignore */ } renderSalonStock(); }
         return;
       }
       if (e.target.closest("[data-salon-ingr]")){ ingr.unlocked = true; closeSalonMode(); goTo("ingredients"); return; }
@@ -3047,12 +3064,14 @@
 
   // Advent tab: no rotating code, but a scanner for the clients' vouchers
   function applySalonKindUi(){
-    const isAdv = salonMode.kind === "ADVENT";
+    const isStock = salonMode.kind === "STOCK";
+    const isAdv = salonMode.kind === "ADVENT" || isStock;
     const hint = $("#salonModeHint"); if (hint) hint.textContent = t("salon_mode_hint_" + salonMode.kind.toLowerCase(), state.lang);
     const qr = $("#salonQr"); if (qr){ qr.className = "salon-qr salon-qr--" + salonMode.kind.toLowerCase(); qr.hidden = isAdv; }
     const hintEl = $("#salonHint"); if (hintEl) hintEl.hidden = isAdv;
     const timer = $("#salonOverlay .salon-timer"); if (timer) timer.hidden = isAdv;
-    const box = $("#salonAdvent"); if (box){ box.hidden = !isAdv; if (isAdv) renderSalonAdvent(); }
+    const box = $("#salonAdvent"); if (box){ box.hidden = !isAdv || isStock; if (isAdv && !isStock) renderSalonAdvent(); }
+    const sb = $("#salonStock"); if (sb){ sb.hidden = !isStock; if (isStock) renderSalonStock(); }
   }
 
   // salon mode on a phone without the private key: explain, show nothing usable
@@ -3084,7 +3103,7 @@
   }
 
   async function tickSalonMode(){
-    if (salonMode.kind === "ADVENT") return;
+    if (salonMode.kind === "ADVENT" || salonMode.kind === "STOCK") return;
     const counter = stampCounterNow();
     const secs = Date.now() / 1000;
     const left = STAMP_STEP_SECONDS - (secs % STAMP_STEP_SECONDS);
@@ -3094,7 +3113,7 @@
     salonMode.counter = counter;
     const kind = salonMode.kind;
     const code = await stampCodeFor(counter, kind);
-    if (kind !== salonMode.kind || kind === "ADVENT") return;            // mode switched while computing
+    if (kind !== salonMode.kind || kind === "ADVENT" || kind === "STOCK") return;            // mode switched while computing
     drawQrToCanvas($("#salonQr"), code);
   }
 
@@ -3132,6 +3151,12 @@
         showToast(t(ok ? "salon_key_ok" : "salon_key_bad", state.lang));
         if (ok) openSalonMode();
       });
+      return;
+    }
+    const mh = location.hash.match(/^#voorraadalarm=([a-z0-9]{20,40})$/);
+    if (mh){
+      window.history.replaceState(null, "", location.pathname + location.search);   // don't leave it in the address bar
+      showToast(t(installStockHook(mh[1]) ? "stock_hook_installed" : "stock_hook_bad", state.lang));
       return;
     }
     if (location.hash === "#salon") openSalonMode();
@@ -3241,7 +3266,9 @@
     } else {
       const noInci = Object.values(SALON_PRODUCTS).filter(p => !ingrInci(p));
       const noProd = ingrTreatments().filter(id => !ingrProductsFor(id).length);
+      const unlinked = Object.values(SALON_PRODUCTS).filter(p => !(p.usedIn || []).length);
       html += `<p class="ingr-note">${t("ingr_todo_intro", L)}</p>
+        ${unlinked.length ? `<h3 class="ingr-h">${t("ingr_todo_unlinked", L)} (${unlinked.length})</h3><ul class="ingr-list">${unlinked.map(p => `<li>${esc(ingrName(p))}</li>`).join("")}</ul>` : ""}
         <h3 class="ingr-h">${t("ingr_todo_noinci", L)} (${noInci.length})</h3>
         <ul class="ingr-list">${noInci.map(p => `<li>${esc(ingrName(p))} — <span class="ingr-muted">${esc((p.usedIn || []).map(ingrTreatName).join(", "))}</span></li>`).join("") || `<li>✓</li>`}</ul>
         <h3 class="ingr-h">${t("ingr_todo_noprod", L)} (${noProd.length})</h3>
@@ -3366,15 +3393,19 @@
   function advFmt(key){ const { y, m, d } = advParts(key); return `${String(d).padStart(2,"0")}/${String(m).padStart(2,"0")}/${y}`; }
   function advDoorDate(day){ return advKeyFor(ADVENT.year, 12, day); }
   // a door + the item behind it (ADVENT.items), as one object
-  function advDoor(day){
+  // overrideId: a replacement item (mask out of stock → Sandra gave another one)
+  function advDoor(day, overrideId){
     const d = ADVENT.doors.find(x => Number(x.day) === Number(day));
     if (!d) return null;
-    const item = (ADVENT.items && ADVENT.items[d.item]) || d;
-    return Object.assign({}, item, { day:Number(d.day), itemId:d.item || null,
+    const ov = overrideId && overrideId !== d.item && ADVENT.items && ADVENT.items[overrideId] ? overrideId : null;
+    const item = (ADVENT.items && ADVENT.items[ov || d.item]) || d;
+    return Object.assign({}, item, { day:Number(d.day), itemId:ov || d.item || null, replacedFrom: ov ? d.item : null,
       itemStock: item.stock == null || item === d ? null : Number(item.stock),
       stock: d.stock == null ? null : Number(d.stock),
       photo: ADVENT.showPhotos === true ? (item.photo || null) : null });
   }
+  // the client's own view: with the replacement Sandra gave (scanned BCR1 code)
+  function advDoorClient(day){ const r = advStore().repl; return advDoor(day, r && r[day]); }
   function advDoorText(door, lang){ return (door && (door[lang] || door.nl)) || ""; }
   function advTxt(v){ return v && typeof v === "object" ? (v[state.lang] || v.nl || "") : (v || ""); }
   // book the appointment (with the code) at the latest on …
@@ -3513,6 +3544,7 @@
     if (!sel || !advPreview) return;
     advTest = sel.value;
     advPreviewRerender();
+    applySeason();
   });
   document.addEventListener("click", e => {
     const b = e.target.closest('[data-adv-preview="wipe"]');
@@ -3565,7 +3597,7 @@
     else if (phase === "after" || phase === "over") note = t("adv_note_over", state.lang);
     const doors = ADV_DOOR_ORDER.filter(d => advDoor(d)).map(day => {
       const st = advDoorState(day);
-      const door = advDoor(day);
+      const door = advDoorClient(day);
       const inner = st === "opened" ? (door.photo ? `<img class="advent-door__photo" src="${door.photo}" data-fallback="adv" data-emoji="${door.type === "discount" ? (door.value || "%") : door.icon}" alt="">` : `<span class="advent-door__icon" aria-hidden="true">${door.type === "discount" ? (door.value || "%") : door.icon}</span>`)
         : st === "missed" ? `<span class="advent-door__tag">${t("adv_state_missed", state.lang)}</span>`
         : st === "today" ? `<span class="advent-door__tag">${t("adv_state_today", state.lang)}</span>` : "";
@@ -3576,7 +3608,7 @@
     const mine = Object.keys(store.opened).map(Number).sort((a, b) => a - b);
     const mineHtml = mine.length ? `<p class="advent-mine__title">${t("adv_mine_title", state.lang)}</p>
       ${ADVENT.maxGiftsPerClient ? `<p class="advent-mine__note">${advFill(t("adv_mine_note", state.lang))}</p>` : ""}
-      <div class="advent-mine">${mine.map(day => { const door = advDoor(day); if (!door) return "";
+      <div class="advent-mine">${mine.map(day => { const door = advDoorClient(day); if (!door) return "";
         const until = advUseBy(day), expired = advTodayKey() > until;
         return `<button type="button" class="advent-mine__item${expired ? " is-expired" : ""}" data-action="advent-door" data-day="${day}">
         ${advThumb(door, "advent-mine__thumb")}<span>${t("adv_door_label", state.lang).replace("{n}", day)} · ${advDoorText(door, state.lang)}<small>${expired ? t("adv_expired_short", state.lang) : advFill(t("adv_book_short", state.lang), door)}</small></span></button>`; }).join("")}</div>` : "";
@@ -3651,7 +3683,7 @@
   }
 
   async function showAdventVoucher(day){
-    const door = advDoor(day);
+    const door = advDoorClient(day);
     const rec = advStore().opened[day];
     if (!door || !rec) return;
     closeAdventVoucher();
@@ -3663,7 +3695,8 @@
     if (isGift && ADVENT.maxGiftsPerClient) rules = rules.replace("</ul>", `<li>${advFill(t("adv_rule_max", state.lang))}</li></ul>`);
     const dates = advFill(t(`adv_dates_${kind}`, state.lang), door);
     const late = !expired && kind !== "homemade" && today > book ? `<p class="advent-voucher__late">${advFill(t("adv_late_note", state.lang), door)}</p>` : "";
-    const stockNote = door.soldOut ? `<p class="advent-voucher__soldout">😔 ${t("adv_soldout_banner", state.lang)}</p>`
+    const stockNote = door.replacedFrom ? `<p class="advent-voucher__limited">🔄 ${t("adv_repl_note", state.lang).replace("{item}", advDoorText(ADVENT.items[door.replacedFrom] || {}, state.lang))}</p>`
+      : door.soldOut ? `<p class="advent-voucher__soldout">😔 ${t("adv_soldout_banner", state.lang)}</p>`
       : (door.itemStock != null ? `<p class="advent-voucher__limited">${t("adv_limited", state.lang).replace("{n}", door.itemStock)}</p>` : "");
     const boxHtml = door.photo ? `<img class="bc-voucher__photo" src="${door.photo}" data-fallback="adv" data-emoji="${door.type === "discount" ? (door.value || "%") : door.icon}" alt="">`
       : door.type === "discount" ? `<b>${door.value || ""}</b>`
@@ -3684,6 +3717,7 @@
     const bookHtml = expired ? "" : `<div class="advent-voucher__book">
         <a class="btn btn--primary btn--sm" href="https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(waText)}" target="_blank" rel="noopener noreferrer">💬 ${t("adv_book_wa", state.lang)}</a>
         <button type="button" class="btn btn--outline btn--sm" data-adv="copy">📋 ${t("adv_copy_code", state.lang)}</button>
+        ${door.itemStock != null || door.replacedFrom ? `<button type="button" class="btn btn--text btn--sm" data-adv="scanrepl">🔄 ${t("adv_repl_scan_btn", state.lang)}</button>` : ""}
       </div>`;
     const ov = document.createElement("div");
     ov.className = "stamp-overlay advent-overlay"; ov.id = "adventVoucherOverlay";
@@ -3719,6 +3753,7 @@
         catch(err){ window.prompt(t("adv_copy_code", state.lang), rec.code); }
         return;
       }
+      if (a && a.dataset.adv === "scanrepl"){ closeAdventVoucher(); openStampScanner(); return; }
       if (e.target === ov || (a && a.dataset.adv === "close")) closeAdventVoucher();
     });
     const ok = await loadFirstScript(["assets/lib/qr-encoder.js"], () => !!window.BCQRCode);
@@ -3744,6 +3779,154 @@
   function advActive(l){ return Object.values(l.codes).filter(x => advStatus(x) !== "void"); }
   function advCountFor(l, day){ return advActive(l).filter(x => Number(x.day) === Number(day)).length; }
   function advCountItem(l, itemId){ return advActive(l).filter(x => (x.item || (advDoor(x.day) || {}).itemId) === itemId).length; }
+  /* ---- salon: stock of products that have a "stock" in data.js (the masks) ----
+     Kept on Sandra's phone. left = stock + refilled − used by hand (e.g. in the
+     promo treatments) − advent vouchers that are booked or redeemed.
+     Out of stock: no refusal, but a pop-up with masks that ARE still there
+     (+ a QR so the client's voucher shows the new mask), an e-mail to
+     herself (mail app, and via Make if installed on this phone). */
+  const STOCK_KEY = "bc_stock_v1", STOCK_HOOK_KEY = "bc_stock_hook_v1";
+  const stockMem = { adj:{}, log:[], alerted:{} };
+  function stockData(){
+    if (advPreview) return stockMem;
+    try { const x = JSON.parse(localStorage.getItem(STOCK_KEY) || "null"); if (x && x.adj) return Object.assign({ log:[], alerted:{} }, x); } catch(e){ /* ignore */ }
+    return { adj:{}, log:[], alerted:{} };
+  }
+  function stockSave(x){ if (advPreview) return true; try { localStorage.setItem(STOCK_KEY, JSON.stringify(x)); return true; } catch(e){ return false; } }
+  function stockItems(){ return typeof ADVENT === "object" && ADVENT.items ? Object.entries(ADVENT.items).filter(([, it]) => typeof it.stock === "number") : []; }
+  function stockTotal(id, x){ const it = ADVENT.items[id]; const a = ((x || stockData()).adj[id]) || {}; return it.stock + (a.added || 0); }
+  function stockLeft(id, l, x){
+    const it = ADVENT.items && ADVENT.items[id];
+    if (!it || typeof it.stock !== "number") return null;
+    x = x || stockData(); l = l || advLedger();
+    const a = x.adj[id] || {};
+    return stockTotal(id, x) - (a.used || 0) - advCountItem(l, id);
+  }
+  function stockName(id){
+    const it = ADVENT.items[id]; if (!it) return id;
+    const n = advDoorText(it, state.lang).replace(/^(Gratis|Free)\s+/i, "").replace(/\s+offerte?s?(?=\s*\(|$)/i, "");
+    return n.charAt(0).toUpperCase() + n.slice(1);
+  }
+  function stockAlternatives(id){
+    const it = ADVENT.items[id]; if (!it) return [];
+    const l = advLedger(), x = stockData(), w = (it.with || {}).nl;
+    return stockItems().filter(([aid, a]) => aid !== id && a.type === it.type && !a.soldOut && (a.with || {}).nl === w && stockLeft(aid, l, x) > 0).map(([aid]) => aid);
+  }
+  function stockHook(){ try { const u = localStorage.getItem(STOCK_HOOK_KEY); return u && /^[a-z0-9]{20,40}$/.test(u) ? u : null; } catch(e){ return null; } }
+  // e-mail via Make (only if this phone holds the webhook; nothing secret is in the code)
+  function stockWebhook(id, reason, test){
+    const u = stockHook(); if (!u) return false;
+    const alts = stockAlternatives(id).map(a => `${stockName(a)} (${stockLeft(a)})`).join(", ") || "—";
+    const it = ADVENT.items[id] || {};
+    const body = new URLSearchParams({ item: it.product || stockName(id), status: test ? "TEST" : (stockLeft(id) <= 0 ? "op" : "bijna op"),
+      left: String(stockLeft(id)), total: String(stockTotal(id)), reason: reason || "", alternatives: alts,
+      date: new Date().toLocaleString("nl-BE") });
+    try { fetch("https://hook.eu1.make.com/" + u, { method:"POST", mode:"no-cors", body }).catch(() => {}); } catch(e){ return false; }
+    return true;
+  }
+  function stockMailto(id){
+    const it = ADVENT.items[id] || {}, name = it.product || stockName(id);
+    const alts = stockAlternatives(id).map(stockName).join(", ") || "een gelijkwaardig masker";
+    const subj = `Voorraad: ${name} is op`;
+    const body = `Hoi Sandra,\n\n${name} is op (${new Date().toLocaleDateString("nl-BE")}).\nNog in voorraad: ${alts}.\n\nTe doen: soldOut: true in data.js (of vraag het aan Claude), bijbestellen, en je klanten verwittigen.\n\n----- VOORBEELD NIEUWSBRIEF -----\nOnderwerp: Adventskalender: ${name} is de deur uit 🎄\n\nLieve klant,\n\nWat gaat het snel! Het ${name} uit onze adventskalender is helemaal op — bedankt aan iedereen die al kwam genieten.\n\nHeb jij een bon voor dit masker die je nog niet hebt ingeruild? Geen zorgen: je krijgt in het salon een gelijkwaardig masker in de plaats (${alts}). Je bon blijft gewoon geldig tot de datum die erop staat.\n\nNog geen afspraak? Boek via WhatsApp of bel +32 499 22 19 01 en vermeld je code.\n\nTot snel in het salon,\nSandra\nBeauty & Coffee — Barbarastraat 25, 2800 Mechelen`;
+    return `mailto:?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
+  }
+  // after every change: warn at the last one, alert (once) when it runs out
+  function stockAfterChange(id, reason){
+    const left = stockLeft(id); if (left == null) return "";
+    const x = stockData(), L = state.lang;
+    if (left > 0){
+      if (x.alerted[id]){ delete x.alerted[id]; stockSave(x); }
+      return left === 1 ? `<p class="stock-warn">⚠️ ${t("stock_last_one", L).replace("{item}", esc(stockName(id)))}</p>` : "";
+    }
+    let sent = false;
+    if (!x.alerted[id]){ x.alerted[id] = new Date().toISOString(); stockSave(x); if (!advPreview) sent = stockWebhook(id, reason); }
+    return stockAlertHtml(id, sent);
+  }
+  function stockAlertHtml(id, sent){
+    const L = state.lang, alts = stockAlternatives(id).map(a => `${esc(stockName(a))} (${stockLeft(a)})`).join(", ");
+    return `<div class="stock-alert"><p>📦 <b>${t("stock_out_title", L).replace("{item}", esc(stockName(id)))}</b></p>
+      <p>${alts ? t("stock_out_alts", L).replace("{alts}", alts) : t("stock_out_noalts", L)}</p>
+      <p class="stock-alert__todo">${t("stock_out_todo", L)}</p>
+      ${sent ? `<p class="stock-alert__sent">✉️ ${t("stock_mail_sent", L)}</p>` : ""}
+      <a class="btn btn--primary btn--sm" href="${stockMailto(id)}">📧 ${t("stock_mail_btn", L)}</a></div>`;
+  }
+  function stockAdjust(id, delta, reason){
+    const x = stockData();
+    const a = x.adj[id] = x.adj[id] || { used:0, added:0 };
+    if (delta < 0) a.used = (a.used || 0) + 1; else a.added = (a.added || 0) + 1;
+    x.log = (x.log || []).concat([{ at:new Date().toISOString(), id, d:delta, r:reason || "" }]).slice(-60);
+    stockSave(x);
+    const html = stockAfterChange(id, reason);
+    renderSalonStock();
+    if (navigator.vibrate) navigator.vibrate(40);
+    if (html) showStockPopup(html); else showToast(t("stock_saved", state.lang).replace("{item}", stockName(id)).replace("{n}", stockLeft(id)));
+  }
+  function showStockPopup(html){
+    const old = $("#stockPopup"); if (old) old.remove();
+    const ov = document.createElement("div");
+    ov.className = "stamp-overlay adv-result-overlay"; ov.id = "stockPopup";
+    ov.setAttribute("role", "alertdialog"); ov.setAttribute("aria-modal", "true");
+    ov.innerHTML = `<div class="stamp-overlay__panel adv-result adv-result--bad">${html}
+      <div class="adv-result__btns"><button type="button" class="btn btn--ghost" data-stockpop="close">${t("stamp_close", state.lang)}</button></div></div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener("click", e => { if (e.target === ov || e.target.closest("[data-stockpop]")) ov.remove(); });
+  }
+  function renderSalonStock(){
+    const box = $("#salonStock");
+    if (!box) return;
+    const L = state.lang, l = advLedger(), x = stockData();
+    const rows = stockItems().map(([id]) => {
+      const left = stockLeft(id, l, x), tot = stockTotal(id, x), adv = advCountItem(l, id), used = ((x.adj[id] || {}).used) || 0;
+      return `<div class="salon-stock__row${left <= 0 ? " is-out" : left === 1 ? " is-low" : ""}">
+          <div class="salon-stock__name"><b>${esc(stockName(id))}</b><small>${t("stock_row_detail", L).replace("{adv}", adv).replace("{used}", used).replace("{tot}", tot)}</small></div>
+          <div class="salon-stock__left" aria-label="${t("stock_left_aria", L)}">${left}<small>/${tot}</small></div>
+          <div class="salon-stock__btns">
+            <button type="button" class="btn btn--primary btn--sm" data-salon-stock="use" data-item="${id}"${left <= 0 ? " disabled" : ""}>− ${t("stock_btn_use", L)}</button>
+            <button type="button" class="btn btn--outline btn--sm" data-salon-stock="add" data-item="${id}">＋ ${t("stock_btn_add", L)}</button>
+          </div></div>`;
+    }).join("");
+    const log = (x.log || []).slice(-8).reverse().map(e => `<li>${advFmtStamp(e.at)} · ${e.d < 0 ? "−1" : "+1"} ${esc(stockName(e.id))}</li>`).join("");
+    const hook = stockHook();
+    box.innerHTML = `${advPreview ? `<p class="advent-test">🧪 ${t("stock_test_note", L)}</p>` : ""}
+      <p class="salon-stock__intro">${t("stock_intro", L)}</p>
+      ${rows}
+      ${log ? `<details class="salon-adv__stats"><summary>${t("stock_log_title", L)}</summary><ul class="salon-stock__log">${log}</ul></details>` : ""}
+      <details class="salon-adv__stats"><summary>✉️ ${t("stock_hook_title", L)}</summary>
+        <p class="salon-stock__intro">${hook ? t("stock_hook_on", L) : t("stock_hook_off", L)}</p>
+        ${hook ? `<button type="button" class="btn btn--outline btn--sm" data-salon-stock="hooktest">${t("stock_hook_test", L)}</button>
+          <button type="button" class="btn btn--text btn--sm" data-salon-stock="hookdel">${t("stock_hook_del", L)}</button>` : ""}
+      </details>`;
+  }
+  // #voorraadalarm=<Make webhook id>: keep it on this phone only
+  function installStockHook(id){
+    if (!/^[a-z0-9]{20,40}$/.test(id)) return false;
+    try { localStorage.setItem(STOCK_HOOK_KEY, id); return true; } catch(e){ return false; }
+  }
+  // replacement voucher: signed with the salon key, scanned by the client
+  async function advReplCode(code, itemId){
+    const c = String(code).replace(/-/g, "");
+    const sig = await crypto.subtle.sign(ECDSA_SIGN, await getSalonPrivKey(), new TextEncoder().encode("BC-REPL|" + c + "|" + itemId));
+    return "BCR1:" + c + "." + itemId + "." + b64u(sig);
+  }
+  async function advAcceptReplacement(raw){
+    const L = state.lang;
+    const m = String(raw || "").trim().match(/^BCR1:([AT])(\d{2})([A-HJ-NP-Z2-9]{5})([A-HJ-NP-Z2-9]{4})\.([A-Za-z0-9]{2,30})\.([A-Za-z0-9_-]{80,90})$/);
+    closeStampScanner();
+    if (!m){ showToast(t("stamp_invalid", L)); return; }
+    const c = m[1] + m[2] + m[3] + m[4], itemId = m[5], day = Number(m[2]);
+    let ok = false;
+    try { ok = await crypto.subtle.verify(ECDSA_SIGN, await getSalonPubKey(), unb64u(m[6]), new TextEncoder().encode("BC-REPL|" + c + "|" + itemId)); } catch(e){ ok = false; }
+    const st = advStore(), rec = st.opened[day];
+    if (!ok || !ADVENT.items[itemId]){ showToast(t("stamp_invalid", L)); return; }
+    if (!rec || String(rec.code).replace(/-/g, "") !== c){ showToast(t("adv_repl_not_yours", L)); return; }
+    st.repl = st.repl || {}; st.repl[day] = itemId;
+    if (!advPreview) saveLocalData();
+    if (navigator.vibrate) navigator.vibrate(60);
+    renderAdvent();
+    showToast(t("adv_repl_ok", L).replace("{item}", advDoorText(ADVENT.items[itemId], L)));
+  }
+
   function advFmtStamp(iso){
     const d = new Date(iso);
     return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
@@ -3760,7 +3943,7 @@
       const n = advCountFor(l, door.day);
       const stock = door.stock == null ? "∞" : door.stock;
       const full = door.stock != null && n >= door.stock;
-      return `<tr class="${full ? "is-full" : ""}${n ? "" : " is-zero"}"><td>${door.day}</td><td>${door.type === "discount" ? "🎟️" : door.icon} ${advDoorText(door, state.lang)}${door.itemStock != null ? ` <small>(${advCountItem(l, door.itemId)}/${door.itemStock} ${t("salon_adv_total_item", state.lang)})</small>` : ""}${door.soldOut ? " — ❌" : ""}</td><td>${n} / ${stock}</td></tr>`;
+      return `<tr class="${full ? "is-full" : ""}${n ? "" : " is-zero"}"><td>${door.day}</td><td>${door.type === "discount" ? "🎟️" : door.icon} ${advDoorText(door, state.lang)}${door.itemStock != null ? ` <small>(${t("stock_left_short", state.lang).replace("{n}", stockLeft(door.itemId, l))})</small>` : ""}${door.soldOut ? " — ❌" : ""}</td><td>${n} / ${stock}</td></tr>`;
     }).join("");
     const bookedHtml = booked.length ? `<div class="salon-adv__booked"><p>📅 ${t("salon_adv_booked_title", state.lang)}</p>
       ${booked.map(([code, x]) => { const door = advDoor(x.day); return `<button type="button" class="salon-adv__bk" data-salon-adv="open" data-code="${code}">
@@ -3782,8 +3965,7 @@
     if (advDoorDate(p.day) > today) return t("adv_res_future", L).replace("{n}", p.day);
     const bookBy = door.homemade ? advUseBy(p.day) : advBookBy(p.day);
     if (today > bookBy) return t(door.homemade ? "adv_res_expired" : "adv_res_late", L).replace("{d}", advFmt(bookBy));
-    if (door.soldOut) return t("adv_res_soldout_flag", L);
-    if (door.itemStock != null && advCountItem(l, door.itemId) >= door.itemStock) return t("adv_res_soldout_item", L).replace("{y}", door.itemStock);
+    // out of stock / soldOut: no refusal — advHandleCode offers a replacement
     if (door.stock != null && advCountFor(l, p.day) >= door.stock) return t("adv_res_soldout", L).replace("{y}", door.stock);
     const max = door.type === "discount" ? ADVENT.maxDiscountsPerClient : door.type === "extra" ? ADVENT.maxExtrasPerClient : ADVENT.maxGiftsPerClient;
     if (max){
@@ -3819,11 +4001,11 @@
     if (!p.valid) return showAdventResult("bad", t("adv_res_invalid", L), p.code);
     if (p.prefix === "T" && !advPreview) return showAdventResult("bad", t("adv_res_test", L), p.code);
     if (p.prefix === "A" && advPreview) return showAdventResult("bad", t("adv_res_real_in_test", L), p.code);
-    const door = advDoor(p.day);
-    if (!door) return showAdventResult("bad", t("adv_res_invalid", L), p.code);
+    if (!advDoor(p.day)) return showAdventResult("bad", t("adv_res_invalid", L), p.code);
     const today = advTodayKey(), useBy = advUseBy(p.day);
     const l = advLedger();
     const x = l.codes[p.code];
+    const door = advDoor(p.day, p.replaceWith || (x && x.item));
     if (x && advStatus(x) === "used") return showAdventResult("bad", t("adv_res_used", L).replace("{d}", advFmtStamp(x.usedAt || x.at)), p.code, door);
     if (x && advStatus(x) === "void") return showAdventResult("bad", t("adv_res_void", L).replace("{d}", advFmtStamp(x.voidAt || x.at)), p.code, door);
     if (x && advStatus(x) === "booked"){
@@ -3836,6 +4018,7 @@
     }
     const refuse = advRefuseNew(p, door, l);
     if (refuse) return showAdventResult("bad", refuse, p.code, door);
+    if (!p.force && door.itemStock != null && (door.soldOut || stockLeft(door.itemId, l) <= 0)) return advOfferReplacement(p, door);
     const maxAppt = useBy < today ? today : useBy;
     const reserve = `<label class="adv-result__date">${t("adv_appt_date", L)}
         <input type="date" id="advApptDate" min="${today}" max="${maxAppt}"></label>`;
@@ -3844,9 +4027,18 @@
     showAdventResult("ok", t("adv_res_valid_choose", L), p.code, door, info,
       [["redeem", "✅ " + t("adv_btn_redeem_now", L)], ["book", "📅 " + t("adv_btn_book", L)]], p);
   }
+  // the mask behind this voucher is gone: pick one that is still in stock
+  function advOfferReplacement(p, door){
+    const L = state.lang, alts = stockAlternatives(door.itemId);
+    const acts = alts.map(a => ["repl:" + a, `🔄 ${stockName(a)} (${t("stock_left_short", L).replace("{n}", stockLeft(a))})`]);
+    if (!alts.length) acts.push(["force", t("stock_btn_force", L)]);
+    const info = `<p class="adv-result__extra">${alts.length ? t("stock_res_choose", L) : t("stock_out_noalts", L)}</p>`;
+    return showAdventResult("bad", t("stock_res_out", L).replace("{item}", esc(stockName(door.itemId))), p.code, door, info, acts, p);
+  }
   // write to the ledger after Sandra chose an action
   function advAction(action, p){
-    const L = state.lang, door = advDoor(p.day), l = advLedger();
+    const L = state.lang, l = advLedger();
+    const door = advDoor(p.day, p.replaceWith || (l.codes[p.code] && l.codes[p.code].item));
     // in the preview the "now" follows the simulated day
     const now = advPreview ? new Date(`${advTodayKey()}T${new Date().toTimeString().slice(0, 8)}`).toISOString() : new Date().toISOString();
     const x = l.codes[p.code];
@@ -3856,6 +4048,7 @@
       if (refuse) return showAdventResult("bad", refuse, p.code, door);
     }
     const base = x || { day:p.day, dev:p.dev, type:door.type, item:door.itemId, at:now };
+    if (p.replaceWith && door.replacedFrom){ base.item = door.itemId; base.replacedFrom = door.replacedFrom; }
     if (action === "book"){
       const inp = $("#advApptDate"); const appt = inp ? inp.value : "";
       const max = advUseBy(p.day);
@@ -3871,18 +4064,21 @@
     if (!advSaveLedger(l)) return showAdventResult("bad", t("adv_res_storage", L), p.code, door);
     if (navigator.vibrate) navigator.vibrate(80);
     renderSalonAdvent();
-    if (action === "void") return showAdventResult("bad", t("adv_res_voided", L), p.code, door);
+    if (action === "void"){ if (door.itemStock != null) stockAfterChange(door.itemId, "void"); return showAdventResult("bad", t("adv_res_voided", L), p.code, door); }
+    const stockHtml = door.itemStock != null ? stockAfterChange(door.itemId, "advent " + action + " " + p.code) : "";
+    const replHtml = p.replaceWith && door.replacedFrom ? `<div class="adv-repl"><p>🔄 ${t("adv_repl_show", L)}</p><canvas id="advReplQr" class="adv-repl__qr" width="420" height="420"></canvas></div>` : "";
+    if (replHtml) setTimeout(async () => { try { await loadFirstScript(["assets/lib/qr-encoder.js"], () => !!window.BCQRCode); drawQrToCanvas($("#advReplQr"), await advReplCode(p.code, door.itemId)); } catch(e){ /* no key */ } }, 50);
     if (action === "book"){
       trackEvent("advent-booked");
       return showAdventResult("ok", t("adv_res_booked_ok", L).replace("{d}", advFmt(l.codes[p.code].appt)), p.code, door,
-        `<p class="adv-result__extra">${t("adv_res_booked_hint", L)}</p>`);
+        `<p class="adv-result__extra">${t("adv_res_booked_hint", L)}</p>${replHtml}${stockHtml}`);
     }
     trackEvent("advent-redeemed");
     const n = advCountFor(l, p.day), ni = door.itemId ? advCountItem(l, door.itemId) : 0;
-    const count = door.itemStock != null ? t("adv_res_count_item", L).replace("{x}", ni).replace("{y}", door.itemStock)
+    const count = door.itemStock != null ? t("stock_left_short", L).replace("{n}", stockLeft(door.itemId, l))
       : door.stock != null ? t("adv_res_count_of", L).replace("{x}", n).replace("{y}", door.stock) : t("adv_res_count", L).replace("{x}", n);
     const title = door.type === "discount" ? "adv_res_ok_discount" : door.type === "extra" ? "adv_res_ok_extra" : "adv_res_ok_gift";
-    return showAdventResult("ok", t(title, L), p.code, door, `<p class="adv-result__count">${count}</p><p class="adv-result__extra">${advCondNote(door)}</p>`);
+    return showAdventResult("ok", t(title, L), p.code, door, `<p class="adv-result__count">${count}</p><p class="adv-result__extra">${advCondNote(door)}</p>${replHtml}${stockHtml}`);
   }
 
   // mood: "ok" (green), "info" (blue, a reserved voucher), "bad" (red)
@@ -3893,7 +4089,7 @@
     ov.setAttribute("role", "alertdialog"); ov.setAttribute("aria-modal", "true");
     const mark = mood === "ok" ? "✅" : mood === "info" ? "📅" : "❌";
     const btns = actions && actions.length
-      ? actions.map(([a, label]) => `<button type="button" class="btn ${a === "void" ? "btn--ghost adv-result__void" : "btn--primary"}" data-advres="${a}">${label}</button>`).join("")
+      ? actions.map(([a, label]) => `<button type="button" class="btn ${a === "void" || a === "force" ? "btn--ghost adv-result__void" : "btn--primary"}" data-advres="${a}">${label}</button>`).join("")
         + `<button type="button" class="btn btn--ghost" data-advres="close">${t("stamp_close", state.lang)}</button>`
       : `<button type="button" class="btn btn--primary" data-advres="next">📷 ${t("adv_res_next", state.lang)}</button>
          <button type="button" class="btn btn--ghost" data-advres="close">${t("stamp_close", state.lang)}</button>`;
@@ -3914,6 +4110,8 @@
       const act = a.dataset.advres;
       if (act === "close"){ ov.remove(); return; }
       if (act === "next"){ ov.remove(); openStampScanner("advent"); return; }
+      if (p && act.startsWith("repl:")){ ov.remove(); advHandleCode(Object.assign({}, p, { replaceWith: act.slice(5) })); return; }
+      if (p && act === "force"){ ov.remove(); advHandleCode(Object.assign({}, p, { force:true })); return; }
       if (p && (act === "redeem" || act === "book" || act === "void")) advAction(act, p);
     });
   }
@@ -3938,7 +4136,8 @@
   function seasonParam(name){ try { return new URLSearchParams(location.search).get(name); } catch(e){ return null; } }
   function seasonTodayKey(){
     const d = seasonParam("themadag");
-    return d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : todayKey();
+    if (d && /^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
+    return advPreview && advTest ? advTest : todayKey();     // advent preview: the look follows the chosen day
   }
   function seasonDays(a, b){                       // b - a in days (keys "YYYY-MM-DD")
     const p = k => { const [y, m, d] = k.split("-").map(Number); return Date.UTC(y, m - 1, d); };

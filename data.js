@@ -1605,7 +1605,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v72 · 09/10/2026";
+const APP_VERSION = "v73 · 09/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1730,6 +1730,7 @@ const ADVENT = {
             fr:"Gommage au sucre et à l'huile de coco. Frottez doucement un peu de produit sur les lèvres, essuyez ou rincez, puis appliquez un baume. Ne pas utiliser sur des gerçures ou plaies." },
       ingredients:"Sucrose, Cocos Nucifera (Coconut) Oil" },
     guinot: { type:"gift", icon:"🧴",
+      photo:"assets/advent/guinot-ill.webp",
       cond:{ nl:"een geboekte gelaatsverzorgingsworkshop", en:"a booked facial-care workshop", fr:"un atelier soin du visage réservé" },
       nl:"Staaltje Guinot Éclat Parfait scrub", en:"Guinot Éclat Parfait scrub sample", fr:"Échantillon de gommage Guinot Éclat Parfait",
       use:{ nl:"Scrubcrème voor het gezicht met dubbele microkorrels (sheabutter). Breng aan op een gereinigde huid, masseer zacht met kleine cirkeltjes en spoel af met lauw water. Vermijd de oogcontour. Bevat zoete-amandelolie en parfum.",
@@ -1790,12 +1791,17 @@ const ADVENT = {
                    fr:"10 minutes dans le tunnel de lumière LED, adapté à votre peau. <b>Rouge</b> : stimule le collagène et le renouvellement cellulaire — anti-âge, moins de rides. <b>Vert</b> : atténue les rougeurs. <b>Bleu</b> : purifiant pour les imperfections et l'acné. <b>Orange</b> : revitalisant, pour une peau plus élastique." },
       nl:"Gratis 10 min LED-lichttherapie", en:"Free 10-min LED light therapy", fr:"10 min de luminothérapie LED offertes" },
     handspa: { type:"extra", icon:"🤲", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Een scrub met dode-zeezout, kelp en plantaardige oliën (saffloer, zonnebloem, druivenpit, abrikozenpit) maakt je handen zacht. Daarna een massage met een verzorgende lotion met aloë vera, jojoba en sheaboter. Bevat parfum.",
+                   en:"A scrub with Dead Sea salt, kelp and plant oils (safflower, sunflower, grapeseed, apricot kernel) softens your hands, followed by a massage with a nourishing lotion with aloe vera, jojoba and shea butter. Contains fragrance.",
+                   fr:"Un gommage au sel de la mer Morte, au varech et aux huiles végétales (carthame, tournesol, pépins de raisin, noyau d'abricot) adoucit vos mains, suivi d'un massage avec une lotion nourrissante à l'aloe vera, au jojoba et au beurre de karité. Contient du parfum." },
+      product:"Indulge BuffingSeaSalt Oil Scrub + MellowMoist Lotion (daarna Gerlasan handcrème)",
+      ingredients:"Scrub: Carthamus Tinctorius Seed Oil, Helianthus Annuus Seed Oil, Vitis Vinifera Seed Oil, Prunus Armeniaca Kernel Oil, Magnesium Sulfate, Sodium Chloride, Dead Sea Salts, Macrocystis Pyrifera Extract, Dextrose Monohydrate, Fragrance. — Lotion: Aloe Barbadensis Leaf Juice, Aqua, Helianthus Annuus Seed Oil, Isopropyl Palmitate, Glyceryl Stearate SE, Cetyl Alcohol, Stearic Acid, Simmondsia Chinensis Seed Oil, Panthenol, Tocopheryl Acetate, Camellia Sinensis Leaf Extract, Glycerin, Butyrospermum Parkii Butter, Xanthan Gum, Phenoxyethanol, Ethylhexylglycerin, Fragrance. (Volledige lijsten: zie Ingrediënten & allergieën.)",
       nl:"Gratis handpeeling & -massage", en:"Free hand peeling & massage", fr:"Gommage & massage des mains offerts" },
     hotstoneface: { type:"extra", icon:"🪨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       nl:"Gratis Hot Stone gelaatsmassage", en:"Free Hot Stone facial massage", fr:"Massage visage aux pierres chaudes offert" },
     facecupping: { type:"extra", icon:"✨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       nl:"Gratis liftende cuppingmassage voor het gelaat", en:"Free lifting cupping facial massage", fr:"Massage liftant aux ventouses du visage offert" },
-    peelanti: { type:"extra", icon:"🌟", stock:5, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+    peelanti: { type:"extra", icon:"🌟", stock:6, photo:"assets/advent/algoageing-ill.webp", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met kaviaarextract, hamamelis, lavendel en collageen — verstevigt en geeft de rijpere huid een frisse, gladde uitstraling.", en:"With caviar extract, witch hazel, lavender and collagen — firms and gives mature skin a fresh, smooth look.", fr:"À l'extrait de caviar, à l'hamamélis, à la lavande et au collagène — raffermit et donne aux peaux matures un aspect frais et lisse." },
       product:"Bio Balance Algoherbal Ageing (poedermasker + Essence Gel)",
       ingredients:"Poeder (Lavender): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Lavandula Angustifolia (Lavender) Flower, Sodium Phosphate, CI 42090, Lavandula Angustifolia (Lavender) Oil. — Essence Gel (Lavender & Caviar): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Caviar Extract, Hamamelis Virginiana Extract, Lavandula Angustifolia Extract, Carbomer, Triethanolamine, Hyaluronic Acid, Hydrolyzed Collagen, Allantoin, PEG-40 Hydrogenated Castor Oil, Parfum, CI 42090, Phenoxyethanol, Limonene, Linalool, Geraniol, Alpha-Isomethyl Ionone, CI 16035",
@@ -1810,7 +1816,7 @@ const ADVENT = {
       product:"Bio Balance Super Collageen Gelmasker Lifting",
       ingredients:"Aqua, Soluble Collagen, Propanediol, Phenoxyethanol, Avena Sativa (Oat) Kernel Extract, Carbomer, Caprylyl Glycol, Sodium Hydroxide, Disodium EDTA, Sodium Benzoate",
       nl:"Gratis collageenvliesmasker", en:"Free collagen sheet mask", fr:"Masque en tissu au collagène offert" },
-    goldmask: { type:"extra", icon:"👑", stock:1, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+    goldmask: { type:"extra", icon:"👑", stock:1, photo:"assets/advent/goldmask-ill.webp", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met collageen, hyaluronzuur, centella en groene thee — hydrateert en geeft een stralende, frisse look. Volgens de verpakking niet voor de gevoelige huid.", en:"With collagen, hyaluronic acid, centella and green tea — hydrates and gives a radiant, fresh look. According to the pack, not for sensitive skin.", fr:"Au collagène, à l'acide hyaluronique, à la centella et au thé vert — hydrate et donne un teint frais et éclatant. Selon l'emballage, ne convient pas aux peaux sensibles." },
       product:"Gold Bio-Collagen Facial Mask",
       ingredients:"Aqua, Glycerin, Xanthan Gum, Mica, Chondrus Crispus Powder, Titanium Dioxide, Chlorphenesin, Glucomannan, Algin, Methylparaben, Potassium Chloride, Sodium Hyaluronate, Hydrolyzed Collagen, Butylene Glycol, Centella Asiatica Extract, Polygonum Cuspidatum Root Extract, Scutellaria Baicalensis Root Extract, Camellia Sinensis Leaf Extract, Glycyrrhiza Glabra (Licorice) Root Extract, Chamomilla Recutita (Matricaria) Flower Extract, Rosmarinus Officinalis (Rosemary) Leaf Extract, Iron Oxides, Citric Acid, Potassium Citrate, PEG-40 Hydrogenated Castor Oil, Fragrance",
@@ -1857,7 +1863,7 @@ const ADVENT = {
     { day:17, item:"lipscrub",      stock:null },
     { day:18, item:"peelanti",      stock:null },
     { day:19, item:"eraser",        stock:null },
-    { day:20, item:"massage15",     stock:null },
+    { day:20, item:"handspa",       stock:null },   // extra hand peeling: uses up the MellowMoist lotion (Sandra, 09/10)
     { day:21, item:"collagen",      stock:null },
     { day:22, item:"spapedi",       stock:null },
     { day:23, item:"luminoclear",   stock:null },

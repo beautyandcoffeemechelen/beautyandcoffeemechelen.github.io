@@ -56,10 +56,18 @@ const SALON_PRODUCTS = {
     note:{ nl:"Volgens de verpakking: niet op gevoelige huid, zonnebrand of wondjes.", en:"According to the pack: not on sensitive skin, sunburn or broken skin.", fr:"Selon l'emballage : pas sur peau sensible, coup de soleil ou peau abîmée." } },
 
   /* ---- hands ---- */
-  gerlasan:     { name:{ nl:"Gerlasan – Handcrème met ureum", en:"Gerlasan – Hand cream with urea", fr:"Gerlasan – Crème pour les mains à l'urée" }, usedIn:["manicure","manicureexpress","manipedispa","handspa"], slot:"handcream",
+  gerlasan:     { name:{ nl:"Gerlasan – Handcrème met ureum", en:"Gerlasan – Hand cream with urea", fr:"Gerlasan – Crème pour les mains à l'urée" }, usedIn:["handspa","manicure","manicureexpress","manipedispa"], slot:"handcream",
     inci:"Aqua (Water), Urea, Paraffinum Liquidum (Mineral Oil), Polyglyceryl-3 Methylglucose Distearate, Isopropyl Palmitate, Octyldodecanol, Glyceryl Stearate, Simmondsia Chinensis (Jojoba) Seed Oil, Cetyl Alcohol, Glycerin, Dimethicone, Tapioca Starch, Panthenol, Aloe Barbadensis Leaf Juice Powder, Bisabolol, Triethyl Citrate, Xanthan Gum, Parfum (Fragrance), Methylparaben, Ethylparaben, Phenoxyethanol, Caprylyl Glycol, Caprylhydroxamic Acid, Ethylhexylglycerin, Methylpropanediol, Benzyl Salicylate, Citronellol, Hexyl Cinnamal, Limonene, Linalool, Alpha-Isomethyl Ionone",
     note:{ nl:"Ook geschikt voor diabetici (volgens de verpakking).", en:"Also suitable for people with diabetes (according to the pack).", fr:"Convient également aux diabétiques (selon l'emballage)." } },
-  handpeeling:  { name:{ nl:"Handpeeling (welk product?)", en:"Hand scrub (which product?)", fr:"Gommage mains (quel produit ?)" }, usedIn:["handspa","manipedispa"], inci:"" },
+  indulgescrub: { name:"Indulge (Nailit Products) – BuffingSeaSalt Oil Scrub, tender lily & red rose", usedIn:["handspa","manipedispa"], slot:"handscrub",
+    inci:"Carthamus Tinctorius Seed Oil (Safflower Oil), Helianthus Annuus Seed Oil (Organic Sunflower), Vitis Vinifera Seed Oil (Grapeseed), Prunus Armeniaca Kernel Oil (Apricot Kernel Oil), Magnesium Sulfate, Sodium Chloride, Dead Sea Salts, Macrocystis Pyrifera Extract (Sea Kelp), Dextrose Monohydrate, Fragrance (Acapulco Lily)",
+    note:{ nl:"Abrikozenpitolie: let op bij amandel- of notenallergie (verwante familie).", en:"Apricot kernel oil: take care with almond or nut allergy (related family).", fr:"Huile de noyau d'abricot : prudence en cas d'allergie aux amandes ou aux noix (famille proche)." } },
+  mellowmoist:  { name:"Indulge (Nailit Products) – MellowMoist Lotion, tender lily & red rose", usedIn:["handspa","manipedispa"], slot:"handcream",
+    inci:"Aloe Barbadensis Leaf Juice (Organic Aloe), Aqua (Water), Helianthus Annuus Seed Oil (Organic Sunflower), Isopropyl Palmitate, Glyceryl Stearate SE, Cetyl Alcohol, Stearic Acid, Simmondsia Chinensis Seed Oil (Organic Jojoba), Panthenol (Vitamin B5), Tocopheryl Acetate (Vitamin E), Camellia Sinensis Leaf Extract (Green Tea), Glycerin (Kosher Vegetable), Butyrospermum Parkii Butter (Organic Shea), Xanthan Gum, Phenoxyethanol, Ethylhexylglycerin, Fragrance (Acapulco Lily)",
+    note:{ nl:"Eerst deze lotion opgebruiken, daarna Gerlasan. De volgorde op het etiket staat licht door elkaar; alle ingrediënten staan hier.", en:"Use this lotion up first, then Gerlasan. The order on the label is slightly jumbled; all ingredients are listed here.", fr:"Finir d'abord cette lotion, puis Gerlasan. L'ordre sur l'étiquette est un peu mélangé ; tous les ingrédients sont repris ici." } },
+  thermomask:   { name:"Waxceutical – DNA Thermo Mask (Districos)", usedIn:[], slot:"mask",
+    inci:"Paraffin, Glyceryl Rosinate, Paraffinum Liquidum (Mineral Oil), Hydrogenated […]adiene Copolymer, Ethylene/VA Copolymer, Sodium DNA, Glycerin, Glucose, Allantoin, […] Gluconate, Glutamic Acid, Lysine, Glycine, Lactic Acid, Urea, Helianthus Annuus (Sunflower) Seed Oil, Jojoba Esters, Acacia Decurrens Flower Wax, Sodium PCA, Polyglycerin-3, Aqua (Water), […]-Tert-Butylphenyl) Phosphite, Parfum (Fragrance), Phenoxyethanol, Potassium Sorbate, […]lactone, Sodium Benzoate, Tris-BHT Mesitylene, Mica, Hexyl Cinnamal, CI 77891 (Titanium Dioxide), […] Red 7 Lake",
+    note:{ nl:"[…] = op de foto niet leesbaar (linkerrand). Bevat colofonium (Glyceryl Rosinate), een bekend contactallergeen. Warm masker: niet op geïrriteerde huid of bij de ogen.", en:"[…] = not readable on the photo (left edge). Contains colophony (Glyceryl Rosinate), a known contact allergen. Warm mask: not on irritated skin or near the eyes.", fr:"[…] = illisible sur la photo (bord gauche). Contient de la colophane (Glyceryl Rosinate), un allergène de contact connu. Masque chaud : pas sur peau irritée ni près des yeux." } },
 
   /* ---- massage: essential oils + base oil ---- */
   eoorange:     { name:{ nl:"Physalis – Sinaasappel, etherische olie (bio)", en:"Physalis – Sweet orange essential oil (organic)", fr:"Physalis – Huile essentielle d'orange douce (bio)" }, usedIn:["hotstone","cupping","cuppingpeeling","hotstoneface","facecupping"], slot:"essentialoil",
@@ -91,10 +99,10 @@ const ALLERGEN_GROUPS = [
   { id:"rose", label:{ nl:"Roos", en:"Rose", fr:"Rose" }, terms:["roos","rozen","rose"], match:["rosa "] },
   { id:"asteraceae", label:{ nl:"Kamille & composieten (arnica, calendula)", en:"Chamomile & daisy family", fr:"Camomille & astéracées" },
     terms:["kamille","composiet","arnica","calendula","goudsbloem","chamomile","camomille","asteraceae","bisabolol"],
-    match:["chamomilla","matricaria","bisabolol","ormenis","anthemis","calendula","arnica"] },
+    match:["chamomilla","matricaria","bisabolol","ormenis","anthemis","calendula","arnica","carthamus"] },
   { id:"nuts", label:{ nl:"Noten (amandel, shea, macadamia, argan…)", en:"Nuts (almond, shea, macadamia…)", fr:"Fruits à coque (amande, karité…)" },
-    terms:["noot","noten","amandel","shea","karite","karité","macadamia","hazelnoot","argan","walnoot","nut","nuts","almond","noix","amande","noisette"],
-    match:["prunus amygdalus","almond","butyrospermum","shea","macadamia","corylus","argania","juglans","anacardium","pistacia","bertholletia"] },
+    terms:["noot","noten","amandel","abrikoos","abrikozenpit","apricot","abricot","shea","karite","karité","macadamia","hazelnoot","argan","walnoot","nut","nuts","almond","noix","amande","noisette"],
+    match:["prunus amygdalus","almond","prunus armeniaca","apricot kernel","butyrospermum","shea","macadamia","corylus","argania","juglans","anacardium","pistacia","bertholletia"] },
   { id:"coconut", label:{ nl:"Kokos", en:"Coconut", fr:"Coco" }, terms:["kokos","coconut","coco"], match:["cocos","coco","cocoate","cocamid","cocoyl"] },
   { id:"bee", label:{ nl:"Bijenwas, honing & propolis", en:"Beeswax, honey & propolis", fr:"Cire d'abeille, miel & propolis" },
     terms:["bij","bijen","bijenwas","honing","propolis","bee","beeswax","honey","abeille","miel","cire"], match:["cera alba","beeswax","propolis","mel ","honey","royal jelly"] },
@@ -112,12 +120,14 @@ const ALLERGEN_GROUPS = [
     terms:["minerale olie","paraffine","vaseline","mineral oil","paraffin","petrolatum"], match:["paraffinum","mineral oil","petrolatum"] },
   { id:"silicones", label:{ nl:"Siliconen", en:"Silicones", fr:"Silicones" }, terms:["silicone","siliconen"], match:["dimethicone","siloxane","methicone"] },
   { id:"peg", label:{ nl:"PEG & ricinusolie", en:"PEG & castor oil", fr:"PEG & huile de ricin" }, terms:["peg","ricinus","castor","ricin"], match:["peg-","ricinus","castor"] },
-  { id:"collagen", label:{ nl:"Collageen (dierlijk)", en:"Collagen (animal)", fr:"Collagène (animal)" }, terms:["collageen","collagen","collagène","vis","dierlijk"], match:["collagen"] },
+  { id:"collagen", label:{ nl:"Dierlijk: collageen & DNA (vaak van vis)", en:"Animal: collagen & DNA (often fish)", fr:"Animal : collagène & ADN (souvent poisson)" }, terms:["collageen","collagen","collagène","vis","fish","poisson","dierlijk","animal","dna","adn","vegan"], match:["collagen","sodium dna"] },
+  { id:"rosin", label:{ nl:"Colofonium (hars)", en:"Colophony (rosin)", fr:"Colophane" }, terms:["colofonium","colophonium","colophony","colophane","hars","rosin","resin"], match:["rosinate","colophonium","rosin","abietic"] },
+  { id:"seeds", label:{ nl:"Zaadoliën (zonnebloem, saffloer, druivenpit)", en:"Seed oils (sunflower, safflower, grapeseed)", fr:"Huiles de graines (tournesol, carthame, raisin)" }, terms:["zonnebloem","saffloer","druivenpit","zaad","sesam","sunflower","safflower","grapeseed","seed","tournesol","carthame","pepin","sesame"], match:["helianthus","carthamus","vitis vinifera","sesamum"] },
   { id:"aloe", label:{ nl:"Aloë vera", en:"Aloe vera", fr:"Aloe vera" }, terms:["aloe","aloë"], match:["aloe"] },
   { id:"cereals", label:{ nl:"Granen (haver, tarwe, maïs)", en:"Cereals (oat, wheat, corn)", fr:"Céréales (avoine, blé, maïs)" },
     terms:["haver","tarwe","gluten","mais","maïs","graan","oat","wheat","corn","avoine","ble","blé"], match:["avena","triticum","hordeum","zea mays","corn","oat","wheat"] },
   { id:"soy", label:{ nl:"Soja", en:"Soy", fr:"Soja" }, terms:["soja","soy","soya"], match:["glycine soja","soybean","soy"] },
   { id:"licorice", label:{ nl:"Zoethout", en:"Licorice", fr:"Réglisse" }, terms:["zoethout","licorice","réglisse","reglisse"], match:["glycyrrhiza"] },
   { id:"jojoba", label:{ nl:"Jojoba", en:"Jojoba", fr:"Jojoba" }, terms:["jojoba"], match:["simmondsia"] },
-  { id:"algae", label:{ nl:"Algen & zeewier", en:"Algae & seaweed", fr:"Algues" }, terms:["alg","algen","zeewier","jodium","seaweed","algae","algue","iode"], match:["algin","chondrus","fucus","laminaria","spirulina","algae"] }
+  { id:"algae", label:{ nl:"Algen & zeewier", en:"Algae & seaweed", fr:"Algues" }, terms:["alg","algen","zeewier","jodium","seaweed","algae","algue","iode"], match:["algin","chondrus","fucus","laminaria","spirulina","algae","macrocystis","kelp"] }
 ];
