@@ -1672,7 +1672,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v82 · 09/10/2026";
+const APP_VERSION = "v83 · 09/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1882,9 +1882,9 @@ const ADVENT = {
       product:"Depilève Waxceutical DNA Rejuvenating Serum + DNA Thermo Mask (paraffine)",
       ingredients:"Zie Ingrediënten & allergieën: DNA Thermo Mask en DNA Rejuvenating Serum.",
       nl:"Gratis anti-aging paraffinemasker", en:"Free anti-ageing paraffin mask", fr:"Masque anti-âge à la paraffine offert" },
-    hotstoneface: { type:"extra", icon:"🪨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+    hotstoneface: { type:"extra", photo:"assets/advent/hotstoneface-ill.webp", icon:"🪨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       nl:"Gratis Hot Stone gelaatsmassage", en:"Free Hot Stone facial massage", fr:"Massage visage aux pierres chaudes offert" },
-    facecupping: { type:"extra", icon:"✨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+    facecupping: { type:"extra", photo:"assets/advent/facecupping-ill.webp", icon:"✨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       nl:"Gratis liftende cuppingmassage voor het gelaat", en:"Free lifting cupping facial massage", fr:"Massage liftant aux ventouses du visage offert" },
     peelanti: { type:"extra", icon:"🌟", stock:6, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met kaviaarextract, hamamelis, lavendel en collageen — verstevigt en geeft de rijpere huid een frisse, gladde uitstraling. Vooraf een hyaluronzuurserum met komkommer voor extra vocht.", en:"With caviar extract, witch hazel, lavender and collagen — firms and gives mature skin a fresh, smooth look. First a hyaluronic acid serum with cucumber for extra moisture.", fr:"À l'extrait de caviar, à l'hamamélis, à la lavande et au collagène — raffermit et donne aux peaux matures un aspect frais et lisse. D'abord un sérum à l'acide hyaluronique et au concombre pour plus d'hydratation." },
