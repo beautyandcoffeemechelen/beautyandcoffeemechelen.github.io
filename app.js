@@ -1490,6 +1490,7 @@
       .sort((x, y) => (y.yearly ? 1 : 0) - (x.yearly ? 1 : 0));   // seasonal actions first
     const fill = (txt, a) => String(txt || "").replace(/\{value\}/g, lang === "fr" ? String(a.value || "").replace("%", " %") : (a.value || ""))
       .replace(/\{treat\}/g, a.treat ? esc(a.treat[lang] || a.treat.nl) : "")
+      .replace(/\{treat2\}/g, a.treat2 ? esc(a.treat2[lang] || a.treat2.nl) : "")
       .replace(/\{from\}/g, actionFmt(a.dealFrom, lang)).replace(/\{until\}/g, actionFmt(a.until, lang));
     wrap.innerHTML = active.map(a => `
       <div class="action-card${a.yearly ? " action-card--" + esc(a.id) : ""}">
@@ -1517,7 +1518,7 @@
     };
     let w = win(base), yr = base;
     if (today > w.until){ w = win(base + 1); yr = base + 1; }
-    return Object.assign({}, a, w, { treat: actionMassage(a, yr) });
+    return Object.assign({}, a, w, { treat: actionMassage(a, yr), treat2: actionExtra(a, yr) });
   }
   function actionNthSunday(year, month, n){            // e.g. 2nd Sunday of May → "05-09"
     const first = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
@@ -1531,6 +1532,14 @@
     const own = a.massage.byYear && a.massage.byYear[year];
     const m = (own && list.find(x => x.id === own)) || list[((year + (a.massage.offset || 0)) % list.length + list.length) % list.length];
     return m ? { nl:m.nl, en:m.en, fr:m.fr, id:m.id } : null;
+  }
+  // the one other (non-massage) treatment of this action for this year
+  function actionExtra(a, year){
+    if (!a.extra || typeof ACTION_EXTRA_TREATMENTS === "undefined" || !ACTION_EXTRA_TREATMENTS.length) return null;
+    const list = ACTION_EXTRA_TREATMENTS;
+    const own = a.extra.byYear && a.extra.byYear[year];
+    const x = (own && list.find(e => e.id === own)) || list[((year + (a.extra.offset || 0)) % list.length + list.length) % list.length];
+    return x ? { nl:x.nl, en:x.en, fr:x.fr, id:x.id } : null;
   }
   function actionFmt(k, lang, withYear){
     if (!k) return "";
@@ -2390,6 +2399,13 @@
         wipeLocalData(); localData.resetVersion = DATA_RESET_VERSION; saveLocalData();
       }
     }
+    // treatments that were taken off the menu (e.g. acne facial, v91) no longer count
+    try {
+      const known = new Set(TREATMENTS_CATALOG.map(x => x.id).concat(["kindermanicure"]));
+      const kept = (localData.discoveredTreatments || []).filter(id => known.has(id));
+      if (kept.length !== (localData.discoveredTreatments || []).length){ localData.discoveredTreatments = kept; saveLocalData(); }
+      if (localData.lastMoment && !known.has(localData.lastMoment.treatmentId)){ localData.lastMoment = null; saveLocalData(); }
+    } catch(e){ /* ignore */ }
   }
   // Everything a client collected in the app (not the language or profile)
   function wipeLocalData(){

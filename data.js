@@ -327,10 +327,7 @@ const NAME_I18N = {
   "en": "Express Facial",
   "fr": "Soin du visage express"
  },
- "Acnécontrole – Équilibre Pureté Citron Vert": {
-  "en": "Acne Control – Équilibre Pureté Citron Vert",
-  "fr": "Contrôle de l'acné – Équilibre Pureté Citron Vert"
- },
+
  "Bridal Proefmake-up": {
   "en": "Bridal Trial Make-up",
   "fr": "Essai maquillage de mariée"
@@ -625,11 +622,7 @@ const PRICELIST_NAMES = {
   "en": "Express facial",
   "fr": "Soin du visage express"
  },
- "Acnécontrole – Équilibre Pureté Citron Vert": {
-  "nl": "Acnécontrole – Équilibre Pureté Citron Vert",
-  "en": "Acne control – Équilibre Pureté Citron Vert",
-  "fr": "Contrôle acné – Équilibre Pureté Citron Vert"
- },
+
  "Bridal Proefmake-up": {
   "nl": "Bridal proefmake-up",
   "en": "Bridal trial make-up",
@@ -1288,17 +1281,6 @@ const TREATMENTS_CATALOG = [
     aftercare:{ nl:"Gebruik de komende dagen dagelijks een SPF, drink voldoende water en laat je huid de eerste 24 uur zoveel mogelijk rusten zonder zware make-up.",
                 en:"Use SPF daily for the next few days, drink enough water and let your skin rest as much as possible for the first 24 hours without heavy make-up." } },
 
-  { id:"acnefacial", name:"Acnécontrole – Équilibre Pureté Citron Vert", moods:["focus"], genders:["vrouw","man"], sunSensitive:false, price:"€65 (60′)",
-    homecare:{ category:"facial" },
-    benefits:{ nl:"Een zuiverende gelaatsverzorging voor een onzuivere of vette huid, met een huidanalyse bij de eerste behandeling zodat de verzorging echt op jouw huid is afgestemd.",
-               en:"A purifying facial for blemish-prone or oily skin, with a skin analysis at the first treatment so the care is truly tailored to your skin." },
-    funfact:{ nl:"Onzuiverheden ontstaan vaak wanneer talg en dode huidcellen samen een porie afsluiten — regelmatige, zachte reiniging helpt dat te voorkomen.",
-              en:"Blemishes often form when sebum and dead skin cells together block a pore — regular, gentle cleansing helps prevent this." },
-    caution:{ nl:"Gebruik je medicatie tegen acne (bv. Roaccutane) of een voorschrift van de dermatoloog? Laat het vooraf weten, dan passen we de behandeling aan.",
-              en:"Are you using acne medication (e.g. Roaccutane) or a dermatologist's prescription? Let us know beforehand so we can adapt the treatment." },
-    aftercare:{ nl:"Raak je gezicht zo weinig mogelijk aan, gebruik de eerste 24 uur geen zware make-up en bescherm je huid dagelijks met een lichte, niet-vette SPF.",
-                en:"Touch your face as little as possible, avoid heavy make-up for the first 24 hours and protect your skin daily with a light, non-greasy SPF." } },
-
   { id:"bridaltrial", name:"Bridal Proefmake-up", moods:["luxury","energetic"], genders:["vrouw"], sunSensitive:false, price:"€65 (60′)",
     homecare:{ category:"facial" },
     benefits:{ nl:"Een rustige proefsessie om samen jouw bruidslook uit te werken: we testen kleuren, houdbaarheid en stijl, zodat je op je grote dag zeker bent van het resultaat.",
@@ -1475,7 +1457,7 @@ const COMPLAINT_KEYWORDS = [
   { words:["spierpijn","spieren","stijf","gespannen"], ids:["cupping","cuppingpeeling","slimmassage","swedish"] },
   { words:["rimpels","veroudering","verouderen","huidveroudering","stevigheid"], ids:["antiagefacial","liftsummere"] },
   { words:["pigmentatie","pigmentvlekken","oneffen","dof","vale huid","vaal"], ids:["hydrapeel","fruitacid"] },
-  { words:["onzuiverheden","puistjes","acne","vette huid"], ids:["signaturefacial","acnefacial","expressfacial"] },
+  { words:["onzuiverheden","puistjes","acne","vette huid"], ids:["signaturefacial","expressfacial","fruitacid"] },
   { words:["voeten","voet","eelt","nagelriem","ingegroeide nagel"], ids:["pedicure"] },
   { words:["nagels","handen","manicure"], ids:["manicure","manipedispa","manicureexpress","cateye"] },
   { words:["wimpers","wenkbrauwen","brows","lashes"], ids:["lashlift","browlift","hennabrows","browtint","browshaping","lashtint","wenkbrauwontharing"] },
@@ -1508,7 +1490,7 @@ const AVOID_GROUPS = {
   hands:    ["manicure","manicureexpress","manipedispa","cateye"],
   massage:  ["hotstone","cupping","cuppingpeeling","swedish","swedishbackneck","swedishlegs","backwrap","detoxback","harmonizingbody","fullbodywrap","slimmassage","harmonizingback"],
   waxing:   ["oksel","been","rug","buik","borst","browshaping","kin","bovenlip","wenkbrauwontharing","schouders","borstbuik","volledigebenen"],
-  face:     ["hydrapeel","signaturefacial","fillme","fruitacid","liftsummere","antiagefacial","expressfacial","acnefacial"],
+  face:     ["hydrapeel","signaturefacial","fillme","fruitacid","liftsummere","antiagefacial","expressfacial"],
   makeup:   ["glammakeup","bridaltrial","bridalpackage","weddingguest"],
   browlash: ["browlift","hennabrows","lashlift","browtint","browshaping","lashtint","wenkbrauwontharing"],
   workshop: ["makeupworkshop","facialworkshop","tastingbasic","tastingadvanced","baristaworkshop","teambeauty","teamcoffee","cateye"]
@@ -1584,13 +1566,33 @@ function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
    Optional: from / until as "YYYY-MM-DD". Outside that window the
    action hides itself automatically. Leave null for "no end date".
    ============================================================ */
+/* SECOND TREATMENT in the yearly actions (since v91): besides the one
+   massage, every yearly action also gives 10% on ONE other treatment that
+   has no discount of its own. It changes every year by itself (one by one
+   from this list, starting at the action's "extra.offset"); to choose it
+   yourself for a year: extra:{ offset:0, byYear:{ 2027:"lashlift" } }.
+   The names include the article ("een", "a", "un/une"). */
+const ACTION_EXTRA_TREATMENTS = [
+  { id:"pedicure",       nl:"een uitgebreide pedicure",               en:"a full pedicure",                     fr:"une pédicure complète" },
+  { id:"lashlift",       nl:"een lash lift met kleuring",             en:"a lash lift with tint",               fr:"un rehaussement de cils avec teinture" },
+  { id:"manicure",       nl:"een uitgebreide manicure",               en:"a full manicure",                     fr:"une manucure complète" },
+  { id:"browlift",       nl:"een brow lift",                          en:"a brow lift",                         fr:"un brow lift" },
+  { id:"volledigebenen", nl:"een volledige beenontharing",            en:"a full leg wax",                      fr:"une épilation des jambes complètes" },
+  { id:"hennabrows",     nl:"een henna brows-behandeling",            en:"a henna brows treatment",             fr:"un soin henna brows" },
+  { id:"manipedispa",    nl:"een SPA-manicure of SPA-pedicure",       en:"a SPA manicure or SPA pedicure",      fr:"une manucure ou pédicure SPA" },
+  { id:"glammakeup",     nl:"een avond- of partymake-up",             en:"an evening or party make-up",         fr:"un maquillage de soirée" },
+  { id:"browshaping",    nl:"een brow shaping (mappen en ontharen)",  en:"a brow shaping (mapping and waxing)", fr:"un brow shaping (tracé et épilation)" },
+  { id:"cateye",         nl:"een Cat Eye-gellakworkshop",             en:"a Cat Eye gel polish workshop",       fr:"un atelier vernis semi-permanent Cat Eye" }
+];
+
 const CURRENT_ACTIONS = [
   { id:"grabbelton", icon:"🎁", from:null, until:null,
     title:{ nl:"Grabbelton", en:"Lucky dip" },
     text:{ nl:"Besteed je €75 of meer tijdens dezelfde afspraak? Dan mag je één keer grabbelen in de grabbelton. Zolang de voorraad strekt.",
            en:"Spend €75 or more during the same appointment and you get one grab from the lucky dip. While stocks last." } },
   /* EVERY YEAR AGAIN — Valentine, Mother's Day and Father's Day: a discount
-     on ONE named massage, on the weekends around the day (Sandra works on
+     on ONE named massage (and, since v91, on ONE other treatment, see
+     ACTION_EXTRA_TREATMENTS), on the weekends around the day (Sandra works on
      Saturday and Sunday). The app works out the dates itself each year:
      weekendsBefore weekends before the weekend of the day, that weekend
      itself, and weekendsAfter weekends after it. The banner shows from
@@ -1601,40 +1603,40 @@ const CURRENT_ACTIONS = [
      for a year: byYear:{ 2027:"hotstone" }.
      Mother's Day / Father's Day in Belgium: 2nd Sunday of May / of June.
      Preview: …/?voorproef=BC-XMAS-7Q4K&datum=2027-01-20 (or 2027-05-01, 2027-06-01) */
-  { id:"valentijn", icon:"💕", value:"10%", massage:{ offset:3, byYear:{} },
+  { id:"valentijn", icon:"💕", value:"10%", massage:{ offset:3, byYear:{} }, extra:{ offset:0, byYear:{} },
     yearly:{ anchorMD:"02-14", weekendsBefore:3, weekendsAfter:2, showDaysBefore:12 },
-    title:{ nl:"Valentijnsactie: {value} korting op een {treat}",
-            en:"Valentine’s offer: {value} off a {treat}",
-            fr:"Action Saint-Valentin : {value} de réduction sur un {treat}" },
-    text:{ nl:"Verwen jezelf of je lief: {value} korting op een <b>{treat}</b>. Geldig voor afspraken in de weekends van {from} <b>tot en met {until}</b>. Vermeld “Valentijn” als je boekt. Niet combineerbaar met andere acties of kortingen.",
-           en:"Treat yourself or your love: {value} off a <b>{treat}</b>. Valid for appointments on the weekends from {from} <b>until {until}</b>. Mention “Valentine” when you book. Cannot be combined with other offers or discounts.",
-           fr:"Faites-vous plaisir ou gâtez votre moitié : {value} de réduction sur un <b>{treat}</b>. Valable pour les rendez-vous les week-ends du {from} <b>au {until} inclus</b>. Mentionnez « Saint-Valentin » en réservant. Non cumulable avec d’autres actions ou réductions." } },
-  { id:"moederdag", icon:"💐", value:"10%", massage:{ offset:5, byYear:{} },
+    title:{ nl:"Valentijnsactie: {value} korting op een {treat} of {treat2}",
+            en:"Valentine’s offer: {value} off a {treat} or {treat2}",
+            fr:"Action Saint-Valentin : {value} de réduction sur un {treat} ou {treat2}" },
+    text:{ nl:"Verwen jezelf of je lief: {value} korting op een <b>{treat}</b> of op <b>{treat2}</b>. Geldig voor afspraken in de weekends van {from} <b>tot en met {until}</b>. Vermeld “Valentijn” als je boekt. Niet combineerbaar met andere acties of kortingen.",
+           en:"Treat yourself or your love: {value} off a <b>{treat}</b> or <b>{treat2}</b>. Valid for appointments on the weekends from {from} <b>until {until}</b>. Mention “Valentine” when you book. Cannot be combined with other offers or discounts.",
+           fr:"Faites-vous plaisir ou gâtez votre moitié : {value} de réduction sur un <b>{treat}</b> ou sur <b>{treat2}</b>. Valable pour les rendez-vous les week-ends du {from} <b>au {until} inclus</b>. Mentionnez « Saint-Valentin » en réservant. Non cumulable avec d’autres actions ou réductions." } },
+  { id:"moederdag", icon:"💐", value:"10%", massage:{ offset:5, byYear:{} }, extra:{ offset:3, byYear:{} },
     yearly:{ anchor:"mothersday", weekendsBefore:3, weekendsAfter:1, showDaysBefore:12 },
-    title:{ nl:"Moederdagactie: {value} korting op een {treat}",
-            en:"Mother’s Day offer: {value} off a {treat}",
-            fr:"Action fête des Mères : {value} de réduction sur un {treat}" },
-    text:{ nl:"Verwen je mama (of jezelf): {value} korting op een <b>{treat}</b>. Geldig voor afspraken in de weekends van {from} <b>tot en met {until}</b>. Liever cadeau doen? Vraag naar een cadeaubon. Vermeld “Moederdag” als je boekt. Niet combineerbaar met andere acties of kortingen.",
-           en:"Treat your mum (or yourself): {value} off a <b>{treat}</b>. Valid for appointments on the weekends from {from} <b>until {until}</b>. Rather give it as a present? Ask for a gift voucher. Mention “Mother’s Day” when you book. Cannot be combined with other offers or discounts.",
-           fr:"Gâtez votre maman (ou vous-même) : {value} de réduction sur un <b>{treat}</b>. Valable pour les rendez-vous les week-ends du {from} <b>au {until} inclus</b>. Plutôt l’offrir ? Demandez un bon cadeau. Mentionnez « fête des Mères » en réservant. Non cumulable avec d’autres actions ou réductions." } },
+    title:{ nl:"Moederdagactie: {value} korting op een {treat} of {treat2}",
+            en:"Mother’s Day offer: {value} off a {treat} or {treat2}",
+            fr:"Action fête des Mères : {value} de réduction sur un {treat} ou {treat2}" },
+    text:{ nl:"Verwen je mama (of jezelf): {value} korting op een <b>{treat}</b> of op <b>{treat2}</b>. Geldig voor afspraken in de weekends van {from} <b>tot en met {until}</b>. Liever cadeau doen? Vraag naar een cadeaubon. Vermeld “Moederdag” als je boekt. Niet combineerbaar met andere acties of kortingen.",
+           en:"Treat your mum (or yourself): {value} off a <b>{treat}</b> or <b>{treat2}</b>. Valid for appointments on the weekends from {from} <b>until {until}</b>. Rather give it as a present? Ask for a gift voucher. Mention “Mother’s Day” when you book. Cannot be combined with other offers or discounts.",
+           fr:"Gâtez votre maman (ou vous-même) : {value} de réduction sur un <b>{treat}</b> ou sur <b>{treat2}</b>. Valable pour les rendez-vous les week-ends du {from} <b>au {until} inclus</b>. Plutôt l’offrir ? Demandez un bon cadeau. Mentionnez « fête des Mères » en réservant. Non cumulable avec d’autres actions ou réductions." } },
   /* Mother's Day on 15 August (Antwerp tradition): 2 weekends before and 2 after.
      */
-  { id:"moederdag15aug", icon:"🌷", value:"10%", massage:{ offset:1, byYear:{} },
+  { id:"moederdag15aug", icon:"🌷", value:"10%", massage:{ offset:1, byYear:{} }, extra:{ offset:6, byYear:{} },
     yearly:{ anchorMD:"08-15", weekendsBefore:2, weekendsAfter:2, showDaysBefore:12 },
-    title:{ nl:"Moederdag 15 augustus: {value} korting op een {treat}",
-            en:"Mother’s Day 15 August: {value} off a {treat}",
-            fr:"Fête des Mères du 15 août : {value} de réduction sur un {treat}" },
-    text:{ nl:"Vier je Moederdag op 15 augustus? Verwen je mama (of jezelf): {value} korting op een <b>{treat}</b>. Geldig voor afspraken in de weekends van {from} <b>tot en met {until}</b>. Liever cadeau doen? Vraag naar een cadeaubon. Vermeld “Moederdag” als je boekt. Niet combineerbaar met andere acties of kortingen.",
-           en:"Celebrating Mother’s Day on 15 August? Treat your mum (or yourself): {value} off a <b>{treat}</b>. Valid for appointments on the weekends from {from} <b>until {until}</b>. Rather give it as a present? Ask for a gift voucher. Mention “Mother’s Day” when you book. Cannot be combined with other offers or discounts.",
-           fr:"Vous fêtez les mères le 15 août ? Gâtez votre maman (ou vous-même) : {value} de réduction sur un <b>{treat}</b>. Valable pour les rendez-vous les week-ends du {from} <b>au {until} inclus</b>. Plutôt l’offrir ? Demandez un bon cadeau. Mentionnez « fête des Mères » en réservant. Non cumulable avec d’autres actions ou réductions." } },
-  { id:"vaderdag", icon:"☕", value:"10%", massage:{ offset:8, byYear:{} },
+    title:{ nl:"Moederdag 15 augustus: {value} korting op een {treat} of {treat2}",
+            en:"Mother’s Day 15 August: {value} off a {treat} or {treat2}",
+            fr:"Fête des Mères du 15 août : {value} de réduction sur un {treat} ou {treat2}" },
+    text:{ nl:"Vier je Moederdag op 15 augustus? Verwen je mama (of jezelf): {value} korting op een <b>{treat}</b> of op <b>{treat2}</b>. Geldig voor afspraken in de weekends van {from} <b>tot en met {until}</b>. Liever cadeau doen? Vraag naar een cadeaubon. Vermeld “Moederdag” als je boekt. Niet combineerbaar met andere acties of kortingen.",
+           en:"Celebrating Mother’s Day on 15 August? Treat your mum (or yourself): {value} off a <b>{treat}</b> or <b>{treat2}</b>. Valid for appointments on the weekends from {from} <b>until {until}</b>. Rather give it as a present? Ask for a gift voucher. Mention “Mother’s Day” when you book. Cannot be combined with other offers or discounts.",
+           fr:"Vous fêtez les mères le 15 août ? Gâtez votre maman (ou vous-même) : {value} de réduction sur un <b>{treat}</b> ou sur <b>{treat2}</b>. Valable pour les rendez-vous les week-ends du {from} <b>au {until} inclus</b>. Plutôt l’offrir ? Demandez un bon cadeau. Mentionnez « fête des Mères » en réservant. Non cumulable avec d’autres actions ou réductions." } },
+  { id:"vaderdag", icon:"☕", value:"10%", massage:{ offset:8, byYear:{} }, extra:{ offset:8, byYear:{} },
     yearly:{ anchor:"fathersday", weekendsBefore:2, weekendsAfter:1, showDaysBefore:12 },
-    title:{ nl:"Vaderdagactie: {value} korting op een {treat}",
-            en:"Father’s Day offer: {value} off a {treat}",
-            fr:"Action fête des Pères : {value} de réduction sur un {treat}" },
-    text:{ nl:"Verwen je papa (of jezelf): {value} korting op een <b>{treat}</b>. Geldig voor afspraken in de weekends van {from} <b>tot en met {until}</b>. Liever cadeau doen? Vraag naar een cadeaubon. Vermeld “Vaderdag” als je boekt. Niet combineerbaar met andere acties of kortingen.",
-           en:"Treat your dad (or yourself): {value} off a <b>{treat}</b>. Valid for appointments on the weekends from {from} <b>until {until}</b>. Rather give it as a present? Ask for a gift voucher. Mention “Father’s Day” when you book. Cannot be combined with other offers or discounts.",
-           fr:"Gâtez votre papa (ou vous-même) : {value} de réduction sur un <b>{treat}</b>. Valable pour les rendez-vous les week-ends du {from} <b>au {until} inclus</b>. Plutôt l’offrir ? Demandez un bon cadeau. Mentionnez « fête des Pères » en réservant. Non cumulable avec d’autres actions ou réductions." } }
+    title:{ nl:"Vaderdagactie: {value} korting op een {treat} of {treat2}",
+            en:"Father’s Day offer: {value} off a {treat} or {treat2}",
+            fr:"Action fête des Pères : {value} de réduction sur un {treat} ou {treat2}" },
+    text:{ nl:"Verwen je papa (of jezelf): {value} korting op een <b>{treat}</b> of op <b>{treat2}</b>. Geldig voor afspraken in de weekends van {from} <b>tot en met {until}</b>. Liever cadeau doen? Vraag naar een cadeaubon. Vermeld “Vaderdag” als je boekt. Niet combineerbaar met andere acties of kortingen.",
+           en:"Treat your dad (or yourself): {value} off a <b>{treat}</b> or <b>{treat2}</b>. Valid for appointments on the weekends from {from} <b>until {until}</b>. Rather give it as a present? Ask for a gift voucher. Mention “Father’s Day” when you book. Cannot be combined with other offers or discounts.",
+           fr:"Gâtez votre papa (ou vous-même) : {value} de réduction sur un <b>{treat}</b> ou sur <b>{treat2}</b>. Valable pour les rendez-vous les week-ends du {from} <b>au {until} inclus</b>. Plutôt l’offrir ? Demandez un bon cadeau. Mentionnez « fête des Pères » en réservant. Non cumulable avec d’autres actions ou réductions." } }
 ];
 
 /* ============================================================
@@ -1668,7 +1670,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v90 · 09/10/2026";
+const APP_VERSION = "v91 · 09/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1988,7 +1990,6 @@ function PI(nl, en, time, price, dnl, den, nnl, nen){
 const PRICE_LIST = [
   { id:"facial", icon:"🌿", title:{ nl:"Gelaatsverzorging", en:"Facials" }, items:[
     PI("Express gelaatsverzorging","Express facial","30′","€60","Reiniging, dieptereiniging, crèmemasker & dagcrème.","Cleansing, deep cleansing, cream mask & day cream."),
-    PI("Acnécontrole – Équilibre Pureté Citron Vert","Acne control – Équilibre Pureté Citron Vert","60′","€65","Zuiverende behandeling, met huidanalyse bij de eerste behandeling.","Purifying treatment, with skin analysis at the first treatment."),
     PI("Signature gelaatsverzorging","Signature facial","75′","€85","Uitgebreide verzorging met massage; ook voor gevoelige huid.","Full facial with massage; also suitable for sensitive skin."),
     PI("Fill Me Micro Infusie Treatment","Fill Me Micro Infusion Treatment","45–60′","€99","Cleanser, tonic, Fill Me Serum, masker, LED-masker & UV-bescherming.","Cleanser, tonic, Fill Me Serum, mask, LED mask & UV protection."),
     PI("Fruitzurenpeeling 4/26 Dr. Renaud","Fruit acid peel 4/26 Dr. Renaud","75′","€100","Voor een egalere teint. Enkel van september tot maart.","For a more even skin tone. Only from September to March."),
@@ -2134,6 +2135,18 @@ const HOUSE_RULES = [
       R("Kom je met de fiets of bakfiets? Die mag je vastzetten bij de fietsen.","Coming by bike or cargo bike? You can lock it up with the bikes."),
       R("Route nodig? Tik op het kaartje hieronder: Google Maps opent met de route naar mij.","Need directions? Tap the map below: Google Maps opens with directions to me.")
     ]}] },
+  { id:"promise", icon:"✨", title:R("Mijn hygiëne-belofte","My hygiene promise"),
+    intro:R("Jouw gezondheid en comfort komen eerst. Zo werk ik:","Your health and comfort come first. This is how I work:"), outro:null,
+    groups:[{ title:null, items:[
+      R("Ik ontsmet mijn handen bij de start van elke behandeling. Werktafels en schalen worden grondig ontsmet.","I disinfect my hands at the start of every treatment. Work tables and bowls are thoroughly disinfected."),
+      R("Instrumenten die ik gebruik, worden vooraf én achteraf ontsmet.","The instruments I use are disinfected before and after use."),
+      R("Na elke klant doorlopen mijn instrumenten een vaste volgorde: reinigen, een ultrasoon bad, een alcoholbad van minstens 10 minuten en tot slot de kogelsterilisator.","After every client my instruments go through a fixed routine: cleaning, an ultrasonic bath, an alcohol bath of at least 10 minutes and finally the glass bead steriliser."),
+      R("Voor elke klant gebruik ik nieuw, proper (geplastificeerd) papier of dental towels.","For every client I use new, clean (plastic-coated) paper or dental towels."),
+      R("Wegwerpmateriaal gooi ik meteen na gebruik weg. Vijlen en buffers zijn persoonlijk: ik gebruik ze alleen voor jou.","Disposable materials are thrown away right after use. Files and buffers are personal: I only use them for you."),
+      R("Handdoeken, herbruikbare watjes en haarbanden worden altijd op kookwas (90 °C) gewassen.","Towels, reusable cotton pads and headbands are always washed on a hot boil wash (90 °C)."),
+      R("Bij harsen met een houten spatel gaat elke kant maar één keer in de pot; daarna neem ik een nieuwe spatel. Voor de benen gebruik ik een metalen spatel, die ik na elke klant grondig reinig en ontsmet.","When waxing with a wooden spatula, each side goes into the pot only once; then I take a new spatula. For legs I use a metal spatula, which I thoroughly clean and disinfect after every client."),
+      R("Al mijn producten zijn goed gesloten en binnen hun houdbaarheid, en op potten en tubes noteer ik de datum van opening.","All my products are properly closed and within their shelf life, and I note the opening date on jars and tubes.")
+    ]}] },
   { id:"hygiene", icon:"🧼", title:R("Hygiëne en verzorging","Hygiene and care"),
     intro:R("Zo genieten we samen van een verzorgd en ontspannen moment:","This way we both enjoy a well-cared-for, relaxed moment:"), outro:null,
     groups:[
@@ -2243,7 +2256,7 @@ const SKIN_FACTS = [
 const SKIN_FACT_POOLS = {
   kids: ["A","G","H"],
   byTreatment: {
-    expressfacial:["A","B","C","D"], acnefacial:["A","B","C","D"], bridaltrial:["A","B"], bridalpackage:["A","B"], weddingguest:["A","B"], browtint:["G"], browshaping:["G"], lashtint:["G"], manicureexpress:["F","H","C"], cateye:["F","H","C"], kin:["G"], bovenlip:["G"], wenkbrauwontharing:["G"], schouders:["G"], borstbuik:["G"], volledigebenen:["G"], harmonizingback:["A","D","E"], teambeauty:["A","B","C"],
+    expressfacial:["A","B","C","D"], bridaltrial:["A","B"], bridalpackage:["A","B"], weddingguest:["A","B"], browtint:["G"], browshaping:["G"], lashtint:["G"], manicureexpress:["F","H","C"], cateye:["F","H","C"], kin:["G"], bovenlip:["G"], wenkbrauwontharing:["G"], schouders:["G"], borstbuik:["G"], volledigebenen:["G"], harmonizingback:["A","D","E"], teambeauty:["A","B","C"],
     pedicure:["F","C"], pedicureexpress:["F","C"],
     manipedispa:["F","C","H"], manicure:["F","H","C"],
     oksel:["G","E"], been:["G"], rug:["G"], buik:["G"], borst:["G"],
@@ -2338,7 +2351,7 @@ const CONDITION_FACTS = [
 const CONDITION_FACT_POOLS = {
   sun: ["SH"],
   byTreatment: {
-    expressfacial:["PI","DR"], acnefacial:["AC","PI"], bridaltrial:["AL"], bridalpackage:["AL"], weddingguest:["AL"], browtint:["AL"], browshaping:["AL"], lashtint:["AL"], kin:["AL"], bovenlip:["AL"], wenkbrauwontharing:["AL"], schouders:["AL"], borstbuik:["AL"], volledigebenen:["AL","PE"], harmonizingback:["ZW"], teambeauty:["AC","PI"],
+    expressfacial:["PI","DR"], bridaltrial:["AL"], bridalpackage:["AL"], weddingguest:["AL"], browtint:["AL"], browshaping:["AL"], lashtint:["AL"], kin:["AL"], bovenlip:["AL"], wenkbrauwontharing:["AL"], schouders:["AL"], borstbuik:["AL"], volledigebenen:["AL","PE"], harmonizingback:["ZW"], teambeauty:["AC","PI"],
     pedicure:["PE"], pedicureexpress:["PE"], manipedispa:["PE"],
     hotstone:["ZW"], swedish:["ZW"], swedishbackneck:["ZW"], swedishlegs:["ZW","PE"],
     detoxback:["ZW"], slimmassage:["ZW"],
@@ -2650,7 +2663,7 @@ const SKINKNOW_FACTS = [
 const MORE_FACT_POOLS = {
   cellIntro: true,
   byTreatment: {
-    expressfacial:["GV","SK"], acnefacial:["GV","SK"], lashtint:["LL","LT"], manicureexpress:["NA","NB","NC","ND","NE","NF"], cateye:["NA","NB","NC","ND","NE","NF"], harmonizingback:["GV","SK"], teambeauty:["GV"],
+    expressfacial:["GV","SK"], lashtint:["LL","LT"], manicureexpress:["NA","NB","NC","ND","NE","NF"], cateye:["NA","NB","NC","ND","NE","NF"], harmonizingback:["GV","SK"], teambeauty:["GV"],
     manicure:["NA","NB","NC","ND","NE","NF"], manipedispa:["NA","NB","NC","ND","NE","NF"],
     pedicure:["NA","NB","NC","ND","NE","NF"], pedicureexpress:["NA","NB","NC","ND","NE","NF"],
     lashlift:["LL","LT"],
@@ -2672,7 +2685,6 @@ const MORE_FACT_POOLS = {
 function U(nl, en, fr, price){ return { nl, en, fr, price }; }
 const UPSELL_SUGGESTIONS = {
   expressfacial: U("Voeg een ampul / serum toe", "Add an ampoule / serum", "Ajoutez une ampoule / un sérum", "+€5"),
-  acnefacial: U("Voeg LED-therapie toe", "Add LED therapy", "Ajoutez la luminothérapie LED", "+€10"),
   bridaltrial: U("Kies meteen het pakket proef- &amp; bruidsmake-up", "Go for the trial &amp; wedding-day package", "Optez pour le forfait essai &amp; mariage", "€135"),
   browtint: U("Combineer met Lash Tinting", "Combine with Lash Tinting", "Combinez avec la teinture des cils", "€20"),
   lashtint: U("Combineer met Brow Tinting", "Combine with Brow Tinting", "Combinez avec la teinture des sourcils", "€20"),

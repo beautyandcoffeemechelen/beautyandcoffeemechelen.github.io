@@ -674,12 +674,6 @@
    "funfact": "Même un soin court aide : une peau propre absorbe mieux les actifs d'un masque et d'une crème de jour.",
    "aftercare": "Utilisez un SPF chaque jour pendant les prochains jours, buvez suffisamment d'eau et laissez votre peau se reposer autant que possible pendant les 24 premières heures, sans maquillage lourd."
   },
-  "acnefacial": {
-   "benefits": "Un soin du visage purifiant pour les peaux à imperfections ou grasses, avec une analyse de peau lors du premier soin pour l'adapter vraiment à votre peau.",
-   "funfact": "Les imperfections apparaissent souvent quand le sébum et les cellules mortes bouchent ensemble un pore — un nettoyage doux et régulier aide à l'éviter.",
-   "aftercare": "Touchez votre visage le moins possible, évitez le maquillage lourd pendant les 24 premières heures et protégez votre peau chaque jour avec un SPF léger et non gras.",
-   "caution": "Vous prenez un médicament contre l'acné (p. ex. Roaccutane) ou un traitement prescrit par un dermatologue ? Prévenez-nous à l'avance pour que nous adaptions le soin."
-  },
   "bridaltrial": {
    "benefits": "Une séance d'essai détendue pour créer ensemble votre look de mariée : nous testons les couleurs, la tenue et le style, pour être sûre du résultat le grand jour.",
    "funfact": "Il vaut mieux prévoir l'essai quelques semaines avant le mariage — vous pouvez ainsi voir le look en photo et à la lumière du jour.",
@@ -1041,12 +1035,6 @@
      "Express gelaatsverzorging",
      "Soin du visage express",
      "Nettoyage, nettoyage en profondeur, masque crème & crème de jour.",
-     null
-    ],
-    [
-     "Acnécontrole – Équilibre Pureté Citron Vert",
-     "Contrôle acné – Équilibre Pureté Citron Vert",
-     "Soin purifiant, avec analyse de la peau lors du premier soin.",
      null
     ],
     [
@@ -1569,6 +1557,26 @@
       "En cas de maladie : prévenez le plus vite possible. Si vous annulez au moins 1 heure avant le rendez-vous, aucun frais n'est facturé. En cas d'annulation tardive, la règle des 50 % s'applique.",
       "Soyez à l'heure. En retard ? Prévenez immédiatement par téléphone ou SMS. En cas de plus de 15 minutes de retard, le soin peut être raccourci ou annulé aux conditions d'annulation.",
       "En cas de non-paiement, il n'est plus possible de prendre rendez-vous chez Beauty & Coffee."
+     ]
+    }
+   ]
+  },
+  "promise": {
+   "title": "Ma promesse d’hygiène",
+   "intro": "Votre santé et votre confort passent avant tout. Voici comment je travaille :",
+   "outro": null,
+   "groups": [
+    {
+     "title": null,
+     "items": [
+      "Je désinfecte mes mains au début de chaque soin. Les tables de travail et les bols sont soigneusement désinfectés.",
+      "Les instruments que j’utilise sont désinfectés avant et après usage.",
+      "Après chaque personne, mes instruments suivent un ordre précis : nettoyage, bain à ultrasons, bain d’alcool d’au moins 10 minutes et enfin le stérilisateur à billes.",
+      "Pour chaque personne, j’utilise du papier neuf et propre (plastifié) ou des dental towels.",
+      "Le matériel jetable est jeté immédiatement après usage. Limes et polissoirs sont personnels : je les utilise uniquement pour vous.",
+      "Les serviettes, les cotons réutilisables et les bandeaux sont toujours lavés à 90 °C.",
+      "Pour l’épilation à la spatule en bois, chaque côté ne va qu’une seule fois dans le pot ; ensuite je prends une nouvelle spatule. Pour les jambes, j’utilise une spatule en métal, soigneusement nettoyée et désinfectée après chaque personne.",
+      "Tous mes produits sont bien fermés et dans leur durée de conservation, et je note la date d’ouverture sur les pots et les tubes."
      ]
     }
    ]
