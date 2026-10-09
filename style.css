@@ -1036,16 +1036,16 @@ body{
 body{ --s-bg:#fbf5ea; --s-ink:var(--espresso); --s-accent:var(--gold); --s-line:var(--gold-light); }
 body[data-theme="halloween"]{ --s-bg:linear-gradient(135deg,#2b1638,#4a2350); --s-ink:#fff4e6; --s-accent:#ff8a1f; --s-line:#ff8a1f; }
 body[data-theme="sintemette"]{ --s-bg:linear-gradient(135deg,#fff3e0,#fde3c4); --s-accent:#c0392b; --s-line:#c0392b; }
-body[data-theme="sinterklaas"]{ --s-bg:linear-gradient(135deg,#a3151f,#c62a33); --s-ink:#fff8e7; --s-accent:#f1c75b; --s-line:#f1c75b; }
-body[data-theme="kerst"]{ --s-bg:linear-gradient(135deg,#17502e,#1f6b3a); --s-ink:#fffaf0; --s-accent:#e8c26a; --s-line:#c0392b; }
+body[data-theme="sinterklaas"]{ --s-bg:linear-gradient(135deg,#5a1820,#7a2a31); --s-ink:#fff8e7; --s-accent:#f1c75b; --s-line:#f1c75b; }
+body[data-theme="kerst"]{ --s-bg:linear-gradient(135deg,#143a28,#1d5236); --s-ink:#fffaf0; --s-accent:#e8c26a; --s-line:#c0392b; }
 body[data-theme="nieuwjaar"]{ --s-bg:linear-gradient(135deg,#14142e,#2a2a55); --s-ink:#fdf6e3; --s-accent:#e3bd72; --s-line:#e3bd72; }
-body[data-theme="cny"]{ --s-bg:linear-gradient(135deg,#a50d24,#c8102e); --s-ink:#fff4d6; --s-accent:#f4c430; --s-line:#f4c430; }
+body[data-theme="cny"]{ --s-bg:linear-gradient(135deg,#5e1420,#86202c); --s-ink:#fff4d6; --s-accent:#f4c430; --s-line:#f4c430; }
 body[data-theme="valentijn"]{ --s-bg:linear-gradient(135deg,#ffe3ec,#ffc9da); --s-accent:#d6336c; --s-line:#d6336c; }
 body[data-theme="pasen"]{ --s-bg:linear-gradient(135deg,#eaf7e5,#fff3c4); --s-accent:#5f9e5f; --s-line:#f2c94c; }
 body[data-theme="moederdag"]{ --s-bg:linear-gradient(135deg,#fde2ea,#fbeff3); --s-accent:#c95b80; --s-line:#e88aa8; }
 body[data-theme="vaderdag"]{ --s-bg:linear-gradient(135deg,#e6eef7,#f6f0e6); --s-accent:#2f5d8a; --s-line:#2f5d8a; }
-body[data-theme="drakenboot"]{ --s-bg:linear-gradient(135deg,#0f6f62,#14917f); --s-ink:#f4fff9; --s-accent:#f2c14e; --s-line:#f2c14e; }
-body[data-theme="nationale"]{ --s-bg:linear-gradient(90deg,#1a1a1a 0 6px,#fdda24 6px 12px,#ef3340 12px 18px,#fffdf3 18px); --s-accent:#c8102e; --s-line:#fdda24; }
+body[data-theme="drakenboot"]{ --s-bg:linear-gradient(135deg,#0f4f47,#16675c); --s-ink:#f4fff9; --s-accent:#f2c14e; --s-line:#f2c14e; }
+body[data-theme="nationale"]{ --s-bg:linear-gradient(90deg,#1a1a1a 0 3px,#e8c547 3px 6px,#c8423f 6px 9px,#fbf5ea 9px); --s-accent:#c8102e; --s-line:#fdda24; }
 body[data-theme="midautumn"]{ --s-bg:linear-gradient(135deg,#1f2150,#33366e); --s-ink:#fff7e0; --s-accent:#f4c430; --s-line:#f4c430; }
 body[data-theme="herfst"]{ --s-bg:linear-gradient(135deg,#fbe9d7,#f4d2ae); --s-accent:#b5562b; --s-line:#d9822b; }
 body[data-theme="winter"]{ --s-bg:linear-gradient(135deg,#eef4fb,#dfe9f5); --s-accent:#4f73a0; --s-line:#8fb0d6; }
@@ -1181,3 +1181,15 @@ body[data-theme] .topbar{ box-shadow:0 3px 0 -1px var(--s-line); }
 .ingr-order .btn{ flex:0 0 auto; }
 .ingr-oppending{ margin:12px 0; padding:10px 12px; border:1px dashed var(--gold); border-radius:var(--radius-m); background:var(--cream); font-size:13px; }
 .ingr-oppending code{ display:block; margin:6px 0; word-break:break-all; font-size:12px; }
+
+/* advent reveal: close without opening the voucher */
+.adv-reveal__later{ opacity:0; animation:advFade .5s ease 2.5s forwards; color:#fff; text-decoration:underline; }
+.adv-reveal__x{ position:absolute; top:14px; right:14px; width:40px; height:40px; border-radius:50%; border:1px solid rgba(255,255,255,.5); background:rgba(0,0,0,.25); color:#fff; font-size:18px; line-height:1; cursor:pointer; }
+/* calmer, more refined look: seasonal figures and falling effects only on the start screen */
+body[data-step]:not([data-step="welcome"]) .season-figures{ display:none; }
+body[data-step]:not([data-step="welcome"]) .season-deco{ opacity:.35; }
+
+/* refined: bottom corner figures overlapped the cards — hidden; top figures smaller and softer */
+.season-fig--bl, .season-fig--br, .season-fig--walk{ display:none; }
+.season-fig--tl, .season-fig--tr{ font-size:24px; opacity:.85; }
+.season-card{ box-shadow:0 6px 18px rgba(36,26,20,.12); }

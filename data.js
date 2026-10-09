@@ -1035,6 +1035,8 @@ const TREATMENTS_CATALOG = [
                en:"An open, awake look with no daily styling — the brow hairs stay in place for weeks." },
     funfact:{ nl:"Een brow lift werkt met dezelfde techniek als een lash lift, maar dan gericht op de wenkbrauw.",
               en:"A brow lift uses the same technique as a lash lift, but is applied to the eyebrow instead." },
+    caution:{ nl:"Bij een eerste brow lift doen we best 48 uur vooraf een huidtest. Niet als je minder dan 3 dagen geleden henna had, bij een geïrriteerde huid of tijdens zwangerschap of borstvoeding.",
+              en:"For a first brow lift it’s best to do a patch test 48 hours beforehand. Not within 3 days after henna, on irritated skin, or during pregnancy or breastfeeding." },
     aftercare:{ nl:"Houd de wenkbrauwen 24 uur droog en vermijd de eerste 48 uur oliehoudende reinigers op de wenkbrauw.",
                 en:"Keep the brows dry for 24 hours and avoid oil-based cleansers on the brow area for the first 48 hours." } },
 
@@ -1044,6 +1046,8 @@ const TREATMENTS_CATALOG = [
                en:"Fuller-looking brows with a natural color intensity that lasts for weeks." },
     funfact:{ nl:"Henna kleurt niet alleen de haartjes maar ook de huid eronder, voor een extra vol effect.",
               en:"Henna colors not just the hairs but also the skin underneath, for an extra full effect." },
+    caution:{ nl:"Bij een eerste henna doen we best 48 uur vooraf een huidtest, om een allergische reactie uit te sluiten.",
+              en:"For a first henna it’s best to do a patch test 48 hours beforehand to rule out an allergic reaction." },
     aftercare:{ nl:"Houd de wenkbrauwen 24 uur droog en vermijd scrubs of peelings rond de wenkbrauw gedurende 3 dagen.",
                 en:"Keep the brows dry for 24 hours and avoid scrubs or peels around the brow area for 3 days." } },
 
@@ -1053,6 +1057,8 @@ const TREATMENTS_CATALOG = [
                en:"Curled, darker lashes without mascara — saves time in your morning routine." },
     funfact:{ nl:"Het effect van een lash lift houdt gemiddeld één volledige wimpergroeicyclus aan, ongeveer 6 tot 8 weken.",
               en:"The effect of a lash lift lasts on average one full lash growth cycle, about 6 to 8 weeks." },
+    caution:{ nl:"Bij een eerste lash lift doen we best 48 uur vooraf een huidtest. Contactlenzen gaan uit tijdens de behandeling.",
+              en:"For a first lash lift it’s best to do a patch test 48 hours beforehand. Contact lenses come out during the treatment." },
     aftercare:{ nl:"Houd de wimpers de eerste 24 uur volledig droog en vermijd olie-based make-up remover.",
                 en:"Keep the lashes completely dry for the first 24 hours and avoid oil-based makeup remover." } },
 
@@ -1662,7 +1668,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v87 · 09/10/2026";
+const APP_VERSION = "v88 · 09/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".

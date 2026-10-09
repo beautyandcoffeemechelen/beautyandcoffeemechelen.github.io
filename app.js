@@ -130,6 +130,7 @@
 
   function showStep(name){
     $$(".step").forEach(sec => sec.classList.toggle("is-active", sec.dataset.step === name));
+    document.body.dataset.step = name;   // seasonal figures only on the start screen (calmer elsewhere)
     const topBack = $("#topbarBack"); if (topBack) topBack.hidden = (name === "welcome");
     updateProgress(name);
 
@@ -2165,7 +2166,7 @@
             <figcaption>— ${r.name}${r.topic ? ` · <span>${r.topic}</span>` : ""}</figcaption>
           </figure>`).join("")}
       </div>
-      ${lang !== "nl" ? `<p class="reviews-card__note">${t("reviews_original_lang", lang)}</p>` : ""}
+      <p class="reviews-card__note">${t("reviews_selection", lang)}${lang !== "nl" ? " " + t("reviews_original_lang", lang) : ""}</p>
       <div class="reviews-card__buttons">
         <a class="btn btn--outline" href="${G.allUrl}" target="_blank" rel="noopener noreferrer" data-review="all">${t("reviews_all", lang)}</a>
         <a class="btn btn--primary" href="${GOOGLE_REVIEW_URL}" target="_blank" rel="noopener noreferrer" data-review="write">${t("reviews_write", lang)}</a>
@@ -3835,10 +3836,19 @@
       </div>
       <p class="adv-reveal__title">${t("adv_reveal_title", state.lang)}</p>
       <p class="adv-reveal__name">${advDoorText(door, state.lang)}</p>
-      <button type="button" class="btn btn--primary adv-reveal__go" data-reveal="go">🎟️ ${t("adv_reveal_btn", state.lang)}</button>`;
+      <button type="button" class="btn btn--primary adv-reveal__go" data-reveal="go">🎟️ ${t("adv_reveal_btn", state.lang)}</button>
+      <button type="button" class="btn btn--text adv-reveal__later" data-reveal="close">${t("adv_reveal_later", state.lang)}</button>
+      <button type="button" class="adv-reveal__x" data-reveal="close" aria-label="${t("adv_reveal_later", state.lang)}">✕</button>`;
     document.body.appendChild(ov);
-    const go = () => { ov.remove(); showAdventVoucher(day); };
-    ov.addEventListener("click", e => { if (e.target.closest('[data-reveal="go"]') || ov.classList.contains("is-done")) go(); });
+    // the door stays opened: the voucher can be shown later via "Mijn bonnen"
+    const close = () => { ov.remove(); document.removeEventListener("keydown", onKey); if (typeof renderAdvent === "function") renderAdvent(); };
+    const go = () => { ov.remove(); document.removeEventListener("keydown", onKey); showAdventVoucher(day); };
+    const onKey = e => { if (e.key === "Escape") close(); };
+    document.addEventListener("keydown", onKey);
+    ov.addEventListener("click", e => {
+      if (e.target.closest('[data-reveal="close"]')) return close();
+      if (e.target.closest('[data-reveal="go"]')) go();
+    });
     setTimeout(() => ov.classList.add("is-done"), 2300);
   }
 
