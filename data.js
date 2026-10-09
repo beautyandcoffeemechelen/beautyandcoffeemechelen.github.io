@@ -1668,7 +1668,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v89 · 09/10/2026";
+const APP_VERSION = "v90 · 09/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -2244,7 +2244,7 @@ const SKIN_FACT_POOLS = {
   kids: ["A","G","H"],
   byTreatment: {
     expressfacial:["A","B","C","D"], acnefacial:["A","B","C","D"], bridaltrial:["A","B"], bridalpackage:["A","B"], weddingguest:["A","B"], browtint:["G"], browshaping:["G"], lashtint:["G"], manicureexpress:["F","H","C"], cateye:["F","H","C"], kin:["G"], bovenlip:["G"], wenkbrauwontharing:["G"], schouders:["G"], borstbuik:["G"], volledigebenen:["G"], harmonizingback:["A","D","E"], teambeauty:["A","B","C"],
-    pedicure:["F","E","C"], pedicureexpress:["F","E","C"],
+    pedicure:["F","C"], pedicureexpress:["F","C"],
     manipedispa:["F","C","H"], manicure:["F","H","C"],
     oksel:["G","E"], been:["G"], rug:["G"], buik:["G"], borst:["G"],
     browlift:["G"], hennabrows:["G"], lashlift:["G"],
@@ -2309,7 +2309,7 @@ const CONDITION_FACTS = [
   { code:"PE4", theme:"PE", kop:"Voetschimmel houdt van warm en vochtig", nl:"Schimmels zitten graag op warme, vochtige plekken zoals voeten en tussen de tenen. Droog goed tussen de tenen, draag katoenen of wollen sokken en ruime, liefst lederen schoenen.", en:"Fungi love warm, moist places such as feet and between the toes. Dry well between your toes, wear cotton or wool socks and roomy, preferably leather shoes.", kopEn:"Fungus loves warm and damp" },
   { code:"PE5", theme:"PE", kop:"Hardnekkig", nl:"Schimmelinfecties zijn hardnekkig en komen vaak terug. Een langdurige behandeling van weken tot maanden is vaak nodig.", en:"Fungal infections are stubborn and often come back. A prolonged treatment of weeks to months is often needed.", kopEn:"Stubborn" },
   { code:"PE6", theme:"PE", kop:"Blaartjes op de voetzool", nl:"Blaartjes op de handpalmen of voetzolen zijn meestal een overgevoeligheidsreactie op een schimmelinfectie elders op het lichaam.", en:"Small blisters on the palms or soles are usually a hypersensitivity reaction to a fungal infection elsewhere on the body.", kopEn:"Blisters on the sole" },
-  { code:"PE7", theme:"PE", kop:"Zweetvoeten", nl:"Tegen zweetvoeten helpen dagelijks schone (katoenen) kousen, schoenen meermaals per dag wisselen en lederen schoenen die de voet niet afsluiten. Minder koffie, alcohol en scherpe kruiden helpt ook.", en:"For sweaty feet, clean (cotton) socks every day, changing shoes several times a day, and leather shoes that let the foot breathe all help. Less coffee, alcohol and spicy food helps too.", kopEn:"Sweaty feet" },
+  { code:"PE7", theme:"PE", kop:"Frisse voeten", nl:"Voor frisse, comfortabele voeten helpen dagelijks schone (katoenen) kousen, schoenen meermaals per dag wisselen en lederen schoenen die de voet niet afsluiten. Minder koffie, alcohol en scherpe kruiden helpt ook.", en:"For fresh, comfortable feet, clean (cotton) socks every day, changing shoes several times a day, and leather shoes that let the foot breathe all help. Less coffee, alcohol and spicy food helps too.", kopEn:"Fresh feet" },
   { code:"PE8", theme:"PE", kop:"Diabetes en de huid", nl:"Bij diabetes is er een verhoogde kans op schimmelinfecties (verminderde weerstand) en op fibromen (steelwratjes).", en:"With diabetes there is an increased risk of fungal infections (reduced resistance) and of skin tags (fibromas).", kopEn:"Diabetes and skin" },
   { code:"PE9", theme:"PE", kop:"Geen steenpuist op de voetzool", nl:"Steenpuisten komen nooit voor op de voetzool of handpalm: daar zitten geen haarzakjes.", en:"Boils never occur on the sole of the foot or the palm: there are no hair follicles there.", kopEn:"No boils on the sole" },
   { code:"PE10", theme:"PE", kop:"Teek verwijderen", nl:"Pak een teek met een pincet bij de kop en trek hem langzaam recht omhoog. Zorg dat ook de monddelen mee zijn.", en:"Grip a tick with tweezers at the head and pull it slowly and straight upward. Make sure the mouthparts come out too.", kopEn:"Removing a tick" },
@@ -2339,7 +2339,7 @@ const CONDITION_FACT_POOLS = {
   sun: ["SH"],
   byTreatment: {
     expressfacial:["PI","DR"], acnefacial:["AC","PI"], bridaltrial:["AL"], bridalpackage:["AL"], weddingguest:["AL"], browtint:["AL"], browshaping:["AL"], lashtint:["AL"], kin:["AL"], bovenlip:["AL"], wenkbrauwontharing:["AL"], schouders:["AL"], borstbuik:["AL"], volledigebenen:["AL","PE"], harmonizingback:["ZW"], teambeauty:["AC","PI"],
-    pedicure:["PE","ZW"], pedicureexpress:["PE","ZW"], manipedispa:["PE"],
+    pedicure:["PE"], pedicureexpress:["PE"], manipedispa:["PE"],
     hotstone:["ZW"], swedish:["ZW"], swedishbackneck:["ZW"], swedishlegs:["ZW","PE"],
     detoxback:["ZW"], slimmassage:["ZW"],
     hydrapeel:["PI","DR"], signaturefacial:["PI","DR"], fillme:["PI"],
@@ -2419,6 +2419,26 @@ const PRACTICE_FACTS = [
   { code:"PEDX12", theme:"PEDX", nl:"Bij diabetes stroomt minder bloed naar de voeten en is er minder gevoel; kleine wondjes kunnen tot amputatie leiden.", en:"With diabetes, less blood flows to the feet and sensation is reduced; small wounds can lead to amputation." },
   { code:"PEDX13", theme:"PEDX", nl:"Fysiologisch eelt is beschermend en laat je gedeeltelijk zitten; enkel pathologisch eelt (hyperkeratose) is storend.", en:"Physiological callus is protective and is partly left in place; only pathological callus (hyperkeratosis) is a problem." },
   { code:"PEDX14", theme:"PEDX", nl:"Spreekwoorden: op goede/gespannen voet staan, voet bij stuk houden, een wit voetje halen…", en:"Feet even show up in language: to put your best foot forward, to stand your ground, to get in someone's good books…" },
+  // HYG (hygiëne & microbiologie) and ERG (rug & houding): Syntra Leuven, GVV 'Elementaire voetverzorgingstechnieken' hfdst 4-7 (2026)
+  { code:"HYG1", theme:"HYG", nl:"Hygiëne in de salon gaat in drie stappen, altijd in deze volgorde: reinigen, desinfecteren en steriliseren.", en:"Hygiene in the salon follows three steps, always in this order: cleaning, disinfecting and sterilising." },
+  { code:"HYG2", theme:"HYG", nl:"Eerst reinigen is essentieel: zichtbaar vuil zoals huidschilfers of nagelresten hindert de werking van een desinfectiemiddel.", en:"Cleaning first is essential: visible dirt such as skin flakes or nail clippings stops a disinfectant from working properly." },
+  { code:"HYG3", theme:"HYG", nl:"Desinfecteren doodt een groot deel van de micro-organismen. Steriliseren gaat verder: dan worden álle levende micro-organismen gedood of verwijderd.", en:"Disinfecting kills a large share of micro-organisms. Sterilising goes further: it kills or removes all living micro-organisms." },
+  { code:"HYG4", theme:"HYG", nl:"Een desinfectiemiddel werkt pas goed met de juiste concentratie én inwerkingstijd. Even snel afvegen met alcohol is dus niet genoeg.", en:"A disinfectant only works properly at the right concentration and contact time. A quick wipe with alcohol is not enough." },
+  { code:"HYG5", theme:"HYG", nl:"Besmetting is nog geen infectie. Bij een besmetting komen kiemen op je huid of op een voorwerp terecht; pas bij een infectie dringen ze binnen, vermenigvuldigen ze zich en word je ziek.", en:"Contamination is not yet infection. With contamination, germs land on your skin or on an object; only with infection do they get in, multiply and make you ill." },
+  { code:"HYG6", theme:"HYG", nl:"Of een besmetting tot een infectie leidt, hangt af van vier dingen: het soort micro-organisme, hoeveel het er zijn, waar ze binnenkomen en hoe sterk je weerstand is.", en:"Whether contamination leads to infection depends on four things: the type of micro-organism, how many there are, where they get in and how strong your resistance is." },
+  { code:"HYG7", theme:"HYG", nl:"Kiemen verspreiden zich direct, van huid op huid, of indirect, via handdoeken, vloeren of instrumenten. Daarom zijn verse handdoeken en propere instrumenten voor elke klant zo belangrijk.", en:"Germs spread directly, from skin to skin, or indirectly, via towels, floors or instruments. That's why fresh towels and clean instruments for every client matter so much." },
+  { code:"HYG8", theme:"HYG", nl:"Je huid en slijmvliezen zijn de eerste barrière tegen micro-organismen. Een klein wondje is dus een opening: vertel het daarom gerust vóór je verzorging.", en:"Your skin and mucous membranes are the first barrier against micro-organisms. Even a small wound is an opening, so do mention it before your treatment." },
+  { code:"HYG9", theme:"HYG", nl:"Een ontsteking herken je aan vijf klassieke tekens met Latijnse namen: rubor (roodheid), calor (warmte), tumor (zwelling), dolor (pijn) en functio laesa (minder goed werken).", en:"You recognise inflammation by five classic signs with Latin names: rubor (redness), calor (warmth), tumor (swelling), dolor (pain) and functio laesa (loss of function)." },
+  { code:"HYG10", theme:"HYG", nl:"Handhygiëne heeft een vaste volgorde: handen wassen, goed afdrogen, ontsmetten en pas dan handschoenen aan. Na het uittrekken: eerst ontsmetten, dan wassen.", en:"Hand hygiene has a fixed order: wash, dry well, disinfect and only then put on gloves. After taking them off: disinfect first, then wash." },
+  { code:"HYG11", theme:"HYG", nl:"Tijdens een voetverzorging draagt de verzorger geen ringen of armbanden en zijn de nagels kort: zo kunnen de handen goed gereinigd en ontsmet worden.", en:"During a foot treatment, the practitioner wears no rings or bracelets and keeps the nails short, so the hands can be cleaned and disinfected properly." },
+  { code:"HYG12", theme:"HYG", nl:"De tetanusbacterie leeft in aarde en straatvuil en kan binnendringen via een wondje. Goede wondverzorging en een tijdige vaccinatie beschermen je, ook in de tuin.", en:"The tetanus bacterium lives in soil and street dirt and can enter through a wound. Good wound care and up-to-date vaccination protect you, in the garden too." },
+  { code:"HYG13", theme:"HYG", nl:"Niet alle micro-organismen zijn schadelijk. Men onderscheidt apathogene (niet-ziekmakende) en pathogene (ziekmakende) kiemen; hoe ziekmakend ze zijn, heet pathogeniteit.", en:"Not all micro-organisms are harmful. A distinction is made between apathogenic (harmless) and pathogenic (disease-causing) germs; how disease-causing they are is called pathogenicity." },
+  { code:"ERG1", theme:"ERG", nl:"Rugklachten ontstaan zelden door één verkeerde beweging. Meestal komen ze van langdurige, herhaalde belasting en te weinig beweging.", en:"Back complaints rarely come from one wrong movement. Usually they come from prolonged, repeated strain and too little movement." },
+  { code:"ERG2", theme:"ERG", nl:"Til vanuit je benen, niet vanuit je rug, en hou de last dicht bij je lichaam.", en:"Lift with your legs, not your back, and keep the load close to your body." },
+  { code:"ERG3", theme:"ERG", nl:"Lang in dezelfde houding zitten of staan? Beweeg minstens elk halfuur even en rek je regelmatig uit.", en:"Sitting or standing in the same position for a long time? Move at least every half hour and stretch regularly." },
+  { code:"ERG4", theme:"ERG", nl:"Goed zitten: bekken achteraan op de zitting, rug tegen de leuning, voeten plat op de grond en knieën in een hoek van ongeveer 90°. Zo behoudt je wervelkolom zijn natuurlijke S-vorm.", en:"Sitting well: pelvis at the back of the seat, back against the backrest, feet flat on the floor and knees at about 90°. That keeps the natural S-shape of your spine." },
+  { code:"ERG5", theme:"ERG", nl:"Vermijd schroefbewegingen, waarbij je tegelijk draait en buigt: die belasten je rug extra.", en:"Avoid twisting movements where you turn and bend at the same time: they put extra strain on your back." },
+  { code:"ERG6", theme:"ERG", nl:"Aan je bureau: stel stoel en werkhoogte zo in dat je schouders niet optrekken en je nek niet voortdurend voorover buigt. Voldoende licht, liefst daglicht, helpt ook.", en:"At your desk: set your chair and working height so your shoulders don't hunch up and your neck isn't constantly bent forward. Enough light, preferably daylight, helps too." },
   { code:"MA1", theme:"MA", nl:"Massage verbetert de doorbloeding, zodat spieren en huid beter van zuurstof en voedingsstoffen worden voorzien.", en:"Massage improves blood flow, so muscles and skin get more oxygen and nutrients." },
   { code:"MA2", theme:"MA", nl:"Het lymfestelsel heeft, anders dan de bloedsomloop, geen eigen pomp. Massage kan de doorstroming van de lymfe ondersteunen.", en:"Unlike the blood circulation, the lymphatic system has no pump of its own. Massage can help support lymph flow." },
   { code:"MA3", theme:"MA", nl:"Een ontspanningsmassage kan een hoge bloeddruk doen dalen dankzij het ontspannende effect op lichaam en geest.", en:"A relaxation massage can lower high blood pressure thanks to its calming effect on body and mind." },
@@ -2450,14 +2470,16 @@ const PRACTICE_FACTS = [
 ];
 const PRACTICE_FACT_POOLS = {
   byTreatment: {
-    harmonizingback:["MA","MT","MV","MR","WEC"], cateye:["WEC","WEG"], teambeauty:["WEC","WEG"], teamcoffee:["WEC"],
-    hotstone:["WEW","MA","MT","MV","MR"],
-    cupping:["MA","MT","MV","MR"], cuppingpeeling:["MA","MT","MV","MR"],
-    swedish:["MA","MT","MV","MR"], swedishbackneck:["MA","MT","MV","MR"], swedishlegs:["MA","MT","MV","MR"],
-    backwrap:["MA","MT","MV","MR","WEH"], detoxback:["MA","MT","MV","MR","WEH"],
+    harmonizingback:["MA","MT","MV","MR","WEC","ERG"], teambeauty:["WEC","WEG"], teamcoffee:["WEC"],
+    hotstone:["WEW","MA","MT","MV","MR","ERG"],
+    cupping:["MA","MT","MV","MR","ERG"], cuppingpeeling:["MA","MT","MV","MR","ERG"],
+    swedish:["MA","MT","MV","MR","ERG"], swedishbackneck:["MA","MT","MV","MR","ERG"], swedishlegs:["MA","MT","MV","MR"],
+    backwrap:["MA","MT","MV","MR","WEH","ERG"], detoxback:["MA","MT","MV","MR","WEH","ERG"],
     harmonizingbody:["MA","MT","MV","MR","WEC"], fullbodywrap:["MA","MT","MV","MR","WEC"],
-    slimmassage:["MA","MT","MV","MR","WEH"],
-    pedicure:["PEDX"], pedicureexpress:["PEDX"], manipedispa:["PEDX","MA"],
+    slimmassage:["MA","MT","MV","MR","WEH","ERG"],
+    pedicure:["PEDX","HYG"], pedicureexpress:["PEDX","HYG"], manipedispa:["PEDX","MA","HYG"],
+    manicure:["HYG"], manicureexpress:["HYG"], cateye:["WEC","WEG","HYG"],
+    oksel:["HYG"], been:["HYG"], rug:["HYG"], buik:["HYG"], borst:["HYG"], kin:["HYG"], bovenlip:["HYG"], wenkbrauwontharing:["HYG"], schouders:["HYG"], borstbuik:["HYG"], volledigebenen:["HYG"],
     makeupworkshop:["WEC","WEG"], facialworkshop:["WEC","WEG","WEH"],
     tastingbasic:["WEC"], tastingadvanced:["WEC"], baristaworkshop:["WEC"]
   }
