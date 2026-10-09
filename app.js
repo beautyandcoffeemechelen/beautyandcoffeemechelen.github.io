@@ -1182,11 +1182,18 @@
   function closedDaysAhead(fromKey, days){
     if (typeof CLOSED_DAYS !== "object" || !CLOSED_DAYS) return [];
     const y = Number(fromKey.slice(0, 4)), out = [];
+    const k = dt => `${dt.getUTCFullYear()}-${String(dt.getUTCMonth()+1).padStart(2,"0")}-${String(dt.getUTCDate()).padStart(2,"0")}`;
+    const add = (key, kind) => { const diff = seasonDays(fromKey, key); if (diff >= 0 && diff <= days && !out.some(o => o.key === key)) out.push({ key, kind }); };
     [y, y + 1].forEach(yy => (CLOSED_DAYS.days || []).forEach(md => {
-      const real = md === "cny" ? (typeof LUNAR_DATES === "object" && LUNAR_DATES.cny[yy]) : md;
-      if (!real) return;
-      const key = `${yy}-${real}`, diff = seasonDays(fromKey, key);
-      if (diff >= 0 && diff <= days) out.push({ key, kind: md === "cny" ? "cny" : md });
+      if (/^\d{4}-\d{2}-\d{2}$/.test(md)){ if (Number(md.slice(0, 4)) === yy) add(md, "own"); return; }
+      if (md === "cny"){ const c = typeof LUNAR_DATES === "object" && LUNAR_DATES.cny[yy]; if (c) add(`${yy}-${c}`, "cny"); return; }
+      if (md === "herfstvakantie"){
+        // Flemish autumn holiday: the Monday between 27 October and 2 November
+        const oct27 = new Date(Date.UTC(yy, 9, 27)), mon = new Date(oct27.getTime() + ((8 - oct27.getUTCDay()) % 7) * 864e5);
+        for (let n = -2; n <= 4; n++) add(k(new Date(mon.getTime() + n * 864e5)), "holiday");
+        return;
+      }
+      if (/^\d{2}-\d{2}$/.test(md)) add(`${yy}-${md}`, md);
     }));
     return out.sort((a, b) => a.key < b.key ? -1 : 1);
   }
@@ -1195,8 +1202,15 @@
     const list = closedDaysAhead(today, (CLOSED_DAYS && CLOSED_DAYS.noticeDays) || 28);
     if (!list.length) return "";
     const L = state.lang;
-    const names = { "12-25":"closed_xmas", "12-31":"closed_nye", "01-01":"closed_ny", "08-15":"closed_aug15", cny:"closed_cny" };
-    const dates = list.map(c => `<b>${actionFmt(c.key, L, true)}</b>${names[c.kind] ? ` (${t(names[c.kind], L)})` : ""}`).join(", ");
+    const names = { "12-25":"closed_xmas", "12-31":"closed_nye", "01-01":"closed_ny", "08-15":"closed_aug15", cny:"closed_cny", holiday:"closed_holiday" };
+    // days next to each other → one period
+    const groups = [];
+    list.forEach(c => { const g = groups[groups.length - 1]; if (g && seasonDays(g.to, c.key) === 1){ g.to = c.key; g.kinds.push(c.kind); } else groups.push({ from:c.key, to:c.key, kinds:[c.kind] }); });
+    const dates = groups.map(g => {
+      const lbl = [...new Set(g.kinds.map(x => names[x]).filter(Boolean))].map(x => t(x, L)).join(", ");
+      const when = g.from === g.to ? actionFmt(g.from, L, true) : `${actionFmt(g.from, L, false)} ${t("closed_until", L)} ${actionFmt(g.to, L, true)}`;
+      return `<b>${when}</b>${lbl ? ` (${lbl})` : ""}`;
+    }).join(", ");
     return `<p class="closed-note">🚫 ${t("closed_note", L).replace("{dates}", dates)}</p>`;
   }
 

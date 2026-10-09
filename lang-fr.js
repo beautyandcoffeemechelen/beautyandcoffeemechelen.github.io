@@ -265,6 +265,8 @@
   "closed_ny": "Nouvel An",
   "closed_cny": "premier jour du Nouvel An chinois",
   "closed_aug15": "fête des Mères",
+  "closed_holiday": "vacances",
+  "closed_until": "au",
   "ingr_search_label": "Allergie ou ingrédient",
   "ingr_search_ph": "p. ex. noix, lavande, parfum, linalool",
   "ingr_search_hint": "Tapez au moins 2 lettres, ou touchez un groupe ci-dessus.",
