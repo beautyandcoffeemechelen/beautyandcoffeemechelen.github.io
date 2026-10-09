@@ -1165,3 +1165,19 @@ body[data-theme] .topbar{ box-shadow:0 3px 0 -1px var(--s-line); }
 
 /* yearly Valentine action */
 .action-card--valentijn{ border-color:#e7a1b0; background:linear-gradient(135deg, #fff5f7, #fdebef); }
+
+/* closed days + holiday date */
+.closed-note{ font-size:13px; margin:8px 0 0; padding:8px 12px; border-radius:var(--radius-m); background:#fdecec; border:1px solid #e8b4b4; color:#7a2626; }
+.season-card__date{ font-size:13px; font-weight:600; margin:2px 0 6px; }
+/* order of use (ingredients, Sandra only) */
+.ingr-phase{ border:1px solid var(--gold-light); border-radius:var(--radius-m); padding:8px 12px; margin:0 0 8px; background:#fff; }
+.ingr-phase.is-now{ border-color:#7fb38a; background:#f1f8f2; }
+.ingr-phase__title{ font-weight:600; font-size:13.5px; margin:0 0 6px; }
+.ingr-phase__now{ display:inline-block; font-size:11px; font-weight:600; color:#fff; background:#4f8a5b; border-radius:999px; padding:1px 8px; margin-left:4px; }
+.ingr-order{ list-style:none; margin:0; padding:0; }
+.ingr-order li{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:5px 0; border-top:1px dashed #e6dccb; font-size:13px; }
+.ingr-order li:first-child{ border-top:0; }
+.ingr-order li.is-op span{ text-decoration:line-through; opacity:.55; }
+.ingr-order .btn{ flex:0 0 auto; }
+.ingr-oppending{ margin:12px 0; padding:10px 12px; border:1px dashed var(--gold); border-radius:var(--radius-m); background:var(--cream); font-size:13px; }
+.ingr-oppending code{ display:block; margin:6px 0; word-break:break-all; font-size:12px; }

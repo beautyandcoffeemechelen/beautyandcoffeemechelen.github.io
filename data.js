@@ -1583,22 +1583,52 @@ const CURRENT_ACTIONS = [
     title:{ nl:"Grabbelton", en:"Lucky dip" },
     text:{ nl:"Besteed je €75 of meer tijdens dezelfde afspraak? Dan mag je één keer grabbelen in de grabbelton. Zolang de voorraad strekt.",
            en:"Spend €75 or more during the same appointment and you get one grab from the lucky dip. While stocks last." } },
-  /* EVERY YEAR AGAIN — Valentine: massage discount on the weekends around
-     14 February (Sandra works on Saturday and Sunday). The dates are worked
-     out by the app each year: weekendsBefore weekends before the Valentine
-     weekend, the Valentine weekend itself, and weekendsAfter weekends after
-     it. The banner shows from showDaysBefore days before the first weekend
-     until the last Sunday. {value} {from} {until} are filled in.
-     Preview: …/?voorproef=BC-XMAS-7Q4K&datum=2027-01-20 */
-  { id:"valentijn", icon:"💕", value:"15%",
+  /* EVERY YEAR AGAIN — Valentine, Mother's Day and Father's Day: a discount
+     on ONE named massage, on the weekends around the day (Sandra works on
+     Saturday and Sunday). The app works out the dates itself each year:
+     weekendsBefore weekends before the weekend of the day, that weekend
+     itself, and weekendsAfter weekends after it. The banner shows from
+     showDaysBefore days before the first weekend until the last Sunday
+     (= the deadline). No prices in the text.
+     The massage changes every year by itself (one by one from
+     ADVENT.autoFill.massages, starting at "offset"); to choose it yourself
+     for a year: byYear:{ 2027:"hotstone" }.
+     Mother's Day / Father's Day in Belgium: 2nd Sunday of May / of June.
+     Preview: …/?voorproef=BC-XMAS-7Q4K&datum=2027-01-20 (or 2027-05-01, 2027-06-01) */
+  { id:"valentijn", icon:"💕", value:"10%", massage:{ offset:3, byYear:{} },
     yearly:{ anchorMD:"02-14", weekendsBefore:3, weekendsAfter:2, showDaysBefore:12 },
-    title:{ nl:"Valentijnsactie: {value} korting op alle massages",
-            en:"Valentine’s offer: {value} off all massages",
-            fr:"Action Saint-Valentin : {value} de réduction sur tous les massages" },
-    text:{ nl:"Verwen jezelf of je lief: {value} korting op elke massage, voor afspraken in de weekends van <b>{from} tot en met {until}</b>. Hot stone, cupping, Zweedse massage, afslankingsmassage … Vermeld “Valentijn” als je boekt. Niet combineerbaar met andere acties of kortingen.",
-           en:"Treat yourself or your love: {value} off every massage, for appointments on the weekends from <b>{from} to {until}</b>. Hot stone, cupping, Swedish massage, slimming massage … Mention “Valentine” when you book. Cannot be combined with other offers or discounts.",
-           fr:"Faites-vous plaisir ou gâtez votre moitié : {value} de réduction sur chaque massage, pour les rendez-vous les week-ends du <b>{from} au {until}</b>. Pierres chaudes, ventouses, massage suédois, massage amincissant … Mentionnez « Saint-Valentin » en réservant. Non cumulable avec d’autres actions ou réductions." } }
+    title:{ nl:"Valentijnsactie: {value} korting op een {treat}",
+            en:"Valentine’s offer: {value} off a {treat}",
+            fr:"Action Saint-Valentin : {value} de réduction sur un {treat}" },
+    text:{ nl:"Verwen jezelf of je lief: {value} korting op een <b>{treat}</b>. Geldig voor afspraken in de weekends van {from} <b>tot en met {until}</b>. Vermeld “Valentijn” als je boekt. Niet combineerbaar met andere acties of kortingen.",
+           en:"Treat yourself or your love: {value} off a <b>{treat}</b>. Valid for appointments on the weekends from {from} <b>until {until}</b>. Mention “Valentine” when you book. Cannot be combined with other offers or discounts.",
+           fr:"Faites-vous plaisir ou gâtez votre moitié : {value} de réduction sur un <b>{treat}</b>. Valable pour les rendez-vous les week-ends du {from} <b>au {until} inclus</b>. Mentionnez « Saint-Valentin » en réservant. Non cumulable avec d’autres actions ou réductions." } },
+  { id:"moederdag", icon:"💐", value:"10%", massage:{ offset:5, byYear:{} },
+    yearly:{ anchor:"mothersday", weekendsBefore:3, weekendsAfter:1, showDaysBefore:12 },
+    title:{ nl:"Moederdagactie: {value} korting op een {treat}",
+            en:"Mother’s Day offer: {value} off a {treat}",
+            fr:"Action fête des Mères : {value} de réduction sur un {treat}" },
+    text:{ nl:"Verwen je mama (of jezelf): {value} korting op een <b>{treat}</b>. Geldig voor afspraken in de weekends van {from} <b>tot en met {until}</b>. Liever cadeau doen? Vraag naar een cadeaubon. Vermeld “Moederdag” als je boekt. Niet combineerbaar met andere acties of kortingen.",
+           en:"Treat your mum (or yourself): {value} off a <b>{treat}</b>. Valid for appointments on the weekends from {from} <b>until {until}</b>. Rather give it as a present? Ask for a gift voucher. Mention “Mother’s Day” when you book. Cannot be combined with other offers or discounts.",
+           fr:"Gâtez votre maman (ou vous-même) : {value} de réduction sur un <b>{treat}</b>. Valable pour les rendez-vous les week-ends du {from} <b>au {until} inclus</b>. Plutôt l’offrir ? Demandez un bon cadeau. Mentionnez « fête des Mères » en réservant. Non cumulable avec d’autres actions ou réductions." } },
+  { id:"vaderdag", icon:"☕", value:"10%", massage:{ offset:8, byYear:{} },
+    yearly:{ anchor:"fathersday", weekendsBefore:2, weekendsAfter:1, showDaysBefore:12 },
+    title:{ nl:"Vaderdagactie: {value} korting op een {treat}",
+            en:"Father’s Day offer: {value} off a {treat}",
+            fr:"Action fête des Pères : {value} de réduction sur un {treat}" },
+    text:{ nl:"Verwen je papa (of jezelf): {value} korting op een <b>{treat}</b>. Geldig voor afspraken in de weekends van {from} <b>tot en met {until}</b>. Liever cadeau doen? Vraag naar een cadeaubon. Vermeld “Vaderdag” als je boekt. Niet combineerbaar met andere acties of kortingen.",
+           en:"Treat your dad (or yourself): {value} off a <b>{treat}</b>. Valid for appointments on the weekends from {from} <b>until {until}</b>. Rather give it as a present? Ask for a gift voucher. Mention “Father’s Day” when you book. Cannot be combined with other offers or discounts.",
+           fr:"Gâtez votre papa (ou vous-même) : {value} de réduction sur un <b>{treat}</b>. Valable pour les rendez-vous les week-ends du {from} <b>au {until} inclus</b>. Plutôt l’offrir ? Demandez un bon cadeau. Mentionnez « fête des Pères » en réservant. Non cumulable avec d’autres actions ou réductions." } }
 ];
+
+/* ============================================================
+   CLOSED DAYS — every year, no appointments possible on these days.
+   "MM-DD" = fixed date; "cny" = the first day of Chinese New Year
+   (date from LUNAR_DATES in seasons.js). Shown on the season card and
+   above the booking buttons when such a day is coming up (within
+   noticeDays days).
+   ============================================================ */
+const CLOSED_DAYS = { days:["12-25", "12-31", "01-01", "cny"], noticeDays:28 };
 
 /* ============================================================
    BOOKING SLOTS — chips shown above the booking buttons.
@@ -1620,7 +1650,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v77 · 09/10/2026";
+const APP_VERSION = "v78 · 09/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1725,8 +1755,8 @@ const PREVIEW_KEY = "BC-XMAS-7Q4K";
    dates (announcement 15/11, doors 1–25/12). What is behind the doors is set
    per year in doorsByYear below. A year without a list, or a door that is
    left out, is filled automatically with 15% off a massage — one by one from
-   autoFill.massages. Cheaper massages carry their own minimum (dmin = their
-   price), so the rule on the voucher stays correct. */
+   autoFill.massages. These vouchers name the massage and show no price
+   (noMin: true). */
 const ADVENT = {
   live: false,                  // true = public right away (e.g. on 15/11 for the announcement)
   liveFromMD: "11-15",          // public automatically from this day (announcement); doors only open from 1/12, each on its own day
@@ -1881,12 +1911,12 @@ const ADVENT = {
     { id:"hotstone",        nl:"Hot Stone massage",                      en:"Hot Stone massage",                   fr:"massage aux pierres chaudes" },
     { id:"cupping",         nl:"cuppingmassage",                         en:"cupping massage",                     fr:"massage aux ventouses" },
     { id:"swedish",         nl:"Zweedse massage (volledig lichaam)",     en:"full-body Swedish massage",           fr:"massage suédois complet" },
-    { id:"slimmassage",     nl:"afslankingsmassage",                     en:"slimming massage",                    fr:"massage amincissant", dmin:55 },
+    { id:"slimmassage",     nl:"afslankingsmassage",                     en:"slimming massage",                    fr:"massage amincissant" },
     { id:"cuppingpeeling",  nl:"Cupping Body Renewal",                   en:"Cupping Body Renewal",                fr:"soin Cupping Body Renewal" },
-    { id:"swedishbackneck", nl:"Zweedse rug-, nek- en schoudermassage",  en:"Swedish back, neck & shoulder massage", fr:"massage suédois dos, nuque et épaules", dmin:40 },
+    { id:"swedishbackneck", nl:"Zweedse rug-, nek- en schoudermassage",  en:"Swedish back, neck & shoulder massage", fr:"massage suédois dos, nuque et épaules" },
     { id:"backwrap",        nl:"Energetic Back Wrap",                    en:"back wrap (Energetic Back Wrap)",     fr:"soin Energetic Back Wrap" },
     { id:"harmonizingbody", nl:"harmoniserende full body verzorging",    en:"harmonising full-body treatment",     fr:"soin harmonisant complet du corps" },
-    { id:"swedishlegs",     nl:"Zweedse benen- en voetenmassage",        en:"Swedish leg & foot massage",          fr:"massage suédois jambes et pieds", dmin:40 },
+    { id:"swedishlegs",     nl:"Zweedse benen- en voetenmassage",        en:"Swedish leg & foot massage",          fr:"massage suédois jambes et pieds" },
     { id:"fullbodywrap",    nl:"energetische full body pakking",         en:"energising full-body wrap",           fr:"enveloppement énergétique complet" }
   ]},
   doorsByYear: {
@@ -1942,7 +1972,7 @@ const ADVENT = {
     const m = list[k++ % list.length], id = "auto_" + m.id;
     if (!ADVENT.items[id]) ADVENT.items[id] = { type:"discount", icon:"💆", value:v, auto:true,
       nl:`${v} korting op een ${m.nl}`, en:`${v} off a ${m.en}`, fr:`${v.replace("%", " %")} de réduction sur un ${m.fr}`,
-      treat:{ nl:m.nl, en:m.en, fr:m.fr }, dmin: m.dmin || null };
+      treat:{ nl:m.nl, en:m.en, fr:m.fr }, noMin:true };
     ADVENT.doors.push({ day, item:id, stock:null });
   }
 })();

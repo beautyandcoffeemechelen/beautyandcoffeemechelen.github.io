@@ -115,7 +115,29 @@ const SALON_PRODUCTS = {
     note:{ nl:"* van nature aanwezig in de olie. Een paar druppels in amandel- of druivenpitolie, afhankelijk van de massage. Merk en etiket nog aan te vullen (foto sturen).", en:"* naturally present in the oil. A few drops in almond or grapeseed oil, depending on the massage. Brand and label still to be added (send a photo).", fr:"* naturellement présent dans l’huile. Quelques gouttes dans l’huile d’amande ou de pépins de raisin, selon le massage. Marque et étiquette à compléter (envoyer une photo)." } },
   eolemongrass: { name:{ nl:"Citroengras, etherische olie (in eigen massagemengsel)", en:"Lemongrass essential oil (in Sandra’s own massage blend)", fr:"Huile essentielle de citronnelle / lemongrass (dans le mélange de massage maison)" }, usedIn:["cupping","cuppingpeeling","swedish","swedishbackneck","swedishlegs","slimmassage"], slot:"essentialoil",
     inci:"Cymbopogon Flexuosus Oil, Citral*, Geraniol*, Limonene*, Linalool*",
-    note:{ nl:"* van nature aanwezig; citral is een sterk geurallergeen. Een paar druppels in amandel- of druivenpitolie (bv. bij cupping). Niet bij zwangerschap en altijd goed verdund. Merk en etiket nog aan te vullen (foto sturen).", en:"* naturally present; citral is a strong fragrance allergen. A few drops in almond or grapeseed oil (e.g. for cupping). Not during pregnancy, always well diluted. Brand and label still to be added (send a photo).", fr:"* naturellement présent ; le citral est un allergène parfumant puissant. Quelques gouttes dans l’huile d’amande ou de pépins de raisin (p. ex. ventouses). Pas pendant la grossesse, toujours bien diluée. Marque et étiquette à compléter (envoyer une photo)." } }
+    note:{ nl:"* van nature aanwezig; citral is een sterk geurallergeen. Een paar druppels in amandel- of druivenpitolie (bv. bij cupping). Niet bij zwangerschap en altijd goed verdund. Merk en etiket nog aan te vullen (foto sturen).", en:"* naturally present; citral is a strong fragrance allergen. A few drops in almond or grapeseed oil (e.g. for cupping). Not during pregnancy, always well diluted. Brand and label still to be added (send a photo).", fr:"* naturellement présent ; le citral est un allergène parfumant puissant. Quelques gouttes dans l’huile d’amande ou de pépins de raisin (p. ex. ventouses). Pas pendant la grossesse, toujours bien diluée. Marque et étiquette à compléter (envoyer une photo)." } },
+  /* FACIAL MASSAGE CREAM — for the face massage during a facial (not with an oncological facial) */
+  janssenmassage: { name:{ nl:"Janssen Cosmetics – Relaxing Massage Cream (gelaatsmassage)", en:"Janssen Cosmetics – Relaxing Massage Cream (facial massage)", fr:"Janssen Cosmetics – Crème de massage relaxante (massage du visage)" }, usedIn:["signaturefacial","antiagefacial","expressfacial","acnefacial","hydrapeel","fillme","fruitacid","liftsummere","facialworkshop"], slot:"facemassage",
+    inci:"Aqua (Water), Persea Gratissima (Avocado) Oil, Ethylhexyl Stearate, Octyldodecanol, Butylene Glycol, Polyglyceryl-2 Dipolyhydroxystearate, Polyglyceryl-3 Diisostearate, Glycerin, Cera Alba (Beeswax), Hydrogenated Castor Oil, Cera Microcristallina (Microcrystalline Wax), Sodium Levulinate, Bisabolol, Lecithin, Sodium Chloride, Citric Acid, Ascorbyl Palmitate, Tocopherol, Disodium EDTA, Sodium Anisate, Citrus Aurantium Dulcis (Orange) Peel Oil, Limonene, Linalool, Phenoxyethanol, Sodium Benzoate",
+    note:{ nl:"Voor de gelaatsmassage bij een gelaatsverzorging, niet bij een oncologische gelaatsverzorging. Bevat avocado, bijenwas, ricinus en sinaasappelolie. 200 ml, ref. 5580P.", en:"For the face massage during a facial, not with an oncological facial. Contains avocado, beeswax, castor and orange oil. 200 ml, ref. 5580P.", fr:"Pour le massage du visage pendant un soin du visage, pas lors d’un soin oncologique. Contient de l’avocat, de la cire d’abeille, du ricin et de l’huile d’orange. 200 ml, réf. 5580P." } },
+  /* LASHES & BROWS — RefectoCil (GW Cosmetics) */
+  refectoremover: { name:{ nl:"RefectoCil – Eye make-up remover (niet vettend)", en:"RefectoCil – Eye make-up remover (non-oily)", fr:"RefectoCil – Démaquillant yeux (non gras)" }, usedIn:["browtint","lashtint","lashlift","browlift"], slot:"eyeremover",
+    inci:"Aqua, PEG-40 Hydrogenated Castor Oil, Cocamidopropyl Betaine, Chloroacetamide, Parfum, Sodium Benzoate, Citric Acid, Hydroxycitronellal, PPG-2 Methyl Ether, CI 16035, CI 16185",
+    note:{ nl:"Om oogmake-up te verwijderen vóór het verven. Bevat parfum, kokosderivaat en chlooracetamide (het etiket vermeldt dit apart). 100 ml.", en:"To remove eye make-up before tinting. Contains fragrance, a coconut derivative and chloroacetamide (stated separately on the label). 100 ml.", fr:"Pour démaquiller les yeux avant la teinture. Contient du parfum, un dérivé de coco et du chloroacétamide (mentionné à part sur l’étiquette). 100 ml." } },
+  refectooxliquid: { name:{ nl:"RefectoCil – Oxidant 3% vloeibaar", en:"RefectoCil – Oxidant 3% liquid", fr:"RefectoCil – Oxydant 3 % liquide" }, usedIn:["browtint","lashtint","lashlift","browlift"], slot:"oxidant",
+    inci:"Aqua, Hydrogen Peroxide, Triethanolamine, Phosphoric Acid, C12-13 Pareth-9",
+    note:{ nl:"Ontwikkelaar, wordt 1:1 gemengd met de verf. Bevat waterstofperoxide: niet in de ogen.", en:"Developer, mixed 1:1 with the tint. Contains hydrogen peroxide: keep out of the eyes.", fr:"Révélateur, mélangé 1:1 à la teinture. Contient du peroxyde d’hydrogène : éviter les yeux." } },
+  refectooxcreme: { name:{ nl:"RefectoCil – Oxidant 3% crème", en:"RefectoCil – Oxidant 3% cream", fr:"RefectoCil – Oxydant 3 % crème" }, usedIn:["browtint","lashtint","lashlift","browlift"], slot:"oxidant",
+    inci:"Aqua, Hydrogen Peroxide, Cetearyl Alcohol, Triethanolamine, Ceteareth-20, Phosphoric Acid, Sodium Cetearyl Sulfate",
+    note:{ nl:"Ontwikkelaar in crèmevorm. Bevat waterstofperoxide: niet in de ogen.", en:"Developer in cream form. Contains hydrogen peroxide: keep out of the eyes.", fr:"Révélateur en crème. Contient du peroxyde d’hydrogène : éviter les yeux." } },
+  refectotintremover: { name:{ nl:"RefectoCil – Tint remover (verfvlekken)", en:"RefectoCil – Tint remover (stains)", fr:"RefectoCil – Tint remover (taches de teinture)" }, usedIn:["browtint","lashtint","lashlift","browlift"], slot:"tintremover",
+    inci:"Aqua, Isopropyl Alcohol, Polysorbate 80, Citrus Limon Peel Oil, Limonene, Litsea Cubeba Fruit Oil, Citral, Linalool, Citronellol, Geraniol",
+    note:{ nl:"Verwijdert verfvlekken op de huid. Bevat alcohol, citroenolie en geurallergenen.", en:"Removes tint stains from the skin. Contains alcohol, lemon oil and fragrance allergens.", fr:"Enlève les taches de teinture sur la peau. Contient de l’alcool, de l’huile de citron et des allergènes parfumants." } },
+  refectoprotect: { name:{ nl:"RefectoCil – Skin Protection Cream", en:"RefectoCil – Skin Protection Cream", fr:"RefectoCil – Crème protectrice" }, usedIn:["browtint","lashtint","lashlift","browlift"], slot:"skinprotect",
+    inci:"Aqua, Glycine Soja Oil, Glyceryl Stearate SE, Cetearyl Alcohol, Decyl Oleate, Glycerin, Prunus Amygdalus Dulcis Oil, Phenoxyethanol, Sodium Cetearyl Sulfate, Butyrospermum Parkii Butter, Parfum, Methylparaben, Propylene Glycol, Chamomilla Recutita Extract, Tocopherol, Panthenol, Tocopheryl Acetate, Citric Acid, Ethylparaben, Butylparaben, Propylparaben, Disodium Phosphate, Potassium Phosphate",
+    note:{ nl:"Beschermt de huid rond het te verven gebied. Bevat soja, amandel, shea, kamille, parfum en parabenen. 75 ml.", en:"Protects the skin around the area to be tinted. Contains soy, almond, shea, chamomile, fragrance and parabens. 75 ml.", fr:"Protège la peau autour de la zone à teinter. Contient du soja, de l’amande, du karité, de la camomille, du parfum et des parabènes. 75 ml." } },
+  refectotint:  { name:{ nl:"RefectoCil – Wimper- en wenkbrauwverf (welke kleuren?)", en:"RefectoCil – Lash & brow tint (which colours?)", fr:"RefectoCil – Teinture cils & sourcils (quelles couleurs ?)" }, usedIn:["browtint","lashtint","lashlift","browlift"], slot:"tint", inci:"" },
+  mrshighbrow:  { name:{ nl:"Mrs. Highbrow – producten voor wenkbrauwen (welke?)", en:"Mrs. Highbrow – brow products (which ones?)", fr:"Mrs. Highbrow – produits sourcils (lesquels ?)" }, usedIn:["browlift","hennabrows","browshaping"], slot:"browproduct", inci:"" }
 };
 
 /* Allergy groups for the search. "terms" = what people type (nl/en/fr),
@@ -123,7 +145,7 @@ const SALON_PRODUCTS = {
 const ALLERGEN_GROUPS = [
   { id:"fragrance", label:{ nl:"Parfum & geurstoffen", en:"Fragrance", fr:"Parfum" },
     terms:["parfum","geur","fragrance","perfume","geurstof","allergeen"],
-    match:["parfum","fragrance","linalool","limonene","citronellol","geraniol","citral","hexyl cinnamal","benzyl salicylate","alpha-isomethyl ionone","eugenol","coumarin","benzyl benzoate","benzyl alcohol","farnesol","cinnamal","hydroxycitronellal","isoeugenol","amyl cinnamal","hydroxyisohexyl 3-cyclohexene carboxaldehyde"] },
+    match:["parfum","fragrance","linalool","limonene","citronellol","geraniol","citral","hexyl cinnamal","benzyl salicylate","alpha-isomethyl ionone","eugenol","coumarin","benzyl benzoate","benzyl alcohol","farnesol","cinnamal","hydroxycitronellal","isoeugenol","amyl cinnamal","hydroxyisohexyl 3-cyclohexene carboxaldehyde","litsea cubeba"] },
   { id:"essential", label:{ nl:"Etherische oliën", en:"Essential oils", fr:"Huiles essentielles" },
     terms:["etherisch","essentieel","essential","essentielle","aromatherapie"],
     match:["peel oil","leaf oil","flower oil","lavandula angustifolia (lavender) oil","lavandula angustifolia oil","ormenis multicaulis oil","rosa rugosa flower oil","cymbopogon"] },
@@ -133,6 +155,7 @@ const ALLERGEN_GROUPS = [
   { id:"lavender", label:{ nl:"Lavendel", en:"Lavender", fr:"Lavande" }, terms:["lavendel","lavender","lavande"], match:["lavandula"] },
   { id:"lemongrass", label:{ nl:"Citroengras", en:"Lemongrass", fr:"Citronnelle (lemongrass)" }, terms:["citroengras","lemongrass","citronnelle","verveine des indes"], match:["cymbopogon"] },
   { id:"avocado", label:{ nl:"Avocado", en:"Avocado", fr:"Avocat" }, terms:["avocado","avocat","latex"], match:["persea"] },
+  { id:"peroxide", label:{ nl:"Waterstofperoxide (ontwikkelaar)", en:"Hydrogen peroxide (developer)", fr:"Peroxyde d’hydrogène (révélateur)" }, terms:["waterstofperoxide","peroxide","oxidant","ontwikkelaar","hydrogen peroxide","peroxyde","oxydant"], match:["hydrogen peroxide"] },
   { id:"rosemary", label:{ nl:"Rozemarijn", en:"Rosemary", fr:"Romarin" }, terms:["rozemarijn","rosemary","romarin"], match:["rosmarinus"] },
   { id:"rose", label:{ nl:"Roos", en:"Rose", fr:"Rose" }, terms:["roos","rozen","rose"], match:["rosa "] },
   { id:"asteraceae", label:{ nl:"Kamille & composieten (arnica, calendula)", en:"Chamomile & daisy family", fr:"Camomille & astéracées" },
@@ -148,7 +171,7 @@ const ALLERGEN_GROUPS = [
   { id:"parabens", label:{ nl:"Parabenen", en:"Parabens", fr:"Parabènes" }, terms:["paraben","parabenen","parabène"], match:["paraben"] },
   { id:"preservatives", label:{ nl:"Andere bewaarmiddelen", en:"Other preservatives", fr:"Autres conservateurs" },
     terms:["bewaarmiddel","conserveermiddel","preservative","conservateur","phenoxyethanol","methylisothiazolinone"],
-    match:["phenoxyethanol","chlorphenesin","sodium benzoate","methylisothiazolinone","methylchloroisothiazolinone","dmdm hydantoin","formaldehyde","caprylhydroxamic"] },
+    match:["phenoxyethanol","chlorphenesin","sodium benzoate","methylisothiazolinone","methylchloroisothiazolinone","dmdm hydantoin","formaldehyde","caprylhydroxamic","chloroacetamide"] },
   { id:"colorants", label:{ nl:"Kleurstoffen & pigmenten", en:"Colourants & pigments", fr:"Colorants & pigments" },
     terms:["kleurstof","kleur","pigment","colorant","colour","color"], match:["ci ","iron oxide","titanium dioxide","mica","red 4","red 40","yellow 5"] },
   { id:"acids", label:{ nl:"Fruitzuren & zuren (AHA)", en:"Fruit acids & acids (AHA)", fr:"Acides de fruits (AHA)" },
@@ -160,7 +183,7 @@ const ALLERGEN_GROUPS = [
   { id:"peg", label:{ nl:"PEG & ricinusolie", en:"PEG & castor oil", fr:"PEG & huile de ricin" }, terms:["peg","ricinus","castor","ricin"], match:["peg-","ricinus","castor"] },
   { id:"collagen", label:{ nl:"Dierlijk: collageen & DNA (vaak van vis)", en:"Animal: collagen & DNA (often fish)", fr:"Animal : collagène & ADN (souvent poisson)" }, terms:["collageen","collagen","collagène","vis","fish","poisson","dierlijk","animal","dna","adn","vegan"], match:["collagen","sodium dna"] },
   { id:"rosin", label:{ nl:"Colofonium (hars)", en:"Colophony (rosin)", fr:"Colophane" }, terms:["colofonium","colophonium","colophony","colophane","hars","rosin","resin"], match:["rosinate","colophonium","rosin","abietic"] },
-  { id:"alcohol", label:{ nl:"Alcohol (ethanol)", en:"Alcohol (ethanol)", fr:"Alcool (éthanol)" }, terms:["alcohol","ethanol","alcool","éthanol"], match:["=alcohol","alcohol denat","ethanol","sd alcohol"] },
+  { id:"alcohol", label:{ nl:"Alcohol (ethanol, isopropyl)", en:"Alcohol (ethanol, isopropyl)", fr:"Alcool (éthanol, isopropylique)" }, terms:["alcohol","ethanol","alcool","éthanol","isopropyl"], match:["=alcohol","alcohol denat","ethanol","sd alcohol","isopropyl alcohol"] },
   { id:"seeds", label:{ nl:"Zaad- & olijfolie (zonnebloem, saffloer, druivenpit, olijf)", en:"Seed & olive oils (sunflower, safflower, grapeseed, olive)", fr:"Huiles de graines & d'olive (tournesol, carthame, raisin, olive)" }, terms:["zonnebloem","saffloer","druivenpit","olijf","olive","olive oil","zaad","sesam","sunflower","safflower","grapeseed","seed","tournesol","carthame","pepin","sesame"], match:["helianthus","carthamus","vitis vinifera","sesamum","olea europaea","olive","olivate"] },
   { id:"aloe", label:{ nl:"Aloë vera", en:"Aloe vera", fr:"Aloe vera" }, terms:["aloe","aloë"], match:["aloe"] },
   { id:"cereals", label:{ nl:"Granen (haver, tarwe, maïs)", en:"Cereals (oat, wheat, corn)", fr:"Céréales (avoine, blé, maïs)" },
@@ -170,3 +193,32 @@ const ALLERGEN_GROUPS = [
   { id:"jojoba", label:{ nl:"Jojoba", en:"Jojoba", fr:"Jojoba" }, terms:["jojoba"], match:["simmondsia"] },
   { id:"algae", label:{ nl:"Algen & zeewier", en:"Algae & seaweed", fr:"Algues" }, terms:["alg","algen","zeewier","jodium","seaweed","algae","algue","iode"], match:["algin","chondrus","fucus","laminaria","spirulina","algae","macrocystis","kelp"] }
 ];
+
+/* ORDER OF USE — which products are used up first, and which stay.
+   Each group lists its phases in order: phase 1 is used up first, the last
+   phase is what stays in the salon for good. A product id may appear in
+   one phase only. Add new products to the right phase when you buy them.
+   In the app (your private link or salon mode → Ingrediënten → tab
+   "Gebruiksvolgorde") you tap "Op" when a product is finished. That is
+   saved on your phone. Then send the list to Claude, or put the ids in
+   PRODUCTS_OP below and upload this file, so clients' phones know too.
+   A product that is "op" is left out of the allergy search for everyone. */
+const PRODUCT_ORDER = [
+  { id:"facial", label:{ nl:"Gelaatsverzorging", en:"Facials", fr:"Soins du visage" }, phases:[
+    { label:{ nl:"Eerst opgebruiken: Bio Balance, Safety 4 You (en de rest)", en:"Use up first: Bio Balance, Safety 4 You (and the rest)", fr:"À finir d’abord : Bio Balance, Safety 4 You (et le reste)" },
+      ids:["algoageing","algorose","blueberry","collagenmask","luminoclear","goldmask","hyalift","thermomask","dnaserum"] },
+    { label:{ nl:"Daarna: Dr. Renaud en Guinot", en:"Then: Dr. Renaud and Guinot", fr:"Ensuite : Dr. Renaud et Guinot" }, ids:[] },
+    { label:{ nl:"Blijvend: Janssen Cosmetics", en:"To stay: Janssen Cosmetics", fr:"Définitif : Janssen Cosmetics" }, ids:["janssenmassage"] } ] },
+  { id:"nails", label:{ nl:"Manicure & pedicure", en:"Manicure & pedicure", fr:"Manucure & pédicure" }, phases:[
+    { label:{ nl:"Eerst opgebruiken: Bio Balance (en de rest)", en:"Use up first: Bio Balance (and the rest)", fr:"À finir d’abord : Bio Balance (et le reste)" }, ids:["indulgescrub","mellowmoist"] },
+    { label:{ nl:"Blijvend: Gehwol en Gerlasan", en:"To stay: Gehwol and Gerlasan", fr:"Définitif : Gehwol et Gerlasan" }, ids:["gerlasan"] } ] },
+  { id:"browlash", label:{ nl:"Wenkbrauwen & wimpers", en:"Brows & lashes", fr:"Sourcils & cils" }, phases:[
+    { label:{ nl:"Blijvend: Mrs. Highbrow en RefectoCil", en:"To stay: Mrs. Highbrow and RefectoCil", fr:"Définitif : Mrs. Highbrow et RefectoCil" },
+      ids:["refectoremover","refectooxliquid","refectooxcreme","refectotintremover","refectoprotect","refectotint","mrshighbrow"] } ] },
+  { id:"massage", label:{ nl:"Massage", en:"Massage", fr:"Massage" }, phases:[
+    { label:{ nl:"Eerst opgebruiken: Breezy Blossom, dan de kokosgeur-olie, dan De Tuinen", en:"Use up first: Breezy Blossom, then the coconut-scented oil, then De Tuinen", fr:"À finir d’abord : Breezy Blossom, puis l’huile parfum coco, puis De Tuinen" },
+      ids:["breezyblossom","coconutoil","avocadooil","castoroil"] },
+    { label:{ nl:"Blijvend: ZenGrowth-oliën", en:"To stay: ZenGrowth oils", fr:"Définitif : huiles ZenGrowth" }, ids:["almondoil","grapeseedoil","jojobaoil"] } ] }
+];
+// finished products (ids), for everyone — e.g. ["breezyblossom"]
+const PRODUCTS_OP = [];

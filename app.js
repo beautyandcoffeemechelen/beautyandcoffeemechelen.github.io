@@ -1174,7 +1174,30 @@
           return `<button type="button" class="slot-chip${on ? " is-selected" : ""}" data-action="toggle-slot" data-slot="${s.id}" aria-pressed="${on}">${s[state.lang] || s.nl}</button>`;
         }).join("")}
       </div>
-      <p class="slot-picker__hint">${t("slots_hint", state.lang)}</p>`;
+      <p class="slot-picker__hint">${t("slots_hint", state.lang)}</p>
+      ${closedNoticeHtml()}`;
+  }
+
+  /* closed days (data.js → CLOSED_DAYS): 25/12, 31/12, 1/1, 1st day of Chinese New Year */
+  function closedDaysAhead(fromKey, days){
+    if (typeof CLOSED_DAYS !== "object" || !CLOSED_DAYS) return [];
+    const y = Number(fromKey.slice(0, 4)), out = [];
+    [y, y + 1].forEach(yy => (CLOSED_DAYS.days || []).forEach(md => {
+      const real = md === "cny" ? (typeof LUNAR_DATES === "object" && LUNAR_DATES.cny[yy]) : md;
+      if (!real) return;
+      const key = `${yy}-${real}`, diff = seasonDays(fromKey, key);
+      if (diff >= 0 && diff <= days) out.push({ key, kind: md === "cny" ? "cny" : md });
+    }));
+    return out.sort((a, b) => a.key < b.key ? -1 : 1);
+  }
+  function closedNoticeHtml(){
+    let today; try { today = seasonTodayKey(); } catch(e){ today = todayKey(); }
+    const list = closedDaysAhead(today, (CLOSED_DAYS && CLOSED_DAYS.noticeDays) || 28);
+    if (!list.length) return "";
+    const L = state.lang;
+    const names = { "12-25":"closed_xmas", "12-31":"closed_nye", "01-01":"closed_ny", cny:"closed_cny" };
+    const dates = list.map(c => `<b>${actionFmt(c.key, L, true)}</b>${names[c.kind] ? ` (${t(names[c.kind], L)})` : ""}`).join(", ");
+    return `<p class="closed-note">🚫 ${t("closed_note", L).replace("{dates}", dates)}</p>`;
   }
 
   function toggleSlot(id){
@@ -1458,6 +1481,7 @@
     const active = CURRENT_ACTIONS.map(a => actionWindow(a, today)).filter(a => a && (!a.from || today >= a.from) && (!a.until || today <= a.until))
       .sort((x, y) => (y.yearly ? 1 : 0) - (x.yearly ? 1 : 0));   // seasonal actions first
     const fill = (txt, a) => String(txt || "").replace(/\{value\}/g, lang === "fr" ? String(a.value || "").replace("%", " %") : (a.value || ""))
+      .replace(/\{treat\}/g, a.treat ? esc(a.treat[lang] || a.treat.nl) : "")
       .replace(/\{from\}/g, actionFmt(a.dealFrom, lang)).replace(/\{until\}/g, actionFmt(a.until, lang));
     wrap.innerHTML = active.map(a => `
       <div class="action-card${a.yearly ? " action-card--" + esc(a.id) : ""}">
@@ -1473,22 +1497,39 @@
     if (!a.yearly) return a;
     const y = a.yearly, base = Number(today.slice(0, 4));
     const key = dt => `${dt.getUTCFullYear()}-${String(dt.getUTCMonth()+1).padStart(2,"0")}-${String(dt.getUTCDate()).padStart(2,"0")}`;
+    const anchorMD = year => y.anchor === "mothersday" ? actionNthSunday(year, 5, 2)
+      : y.anchor === "fathersday" ? actionNthSunday(year, 6, 2) : y.anchorMD;
     const win = year => {
-      const [m, d] = y.anchorMD.split("-").map(Number);
+      const [m, d] = anchorMD(year).split("-").map(Number);
       const anchor = new Date(Date.UTC(year, m - 1, d));
       const sat0 = new Date(anchor.getTime() - ((anchor.getUTCDay() + 1) % 7) * 864e5);   // Saturday of the Valentine weekend
       const first = new Date(sat0.getTime() - 7 * (y.weekendsBefore || 0) * 864e5);
       const last = new Date(sat0.getTime() + (7 * (y.weekendsAfter || 0) + 1) * 864e5);   // a Sunday
       return { from: key(new Date(first.getTime() - (y.showDaysBefore || 0) * 864e5)), dealFrom: key(first), until: key(last) };
     };
-    let w = win(base);
-    if (today > w.until) w = win(base + 1);
-    return Object.assign({}, a, w);
+    let w = win(base), yr = base;
+    if (today > w.until){ w = win(base + 1); yr = base + 1; }
+    return Object.assign({}, a, w, { treat: actionMassage(a, yr) });
   }
-  function actionFmt(k, lang){
+  function actionNthSunday(year, month, n){            // e.g. 2nd Sunday of May → "05-09"
+    const first = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
+    const day = 1 + ((7 - first) % 7) + 7 * (n - 1);
+    return `${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+  }
+  // the one massage of this action for this year (changes every year by itself)
+  function actionMassage(a, year){
+    if (!a.massage || typeof ADVENT !== "object" || !ADVENT.autoFill) return null;
+    const list = ADVENT.autoFill.massages;
+    const own = a.massage.byYear && a.massage.byYear[year];
+    const m = (own && list.find(x => x.id === own)) || list[((year + (a.massage.offset || 0)) % list.length + list.length) % list.length];
+    return m ? { nl:m.nl, en:m.en, fr:m.fr, id:m.id } : null;
+  }
+  function actionFmt(k, lang, withYear){
     if (!k) return "";
     const [y, m, d] = k.split("-").map(Number);
-    try { return new Date(y, m - 1, d).toLocaleDateString(lang === "fr" ? "fr-BE" : lang === "en" ? "en-GB" : "nl-BE", { day:"numeric", month:"long" }); }
+    const o = { weekday:"long", day:"numeric", month:"long" };
+    if (withYear) o.year = "numeric";
+    try { return new Date(y, m - 1, d).toLocaleDateString(lang === "fr" ? "fr-BE" : lang === "en" ? "en-GB" : "nl-BE", o); }
     catch(e){ return `${d}/${m}`; }
   }
 
@@ -3259,10 +3300,34 @@
   function ingrTreatments(){
     const ids = (typeof TREATMENTS_CATALOG !== "undefined" ? TREATMENTS_CATALOG : []).map(x => x.id)
       .filter(id => !(typeof INGREDIENTS_SKIP_TREATMENTS !== "undefined" && INGREDIENTS_SKIP_TREATMENTS.includes(id)));
-    Object.values(SALON_PRODUCTS).forEach(p => (p.usedIn || []).forEach(id => { if (!ids.includes(id)) ids.push(id); }));
+    ingrCatalog().forEach(([, p]) => (p.usedIn || []).forEach(id => { if (!ids.includes(id)) ids.push(id); }));
     return ids;
   }
-  const ingrProductsFor = id => Object.entries(SALON_PRODUCTS).filter(([, p]) => (p.usedIn || []).includes(id));
+  const ingrProductsFor = id => ingrCatalog().filter(([, p]) => (p.usedIn || []).includes(id));
+  /* Sandra = private link, opened from salon mode, or a phone with the salon key */
+  function ingrSandra(){ try { return ingrPreview || ingr.unlocked || hasSalonKey(); } catch(e){ return ingrPreview || ingr.unlocked; } }
+  /* finished products ("op"): PRODUCTS_OP in ingredients.js + marked on this phone */
+  const PROD_OP_KEY = "bc_prod_op_v1";
+  function ingrOpLocal(){ try { return JSON.parse(localStorage.getItem(PROD_OP_KEY) || "[]") || []; } catch(e){ return []; } }
+  function ingrOpSet(){ return new Set([...(typeof PRODUCTS_OP !== "undefined" ? PRODUCTS_OP : []), ...ingrOpLocal()]); }
+  function ingrToggleOp(id){
+    if (typeof PRODUCTS_OP !== "undefined" && PRODUCTS_OP.includes(id)){ showToast(t("ingr_op_in_file", state.lang)); return; }
+    const l = ingrOpLocal(), i = l.indexOf(id);
+    if (i >= 0) l.splice(i, 1); else l.push(id);
+    try { localStorage.setItem(PROD_OP_KEY, JSON.stringify(l)); } catch(e){ /* ignore */ }
+    renderIngredients();
+  }
+  // advent usages stay hidden for clients (otherwise the surprise is gone)
+  function ingrIsAdventUse(u){ return u === "advent" || /^extra-/.test(u) || !!(typeof ADVENT === "object" && ADVENT.items && ADVENT.items[u]); }
+  // the products this phone may see: without finished ones; clients without advent usages
+  function ingrCatalog(){
+    const op = ingrOpSet(), sandra = ingrSandra();
+    return Object.entries(SALON_PRODUCTS).filter(([id]) => !op.has(id)).map(([id, p]) => {
+      if (sandra) return [id, p];
+      const used = (p.usedIn || []).filter(u => !ingrIsAdventUse(u));
+      return used.length || !(p.usedIn || []).length ? [id, Object.assign({}, p, { usedIn: used })] : null;
+    }).filter(Boolean);
+  }
   // which allergy groups does the query point to? → INCI keys to look for
   function ingrQuery(q){
     const nq = ingrNorm(q).trim();
@@ -3278,7 +3343,9 @@
     const L = state.lang;
     if (!ingrHasConfig()){ body.innerHTML = `<p class="ingr-note">${t("ingr_none_config", L)}</p>`; return; }
     if (!ingrAllowed()){ body.innerHTML = `<p class="ingr-note">${t("ingr_not_yet", L)}</p>`; return; }
-    const tabs = ["search", "treat", "todo"].map(k => `<button type="button" class="chip${ingr.tab === k ? " is-selected" : ""}" data-action="ingr-tab" data-tab="${k}" aria-pressed="${ingr.tab === k}">${t("ingr_tab_" + k, L)}</button>`).join("");
+    const sandra = ingrSandra();
+    if (!sandra && (ingr.tab === "todo" || ingr.tab === "order")) ingr.tab = "search";
+    const tabs = (sandra ? ["search", "treat", "order", "todo"] : ["search", "treat"]).map(k => `<button type="button" class="chip${ingr.tab === k ? " is-selected" : ""}" data-action="ingr-tab" data-tab="${k}" aria-pressed="${ingr.tab === k}">${t("ingr_tab_" + k, L)}</button>`).join("");
     let html = ingrIsLive() ? "" : `<div class="advent-preview ingr-preview"><p>🧪 <b>${t("ingr_pv_title", L)}</b> — ${t("ingr_pv_text", L).replace("{d}", advFmt(INGREDIENTS_LIVE.liveFrom))}</p></div>`;
     html += `<div class="ingr-tabs" role="tablist">${tabs}</div>`;
     if (ingr.tab === "search"){
@@ -3291,10 +3358,12 @@
       html += `<label class="ingr-label" for="ingrTreat">${t("ingr_choose_treat", L)}</label>
         <select id="ingrTreat" class="ingr-select"><option value="">—</option>${opts.map(o => `<option value="${esc(o[0])}"${o[0] === ingr.treat ? " selected" : ""}>${esc(o[1])}</option>`).join("")}</select>
         <div id="ingrTreatBody"></div>`;
+    } else if (ingr.tab === "order"){
+      html += ingrOrderHtml();
     } else {
-      const noInci = Object.values(SALON_PRODUCTS).filter(p => !ingrInci(p));
+      const noInci = ingrCatalog().map(([, p]) => p).filter(p => !ingrInci(p));
       const noProd = ingrTreatments().filter(id => !ingrProductsFor(id).length);
-      const unlinked = Object.values(SALON_PRODUCTS).filter(p => !(p.usedIn || []).length);
+      const unlinked = ingrCatalog().map(([, p]) => p).filter(p => !(p.usedIn || []).length);
       html += `<p class="ingr-note">${t("ingr_todo_intro", L)}</p>
         ${unlinked.length ? `<h3 class="ingr-h">${t("ingr_todo_unlinked", L)} (${unlinked.length})</h3><ul class="ingr-list">${unlinked.map(p => `<li>${esc(ingrName(p))}</li>`).join("")}</ul>` : ""}
         <h3 class="ingr-h">${t("ingr_todo_noinci", L)} (${noInci.length})</h3>
@@ -3315,6 +3384,34 @@
       renderIngrTreat();
     }
   }
+  /* tab "Gebruiksvolgorde" (only Sandra): what is used up first, what stays; tap "Op" when finished */
+  function ingrOrderHtml(){
+    const L = state.lang, op = ingrOpSet(), local = ingrOpLocal(), file = typeof PRODUCTS_OP !== "undefined" ? PRODUCTS_OP : [];
+    const tx = v => v && typeof v === "object" ? (v[L] || v.nl) : (v || "");
+    let html = `<p class="ingr-note">${t("ingr_order_intro", L)}</p>`;
+    (typeof PRODUCT_ORDER !== "undefined" ? PRODUCT_ORDER : []).forEach(g => {
+      const nowIdx = g.phases.findIndex(ph => ph.ids.some(id => SALON_PRODUCTS[id] && !op.has(id)));
+      html += `<h3 class="ingr-h">${esc(tx(g.label))}</h3>`;
+      g.phases.forEach((ph, i) => {
+        const last = i === g.phases.length - 1;
+        html += `<div class="ingr-phase${i === nowIdx ? " is-now" : ""}"><p class="ingr-phase__title">${i + 1}. ${esc(tx(ph.label))}${i === nowIdx ? ` <span class="ingr-phase__now">${t("ingr_order_now", L)}</span>` : ""}</p>`;
+        const ids = ph.ids.filter(id => SALON_PRODUCTS[id]);
+        html += ids.length ? `<ul class="ingr-order">${ids.map(id => {
+          const isOp = op.has(id);
+          return `<li class="${isOp ? "is-op" : ""}"><span>${esc(ingrName(SALON_PRODUCTS[id]))}</span>
+            <button type="button" class="btn btn--sm ${isOp ? "btn--ghost" : "btn--text"}" data-action="ingr-op" data-id="${esc(id)}">${isOp ? (file.includes(id) ? "✓ " + t("ingr_op_done", L) : t("ingr_op_back", L)) : t("ingr_op_mark", L)}</button></li>`;
+        }).join("")}</ul>` : `<p class="ingr-muted">${t(last ? "ingr_order_none_last" : "ingr_order_none", L)}</p>`;
+        html += `</div>`;
+      });
+    });
+    const pending = local.filter(id => !file.includes(id));
+    if (pending.length){
+      const code = `PRODUCTS_OP = ${JSON.stringify([...new Set([...file, ...pending])])};`;
+      html += `<div class="ingr-oppending"><p>📌 ${t("ingr_op_pending", L)}</p><code>${esc(code)}</code>
+        <button type="button" class="btn btn--sm btn--ghost" data-action="ingr-op-copy" data-code="${esc(code)}">📋 ${t("ingr_op_copy", L)}</button></div>`;
+    }
+    return html;
+  }
   function ingrProductCard(id, p, keys){
     const L = state.lang, inci = ingrInci(p);
     const hits = keys ? ingrParts(inci).filter(x => ingrHit(x, keys)) : [];
@@ -3331,7 +3428,7 @@
     if (!box) return;
     const L = state.lang, Q = ingrQuery(ingr.q);
     if (!Q){ box.innerHTML = `<p class="ingr-muted">${t("ingr_search_hint", L)}</p>`; return; }
-    const all = Object.entries(SALON_PRODUCTS);
+    const all = ingrCatalog();
     const hit = all.filter(([, p]) => ingrParts(ingrInci(p)).some(x => ingrHit(x, Q.keys)));
     const hitIds = new Set(hit.map(([id]) => id));
     const unknown = all.filter(([, p]) => !ingrInci(p));
@@ -3344,7 +3441,7 @@
       hit.forEach(([id, p]) => (p.usedIn || []).forEach(tid => { (treat[tid] = treat[tid] || []).push(id); }));
       html += `<h3 class="ingr-h">${t("ingr_per_treat", L)}</h3><ul class="ingr-list">` + Object.entries(treat).map(([tid, pids]) => {
         const items = pids.map(pid => {
-          const p = SALON_PRODUCTS[pid];
+          const p = all.find(([x]) => x === pid)[1];
           const alts = p.slot ? all.filter(([aid, a]) => a.slot === p.slot && !hitIds.has(aid) && ingrInci(a) && (a.usedIn || []).some(u => (p.usedIn || []).includes(u))).map(([, a]) => ingrName(a)) : [];
           return `<b>${esc(ingrName(p))}</b>${alts.length ? ` <span class="ingr-alt">→ ${t("ingr_alt", L)} ${esc(alts.join(" / "))}</span>` : ""}`;
         });
@@ -3519,10 +3616,13 @@
   // fills {gmin} {dmin} {treat} {with} {max} {book} {until} in a text
   function advFill(txt, door){
     const L = state.lang;
-    let s = String(txt || "")
+    let s = String(txt || "");
+    // vouchers for one named massage: no price in the text
+    if (door && door.noMin) s = s.replace(/ (?:van minstens €|of at least €|vanaf €|from €)\{dmin\}| (?:d'au moins|à partir de) \{dmin\} €/g, "");
+    s = s
       .replace(/\{cond\}/g, door && door.cond ? (door.cond[L] || door.cond.nl) : t("adv_cond_default", L))
       .replace(/\{gmin\}/g, ADVENT.giftMinSpend || 0)
-      .replace(/\{dmin\}/g, door && door.dmin ? door.dmin : (ADVENT.discountMinSpend || 0))
+      .replace(/\{dmin\}/g, ADVENT.discountMinSpend || 0)
       .replace(/\{max\}/g, ADVENT.maxGiftsPerClient || 1)
       .replace(/\{treat\}/g, door && door.treat ? (door.treat[L] || door.treat.nl) : "")
       .replace(/\{with\}/g, door && door.with ? (door.with[L] || door.with.nl) : "");
@@ -4243,12 +4343,27 @@
     card.className = "season-card season-card--" + th.id;
     card.innerHTML = `
       <p class="season-card__hello"><span aria-hidden="true">${icons}</span> ${seasonText(th.hello, season.year)}</p>
+      ${seasonDateHtml(th, season.year)}
       ${fact ? `<p class="season-card__fact"><b>${t("season_did_you_know", L)}</b> ${fact}</p>` : ""}
+      ${closedNoticeHtml()}
       <div class="season-card__btns">
         ${facts.length > 1 ? `<button type="button" class="btn btn--text btn--sm" data-action="season-fact">🔄 ${t("season_next_fact", L)}</button>` : ""}
         <a class="season-card__shop" href="${SOAP_SHOP_URL}" target="_blank" rel="noopener noreferrer" data-action="season-shop">${promo}</a>
       </div>`;
     card.hidden = false;
+  }
+  // the exact date of the holiday (moves every year for e.g. Easter or Chinese New Year)
+  function seasonDateHtml(th, year){
+    if (!th || th.season || !th.date) return "";
+    const md = typeof th.date === "function" ? th.date(year) : th.date;
+    if (!md) return "";
+    const L = state.lang;
+    let txt = actionFmt(`${year}-${md}`, L, true);
+    if (th.id === "pasen"){          // + Easter Monday
+      const [m, d] = md.split("-").map(Number), mon = new Date(Date.UTC(year, m - 1, d + 1));
+      txt += ` ${t("season_and", L)} ${actionFmt(`${year}-${String(mon.getUTCMonth()+1).padStart(2,"0")}-${String(mon.getUTCDate()).padStart(2,"0")}`, L, false)}`;
+    }
+    return `<p class="season-card__date">📅 ${txt}</p>`;
   }
   function nextSeasonFact(){ season.factIndex++; renderSeasonCard(); trackEvent("season-fact"); }
   function buildSeasonDeco(){
@@ -4406,6 +4521,8 @@
       if (action === "open-houserules") goTo("houserules");
       if (action === "open-ingredients") ingrOpen();
       if (action === "ingr-tab"){ ingr.tab = el.dataset.tab; renderIngredients(); }
+      if (action === "ingr-op") ingrToggleOp(el.dataset.id);
+      if (action === "ingr-op-copy"){ const c = el.dataset.code; try { navigator.clipboard.writeText(c).then(() => showToast(t("ingr_op_copied", state.lang)), () => showToast(c)); } catch(e){ showToast(c); } }
       if (action === "ingr-chip"){ const g = ALLERGEN_GROUPS.find(x => x.id === el.dataset.group); ingr.q = g ? (g.label[state.lang] || g.label.nl) : ""; const inp = $("#ingrSearch"); if (inp) inp.value = ingr.q; renderIngrResults(); }
       if (action === "open-stampcard") goTo("stampcard");
       if (action === "open-advent") goTo("advent");
