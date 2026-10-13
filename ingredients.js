@@ -394,3 +394,11 @@ const PRODUCT_ORDER = [
 ];
 // finished products (ids), for everyone — e.g. ["coconutoil"]
 const PRODUCTS_OP = [];
+// opening dates (Sandra's tab "Openingsdata"):
+// { productId: { d:"YYYY-MM-DD" opened, m: months after opening, t:"YYYY-MM-DD" best-before (THT) } }
+const PRODUCTS_OPENED = {};
+// per piece / per pack / powders: only the best-before date (THT) on the pack counts,
+// not a period after opening (masks per sachet, ampoules, samples, kits, powders)
+const PRODUCTS_THT_ONLY = ["eyeflash","guinotscrub","algoageing","algorose","algocamomile","blueberry","collagenmask",
+  "luminoclear","goldmask","janssenacerola","janssenaloe","janssendeadsea","guinotliftsummum","renaudhydra","renaudiris",
+  "janssenthermo","waxtalc"];

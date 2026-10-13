@@ -1234,3 +1234,21 @@ p.season-card__shop{ text-decoration:none; margin:2px 0 0; font-style:italic; }
 .offer-line b{ font-weight:600; }
 .offer-line__more{ margin-left:6px; font-size:12px; color:var(--gold-ink); white-space:nowrap; }
 .offer-book{ display:inline-block; font-size:12.5px; font-weight:600; color:var(--gold-ink); text-decoration:none; border-bottom:1px solid rgba(110,76,30,.35); }
+
+/* next-moment reminder choices (v97) */
+.reminder-pick{ margin:10px 0 4px; text-align:center; }
+.reminder-pick__q{ font-family:var(--font-display); font-size:14px; margin:0 0 8px; color:var(--espresso); }
+.reminder-pick__chips{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+#reminderPick[hidden]{ display:none; }
+/* opening dates (v97, Sandra only) */
+.open-list{ list-style:none; margin:8px 0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.open-row{ background:#fff; border:1px solid var(--espresso-12); border-radius:var(--radius-m); padding:10px 12px; }
+.open-row.is-soon{ border-color:#C9A46A; background:#FBF6EE; }
+.open-row.is-expired{ border-color:#7A2E2E; background:#FBF1F1; }
+.open-row__name{ font-weight:600; font-size:13.5px; margin:0 0 6px; }
+.open-row__fields{ display:flex; flex-wrap:wrap; gap:8px 12px; font-size:12px; color:var(--espresso-60); }
+.open-row__fields label{ display:flex; flex-direction:column; gap:3px; }
+.open-row__fields .pm-input, .open-row__fields .ingr-select{ margin:0; padding:6px 8px; font-size:13px; }
+.open-row__status{ font-size:12.5px; margin:6px 0 0; }
+.open-row__btns{ display:flex; gap:8px; align-items:center; margin-top:6px; }
+.open-row__hint{ margin:-2px 0 6px; font-size:12px; }

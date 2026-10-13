@@ -2950,6 +2950,7 @@
         <p class="appt-card__title">✨ ${t("appt_after_title", L)}</p>
         <p class="appt-card__text">${apptTreatLabel(recentPast.a)}</p>
         <div class="appt-card__buttons"><button type="button" class="btn btn--primary" data-action="open-photomoment">${t("pm_button", L)}</button></div>
+        ${upcoming.length ? "" : reminderChipsHtml(recentPast.a.tcat || null, recentPast.a.ttext || (recentPast.a.tcat ? t("avoid." + recentPast.a.tcat, L) : ""))}
       </div>`;
     if (upcoming.length) html += `<p class="appt-card__title">📅 ${t(upcoming.length > 1 ? "appt_card_title_many" : "appt_card_title", L)}</p>`;
     upcoming.forEach(x => {
@@ -3673,8 +3674,8 @@
     if (!ingrHasConfig()){ body.innerHTML = `<p class="ingr-note">${t("ingr_none_config", L)}</p>`; return; }
     if (!ingrAllowed()){ body.innerHTML = `<p class="ingr-note">${t("ingr_not_yet", L)}</p>`; return; }
     const sandra = ingrSandra();
-    if (!sandra && (ingr.tab === "todo" || ingr.tab === "order")) ingr.tab = "search";
-    const tabs = (sandra ? ["search", "treat", "order", "todo"] : ["search", "treat"]).map(k => `<button type="button" class="chip${ingr.tab === k ? " is-selected" : ""}" data-action="ingr-tab" data-tab="${k}" aria-pressed="${ingr.tab === k}">${t("ingr_tab_" + k, L)}</button>`).join("");
+    if (!sandra && (ingr.tab === "todo" || ingr.tab === "order" || ingr.tab === "open")) ingr.tab = "search";
+    const tabs = (sandra ? ["search", "treat", "order", "open", "todo"] : ["search", "treat"]).map(k => `<button type="button" class="chip${ingr.tab === k ? " is-selected" : ""}" data-action="ingr-tab" data-tab="${k}" aria-pressed="${ingr.tab === k}">${t("ingr_tab_" + k, L)}</button>`).join("");
     let html = ingrIsLive() ? "" : `<div class="advent-preview ingr-preview"><p>🧪 <b>${t("ingr_pv_title", L)}</b> — ${t("ingr_pv_text", L).replace("{d}", advFmt(INGREDIENTS_LIVE.liveFrom))}</p></div>`;
     html += `<div class="ingr-tabs" role="tablist">${tabs}</div>`;
     if (ingr.tab === "search"){
@@ -3689,6 +3690,8 @@
         <div id="ingrTreatBody"></div>`;
     } else if (ingr.tab === "order"){
       html += ingrOrderHtml();
+    } else if (ingr.tab === "open"){
+      html += ingrOpenHtml();
     } else {
       const noInci = ingrCatalog().map(([, p]) => p).filter(p => !ingrInci(p));
       const noProd = ingrTreatments().filter(id => !ingrProductsFor(id).length);
@@ -3707,12 +3710,134 @@
       inp.addEventListener("input", () => { ingr.q = inp.value; renderIngrResults(); });
       renderIngrResults();
     }
+    if (ingr.tab === "open") ingrOpenBind();
     if (ingr.tab === "treat"){
       const sel = $("#ingrTreat");
       sel.addEventListener("change", () => { ingr.treat = sel.value; renderIngrTreat(); });
       renderIngrTreat();
     }
   }
+  /* tab "Openingsdata" (only Sandra, since v97): when was a jar/tube opened?
+     The app adds the period after opening (the open-jar symbol, e.g. 6M)
+     and warns 7 days before. Stored on Sandra's phone (bc_prod_open_v1);
+     copy the line to Claude to keep it in ingredients.js (PRODUCTS_OPENED).
+     "Agenda" makes an all-day event in Google Calendar on the day of the
+     warning, so her own calendar notifies/mails her. */
+  const PROD_OPEN_KEY = "bc_prod_open_v1";
+  function openLocal(){ try { const x = JSON.parse(localStorage.getItem(PROD_OPEN_KEY) || "{}"); return x && typeof x === "object" ? x : {}; } catch(e){ return {}; } }
+  function openAll(){ return Object.assign({}, typeof PRODUCTS_OPENED === "object" && PRODUCTS_OPENED ? PRODUCTS_OPENED : {}, openLocal()); }
+  function openSave(id, rec){
+    const x = openLocal();
+    if (rec) x[id] = rec; else x[id] = null;   // null = cleared on this phone (also hides a value from the file)
+    try { localStorage.setItem(PROD_OPEN_KEY, JSON.stringify(x)); } catch(e){}
+  }
+  // period after opening, only when the label says so ("na openen X maanden"); no guessing
+  function openPao(p){
+    const m = String(p && p.note && p.note.nl || "").match(/na openen (\d{1,2}) maand/i);
+    return m ? Number(m[1]) : 0;
+  }
+  function openThtOnly(id){ return typeof PRODUCTS_THT_ONLY !== "undefined" && PRODUCTS_THT_ONLY.includes(id); }
+  const okDate = v => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
+  // expiry = the earliest of: best-before date (THT) and opened + months after opening
+  function openInfo(id){
+    const r = openAll()[id];
+    if (!r) return null;
+    const cands = [];
+    if (okDate(r.t)){ const [y, mo, d] = r.t.split("-").map(Number); cands.push({ exp:new Date(y, mo - 1, d), by:"tht" }); }
+    const months = r.m === undefined || r.m === null || r.m === "" ? openPao(SALON_PRODUCTS[id]) : Number(r.m);
+    if (!openThtOnly(id) && okDate(r.d) && months > 0){ const [y, mo, d] = r.d.split("-").map(Number); cands.push({ exp:new Date(y, mo - 1 + months, d), by:"pao" }); }
+    if (!cands.length) return okDate(r.d) && !openThtOnly(id) ? { incomplete:true } : null;
+    const best = cands.sort((x, y) => x.exp - y.exp)[0];
+    const today = new Date(todayKey() + "T00:00:00");
+    const key = dt => `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,"0")}-${String(dt.getDate()).padStart(2,"0")}`;
+    return { opened: okDate(r.d) ? r.d : "", months, tht: okDate(r.t) ? r.t : "", by: best.by, exp: best.exp, expKey: key(best.exp), days: Math.round((best.exp - today) / 86400000) };
+  }
+  function openDue(){ return ingrCatalog().filter(([id]) => { const i = openInfo(id); return i && !i.incomplete && i.days <= 7; }); }
+  function openCalUrl(id, info){
+    const L = state.lang, name = ingrName(SALON_PRODUCTS[id]);
+    const warn = new Date(info.exp.getTime() - 7 * 86400000), next = new Date(warn.getTime() + 86400000);
+    const f = dt => `${dt.getFullYear()}${String(dt.getMonth()+1).padStart(2,"0")}${String(dt.getDate()).padStart(2,"0")}`;
+    const title = t("ingr_open_cal_title", L).replace("{p}", name).replace("{d}", advFmt(info.expKey));
+    const det = info.by === "tht" ? t("ingr_open_cal_text_tht", L).replace("{t}", advFmt(info.tht))
+      : t("ingr_open_cal_text", L).replace("{o}", advFmt(info.opened)).replace("{m}", info.months);
+    return "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+      `&text=${encodeURIComponent(title)}&dates=${f(warn)}/${f(next)}&details=${encodeURIComponent(det)}`;
+  }
+  function ingrOpenHtml(){
+    const L = state.lang, all = openAll(), months = [3, 6, 9, 12, 18, 24, 36];
+    const rows = ingrCatalog().map(([id, p]) => ({ id, p, info: openInfo(id) }));
+    const rank = i => !i ? 2 : (i.incomplete ? 1 : 0);
+    rows.sort((a, b) => rank(a.info) - rank(b.info) || (rank(a.info) === 0 ? a.info.days - b.info.days : ingrName(a.p).localeCompare(ingrName(b.p))));
+    let html = `<p class="ingr-note">${t("ingr_open_intro", L)}</p><ul class="open-list">`;
+    rows.forEach(({ id, p, info }) => {
+      const rec = all[id] || {}, thtOnly = openThtOnly(id);
+      const m = rec.m === undefined || rec.m === null || rec.m === "" ? openPao(p) : Number(rec.m);
+      let status = `<span class="ingr-muted">${t("ingr_open_none", L)}</span>`, cls = "";
+      if (info && info.incomplete) status = `<span class="ingr-muted">${t("ingr_open_incomplete", L)}</span>`;
+      else if (info){
+        const how = info.by === "tht" ? t("ingr_open_by_tht", L) : t("ingr_open_by_pao", L);
+        if (info.days < 0){ status = t("ingr_open_expired", L).replace("{d}", advFmt(info.expKey)); cls = " is-expired"; }
+        else if (info.days <= 7){ status = t("ingr_open_soon", L).replace("{n}", info.days).replace("{d}", advFmt(info.expKey)); cls = " is-soon"; }
+        else status = t("ingr_open_left", L).replace("{n}", info.days).replace("{d}", advFmt(info.expKey));
+        status += ` <span class="ingr-muted">(${how})</span>`;
+      }
+      const opt = n => `<option value="${n}"${n === m ? " selected" : ""}>${n ? t("ingr_open_m", L).replace("{n}", n) : "—"}</option>`;
+      html += `<li class="open-row${cls}">
+          <p class="open-row__name">${esc(ingrName(p))}</p>
+          ${thtOnly ? `<p class="ingr-muted open-row__hint">${t("ingr_open_tht_only", L)}</p>` : ""}
+          <div class="open-row__fields">
+            <label>${t("ingr_open_tht", L)} <input type="date" class="pm-input open-tht" data-open-id="${esc(id)}" value="${esc(rec.t || "")}"></label>
+            ${thtOnly ? "" : `<label>${t("ingr_open_date", L)} <input type="date" class="pm-input open-date" data-open-id="${esc(id)}" value="${esc(rec.d || "")}" max="${todayKey()}"></label>
+            <label>${t("ingr_open_months", L)} <select class="ingr-select open-months" data-open-id="${esc(id)}">${[0].concat(months, months.includes(m) || !m ? [] : [m]).sort((a, b) => a - b).map(opt).join("")}</select></label>`}
+          </div>
+          <p class="open-row__status">${status}</p>
+          ${info && !info.incomplete ? `<div class="open-row__btns"><a class="btn btn--sm btn--outline" href="${esc(openCalUrl(id, info))}" target="_blank" rel="noopener noreferrer">${t("ingr_open_cal", L)}</a>
+            <button type="button" class="btn btn--sm btn--text" data-action="open-clear" data-id="${esc(id)}">${t("ingr_open_clear", L)}</button></div>` : ""}
+        </li>`;
+    });
+    html += `</ul>`;
+    if (Object.keys(openLocal()).length){
+      const merged = {};
+      Object.entries(openAll()).forEach(([id, r]) => {
+        if (!r) return;
+        const o = {};
+        if (okDate(r.d) && !openThtOnly(id)) o.d = r.d;
+        if (r.m !== undefined && r.m !== null && r.m !== "" && !openThtOnly(id)) o.m = Number(r.m);
+        if (okDate(r.t)) o.t = r.t;
+        if (Object.keys(o).length) merged[id] = o;
+      });
+      const code = `const PRODUCTS_OPENED = ${JSON.stringify(merged)};`;
+      html += `<div class="ingr-oppending"><p>📌 ${t("ingr_open_pending", L)}</p><code>${esc(code)}</code>
+        <button type="button" class="btn btn--sm btn--ghost" data-action="ingr-op-copy" data-code="${esc(code)}">📋 ${t("ingr_op_copy", L)}</button></div>`;
+    }
+    return html;
+  }
+  function ingrOpenBind(){
+    $$(".open-date, .open-months, .open-tht").forEach(el => el.addEventListener("change", () => {
+      const id = el.dataset.openId;
+      const d = ($(`.open-date[data-open-id="${id}"]`) || {}).value || "";
+      const mEl = $(`.open-months[data-open-id="${id}"]`);
+      const tt = ($(`.open-tht[data-open-id="${id}"]`) || {}).value || "";
+      const rec = {};
+      if (d) rec.d = d;
+      if (mEl) rec.m = Number(mEl.value) || 0;
+      if (tt) rec.t = tt;
+      openSave(id, (d || tt) ? rec : null);
+      renderIngredients();
+    }));
+  }
+  // once a day on Sandra's phone: a gentle note when something expires within 7 days
+  function openDueToast(){
+    try {
+      if (!ingrSandra()) return;
+      const due = openDue(); if (!due.length) return;
+      const k = "bc_prod_open_toast", today = todayKey();
+      if (localStorage.getItem(k) === today) return;
+      localStorage.setItem(k, today);
+      setTimeout(() => showToast(t("ingr_open_toast", state.lang).replace("{n}", due.length)), 1800);
+    } catch(e){}
+  }
+
   /* tab "Gebruiksvolgorde" (only Sandra): what is used up first, what stays; tap "Op" when finished */
   function ingrOrderHtml(){
     const L = state.lang, op = ingrOpSet(), local = ingrOpLocal(), file = typeof PRODUCTS_OP !== "undefined" ? PRODUCTS_OP : [];
@@ -4752,20 +4877,42 @@
      a downloaded .ics file is the one reminder mechanism that genuinely
      works everywhere, because the phone's own calendar app takes over
      from there and handles the actual notification. */
+  // how many weeks until a next moment, per kind of treatment (AVOID_GROUPS in data.js)
+  const REMINDER_WEEKS = { feet:[4,5,6], hands:[3,4,6], face:[4,6,8], browlash:[6,7,8], massage:[2,4,6], waxing:[4,5,6], makeup:[4,8,12], workshop:[4,8,12] };
+  function reminderCat(treatId){
+    if (!treatId || typeof AVOID_GROUPS === "undefined") return null;
+    for (const g in AVOID_GROUPS) if ((AVOID_GROUPS[g] || []).includes(treatId)) return g;
+    return null;
+  }
+  function reminderChipsHtml(cat, title){
+    const L = state.lang, weeks = REMINDER_WEEKS[cat] || [4, 6, 8];
+    return `<div class="reminder-pick">
+        <p class="reminder-pick__q">${t("reminder_q", L)}</p>
+        <div class="reminder-pick__chips">${weeks.map(w => `<button type="button" class="chip" data-action="reminder-weeks" data-weeks="${w}" data-title="${esc(title || "")}">${t("reminder_in_weeks", L).replace("{n}", w)}</button>`).join("")}</div>
+      </div>`;
+  }
+  // result screen: the button now opens three calm choices (no grey browser box)
   function addCalendarReminder(){
-    const weeksStr = prompt(t("reminder_weeks_label", state.lang), "5");
-    if (weeksStr === null) return;
-    const weeks = parseInt(weeksStr, 10);
+    const btn = $('[data-action="add-reminder"]');
+    let box = $("#reminderPick");
+    if (!box && btn){ box = document.createElement("div"); box.id = "reminderPick"; btn.insertAdjacentElement("afterend", box); }
+    if (!box) return;
+    if (!box.hidden && box.innerHTML){ box.hidden = true; return; }
+    const m = state.match, tr = m && !m.isKid && m.treatment;
+    const title = tr && tr.name ? trName(tr.name, state.lang) : "";
+    box.innerHTML = reminderChipsHtml(reminderCat(tr && tr.id), title);
+    box.hidden = false;
+  }
+  function downloadReminder(weeks, titleTxt){
+    weeks = parseInt(weeks, 10);
     if (!weeks || weeks <= 0) return;
-
     const start = new Date();
     start.setDate(start.getDate() + weeks * 7);
     start.setHours(10, 0, 0, 0);
     const end = new Date(start.getTime() + 30 * 60 * 1000);
-
     const fmt = d => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
-    const title = state.match && !state.match.isKid ? trName(state.match.treatment.name, state.lang) : t("reminder_ics_title", state.lang);
-
+    const icsEsc = v => String(v || "").replace(/\\/g, "\\\\").replace(/[,;]/g, m => "\\" + m).replace(/\n/g, "\\n");
+    const title = titleTxt ? `${t("reminder_ics_title", state.lang)} — ${titleTxt}` : t("reminder_ics_title", state.lang);
     // UID, DTSTAMP and PRODID are required by the calendar standard (RFC 5545);
     // without them some calendar apps (e.g. Outlook, older iPhones) refuse the file.
     const ics = [
@@ -4777,19 +4924,21 @@
       `DTSTAMP:${fmt(new Date())}`,
       `DTSTART:${fmt(start)}`,
       `DTEND:${fmt(end)}`,
-      `SUMMARY:${t("reminder_ics_title", state.lang)} — ${title}`,
-      "DESCRIPTION:Beauty & Coffee",
+      `SUMMARY:${icsEsc(title)}`,
+      `DESCRIPTION:${icsEsc(t("reminder_ics_desc", state.lang))}`,
+      "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${icsEsc(title)}`, "TRIGGER:-PT0M", "END:VALARM",
       "END:VEVENT",
       "END:VCALENDAR"
     ].join("\r\n");
-
     const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url; a.download = "beauty-coffee-herinnering.ics";
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);   // revoking at once can break the download on some phones
+    trackEvent("reminder-" + weeks + "w");
     showToast(t("reminder_saved_toast", state.lang));
+    const box = $("#reminderPick"); if (box) box.hidden = true;
   }
 
   /* ---------------- AI assistants (WebMCP, since v93) ----------------
@@ -4881,6 +5030,7 @@
     setupEditorDrag();
     setupCameraZoom();
     try { setupAgentTools(); } catch(e){ /* AI tools are optional */ }
+    openDueToast();
     const newsletterForm = $("#newsletterForm");
     if (newsletterForm) newsletterForm.addEventListener("submit", submitNewsletter);
     setupNewsletterCard();
@@ -4948,6 +5098,7 @@
       if (action === "open-ingredients") ingrOpen();
       if (action === "ingr-tab"){ ingr.tab = el.dataset.tab; renderIngredients(); }
       if (action === "ingr-op") ingrToggleOp(el.dataset.id);
+      if (action === "open-clear"){ openSave(el.dataset.id, null); renderIngredients(); }
       if (action === "ingr-op-copy"){ const c = el.dataset.code; try { navigator.clipboard.writeText(c).then(() => showToast(t("ingr_op_copied", state.lang)), () => showToast(c)); } catch(e){ showToast(c); } }
       if (action === "ingr-chip"){ const g = ALLERGEN_GROUPS.find(x => x.id === el.dataset.group); ingr.q = g ? (g.label[state.lang] || g.label.nl) : ""; const inp = $("#ingrSearch"); if (inp) inp.value = ingr.q; renderIngrResults(); }
       if (action === "open-stampcard") goTo("stampcard");
@@ -4981,6 +5132,7 @@
       if (action === "replay-drink-pop") replayDrinkPop(el);
       if (action === "reset-local-data") resetLocalData();
       if (action === "add-reminder") addCalendarReminder();
+      if (action === "reminder-weeks") downloadReminder(el.dataset.weeks, el.dataset.title);
       if (action === "dismiss-review") dismissReviewPrompt();
     });
 
