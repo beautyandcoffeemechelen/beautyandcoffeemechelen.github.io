@@ -1670,7 +1670,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v102 · 13/10/2026";
+const APP_VERSION = "v107 · 13/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1940,7 +1940,7 @@ const ADVENT = {
     { day:13, item:"facecupping",   stock:null },
     { day:14, item:"guinot",        stock:null },   // in het salon, bij een gelaatsverzorging
     { day:15, item:"spamani",       stock:null },
-    { day:16, item:"peelblueberry", stock:null },
+    { day:16, item:"peelblueberry", stock:null },   // ongeopend, volgens Sandra en haar leerkracht nog bruikbaar (13/10)
     { day:18, item:"peelanti",      stock:null },
     { day:19, item:"eraser",        stock:null },
     { day:20, item:"handspa",       stock:null },   // extra hand peeling: uses up the MellowMoist lotion (Sandra, 09/10)
