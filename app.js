@@ -3861,7 +3861,7 @@
     list.sort((a, b) => (b.promoted ? 1 : 0) - (a.promoted ? 1 : 0));
     return { extra:false, list: list.slice(0, 2) };
   }
-  const USEUP_SKIP_SLOTS = ["tooldisinfect","toolclean","disinfect","handdisinfect","nailclean","naildegrease","waxtalc","spf","antiseptic","cuticle","footrefresh"];
+  const USEUP_SKIP_SLOTS = ["tooldisinfect","toolclean","disinfect","handdisinfect","nailclean","naildegrease","waxtalc","spf","antiseptic","cuticle","footrefresh","firstaid","nailrepair"];
   function useupPlan(){
     const done = useupGet(USEUP_DONE_KEY), today = new Date(todayKey() + "T00:00:00");
     const items = ingrCatalog().map(([id, p]) => ({ id, p, info: openInfo(id) }))
