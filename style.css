@@ -742,7 +742,8 @@ body{
 /* promo actions (e.g. grabbelton) on the welcome screen: compact, above the buttons */
 .actions-block--welcome{ margin:4px 0 14px; }
 .actions-block--welcome[hidden]{ display:none; }
-.actions-block--welcome .action-card{ margin:0; }
+.actions-block--welcome .action-card{ margin:0 0 10px; }
+.actions-block--welcome .action-card:last-child{ margin-bottom:0; }
 .welcome-stampcard{ margin-top:10px; }
 .practical-info__route{ display:inline-flex; margin-top:6px; text-decoration:none; }
 
@@ -1218,3 +1219,18 @@ p.season-card__shop{ text-decoration:none; margin:2px 0 0; font-style:italic; }
 /* header: brand on one line on small screens */
 @media (max-width:420px){ .brand-mark__text{ font-size:15px; white-space:nowrap; } }
 @media (max-width:360px){ .brand-mark__text{ display:none; } }
+
+/* voice / AI assistants (v93) */
+.findme-voice{ margin-top:18px; padding:16px; border:1px solid var(--espresso-12); border-radius:var(--radius-m, 14px); background:rgba(255,255,255,.35); }
+.findme-voice__list{ margin:8px 0 12px; padding-left:18px; font-size:13.5px; color:var(--espresso-80, var(--espresso)); font-style:italic; }
+.findme-voice__list li{ margin:4px 0; }
+.app-legal--ai{ margin-top:2px; }
+.app-legal--ai a{ color:var(--espresso-60); }
+
+/* ============ "Lopende acties" from WordPress (v94): one calm summary card ============ */
+.offer-lines{ list-style:none; margin:2px 0 8px; padding:0; }
+.offer-line{ font-size:13px; line-height:1.45; color:var(--espresso); padding:5px 0; border-top:1px solid rgba(166,124,58,.18); }
+.offer-line:first-child{ border-top:none; padding-top:0; }
+.offer-line b{ font-weight:600; }
+.offer-line__more{ margin-left:6px; font-size:12px; color:var(--gold-ink); white-space:nowrap; }
+.offer-book{ display:inline-block; font-size:12.5px; font-weight:600; color:var(--gold-ink); text-decoration:none; border-bottom:1px solid rgba(110,76,30,.35); }

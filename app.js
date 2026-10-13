@@ -1539,6 +1539,19 @@
           <a class="btn btn--outline" href="https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(t("contact_wa_text", lang))}" target="_blank" rel="noopener noreferrer" data-contact="whatsapp">${t("contact_whatsapp", lang)}</a>
           <a class="btn btn--outline" href="mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent(t("contact_mail_subject", lang))}" data-contact="mail">${t("contact_mail", lang)}</a>
         </div>
+      </div>
+      <div class="findme-voice" id="voice">
+        <p class="price-contact__title">${t("voice_title", lang)}</p>
+        <p class="price-contact__hint">${t("voice_text", lang)}</p>
+        <ul class="findme-voice__list">
+          <li>${t("voice_ex1", lang)}</li>
+          <li>${t("voice_ex2", lang)}</li>
+          <li>${t("voice_ex3", lang)}</li>
+        </ul>
+        <div class="findme-contact__buttons">
+          <a class="btn btn--outline" href="assets/beauty-and-coffee.vcf" download="Beauty-and-Coffee.vcf" type="text/vcard" data-contact="vcard">${t("voice_save", lang)}</a>
+          <a class="btn btn--text" href="ai.html">${t("voice_ai_link", lang)}</a>
+        </div>
       </div>`;
     body.querySelectorAll("[data-contact]").forEach(a => a.addEventListener("click", () => trackEvent("contact-" + a.dataset.contact)));
   }
@@ -1626,14 +1639,19 @@
       .replace(/\{treat\}/g, a.treat ? esc(a.treat[lang] || a.treat.nl) : "")
       .replace(/\{treat2\}/g, a.treat2 ? esc(a.treat2[lang] || a.treat2.nl) : "")
       .replace(/\{from\}/g, actionFmt(a.dealFrom, lang)).replace(/\{until\}/g, actionFmt(a.until, lang));
-    wrap.innerHTML = active.map(a => `
+    const card = a => `
       <div class="action-card${a.yearly ? " action-card--" + esc(a.id) : ""}">
         <span class="action-card__icon" aria-hidden="true">${a.icon || "🎁"}</span>
         <div class="action-card__body">
           <p class="action-card__title">${fill(a.title[lang] || a.title.nl, a)}</p>
           <p class="action-card__text">${fill(a.text[lang] || a.text.nl, a)}</p>
         </div>
-      </div>`).join("");
+      </div>`;
+    let offers = "";
+    try { offers = newsActionsCardHtml(); } catch(e){ offers = ""; }
+    wrap.innerHTML = active.filter(a => a.yearly).map(card).join("") + offers + active.filter(a => !a.yearly).map(card).join("");
+    wraps.forEach(w => w.querySelectorAll("[data-offer-link]").forEach(x => x.addEventListener("click", () => trackEvent("offer-open"))));
+    wraps.forEach(w => w.querySelectorAll("[data-offer-book]").forEach(x => x.addEventListener("click", () => trackEvent("offer-whatsapp"))));
   }
   // yearly actions (e.g. Valentine): work out this year's weekends
   function actionWindow(a, today){
@@ -2275,7 +2293,7 @@
      Reads the public WordPress.com REST API straight from the browser
      (no backend, no key). The last result is kept in localStorage so the
      card still shows something offline. Any error → card stays hidden. */
-  const NEWS_CACHE_KEY = "bc_news_cache_v1";
+  const NEWS_CACHE_KEY = "bc_news_cache_v3";
   const news = { posts: null, offline: false };
 
   function newsText(html){
@@ -2318,14 +2336,148 @@
     body.querySelectorAll("[data-review]").forEach(a => a.addEventListener("click", () => trackEvent("reviews-" + a.dataset.review)));
   }
 
+  /* ---- actions & specials from WordPress (since v93) ----
+     Every post is classified once when it is loaded: an "action" (category
+     or tag from NEWS_FEED.specials, or action words in the title/intro) and
+     recent enough → shown at the top of the start screen with badges
+     (discount, price, how many left, "Op = Op") and a clear booking button.
+     Everything else → "Leestips & blog" at the bottom. */
+  function newsCfg(){ return (typeof NEWS_FEED === "object" && NEWS_FEED) ? NEWS_FEED : {}; }
+  function newsFacts(p){
+    const text = [p.title, p.excerpt, p.body].join(" ");
+    const f = {};
+    const pct = text.match(/(\d{1,2})\s?%/); if (pct) f.pct = Number(pct[1]);
+    const prices = [];
+    const re = /€\s?(\d{1,4}(?:[.,]\d{2})?)|(\d{1,4}(?:[.,]\d{2})?)\s?€/g; let m;
+    while ((m = re.exec(text)) && prices.length < 6){
+      const v = parseFloat(String(m[1] || m[2]).replace(",", "."));
+      if (v > 0 && !prices.includes(v)) prices.push(v);
+    }
+    if (prices.length){
+      // "€65 → €58,50" when one price is the other minus the discount
+      let pair = null;
+      if (f.pct) for (const hi of prices) for (const lo of prices)
+        if (lo < hi && Math.abs(hi * (1 - f.pct / 100) - lo) < 0.06) pair = [hi, lo];
+      f.prices = pair || [Math.min(...prices)];
+      f.pricePair = !!pair;
+      f.manyPrices = !pair && prices.length > 1;
+    }
+    const left = text.match(/(?:nog|exact|laatste|slechts|maar|only|encore|derniers?)\s*:?\s*(\d{1,3})\b/i)
+      || text.match(/\b(\d{1,3})\s+(?:plekjes|plaatsen|beschikbaar|spots|places)\b/i);
+    if (left && Number(left[1]) > 0 && Number(left[1]) < 200) f.left = Number(left[1]);
+    if (/op\s*=\s*op/i.test(text)) f.opop = true;
+    return f;
+  }
+  function newsIsAction(p){
+    const sp = newsCfg().specials || {};
+    const cats = (sp.categories || []).map(c => String(c).toLowerCase());
+    const labels = (p.labels || []).map(c => String(c).toLowerCase());
+    if (labels.some(l => cats.includes(l))) return true;
+    const words = sp.words instanceof RegExp ? sp.words : /\b(actie|aanbod|korting)\b|\d{1,2}\s?%|op\s*=\s*op/i;
+    return words.test(String(p.title || "") + " " + String(p.excerpt || ""));
+  }
+  function newsSplit(){
+    const sp = newsCfg().specials || {}, maxAge = (sp.maxAgeDays || 45) * 86400000;
+    let now; try { now = new Date(seasonTodayKey() + "T12:00:00").getTime(); } catch(e){ now = Date.now(); }
+    const posts = news.posts || [], specials = [], blog = [];
+    posts.forEach(p => {
+      const age = now - new Date(p.date).getTime();
+      if (p.action && !(age > maxAge) && specials.length < (sp.max || 3)) specials.push(p); else blog.push(p);
+    });
+    return { specials, blog: blog.slice(0, Math.min(5, Math.max(1, parseInt(newsCfg().count, 10) || 3))) };
+  }
+  const newsPlainTitle = tt => String(tt || "").replace(/^[\p{Extended_Pictographic}️‍\s]+/u, "").trim();
+  function newsDate(p){
+    const d = new Date(p.date); if (isNaN(d)) return "";
+    const locale = { nl:"nl-BE", en:"en-GB", fr:"fr-BE" }[state.lang] || "nl-BE";
+    return d.toLocaleDateString(locale, { day:"numeric", month:"long", year:"numeric" });
+  }
+  /* One short line per action for the "Lopende acties" card:
+     - your own WordPress "Samenvatting" (excerpt) if it is short (≤ 140
+       characters) and has a price → shown exactly as you wrote it;
+     - otherwise lines like "Hydraterende Herfstboost – € 69" in the post,
+       or "Normale prijs: € 65" + "Actieprijs: € 58,50" → "€58,50 i.p.v. €65". */
+  function newsOffer(html, excerptText, title){
+    const o = { items:[], oldP:null, newP:null, own:"" };
+    const ex = String(excerptText || "").trim();
+    if (ex && ex.length <= 140 && /€|\d\s?€/.test(ex)) o.own = ex;
+    let lines = [];
+    try {
+      const doc = new DOMParser().parseFromString(String(html || ""), "text/html");
+      lines = [...doc.querySelectorAll("p, li, h2, h3, h4")].map(e => (e.textContent || "").replace(/\s+/g, " ").trim()).filter(Boolean);
+    } catch(e){}
+    const num = v => parseFloat(String(v).replace(",", "."));
+    lines.forEach(l => {
+      const m = l.match(/^(.{3,70}?)\s*[–—:\-]\s*€\s?(\d{1,4}(?:[.,]\d{2})?)/) || l.match(/^(.{3,70}?)\s*[–—:\-]\s*(\d{1,4}(?:[.,]\d{2})?)\s?€/);
+      if (!m) return;
+      const label = m[1].replace(/[\p{Extended_Pictographic}️‍]/gu, "").replace(/^[\s•·\-–\d.]+/, "").trim();
+      const v = num(m[2]);
+      if (/^(normale|gewone|oude|reguliere)\s+prijs|^prijs\b|^normal price|^prix normal/i.test(label)) o.oldP = v;
+      else if (/actieprijs|promoprijs|nu\b|action price|prix promo/i.test(label)) o.newP = v;
+      else if (o.items.length < 4 && !o.items.some(x => x.n === label)) o.items.push({ n: label.replace(/\s*\(.*\)\s*$/, ""), p: v });
+    });
+    return o;
+  }
+  function newsShortTitle(tt){
+    let x = newsPlainTitle(tt);
+    x = x.replace(/^[^:]{2,28}:\s*/, "");            // "Eenmalig aanbod: …" → "…"
+    x = x.replace(/\s*\([^)]*\)\s*!?$/, "");          // drop "(met 10% korting!)"
+    x = x.replace(/^(laatste|nog|de laatste)\s+\d*\s*/i, "").replace(/\s+(behandelingen|behandeling)$/i, "");
+    return x.trim();
+  }
+  function newsEur(v){
+    const L = state.lang, n = Number.isInteger(v) ? String(v) : v.toFixed(2).replace(".", L === "en" ? "." : ",");
+    return L === "fr" ? n + " €" : "€" + n;
+  }
+  function newsOfferLine(p){
+    const L = state.lang, o = p.offer || {}, f = p.facts || {};
+    if (o.own) return { name:"", rest: o.own };
+    const extra = [];
+    if (f.left) extra.push(t("specials_left_short", L).replace("{n}", f.left));
+    if (f.opop && !f.left) extra.push("Op = Op");
+    if (o.items && o.items.length){
+      return { name:"", rest: o.items.map(x => `<b>${esc(x.n)}</b> ${newsEur(x.p)}`).join(" · ") + (extra.length ? " · " + extra.join(" · ") : ""), html:true };
+    }
+    let price = "";
+    if (o.newP && o.oldP) price = t("specials_instead", L).replace("{new}", newsEur(o.newP)).replace("{old}", newsEur(o.oldP));
+    else if (f.pricePair) price = t("specials_instead", L).replace("{new}", newsEur(f.prices[1])).replace("{old}", newsEur(f.prices[0]));
+    else if (f.prices) price = f.manyPrices ? t("specials_from", L).replace("{p}", newsEur(f.prices[0])) : newsEur(f.prices[0]);
+    else if (f.pct) price = "−" + f.pct + (L === "fr" ? " %" : "%");
+    return { name: newsShortTitle(p.title), rest: [price].concat(extra).filter(Boolean).join(" · ") };
+  }
+  // the card itself (HTML), shown with the other action cards (welcome + result)
+  function newsActionsCardHtml(){
+    if (typeof news === "undefined" || !news.posts) return "";
+    const { specials } = newsSplit();
+    if (!specials.length) return "";
+    const L = state.lang;
+    const rows = specials.map(p => {
+      const safe = newsSafeUrl(p.url); if (!safe) return "";
+      const ln = newsOfferLine(p);
+      const body = ln.html ? ln.rest : esc(ln.rest);
+      return `<li class="offer-line">${ln.name ? `<b>${esc(ln.name)}</b>${body ? " — " : ""}` : ""}${body}
+        <a class="offer-line__more" href="${esc(safe)}" target="_blank" rel="noopener noreferrer" data-offer-link>${t("specials_more", L)}</a></li>`;
+    }).join("");
+    if (!rows) return "";
+    const wa = `https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(t("specials_wa_text_any", L))}`;
+    return `
+      <div class="action-card action-card--offers">
+        <span class="action-card__icon" aria-hidden="true">🍂</span>
+        <div class="action-card__body">
+          <p class="action-card__title">${t("specials_title", L)}</p>
+          <ul class="offer-lines">${rows}</ul>
+          <a class="offer-book" href="${wa}" target="_blank" rel="noopener noreferrer" data-offer-book>${t("specials_book", L)}</a>
+        </div>
+      </div>`;
+  }
   function renderNewsCard(){
+    const { blog } = newsSplit();
+    renderActions();   // the short "Lopende acties" summary lives with the other action cards
     const card = $("#newsCard"), list = $("#newsList");
     if (!card || !list) return;
-    const posts = news.posts || [];
-    if (!posts.length){ card.hidden = true; return; }
-    const locale = { nl:"nl-BE", en:"en-GB", fr:"fr-BE" }[state.lang] || "nl-BE";
+    if (!blog.length){ card.hidden = true; return; }
     list.textContent = "";
-    posts.forEach(p => {
+    blog.forEach(p => {
       const a = document.createElement("a");
       const safe = newsSafeUrl(p.url); if (!safe) return;
       a.className = "news-item"; a.href = safe; a.target = "_blank"; a.rel = "noopener noreferrer";
@@ -2337,16 +2489,12 @@
         a.appendChild(img);
       }
       const body = document.createElement("div"); body.className = "news-item__body";
-      const d = new Date(p.date);
-      if (!isNaN(d)){
-        const date = document.createElement("p"); date.className = "news-item__date";
-        date.textContent = d.toLocaleDateString(locale, { day:"numeric", month:"long", year:"numeric" });
-        body.appendChild(date);
-      }
+      const date = newsDate(p);
+      if (date){ const d = document.createElement("p"); d.className = "news-item__date"; d.textContent = date; body.appendChild(d); }
       const title = document.createElement("p"); title.className = "news-item__title"; title.textContent = p.title;
       body.appendChild(title);
       if (p.excerpt){
-        const ex = document.createElement("p"); ex.className = "news-item__excerpt"; ex.textContent = p.excerpt;
+        const ex = document.createElement("p"); ex.className = "news-item__excerpt"; ex.textContent = newsShorten(p.excerpt, 140);
         body.appendChild(ex);
       }
       const more = document.createElement("span"); more.className = "news-item__more";
@@ -2363,10 +2511,10 @@
     card.hidden = false;
   }
   function setupNewsCard(){
-    const cfg = (typeof NEWS_FEED === "object" && NEWS_FEED) ? NEWS_FEED : null;
+    const cfg = newsCfg();
     if (!cfg || !cfg.site || !$("#newsCard")) return;
     const site = String(cfg.site).replace(/^https?:\/\//, "").replace(/\/+$/, "");
-    const count = Math.min(5, Math.max(1, parseInt(cfg.count, 10) || 3));
+    const count = Math.min(20, Math.max(3, parseInt(cfg.fetch, 10) || 12));
     const all = $("#newsAllLink");
     if (all){
       const own = newsSafeUrl(cfg.allUrl || "");
@@ -2380,18 +2528,22 @@
     // Two routes to the same posts: if a browser/ad blocker stops the first,
     // the second (the site's own address) usually still gets through.
     const cat = cfg.category ? encodeURIComponent(cfg.category) : "";
+    const names = o => o && typeof o === "object" ? Object.keys(o).concat(Object.values(o).map(v => v && v.slug).filter(Boolean)) : [];
     const routes = [
       { name: "wpcom-v1.1",
         url: "https://public-api.wordpress.com/rest/v1.1/sites/" + encodeURIComponent(site) +
-             "/posts/?number=" + count + (cat ? "&category=" + cat : ""),
+             "/posts/?number=" + count + (cat ? "&category=" + cat : "") +
+             "&fields=ID,title,URL,date,excerpt,content,featured_image,categories,tags",
         parse: data => (data && Array.isArray(data.posts) ? data.posts : []).map(p => ({
-          title: p.title, url: p.URL, date: p.date, excerpt: p.excerpt, img: p.featured_image })) },
+          title: p.title, url: p.URL, date: p.date, excerpt: p.excerpt, body: p.content, img: p.featured_image,
+          labels: names(p.categories).concat(names(p.tags)) })) },
       { name: "site-wp-v2",
         url: "https://" + site + "/wp-json/wp/v2/posts?per_page=" + count +
-             "&_fields=title,link,date,excerpt,jetpack_featured_media_url",
+             "&_fields=title,link,date,excerpt,content,jetpack_featured_media_url",
         parse: data => (Array.isArray(data) ? data : []).map(p => ({
           title: p.title && p.title.rendered, url: p.link, date: p.date,
-          excerpt: p.excerpt && p.excerpt.rendered, img: p.jetpack_featured_media_url })) }
+          excerpt: p.excerpt && p.excerpt.rendered, body: p.content && p.content.rendered,
+          img: p.jetpack_featured_media_url, labels: [] })) }
     ];
     if (cat) routes.pop();   // the second route can't filter by category name: then only use the first
     const errors = [];
@@ -2411,14 +2563,21 @@
       .then(list => {
         const posts = list.map(p => {
           const img = newsSafeUrl(p.img);
-          return {
+          const q = {
             title: newsText(p.title),
             url: newsSafeUrl(p.url),
             date: p.date || "",
-            excerpt: newsShorten(newsText(p.excerpt), 140),
-            img: img ? img.split("?")[0] + "?w=200&h=200&crop=1" : ""
+            excerpt: newsShorten(newsText(p.excerpt), 220),
+            img: img ? img.split("?")[0] + "?w=400&h=400&crop=1" : "",
+            labels: (p.labels || []).map(x => newsText(x)).slice(0, 40)
           };
-        }).filter(p => p.title && p.url).slice(0, count);
+          q.action = newsIsAction(q);
+          if (q.action){
+            q.facts = newsFacts({ title:q.title, excerpt:q.excerpt, body: newsShorten(newsText(p.body), 4000) });
+            q.offer = newsOffer(p.body, newsText(p.excerpt), q.title);
+          }
+          return q;
+        }).filter(p => p.title && p.url);
         news.posts = posts; news.offline = false;
         try { localStorage.setItem(NEWS_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), posts })); } catch(e){}
         renderNewsCard();
@@ -3399,6 +3558,18 @@
     else if (/^#(ingredienten|ingrediënten|ingredients|allergie|allergieen|allergies)$/i.test(decodeURIComponent(location.hash))){
       window.history.replaceState(null, "", location.pathname + location.search);
       ingrOpen();
+    }
+    else if (/^#(prijslijst|prijzen|prices|tarifs|boeken|book|afspraak)$/i.test(location.hash)){
+      window.history.replaceState(null, "", location.pathname + location.search);
+      goTo("pricelist");
+    }
+    else if (/^#(huisregels|rules|regles)$/i.test(location.hash)){
+      window.history.replaceState(null, "", location.pathname + location.search);
+      goTo("houserules");
+    }
+    else if (/^#(contact|stem|voice)$/i.test(location.hash)){
+      window.history.replaceState(null, "", location.pathname + location.search);
+      goTo("findme");
     }
     else if (location.hash === "#stempelkaart" || location.hash === "#stamps"){
       window.history.replaceState(null, "", location.pathname + location.search);
@@ -4621,6 +4792,86 @@
     showToast(t("reminder_saved_toast", state.lang));
   }
 
+  /* ---------------- AI assistants (WebMCP, since v93) ----------------
+     Browsers with built-in AI agents (Chrome with Gemini, and others that
+     support the WebMCP proposal) can call these tools instead of guessing
+     where to tap. Nothing is sent by the app itself: booking messages are
+     returned as links the person opens and sends. Feature-detected: on
+     browsers without WebMCP nothing happens. Plain info for every
+     assistant: llms.txt and ai.html (built by tools/aiinfo.js). */
+  function setupAgentTools(){
+    const mc = (typeof document !== "undefined" && document.modelContext) || (typeof navigator !== "undefined" && navigator.modelContext);
+    if (!mc || typeof mc.registerTool !== "function") return;
+    const L = () => state.lang;
+    const txt = text => ({ content:[{ type:"text", text }] });
+    const strip = h => String(h || "").replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
+    const slots = () => BOOKING_SLOTS.map(b => b[L()] || b.nl).join(", ");
+    const tools = [
+      { name:"beauty_coffee_info",
+        description:"Contact details, address, opening moments (weekends, by appointment only) and how to book at Beauty & Coffee, a beauty salon in Mechelen (Belgium). Booking is never automatic: Sandra confirms every appointment herself.",
+        inputSchema:{ type:"object", properties:{} },
+        async execute(){ return txt([
+          "Beauty & Coffee · Sandra Truong · Barbarastraat 25, 2800 Mechelen, Belgium",
+          "Phone / WhatsApp: +32 499 22 19 01 · Email: " + BOOKING_EMAIL,
+          "By appointment only. Possible moments: " + slots() + ".",
+          "To book: use the tool beauty_coffee_prepare_booking and let the person send the message. Sandra confirms personally.",
+          "Full info (prices, rules): " + SITE_URL.replace(/index\.html$/, "") + "llms.txt"].join("\n")); } },
+      { name:"beauty_coffee_price_list",
+        description:"The full price list (treatments, duration, price in euro; final prices, VAT-exempt). Optional: a category such as facial, massage, manicure, pedicure, waxing, brows, lashes, makeup, workshops.",
+        inputSchema:{ type:"object", properties:{ category:{ type:"string", description:"Optional category id or word" } } },
+        async execute(args){
+          const q = String(args && args.category || "").toLowerCase(), lang = L();
+          const secs = PRICE_LIST.filter(sec => !q || sec.id.includes(q) || strip(sec.title[lang]).toLowerCase().includes(q) || strip(sec.title.nl).toLowerCase().includes(q));
+          return txt((secs.length ? secs : PRICE_LIST).map(sec => "## " + strip(sec.title[lang]) + "\n" +
+            sec.items.map(it => "- " + strip(it.n[lang]) + " — " + it.price + (it.time ? " — " + it.time : "") + (it.d ? " — " + strip(it.d[lang]) : "")).join("\n")).join("\n\n"));
+        } },
+      { name:"beauty_coffee_prepare_booking",
+        description:"Prepares an appointment request for Beauty & Coffee. Returns a WhatsApp link and an email link with the message filled in. It does NOT book or send anything: show the text to the person, and only open the link after they agree. Sandra confirms the appointment herself.",
+        inputSchema:{ type:"object", properties:{
+          treatment:{ type:"string", description:"Treatment, e.g. 'uitgebreide pedicure' or 'Hot Stone massage'" },
+          preferred_moment:{ type:"string", description:"Preferred day and part of the day, e.g. 'zaterdag voormiddag 17 oktober'" },
+          name:{ type:"string", description:"Name of the client" },
+          note:{ type:"string", description:"Optional extra info (allergy, first visit…)" } }, required:["treatment"] },
+        async execute(a){
+          a = a || {};
+          const lang = L();
+          const lines = {
+            nl:["Hallo Sandra, ik wil graag een afspraak maken.", "Behandeling: ", "Voorkeur: ", "Naam: ", "Opmerking: "],
+            en:["Hello Sandra, I would like to make an appointment.", "Treatment: ", "Preference: ", "Name: ", "Note: "],
+            fr:["Bonjour Sandra, je voudrais prendre rendez-vous.", "Soin : ", "Préférence : ", "Nom : ", "Remarque : "] }[lang] || [];
+          const clean = v => cleanStr(String(v || ""), 200);
+          const msg = [lines[0], lines[1] + clean(a.treatment), a.preferred_moment ? lines[2] + clean(a.preferred_moment) : "", a.name ? lines[3] + clean(a.name) : "", a.note ? lines[4] + clean(a.note) : ""].filter(Boolean).join("\n");
+          return txt("Message (let the person check it first):\n" + msg +
+            "\n\nWhatsApp: https://wa.me/" + BOOKING_WHATSAPP + "?text=" + encodeURIComponent(msg) +
+            "\nEmail: mailto:" + BOOKING_EMAIL + "?subject=" + encodeURIComponent(t("contact_mail_subject", lang)) + "&body=" + encodeURIComponent(msg) +
+            "\nPhone: tel:+" + BOOKING_WHATSAPP);
+        } },
+      { name:"beauty_coffee_save_appointment",
+        description:"After Sandra has CONFIRMED an appointment: saves it in this app under 'My appointments' on this phone and returns a Google Calendar link to add it to the person's calendar.",
+        inputSchema:{ type:"object", properties:{
+          date:{ type:"string", description:"Date as YYYY-MM-DD" }, time:{ type:"string", description:"Time as HH:MM (24 h)" },
+          treatment:{ type:"string", description:"Treatment" } }, required:["date","time"] },
+        async execute(a){
+          a = a || {};
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(String(a.date || "")) || !/^\d{2}:\d{2}$/.test(String(a.time || ""))) return txt("Please give date as YYYY-MM-DD and time as HH:MM.");
+          const appt = { date:a.date, time:a.time, tcat:null, ttext: cleanStr(String(a.treatment || ""), 120) };
+          const list = apptList(); list.push(appt);
+          localData.appointments = list.filter(x => { const st = apptStart(x); return st && Date.now() - st.getTime() < 30*86400000; });
+          saveLocalData(); renderApptCard(); trackEvent("appointment-saved-agent");
+          return txt("Saved in the app (My appointments). Add to Google Calendar: " + apptGoogleUrl(appt));
+        } },
+      { name:"beauty_coffee_open",
+        description:"Opens a screen of the app for the person: pricelist, houserules, findme (route, parking, contact), stampcard, myappt (my appointments).",
+        inputSchema:{ type:"object", properties:{ screen:{ type:"string", enum:["pricelist","houserules","findme","stampcard","myappt"] } }, required:["screen"] },
+        async execute(a){
+          const sc = a && a.screen;
+          if (!["pricelist","houserules","findme","stampcard","myappt"].includes(sc)) return txt("Unknown screen.");
+          goTo(sc); return txt("Opened: " + sc);
+        } }
+    ];
+    tools.forEach(tool => { try { const r = mc.registerTool(tool); if (r && typeof r.catch === "function") r.catch(() => {}); } catch(e){ /* ignore */ } });
+  }
+
   function init(){
     loadLocalData();
     importMigratedData();   // stamps etc. carried over from the old sbw888.github.io address
@@ -4629,6 +4880,7 @@
     showStep("welcome");
     setupEditorDrag();
     setupCameraZoom();
+    try { setupAgentTools(); } catch(e){ /* AI tools are optional */ }
     const newsletterForm = $("#newsletterForm");
     if (newsletterForm) newsletterForm.addEventListener("submit", submitNewsletter);
     setupNewsletterCard();

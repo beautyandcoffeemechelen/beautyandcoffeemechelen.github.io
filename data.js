@@ -1670,7 +1670,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v92 · 09/10/2026";
+const APP_VERSION = "v96 · 13/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1687,8 +1687,25 @@ const NEWSLETTER_URL = "https://sanmakeupstudio.wordpress.com/nieuwsbrief/";
 const NEWS_FEED = {
   site: "sanmakeupstudio.wordpress.com",
   category: "",
-  count: 3,
-  allUrl: "https://sanmakeupstudio.wordpress.com/author/beautyglowbysandra/"
+  count: 3,          // how many ordinary blog posts under "Leestips & blog"
+  fetch: 12,         // how many posts the app reads to find actions among them
+  allUrl: "https://sanmakeupstudio.wordpress.com/author/beautyglowbysandra/",
+  /* ACTIONS & SPECIALS (since v93) — a post counts as an action when it has
+     one of these categories or tags (name or slug, any case), OR when its
+     title/intro contains words like "actie", "aanbod", "korting", "10%",
+     "op = op". Only actions newer than maxAgeDays are shown, as ONE short
+     line each, in the card "Lopende acties" just above the Grabbelton
+     (start screen and result screen); older action posts go to the normal
+     blog list. Tips: give every action post the category "Acties"; want to
+     choose the line yourself? Fill in the WordPress field "Samenvatting"
+     (excerpt) with max. 140 characters and a price, e.g.
+     "Guinot Équilibre Pureté: €58,50 i.p.v. €65 · nog 7 plaatsen". */
+  specials: {
+    categories: ["acties", "actie", "tijdelijk aanbod", "tijdelijk-aanbod", "nieuwsbrief", "herfstactie"],
+    words: /\b(actie|aanbod|korting|promo|special)\b|\d{1,2}\s?%|op\s*=\s*op/i,
+    maxAgeDays: 45,
+    max: 3
+  }
 };
 const SOCIAL_LINKS = {
   instagram: "https://www.instagram.com/beauty_and_coffee_mechelen/",
@@ -1830,7 +1847,7 @@ const ADVENT = {
             fr:"Mélangez une cuillère à café d'argile avec un peu d'eau pour obtenir une pâte lisse. Appliquez sur peau nettoyée (pas autour des yeux), laissez poser environ 10 minutes et rincez à l'eau tiède avant séchage complet." },
       ingredients:"" },
     // ---- free extras with a booked treatment (valid discountDays) ----
-    led: { type:"extra", icon:"💡", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+    led: { type:"extra", photo:"assets/advent/led-ill.webp", icon:"💡", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       product:"LED-lichttunnel",
       highlights:{ nl:"10 minuten in de LED-lichttunnel, afgestemd op jouw huid. <b>Rood</b>: stimuleert collageen en celvernieuwing — anti-aging, minder rimpels. <b>Groen</b>: vermindert roodheid. <b>Blauw</b>: zuiverend bij onzuiverheden en acné. <b>Oranje</b>: revitaliserend, voor een elastischere huid.",
                    en:"10 minutes in the LED light tunnel, matched to your skin. <b>Red</b>: stimulates collagen and cell renewal — anti-ageing, fewer wrinkles. <b>Green</b>: reduces redness. <b>Blue</b>: purifying for blemishes and acne. <b>Orange</b>: revitalising, for more elastic skin.",

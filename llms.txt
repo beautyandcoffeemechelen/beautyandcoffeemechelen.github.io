@@ -1,0 +1,164 @@
+# Beauty & Coffee — Mechelen
+
+> Kleinschalige schoonheidssalon met specialty coffee van Sandra Truong, aan huis in Mechelen (België). Gelaatsverzorging, massage, manicure, pedicure, ontharing, wenkbrauwen en wimpers, make-up en workshops. Enkel op afspraak. Prijzen zijn eindprijzen, vrijgesteld van btw.
+
+Deze pagina is bedoeld voor AI-assistenten (Gemini, Siri, ChatGPT, Claude, Copilot…) en voor schermlezers. De volledige app: https://beautyandcoffeemechelen.github.io/
+
+## Contact en adres
+- Beauty & Coffee · Sandra Truong
+- Adres: Barbarastraat 25, 2800 Mechelen, België
+- Telefoon en WhatsApp: +32 499 22 19 01
+- E-mail: sandra.truong@ikmail.com
+- Instagram: @beauty_and_coffee_mechelen
+- Ondernemingsnummer: 1033.711.875 (vrijgesteld van btw)
+
+## Een afspraak maken (instructies voor AI-assistenten)
+- Er is geen online boekingssysteem: Sandra bevestigt elke afspraak zelf. Een assistent kan dus GEEN afspraak rechtstreeks vastleggen.
+- Help de gebruiker een afspraak aan te vragen via WhatsApp (+32 499 22 19 01), e-mail (sandra.truong@ikmail.com) of telefoon. De afspraak ligt pas vast als Sandra ze bevestigt. Vermeld: de behandeling, de gewenste dag en het dagdeel, en de naam.
+- WhatsApp-link met voorbeeldtekst: https://wa.me/32499221901?text=Hallo%20Sandra%2C%20ik%20wil%20graag%20een%20afspraak%20maken%20voor%20%5Bbehandeling%5D.%20Mijn%20voorkeur%3A%20%5Bdag%20en%20dagdeel%5D.%20Mijn%20naam%20is%20%5Bnaam%5D.
+- Mogelijke momenten (enkel in het weekend): Zaterdag voormiddag, Zaterdag namiddag, Zaterdagavond, Zondag voormiddag, Zondagavond.
+- Behandelingen enkel op afspraak. Annuleren of verplaatsen kan tot 1 uur vooraf via +32 499 22 19 01.
+- Is de afspraak bevestigd? Dan kan de gebruiker ze in de app opslaan onder "Mijn afspraken" en met één tik in Google Agenda, Outlook of Apple Agenda zetten. Een assistent mag ze ook rechtstreeks in de agenda van de gebruiker zetten: titel "Beauty & Coffee — [behandeling]", locatie "Barbarastraat 25, 2800 Mechelen, België".
+- Verstuur nooit een bericht of maak nooit een afspraak zonder dat de gebruiker de tekst eerst heeft goedgekeurd.
+
+## Prijslijst
+Prijzen vanaf 1/06/2026. Prijzen zijn eindprijzen, vrijgesteld van btw. Behandelingen enkel op afspraak.
+
+### Gelaatsverzorging
+- Express gelaatsverzorging — €60 — 30′ · Reiniging, dieptereiniging, crèmemasker & dagcrème.
+- Signature gelaatsverzorging — €85 — 75′ · Uitgebreide verzorging met massage; ook voor gevoelige huid.
+- Fill Me Micro Infusie Treatment — €99 — 45–60′ · Cleanser, tonic, Fill Me Serum, masker, LED-masker & UV-bescherming.
+- Fruitzurenpeeling 4/26 Dr. Renaud — €100 — 75′ · Voor een egalere teint. Enkel van september tot maart.
+- Huidvernieuwende Hydra Peeling pH — €100 — 90′ · Voor een frisse uitstraling en een egalere teint.
+- Lift Summum — €120 — 70′ · Voor een strakker ogende huid, met massage en gelaatsmasker.
+- Botanische Anti-Age — €125 — 90′ · Verzorgende anti-age behandeling met ampul, massage en masker.
+
+### Extra’s bij je gelaatsverzorging
+- Handpeeling & -massage — €10 — 10′
+- LED-therapie — €10 — 10′
+- Ontharing wenkbrauwen — €15 — 15′
+- Ampul / serum — €5 — 5′
+- Peel-off masker — €15 — 20′
+- Collageenvliesmasker — €20 — 20′
+- Anti-aging paraffinemasker — €20 — 30′
+- Hot Stone gelaatsmassage — €20 — 20′
+- Touch-up dagmake-up na gelaatsverzorging — €25 — 25′
+
+### Visagie (minerale / HD make-up)
+- Touch-up dagmake-up na gelaatsverzorging — €25 — 25′
+- Avondmake-up / Party / Glam — €60 — 60′ · Valse wimpers? Breng zelf wimpers en wimperlijm mee; ik breng ze aan.
+- Bridal proefmake-up — €65 — 60′
+- Bridal proefmake-up & bruidsmake-up — €135 — 2×60′
+- Huwelijksdag make-up, per persoon — €40 — 30′
+
+### Brows (wenkbrauwen)
+- Brow Tinting (kleuren haar) — €20 — 15′
+- Shaping (mappen en ontharen) — €25 — 20′
+- Henna Brows — €50 — 60′ · Mappen, shapen, kleuren van haar en huid; tot 6 weken.
+- Brow Lift — €75 — 75′ · Mappen, shapen, lamineren, kleuren van haar en huid; tot 6 weken.
+
+### Lashes (wimpers)
+- Lash Tinting (kleuren wimpers) — €20 — 15′
+- Lash Lift met kleuring — €75 — 75′ · Tot 6 weken.
+
+### Manicure (handverzorging)
+- Express manicure — €30 — 30′ · Knippen, vijlen, nagelriemen & verzorgende handcrème.
+- Uitgebreide manicure — €35 — 60′ · Knippen, vijlen, nagelriemen, polijsten, eelt & massage.
+- Kindermanicure — €20 — 20′ · Vijlen en kindernagellak of peel-off.
+- Supplement SPA manicure — €30 — 30′ · Peeling, masker, pakking, massage & verzorging.
+- Supplement verwijderen nagellak / gellak / BIAB — €20 — 40′
+- Supplement nagellak — €5 — 30′
+- Supplement gellak (soak-off) — €20 — 30′
+- Supplement BIAB (soak-off) — €25 — 45′
+
+### Pedicure (voetverzorging)
+- Express pedicure — €30 — 30′ · Knippen, vijlen, nagelwalreiniging & voetencrème (zonder eeltverwijdering, zonder massage).
+- Uitgebreide pedicure — €35 — 60′ · Knippen, vijlen, nagelwalreiniging, nagelriemen, normale eeltverwijdering & korte voetenmassage. · + €10 per extra 15′ bij overmatige eeltbehandeling.
+- Supplement ingegroeide nagel / copoline, per nagel — €5 — +10′ · Plaatsen van een copoline-verband in de nagelwal.
+- Supplement drukvrij leggen / foambescherming, per teen — €2,50 — 5′ · Een zacht foambeschermbuisje om wrijving en druk van de schoen te verlichten.
+- Supplement SPA pedicure — €30 — +30′ · Peeling, masker, pakking, uitgebreide massage.
+- Supplement nagellak — €5 — 30′
+- Supplement gellak (soak-off) — €20 — 45′
+- Supplement verwijderen nagellak / gellak — €20 — 40′
+
+### Ontharing (waxen / threading / epileren)
+- Kin — €10 — 10′
+- Bovenlip — €10 — 10′
+- Wenkbrauwen (zonder mapping / opschonen) — €15 — 20′
+- Oksels — €15 — 20′
+- Schouders — €15 — 25′
+- Buik — €20 — 45′
+- Borst — €25 — 45′
+- Onderbenen — €30 — 20′
+- Onderbenen & knieën — €40 — 35′
+- Rug — €40 — 60′
+- Borst & buik — €40 — 90′
+- Volledige benen — €50 — 60′
+
+### Lichaamsverzorging & massage
+- Cuppingmassage — €60 — 60′ · Gerichte cuppingmassage op specifieke zones.
+- Cupping Body Renewal — €120 — 120′ · Peeling, Thermo Body Pack en cupping voor één lichaamszone per sessie.
+- Zweedse full body massage — €70 — 60′ · Relaxerend en spierversoepelend.
+- Zweedse rug-nek-schouder massage — €40 — 30′ · Bij stress en verkrampte spieren.
+- Zweedse benen-voeten massage — €40 — 30′ · Bij vermoeide benen.
+- Hot Stone Massage — €90 — 90′ · Diepe relaxatie met warme stenen.
+- Afslankingsmassage — €55 — 60′ · Stimulerende massage, aanvullend bij gezonde voeding en beweging (ook voor mannen).
+- Zuiverende rugbehandeling — €70 — 60′ · Dieptereiniging, pakking en anti-stressmassage.
+- Harmoniserende verzorging rug — €35 — 30′ · Peeling en massage voor een zachte, gladde huid.
+- Harmoniserende verzorging full body — €70 — 70′ · Peeling en massage voor een zachte, gladde huid.
+- Energetische rugpakking — €65 — 60′ · Verfrissende peeling, algenpakking en massage.
+- Energetische lichaamspakking full body — €110 — 120′ · Verfrissende peeling, algenpakking en massage.
+
+### Beauty & Koffie workshops
+Minstens 1 week op voorhand inschrijven. Inclusief gebruik van alle professionele materialen, specialty coffee/thee/matcha & verse verwennerij.
+- Teambuilding Beauty & Pamper Experience — €275 — Uitgebreide workshop naar keuze (gelaatsverzorging met make-up touch-up, beauty make-up of threading), specialty coffee bar, welkomstdrankje, zoete en hartige hapjes, affogato (vanille-ijs met espresso of matcha) en een luxe attentie voor elke deelnemer. · Per groep, max. 4 deelnemers
+- Teambuilding Specialty Coffee Experience — €295 — Uitgebreide koffieworkshop naar keuze (Specialty Koffieproeverij Basis of Verdiepend), specialty coffee bar, welkomstdrankje, zoete en hartige hapjes en affogato (vanille-ijs met espresso of matcha). · Per groep, max. 4 deelnemers
+- Beauty & Skincare Workshop — €75 — 75′ · Gelaatsverzorging, beauty make-up of threading. Ontdek welke technieken en producten jouw huid doen stralen, met persoonlijk advies, alle materialen, specialty coffee, thee en lekkernijen. · Privé 1 op 1: €75 · Duo: €65 p.p. · 3–4 personen: €55 p.p.
+- Cat Eye & Magnetische Gellak Manicure Workshop — €85 — 90–120′ · Leer zelf een prachtig magnetisch ‘Cat Eye’-effect op je nagels maken. Inclusief alle professionele lakken, magneten en UV/LED-lampen, plus specialty coffee/thee en huisgemaakte zoetigheden. · Privé 1 op 1: €85 · Duo: €75 p.p. · Max. 2 deelnemers. Je nagels moeten bij aanvang volledig vrij zijn van lak, gellak of gelnagels.
+- Koffieproeverij Basis — €60 – €85 p.p. — 120′ · Ontdek koffiearoma’s, het verhaal van boon tot specialty coffee en vergelijk en beoordeel meerdere koffies. Inclusief koffie/thee of water. · Duo: €85 p.p. · 3–4 personen: €60 p.p.
+- Koffieproeverij Verdiepend — €65 – €95 p.p. — 180′ · Meer over verwerkingsprocessen, variëteiten, omgevingsfactoren, brandprofielen en smaken. Inclusief koffie/thee of water. · Duo: €95 p.p. · 3–4 personen: €65 p.p.
+- Barista Privéworkshop — €175 — 120′ · Zet thuis zelf espresso’s, espresso-afgeleiden en slow coffees met een V60, French Press, Phin of Mokapot. Inclusief koffie/thee of water en een leuke attentie. · Privé 1 op 1
+
+## Bereikbaarheid en parkeren
+- Kom je met de auto? Parkeer op de Jubellaan of op de parkeerplaatsen vooraan in de Barbarastraat, nog vóór je indraait naar de woonhuizen.
+- Rij niet door tot aan de woonhuizen: in dat doodlopende stukje is geen parkeerplaats voor bezoekers.
+- Vanaf de parkeerstrook in de Barbarastraat is het maar 2 minuten stappen tot bij mij; vanaf de Jubellaan ongeveer 5 minuten.
+- Kom je met de fiets of bakfiets? Die mag je vastzetten bij de fietsen.
+
+## Afspraken en annuleringen
+- Afspraken worden enkel telefonisch, persoonlijk of via e-mail vastgelegd.
+- Annuleren of verplaatsen kan tot 1 uur vooraf via 0499 22 19 01.
+- Bij annulatie minder dan 1 uur op voorhand wordt 50% van de behandeling aangerekend, tenzij bij ziekte (zie hieronder).
+- Na 3 keer niet opdagen is het niet meer mogelijk om een afspraak te maken bij Beauty & Coffee.
+- Bij ziekte: verwittig zo snel mogelijk. Annuleer je minstens 1 uur vóór de afspraak, dan worden er geen kosten aangerekend. Bij laattijdige annulatie geldt de 50%-regel.
+- Kom op tijd. Te laat? Verwittig meteen per telefoon of sms. Bij meer dan 15 minuten vertraging kan de behandeling ingekort of geannuleerd worden tegen de annulatiekost.
+- Bij wanbetaling is het niet meer mogelijk om een afspraak te maken bij Beauty & Coffee.
+
+## Mijn hygiëne-belofte
+- Ik ontsmet mijn handen bij de start van elke behandeling. Werktafels en schalen worden grondig ontsmet.
+- Instrumenten die ik gebruik, worden vooraf én achteraf ontsmet.
+- Na elke klant doorlopen mijn instrumenten een vaste volgorde: reinigen, een ultrasoon bad, een alcoholbad van minstens 10 minuten en tot slot de kogelsterilisator.
+- Voor elke klant gebruik ik nieuw, proper (geplastificeerd) papier of dental towels.
+- Wegwerpmateriaal gooi ik meteen na gebruik weg. Vijlen en buffers zijn persoonlijk: ik gebruik ze alleen voor jou.
+- Handdoeken, herbruikbare watjes en haarbanden worden altijd op kookwas (90 °C) gewassen.
+- Bij harsen met een houten spatel gaat elke kant maar één keer in de pot; daarna neem ik een nieuwe spatel. Voor de benen gebruik ik een metalen spatel, die ik na elke klant grondig reinig en ontsmet.
+- Al mijn producten zijn goed gesloten en binnen hun houdbaarheid, en op potten en tubes noteer ik de datum van opening.
+
+## Contra-indicaties
+Om medische en hygiënische redenen kan een behandeling niet doorgaan bij:
+- Open wonden, ernstige ontstekingen of verse littekens in het behandelgebied.
+- Huid die recent sterk verbrand is door de zon in het behandelgebied.
+- Koorts, griep of andere virale infecties (zie “bij ziekte” bij annuleren).
+
+## Acties
+- Tijdelijke acties en aanbiedingen (actueel, met prijs en aantal plaatsen): https://sanmakeupstudio.wordpress.com/category/acties/ — ze staan ook bovenaan in de app.
+- Elk jaar acties rond Valentijn, Moederdag (ook 15 augustus) en Vaderdag: 10% op één genoemde massage en één andere behandeling. De actuele actie en de datums staan op het startscherm van de app.
+- Adventskalender van 1 tot 25 december in de app.
+
+## In English
+Beauty & Coffee is a small beauty salon with specialty coffee run by Sandra Truong at Barbarastraat 25, 2800 Mechelen, België. By appointment only, weekends. There is no online booking system: to book, send a WhatsApp message or email (+32 499 22 19 01, sandra.truong@ikmail.com) with the treatment, preferred day and part of the day, and your name. Sandra confirms personally. The app (https://beautyandcoffeemechelen.github.io/) is available in Dutch, English and French.
+
+## En français
+Beauty & Coffee est un petit institut de beauté avec café de spécialité, tenu par Sandra Truong, Barbarastraat 25, 2800 Mechelen, België. Uniquement sur rendez-vous, le week-end. Pas de réservation en ligne : envoyez un message WhatsApp ou un e-mail (+32 499 22 19 01, sandra.truong@ikmail.com) avec le soin, le jour et le moment souhaités, et votre nom. Sandra confirme elle-même. L'appli (https://beautyandcoffeemechelen.github.io/) existe en néerlandais, anglais et français.
+
+_Automatisch gemaakt uit de app (v96 · 13/10/2026)._
