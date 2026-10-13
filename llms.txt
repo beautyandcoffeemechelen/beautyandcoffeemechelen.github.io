@@ -161,4 +161,4 @@ Beauty & Coffee is a small beauty salon with specialty coffee run by Sandra Truo
 ## En français
 Beauty & Coffee est un petit institut de beauté avec café de spécialité, tenu par Sandra Truong, Barbarastraat 25, 2800 Mechelen, België. Uniquement sur rendez-vous, le week-end. Pas de réservation en ligne : envoyez un message WhatsApp ou un e-mail (+32 499 22 19 01, sandra.truong@ikmail.com) avec le soin, le jour et le moment souhaités, et votre nom. Sandra confirme elle-même. L'appli (https://beautyandcoffeemechelen.github.io/) existe en néerlandais, anglais et français.
 
-_Automatisch gemaakt uit de app (v98 · 13/10/2026)._
+_Automatisch gemaakt uit de app (v102 · 13/10/2026)._

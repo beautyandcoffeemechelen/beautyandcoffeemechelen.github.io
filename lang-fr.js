@@ -919,7 +919,7 @@
   },
   "facialworkshop": {
    "benefits": "Découvrez une routine de soin simple et apprenez à finaliser ensuite votre look avec une jolie retouche maquillage.",
-   "funfact": "Vous repartez avec l'ordre exact des produits qui convient le mieux à votre peau — ainsi qu'une pochette cadeau remplie de miniatures pour essayer tout de suite votre nouvelle routine à la maison.",
+   "funfact": "Vous repartez avec l'ordre exact des produits qui convient le mieux à votre peau, et des conseils personnalisés pour commencer tout de suite votre nouvelle routine à la maison.",
    "aftercare": "Utilisez un SPF chaque jour après un soin du visage et hydratez bien votre peau le soir."
   },
   "tastingbasic": {

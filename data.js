@@ -1158,8 +1158,8 @@ const TREATMENTS_CATALOG = [
     homecare:{ category:"facial" },
     benefits:{ nl:"Ontdek een eenvoudige verzorgingsroutine en leer hoe je jouw look daarna met een mooie touch-up afwerkt.",
                en:"Discover a simple skincare routine and learn how to finish your look afterwards with a lovely touch-up." },
-    funfact:{ nl:"Je gaat naar huis met de exacte volgorde van producten die het beste bij jouw huid past — en met een eigen goodiebag vol proefverpakkingen om je nieuwe routine thuis meteen te ontdekken.",
-              en:"You'll go home with the exact product order that suits your skin best — plus your own goodie bag full of sample sizes to try your new routine at home right away." },
+    funfact:{ nl:"Je gaat naar huis met de exacte volgorde van producten die het beste bij jouw huid past, en met persoonlijk advies om je nieuwe routine thuis meteen te beginnen.",
+              en:"You'll go home with the exact product order that suits your skin best, plus personal advice to start your new routine at home right away." },
     aftercare:{ nl:"Gebruik dagelijks SPF na een gelaatsbehandeling en hydrateer 's avonds goed.",
                 en:"Use daily SPF after a facial treatment and moisturize well in the evening." } },
 
@@ -1670,7 +1670,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v98 · 13/10/2026";
+const APP_VERSION = "v102 · 13/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1810,20 +1810,6 @@ const ADVENT = {
   maxExtrasPerClient: null,     // free extras per client (null = no limit; 1 per treatment)
   showPhotos: true,             // true = show the drawings in assets/advent; false = icons only
   items: {
-    guinot: { type:"gift", icon:"🧴",
-      cond:{ nl:"een geboekte gelaatsverzorgingsworkshop", en:"a booked facial-care workshop", fr:"un atelier soin du visage réservé" },
-      nl:"Staaltje Guinot Éclat Parfait scrub", en:"Guinot Éclat Parfait scrub sample", fr:"Échantillon de gommage Guinot Éclat Parfait",
-      use:{ nl:"Scrubcrème voor het gezicht met dubbele microkorrels (sheabutter). Breng aan op een gereinigde huid, masseer zacht met kleine cirkeltjes en spoel af met lauw water. Vermijd de oogcontour. Bevat zoete-amandelolie en parfum.",
-            en:"Face exfoliating cream with double microbeads (shea). Apply to cleansed skin, massage gently in small circles and rinse with lukewarm water. Avoid the eye contour. Contains sweet almond oil and fragrance.",
-            fr:"Crème exfoliante visage à double micrograins (karité). Appliquez sur peau nettoyée, massez doucement en petits cercles et rincez à l'eau tiède. Évitez le contour des yeux. Contient de l'huile d'amande douce et du parfum." },
-      ingredients:"Water/Eau (Aqua), Isopropyl Palmitate, Glyceryl Stearate SE, Cetearyl Alcohol, C10-18 Triglycerides, Glycerin, Cellulose Acetate, Propanediol, Steareth-21, Pentylene Glycol, Decyl Glucoside, Butyrospermum Parkii (Shea) Butter Extract, Prunus Amygdalus Dulcis (Sweet Almond) Oil, Cetearyl Glucoside, Tocopheryl Acetate, Fragrance (Parfum), Acrylates/C10-30 Alkyl Acrylate Crosspolymer, Caprylyl Glycol, Xanthan Gum, Butylene Glycol, BHT, Disodium EDTA, Hexyl Cinnamal, Linalool, Benzyl Benzoate, Red 4 (CI 14700), Yellow 5 (CI 19140)" },
-    eyeflash: { type:"gift", icon:"👁️",
-      photo:"assets/advent/eyeflash-ill.webp",
-      nl:"Ampul Janssen Cosmetics Eye Flash Fluid", en:"Janssen Cosmetics Eye Flash Fluid ampoule", fr:"Ampoule Janssen Cosmetics Eye Flash Fluid",
-      use:{ nl:"Hydraterend oogserum met hyaluronzuur en peptidecomplex (1,5 ml). Doe de ampul in een tissue en breek ze met een korte ruk open. Breng de inhoud voorzichtig aan rond de ogen en klop zacht in. Alleen uitwendig gebruik.",
-            en:"Hydrating eye serum with hyaluronic acid and a peptide complex (1.5 ml). Place the ampoule in a tissue and break it open with one sudden movement. Gently apply around the eyes after cleansing and pat into the skin. For external use only.",
-            fr:"Sérum contour des yeux hydratant à l'acide hyaluronique et complexe peptidique (1,5 ml). Tenez l'ampoule dans un mouchoir en papier et cassez l'extrémité d'un coup sec. Appliquez en douceur sur le contour des yeux nettoyé et faites pénétrer en tapotant. Usage externe uniquement." },
-      ingredients:"Aqua (Water), Butylene Glycol, Glycerin, Pentylene Glycol, Xanthan Gum, Sodium Hyaluronate, Palmitoyl Tripeptide-1, Palmitoyl Tetrapeptide-7, Carbomer, Coco-Glucoside, Trideceth-9, PEG-40 Hydrogenated Castor Oil, PEG-7 Glyceryl Cocoate, Tetrasodium Glutamate Diacetate, Propylene Glycol, Citric Acid, Sodium Hydroxide, Parfum (Fragrance), Phenoxyethanol, Sodium Benzoate, Sodium Lactate, CI 16035 (Red 40)" },
     spoolie: { type:"gift", icon:"🖌️",
       photo:"assets/advent/spoolie-ill.webp",
       nl:"Mascaraborsteltje", en:"Mascara wand", fr:"Goupillon à mascara",
@@ -1895,6 +1881,20 @@ const ADVENT = {
       nl:"Gratis SPA manicure", en:"Free SPA manicure", fr:"Manucure SPA offerte" },
     spapedi: { type:"extra", icon:"🦶", with:{ nl:"pedicure", en:"pedicure", fr:"pédicure" },
       nl:"Gratis SPA pedicure", en:"Free SPA pedicure", fr:"Pédicure SPA offerte" },
+    eyeflash: { type:"extra", photo:"assets/advent/eyeflash-ill.webp", icon:"👁️", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Een ampul oogserum met hyaluronzuur en peptiden, tijdens je gelaatsverzorging zacht rond de ogen ingeklopt — voor een frissere, minder vermoeide blik. Bevat parfum.",
+                   en:"An ampoule of eye serum with hyaluronic acid and peptides, gently patted around the eyes during your facial — for a fresher, less tired look. Contains fragrance.",
+                   fr:"Une ampoule de sérum contour des yeux à l'acide hyaluronique et aux peptides, appliquée en tapotant pendant votre soin du visage — pour un regard plus frais et moins fatigué. Contient du parfum." },
+      product:"Janssen Cosmetics Eye Flash Fluid (ampul 1,5 ml)",
+      ingredients:"Aqua (Water), Butylene Glycol, Glycerin, Pentylene Glycol, Xanthan Gum, Sodium Hyaluronate, Palmitoyl Tripeptide-1, Palmitoyl Tetrapeptide-7, Carbomer, Coco-Glucoside, Trideceth-9, PEG-40 Hydrogenated Castor Oil, PEG-7 Glyceryl Cocoate, Tetrasodium Glutamate Diacetate, Propylene Glycol, Citric Acid, Sodium Hydroxide, Parfum (Fragrance), Phenoxyethanol, Sodium Benzoate, Sodium Lactate, CI 16035 (Red 40)",
+      nl:"Gratis Eye Flash oogampul tijdens je gelaatsverzorging", en:"Free Eye Flash eye ampoule during your facial", fr:"Ampoule yeux Eye Flash offerte pendant votre soin du visage" },
+    guinot: { type:"extra", photo:"assets/advent/guinot-ill.webp", icon:"🧴", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Een extra zachte scrub met microkorrels van shea, tijdens je gelaatsverzorging — voor een gladde, stralende huid. Bevat zoete-amandelolie (noten) en parfum.",
+                   en:"An extra gentle scrub with shea microbeads during your facial — for smooth, radiant skin. Contains sweet almond oil (nuts) and fragrance.",
+                   fr:"Un gommage extra doux aux micrograins de karité pendant votre soin du visage — pour une peau lisse et éclatante. Contient de l'huile d'amande douce (fruits à coque) et du parfum." },
+      product:"Guinot Gommage Éclat Parfait",
+      ingredients:"Water/Eau (Aqua), Isopropyl Palmitate, Glyceryl Stearate SE, Cetearyl Alcohol, C10-18 Triglycerides, Glycerin, Cellulose Acetate, Propanediol, Steareth-21, Pentylene Glycol, Decyl Glucoside, Butyrospermum Parkii (Shea) Butter Extract, Prunus Amygdalus Dulcis (Sweet Almond) Oil, Cetearyl Glucoside, Tocopheryl Acetate, Fragrance (Parfum), Acrylates/C10-30 Alkyl Acrylate Crosspolymer, Caprylyl Glycol, Xanthan Gum, Butylene Glycol, BHT, Disodium EDTA, Hexyl Cinnamal, Linalool, Benzyl Benzoate, Red 4 (CI 14700), Yellow 5 (CI 19140)",
+      nl:"Gratis Guinot Éclat Parfait scrub tijdens je gelaatsverzorging", en:"Free Guinot Éclat Parfait scrub during your facial", fr:"Gommage Guinot Éclat Parfait offert pendant votre soin du visage" },
     // ---- more salon products ----
     luminoclear: { type:"extra", icon:"✨", stock:2, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met vitamine C, melkzuur (AHA), witte lelie en berendruif — voor een egalere, stralende teint bij pigmentvlekjes.", en:"With vitamin C, lactic acid (AHA), white lily and bearberry — for a more even, radiant complexion with pigment spots.", fr:"À la vitamine C, à l'acide lactique (AHA), au lys blanc et à la busserole — pour un teint plus uniforme et éclatant en cas de taches pigmentaires." },
@@ -1932,13 +1932,13 @@ const ADVENT = {
     { day:4,  item:"handspa",       stock:null },
     { day:5,  item:"spoolie",       stock:null },
     { day:6,  item:"facial10",      stock:null },
-    { day:7,  item:"eyeflash",      stock:null },
+    { day:7,  item:"eyeflash",      stock:null },   // in het salon, bij een gelaatsverzorging (Sandra, 13/10)
     { day:8,  item:"peelsens",      stock:null },
     { day:10, item:"hotstoneface",  stock:null },
     { day:11, item:"massage15",     stock:null },
     { day:12, item:"buffer",        stock:null },
     { day:13, item:"facecupping",   stock:null },
-    { day:14, item:"guinot",        stock:null },
+    { day:14, item:"guinot",        stock:null },   // in het salon, bij een gelaatsverzorging
     { day:15, item:"spamani",       stock:null },
     { day:16, item:"peelblueberry", stock:null },
     { day:18, item:"peelanti",      stock:null },
@@ -1950,7 +1950,7 @@ const ADVENT = {
     { day:24, item:"goldmask",      stock:null },
     { day:25, item:"paraffinmask",  stock:null }   // gratis anti-aging paraffinemasker (Sandra, 09/10)
   ],
-  // 2027: [ { day:1, item:"eyeflash", stock:null }, … ]   ← keep or change doors; missing days = massage discount
+  // 2027: [ { day:1, item:"spoolie", stock:null }, … ]   ← keep or change doors; missing days = massage discount
   }
 };
 // Which calendar year is "on"? From March: this year's; in January/February
