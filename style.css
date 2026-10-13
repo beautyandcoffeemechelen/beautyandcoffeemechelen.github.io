@@ -1144,6 +1144,7 @@ body[data-theme] .topbar{ box-shadow:0 3px 0 -1px var(--s-line); }
 .ingr-card__name{ font-weight:700; margin:0; }
 .ingr-card__hit{ margin:0; color:#8a3b12; font-size:14px; }
 .ingr-card__note{ margin:0; font-size:13px; font-style:italic; }
+.ingr-card__note--sandra{ margin-top:4px; font-style:normal; color:var(--muted, #7a6f66); }
 .ingr-muted{ color:var(--espresso-60, #6b5a4e); font-size:13px; margin:0; }
 .ingr-warn{ color:#8a5a00; font-size:13.5px; }
 .ingr-ok{ color:#2f6b3a; font-weight:600; }

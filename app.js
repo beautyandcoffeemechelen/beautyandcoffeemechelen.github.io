@@ -3866,13 +3866,29 @@
     }
     return html;
   }
+  /* client-facing notes stay neutral (Sandra, 13/10): sentences with warnings,
+     regulations, dates or "contains …" go to Sandra's private 🔒 note.
+     Clients still see allergens when THEY search for them (⚠️ line). */
+  const NOTE_PRIV = {
+    nl:/^(bevat|met alcohol)|formaldehyde|paraben|ontvlamba|irrit|allerg|\bniet (bij|op|in|tijdens|rond|voor|meer|bewaren)\b|zwanger|borstvoeding|epilep|astma|fototox|\bzon(nebank|nebrand)?\b|geen zon|kankerverw|\bCMR\b|\bD5\b|\bEXP\b|\bTHT\b|houdbaar tot|na openen|\bbatch\b|\bref\.|vervallen|biocide|ernstig|gevaar|vermijd|let op|wondjes|diabetes|temperatuur|patchtest|\bheet\b|chloorhexidine|alkalisch|dierlijk|\bnoten\b|etiket|welk merk|foto|ppd|toluyleen|bijsluiter|doosje|lees ik|nog niet|ingrediëntenlijst|\d{2}\/\d{4}/i,
+    en:/^(contains|with alcohol)|formaldehyde|paraben|flammable|irritat|allerg|^not\b|\bnot (with|on|in|during|around|for|to)\b|pregnan|breastfeed|epilep|asthma|phototox|no sun|sunbed|sunburn|cancer|\bCMR\b|\bD5\b|\bEXP\b|best before|after opening|\bbatch\b|\bref\.|expired|biocide|serious|danger|avoid|note:|no longer|wounds|diabet|temperature|patch test|very hot|chlorhexidine|alkaline|animal|\bnuts\b|label|which brand|photo|ppd|toluene|leaflet|box|ingredient list|not yet|\d{2}\/\d{4}/i,
+    fr:/^(contient)|formald|parab|inflamm|irrit|allerg|\bpas (en cas|sur|pendant|autour|chez|dans|de soleil)\b|^pas\b|grossesse|allaitement|épilep|asthme|phototox|soleil|cancér|\bCMR\b|\bD5\b|\bEXP\b|à utiliser avant|après ouverture|\blot\b|\bréf\.|périm|biocide|grave|danger|éviter|à noter|plus utilisé|plaies|diabét|température|test préalable|très chaude|chlorhexidine|alcalin|animal|fruits à coque|étiquette|quelle marque|lue sur|en cas de doute|photo|ppd|toluyl|notice|boîte|liste des ingrédients|pas encore|\d{2}\/\d{4}/i
+  };
+  function ingrSplitNote(text, L){
+    const re = NOTE_PRIV[L] || NOTE_PRIV.nl, pub = [], priv = [];
+    String(text || "").split(/(?<!\b(?:[Rr][eé]f|[Nn]r|[Bb]v|[Cc]a|[Nn]o|prod|[Aa]rt|e\.g|p\. ?ex)\.)(?<=[.!?])\s+(?=[A-ZÀ-Ý*0-9“"(])/).forEach(s => { if (s.trim()) (re.test(s) ? priv : pub).push(s.trim()); });
+    return { pub: pub.join(" "), priv: priv.join(" ") };
+  }
   function ingrProductCard(id, p, keys){
     const L = state.lang, inci = ingrInci(p);
     const hits = keys ? ingrParts(inci).filter(x => ingrHit(x, keys)) : [];
+    const note = ingrSplitNote(p.note ? (p.note[L] || p.note.nl) : "", L);
+    const priv = [note.priv, p.sandraNote ? (p.sandraNote[L] || p.sandraNote.nl) : ""].filter(Boolean).join(" ");
     return `<div class="ingr-card">
         <p class="ingr-card__name">${esc(ingrName(p))}</p>
         ${hits.length ? `<p class="ingr-card__hit">⚠️ ${t("ingr_contains", L)} <b>${esc([...new Set(hits)].join(", "))}</b></p>` : ""}
-        ${p.note ? `<p class="ingr-card__note">${esc(p.note[L] || p.note.nl)}</p>` : ""}
+        ${note.pub ? `<p class="ingr-card__note">${esc(note.pub)}</p>` : ""}
+        ${priv && ingrSandra() ? `<p class="ingr-card__note ingr-card__note--sandra">🔒 ${esc(priv)}</p>` : ""}
         <p class="ingr-muted">${t("ingr_used_in", L)} ${esc((p.usedIn || []).map(ingrTreatName).join(", ") || "—")}</p>
         <details class="ingr-inci"><summary>${t("ingr_full_list", L)}</summary><p>${inci ? esc(inci) : t("ingr_inci_missing", L)}</p></details>
       </div>`;
