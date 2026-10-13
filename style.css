@@ -1253,3 +1253,13 @@ p.season-card__shop{ text-decoration:none; margin:2px 0 0; font-style:italic; }
 .open-row__status{ font-size:12.5px; margin:6px 0 0; }
 .open-row__btns{ display:flex; gap:8px; align-items:center; margin-top:6px; }
 .open-row__hint{ margin:-2px 0 6px; font-size:12px; }
+
+/* v111 — "Opgebruiken": use-up actions (only Sandra) */
+.useup{ border:1px solid var(--line, #e7dfd6); border-radius:12px; padding:12px 14px; margin:10px 0; background:var(--card, #fffdfa); }
+.useup.is-now{ border-color:var(--accent, #b08d6e); }
+.useup__name{ margin:0 0 2px; font-weight:600; }
+.useup__offer{ margin:6px 0; font-family:var(--font-serif, Georgia, serif); font-size:16px; }
+.useup__txt{ margin:6px 0; }
+.useup__txt summary{ cursor:pointer; font-size:14px; }
+.useup__txt pre{ white-space:pre-wrap; font:inherit; font-size:13px; background:var(--soft, #f6f1ea); padding:10px; border-radius:8px; margin:6px 0; }
+.useup__btns{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }

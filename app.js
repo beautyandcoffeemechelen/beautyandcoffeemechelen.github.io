@@ -3674,8 +3674,8 @@
     if (!ingrHasConfig()){ body.innerHTML = `<p class="ingr-note">${t("ingr_none_config", L)}</p>`; return; }
     if (!ingrAllowed()){ body.innerHTML = `<p class="ingr-note">${t("ingr_not_yet", L)}</p>`; return; }
     const sandra = ingrSandra();
-    if (!sandra && (ingr.tab === "todo" || ingr.tab === "order" || ingr.tab === "open")) ingr.tab = "search";
-    const tabs = (sandra ? ["search", "treat", "order", "open", "todo"] : ["search", "treat"]).map(k => `<button type="button" class="chip${ingr.tab === k ? " is-selected" : ""}" data-action="ingr-tab" data-tab="${k}" aria-pressed="${ingr.tab === k}">${t("ingr_tab_" + k, L)}</button>`).join("");
+    if (!sandra && (ingr.tab === "todo" || ingr.tab === "order" || ingr.tab === "open" || ingr.tab === "useup")) ingr.tab = "search";
+    const tabs = (sandra ? ["search", "treat", "order", "open", "useup", "todo"] : ["search", "treat"]).map(k => `<button type="button" class="chip${ingr.tab === k ? " is-selected" : ""}" data-action="ingr-tab" data-tab="${k}" aria-pressed="${ingr.tab === k}">${t("ingr_tab_" + k, L)}</button>`).join("");
     let html = ingrIsLive() ? "" : `<div class="advent-preview ingr-preview"><p>🧪 <b>${t("ingr_pv_title", L)}</b> — ${t("ingr_pv_text", L).replace("{d}", advFmt(INGREDIENTS_LIVE.liveFrom))}</p></div>`;
     html += `<div class="ingr-tabs" role="tablist">${tabs}</div>`;
     if (ingr.tab === "search"){
@@ -3692,6 +3692,8 @@
       html += ingrOrderHtml();
     } else if (ingr.tab === "open"){
       html += ingrOpenHtml();
+    } else if (ingr.tab === "useup"){
+      html += useupHtml();
     } else {
       const noInci = ingrCatalog().map(([, p]) => p).filter(p => !ingrInci(p));
       const noProd = ingrTreatments().filter(id => !ingrProductsFor(id).length);
@@ -3835,6 +3837,141 @@
       if (localStorage.getItem(k) === today) return;
       localStorage.setItem(k, today);
       setTimeout(() => showToast(t("ingr_open_toast", state.lang).replace("{n}", due.length)), 1800);
+    } catch(e){}
+  }
+
+  /* tab "Opgebruiken" (only Sandra, v111): a product with a date (THT or opened +
+     months) gets a use-up action of ~2 months, ending a week before the date.
+     Actions are spread out: a new one starts at least 3 weeks after the previous
+     one, so never everything at once. Per action: which treatments, 10% off
+     (or a free extra for masks), and ready-made texts for the WordPress
+     newsletter/blog (with SEO) and for Instagram/Facebook. The texts never say
+     that a product expires. */
+  const USEUP_WEEKS = 8, USEUP_GAP_DAYS = 21, USEUP_PREP_DAYS = 7, USEUP_HORIZON = 150;
+  const USEUP_DONE_KEY = "bc_useup_done_v1", USEUP_SEEN_KEY = "bc_useup_seen_v1";
+  function useupGet(k){ try { const x = JSON.parse(localStorage.getItem(k) || "{}"); return x && typeof x === "object" ? x : {}; } catch(e){ return {}; } }
+  function useupSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+  const dKey = dt => `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,"0")}-${String(dt.getDate()).padStart(2,"0")}`;
+  const dAdd = (dt, n) => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate() + n);
+  function useupTreats(p){
+    const cat = typeof TREATMENTS_CATALOG !== "undefined" ? TREATMENTS_CATALOG : [];
+    const ids = (p.usedIn || []);
+    if (ids.includes("extra-facial")) return { extra:true, list: cat.filter(x => ["signaturefacial","antiagefacial","expressfacial"].includes(x.id)).slice(0, 2) };
+    const list = ids.map(id => cat.find(x => x.id === id)).filter(Boolean);
+    list.sort((a, b) => (b.promoted ? 1 : 0) - (a.promoted ? 1 : 0));
+    return { extra:false, list: list.slice(0, 2) };
+  }
+  const USEUP_SKIP_SLOTS = ["tooldisinfect","toolclean","disinfect","handdisinfect","nailclean","naildegrease","waxtalc","spf","antiseptic","cuticle","footrefresh"];
+  function useupPlan(){
+    const done = useupGet(USEUP_DONE_KEY), today = new Date(todayKey() + "T00:00:00");
+    const items = ingrCatalog().map(([id, p]) => ({ id, p, info: openInfo(id) }))
+      .filter(x => x.info && !x.info.incomplete && x.info.days >= 14 && x.info.days <= USEUP_HORIZON && !done[x.id] && !USEUP_SKIP_SLOTS.includes(x.p.slot))
+      .map(x => ({ ...x, tr: useupTreats(x.p) })).filter(x => x.tr.list.length)
+      .sort((a, b) => a.info.exp - b.info.exp);
+    // ideal: start 8 weeks before the end; when two start too close together,
+    // the earlier one starts sooner (more time), never later
+    items.forEach(x => { x.end = dAdd(x.info.exp, -7); x.start = dAdd(x.end, -USEUP_WEEKS * 7); });
+    for (let i = items.length - 2; i >= 0; i--){
+      const lim = dAdd(items[i + 1].start, -USEUP_GAP_DAYS);
+      if (items[i].start > lim) items[i].start = lim;
+    }
+    // not in the past; then keep the gap going forward
+    let prev = null;
+    items.forEach(x => {
+      if (x.start < today) x.start = today;
+      if (prev && x.start < dAdd(prev, USEUP_GAP_DAYS)) x.start = dAdd(prev, USEUP_GAP_DAYS);
+      if (x.start > dAdd(x.end, -14)) x.start = dAdd(x.end, -14);
+      prev = x.start;
+    });
+    const soon = dAdd(today, USEUP_PREP_DAYS);
+    return items.map(x => {
+      const weeks = Math.max(1, Math.round((x.end - x.start) / (7 * 86400000)));
+      return { ...x, prep: dAdd(x.start, -USEUP_PREP_DAYS), weeks, short: weeks < 6 && x.start <= soon };
+    });
+  }
+  function useupEur(price){ const m = String(price || "").match(/€\s*(\d+(?:[.,]\d+)?)/); return m ? Number(m[1].replace(",", ".")) : 0; }
+  function useupTexts(a, L){
+    const tx = k => t(k, L), f = d => advFmt(dKey(d)), tn = tr => trName(tr.name, L);
+    const prod = ingrName(a.p).replace(/\s*\([^)]*\)\s*/g, " ").replace(/\s+–\s+.*$/, m => m).trim();
+    const lines = a.tr.list.map(tr => {
+      const eur = useupEur(tr.price), nm = tn(tr);
+      if (a.tr.extra) return tx("useup_line_extra").replace("{t}", nm);
+      return eur ? tx("useup_line_disc").replace("{t}", nm).replace("{new}", "€" + (Math.round(eur * 0.9 * 2) / 2).toString().replace(".", ",")).replace("{old}", "€" + eur) : tx("useup_line_disc_noprice").replace("{t}", nm);
+    });
+    const first = a.tr.list[0] ? tn(a.tr.list[0]) : "";
+    const offer = a.tr.extra ? tx("useup_offer_extra").replace("{p}", prod) : tx("useup_offer_disc").replace("{t}", first);
+    const period = tx("useup_period").replace("{s}", f(a.start)).replace("{e}", f(a.end));
+    const why = (ingrSplitNote(a.p.note ? (a.p.note[L] || a.p.note.nl) : "", L).pub || "").split(/(?<=[.!?])\s/)[0] || "";
+    const cut = (v, n) => v.length <= n ? v : v.slice(0, n).replace(/\s+\S*$/, "");
+    const seoTitle = (offer + " | Beauty & Coffee Mechelen").length <= 60 ? offer + " | Beauty & Coffee Mechelen" : cut(offer + " | Beauty & Coffee", 60);
+    const slug = (first + "-actie-mechelen").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const news = [
+      tx("useup_news_title_lbl") + " " + offer,
+      tx("useup_seo_title_lbl") + " " + seoTitle,
+      tx("useup_seo_meta_lbl") + " " + cut(offer + ". " + period + " " + tx("useup_seo_meta_tail"), 155),
+      tx("useup_seo_slug_lbl") + " " + slug,
+      tx("useup_seo_kw_lbl") + " " + [first, "Mechelen", tx("useup_kw_extra")].filter(Boolean).join(", "),
+      "",
+      tx("useup_news_intro").replace("{p}", prod) + (why ? " " + why : ""),
+      "",
+      lines.map(l => "• " + l).join("\n"),
+      "",
+      period + " " + tx("useup_terms"),
+      tx("useup_cta")
+    ].join("\n");
+    const social = [
+      offer,
+      "",
+      tx("useup_social_intro").replace("{p}", prod),
+      lines.map(l => "• " + l).join("\n"),
+      "",
+      period + " " + tx("useup_terms_short"),
+      tx("useup_cta_social"),
+      "",
+      tx("useup_hashtags")
+    ].join("\n");
+    return { offer, news, social };
+  }
+  function useupCalUrl(a, L){
+    const f = dt => dKey(dt).replace(/-/g, ""), name = ingrName(a.p);
+    const title = t("useup_cal_title", L).replace("{p}", name);
+    const det = t("useup_cal_text", L).replace("{s}", advFmt(dKey(a.start))).replace("{e}", advFmt(dKey(a.end)));
+    return "https://calendar.google.com/calendar/render?action=TEMPLATE" + `&text=${encodeURIComponent(title)}&dates=${f(a.prep)}/${f(dAdd(a.prep, 1))}&details=${encodeURIComponent(det)}`;
+  }
+  function useupHtml(){
+    const L = state.lang, plan = useupPlan(), today = todayKey();
+    let html = `<p class="ingr-note">${t("useup_intro", L)}</p>`;
+    if (!plan.length) return html + `<p class="ingr-muted">${t("useup_none", L)}</p>`;
+    plan.forEach(a => {
+      const tx = useupTexts(a, L), now = dKey(a.prep) <= today;
+      const mail = `mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent(t("useup_mail_subject", L).replace("{o}", tx.offer))}&body=${encodeURIComponent(t("useup_news_head", L) + "\n\n" + tx.news + "\n\n— — —\n\n" + t("useup_social_head", L) + "\n\n" + tx.social)}`;
+      html += `<div class="useup${now ? " is-now" : ""}">
+        <p class="useup__name">${esc(ingrName(a.p))}</p>
+        <p class="ingr-muted">${t("useup_dates", L).replace("{s}", advFmt(dKey(a.start))).replace("{e}", advFmt(dKey(a.end))).replace("{x}", advFmt(a.info.expKey)).replace("{w}", a.weeks)}${a.short ? " · " + t("useup_short", L) : ""}</p>
+        <p class="useup__offer">${esc(tx.offer)}</p>
+        <details class="useup__txt"><summary>${t("useup_news_head", L)}</summary><pre>${esc(tx.news)}</pre>
+          <button type="button" class="btn btn--sm btn--ghost" data-action="ingr-op-copy" data-code="${esc(tx.news)}">${t("ingr_op_copy", L)}</button></details>
+        <details class="useup__txt"><summary>${t("useup_social_head", L)}</summary><pre>${esc(tx.social)}</pre>
+          <button type="button" class="btn btn--sm btn--ghost" data-action="ingr-op-copy" data-code="${esc(tx.social)}">${t("ingr_op_copy", L)}</button></details>
+        <div class="useup__btns">
+          <a class="btn btn--sm btn--outline" href="${esc(mail)}">${t("useup_mail", L)}</a>
+          <a class="btn btn--sm btn--outline" href="${esc(useupCalUrl(a, L))}" target="_blank" rel="noopener">${t("ingr_open_cal", L)}</a>
+          <button type="button" class="btn btn--sm btn--ghost" data-action="useup-done" data-id="${esc(a.id)}">${t("useup_done", L)}</button>
+        </div></div>`;
+    });
+    const done = Object.keys(useupGet(USEUP_DONE_KEY));
+    if (done.length) html += `<p class="ingr-muted">${t("useup_done_count", L).replace("{n}", done.length)} <button type="button" class="btn btn--sm btn--ghost" data-action="useup-reset">${t("useup_reset", L)}</button></p>`;
+    return html;
+  }
+  // once per action on Sandra's phone: a week before the start, a gentle note
+  function useupToast(){
+    try {
+      if (!ingrSandra()) return;
+      const seen = useupGet(USEUP_SEEN_KEY), today = todayKey();
+      const due = useupPlan().filter(a => dKey(a.prep) <= today && !seen[a.id]);
+      if (!due.length) return;
+      due.forEach(a => { seen[a.id] = today; }); useupSet(USEUP_SEEN_KEY, seen);
+      setTimeout(() => showToast(t("useup_toast", state.lang).replace("{p}", ingrName(due[0].p)).replace("{n}", due.length)), 4200);
     } catch(e){}
   }
 
@@ -5047,6 +5184,7 @@
     setupCameraZoom();
     try { setupAgentTools(); } catch(e){ /* AI tools are optional */ }
     openDueToast();
+    useupToast();
     const newsletterForm = $("#newsletterForm");
     if (newsletterForm) newsletterForm.addEventListener("submit", submitNewsletter);
     setupNewsletterCard();
@@ -5113,6 +5251,8 @@
       if (action === "open-houserules") goTo("houserules");
       if (action === "open-ingredients") ingrOpen();
       if (action === "ingr-tab"){ ingr.tab = el.dataset.tab; renderIngredients(); }
+      if (action === "useup-done"){ const d = useupGet(USEUP_DONE_KEY); d[el.dataset.id] = todayKey(); useupSet(USEUP_DONE_KEY, d); renderIngredients(); }
+      if (action === "useup-reset"){ useupSet(USEUP_DONE_KEY, {}); renderIngredients(); }
       if (action === "ingr-op") ingrToggleOp(el.dataset.id);
       if (action === "open-clear"){ openSave(el.dataset.id, null); renderIngredients(); }
       if (action === "ingr-op-copy"){ const c = el.dataset.code; try { navigator.clipboard.writeText(c).then(() => showToast(t("ingr_op_copied", state.lang)), () => showToast(c)); } catch(e){ showToast(c); } }
