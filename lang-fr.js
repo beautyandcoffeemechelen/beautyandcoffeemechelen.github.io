@@ -2130,7 +2130,39 @@
   "SK38": "Ne jugez un parfum qu'après un quart d'heure sur la peau : c'est là que les notes de cœur ressortent.",
   "SK39": "L'eau de rose est le « sous-produit » de la distillation de l'huile de rose : un hydrolat.",
   "SK40": "Les huiles essentielles sont très puissantes et s'utilisent toujours diluées : un peu suffit amplement.",
-  "SK41": "Après de l'huile de bergamote ou d'orange sur la peau, restez hors du soleil au moins 12 heures, sinon des taches brunes peuvent apparaître."
+  "SK41": "Après de l'huile de bergamote ou d'orange sur la peau, restez hors du soleil au moins 12 heures, sinon des taches brunes peuvent apparaître.",
+  "BR1": "Un poil de sourcil pousse activement environ 1 à 2 mois, puis vient une courte phase de transition et une phase de repos de 2 à 4 mois.",
+  "BR2": "À tout moment, seuls 40 % environ de vos poils de sourcils sont en phase de croissance. C’est pourquoi on laisse reposer les sourcils entre deux soins.",
+  "BR3": "Une brow lamination donne un joli effet « brushed-up » qui tient environ 4 à 6 semaines.",
+  "BR4": "Une lamination agit en deux étapes : d’abord les liaisons de la kératine du poil sont assouplies, puis elles sont refixées dans la nouvelle forme.",
+  "BR5": "Le henné et la brow lamination ne se combinent pas le même jour : c’est l’un ou l’autre. Une teinture classique après une lamination, c’est possible.",
+  "BR6": "Premier henné des sourcils ? On commence avec une teinte un peu plus claire ou un temps de pose plus court, pour s’habituer en douceur au nouveau look.",
+  "BR7": "Effet ombré : on retire un peu plus tôt la couleur au début du sourcil, qui commence ainsi en douceur et s’intensifie vers la queue.",
+  "BR8": "La teinture classique ne colore que les poils. Le henné teinte aussi légèrement la peau en dessous, pour un effet plus fourni.",
+  "BR9": "Une alimentation riche en protéines, les vitamines C et B et un massage doux favorisent une pousse forte, sourcils compris.",
+  "BR10": "Le henné est d’abord testé sur une petite zone de peau. Après 48 heures, on sait que la peau le tolère bien.",
+  "MN1": "Les hommes utilisent du « maquillage » depuis la préhistoire : les chasseurs se coloraient le visage pour se camoufler.",
+  "MN2": "La peau masculine est souvent plus épaisse, avec plus de glandes sébacées et plus grandes : une peau un peu plus grasse est donc normale chez l’homme.",
+  "MN3": "Le pH de la peau masculine est un peu plus élevé (environ 5,6 à 6,3) que celui de la peau féminine (environ 5,1 à 5,8).",
+  "MN4": "Venez volontiers non rasé à un soin du visage : la peau se montre telle qu’elle est et on peut suivre le sens de pousse de la barbe.",
+  "MN5": "Un massage du visage pour homme suit le sens de pousse de la barbe : c’est apaisant, à rebrousse-poil cela peut piquer.",
+  "MN6": "Avec une barbe, un peeling aux enzymes ou aux acides convient mieux qu’un gommage à grains, qui restent coincés entre les poils.",
+  "MN7": "Le rasage épaissit peu à peu la couche supérieure de la peau et peut provoquer des poils incarnés. Un peeling doux aide.",
+  "MN8": "Les poils masculins du dos ou du torse sont plus forts : on épile donc par petites bandes, avec un soin apaisant après.",
+  "MN9": "Les poils du nez apparaissent souvent vers 40 ans, ceux des oreilles vers 50. On peut les retirer soigneusement au salon.",
+  "HV1": "Votre épiderme se renouvelle environ tous les 28 jours : de nouvelles cellules remontent depuis la couche la plus profonde.",
+  "HV2": "Avec les années, ce renouvellement ralentit à environ 5 à 6 semaines. Un peeling doux régulier redonne alors un coup de fraîcheur.",
+  "HV3": "La barrière cutanée ressemble à un mur de briques : les cellules sont les briques, les lipides le ciment qui tient le tout.",
+  "HV4": "Les rides dynamiques n’apparaissent qu’en bougeant, en souriant ou en fronçant. Les rides statiques restent visibles au repos.",
+  "HV5": "Les pattes d’oie viennent aussi de la lecture ou des écrans. La peau autour des yeux est fine : offrez-lui un soin des yeux.",
+  "HV6": "La lumière du soleil se compose d’environ 50 % d’infrarouges (ressentis comme chaleur), 45 % de lumière visible et seulement 5 % d’UV.",
+  "HV7": "Le vieillissement de la peau dépend des gènes et du mode de vie : soleil, sommeil, alimentation et détente font une grande différence.",
+  "HV8": "Une tache de vieillesse a aussi de plus jolis noms : tache solaire, ou même « tache d’expérience ».",
+  "HS1": "Pendant un massage aux pierres chaudes, les pierres sont à environ 50 °C : délicieusement chaudes et toujours agréables.",
+  "HS2": "Après chaque soin, les pierres sont nettoyées et frottées d’huile d’arbre à thé, ce qui leur donne peu à peu leur beau noir profond.",
+  "HS3": "Un massage aux pierres chaudes est volontairement lent : les pierres ont besoin de temps pour transmettre leur chaleur aux muscles.",
+  "HS4": "Pour les pierres chaudes, on utilise une huile douce et relaxante comme l’huile d’amande douce, jamais une huile chauffante : les pierres chauffent déjà.",
+  "HS5": "Une pierre trop chaude ou pas assez ? Dites-le simplement, on l’ajuste aussitôt."
  }
 };
 
@@ -2192,7 +2224,7 @@
   if (typeof PRACTICE_FACTS !== "undefined") {
     PRACTICE_FACTS.forEach(f => setFr(f, FR.practiceFacts[f.code]));
   }
-  [CELL_FACTS, NAIL_FACTS, LASH_FACTS, FACIAL_FACTS, SKINKNOW_FACTS].forEach(arr => {
+  [CELL_FACTS, NAIL_FACTS, LASH_FACTS, FACIAL_FACTS, SKINKNOW_FACTS, (typeof EXTRA_FACTS !== "undefined" ? EXTRA_FACTS : undefined)].forEach(arr => {
     if (typeof arr !== "undefined") arr.forEach(f => setFr(f, FR.moreFacts[f.code]));
   });
 

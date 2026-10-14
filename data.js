@@ -1670,7 +1670,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v125 · 14/10/2026";
+const APP_VERSION = "v126 · 14/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -2680,18 +2680,59 @@ const SKINKNOW_FACTS = [
 const MORE_FACT_POOLS = {
   cellIntro: true,
   byTreatment: {
-    expressfacial:["GV","SK"], lashtint:["LL","LT"], manicureexpress:["NA","NB","NC","ND","NE","NF"], cateye:["NA","NB","NC","ND","NE","NF"], harmonizingback:["GV","SK"], teambeauty:["GV"],
+    expressfacial:["GV", "SK", "HV", "MN"], lashtint:["LL","LT"], manicureexpress:["NA","NB","NC","ND","NE","NF"], cateye:["NA","NB","NC","ND","NE","NF"], harmonizingback:["GV","SK"], teambeauty:["GV"],
     manicure:["NA","NB","NC","ND","NE","NF"], manipedispa:["NA","NB","NC","ND","NE","NF"],
     pedicure:["NA","NB","NC","ND","NE","NF"], pedicureexpress:["NA","NB","NC","ND","NE","NF"],
-    lashlift:["LL","LT"],
-    hydrapeel:["GV","SK"], signaturefacial:["GV","SK"], fillme:["GV","SK"],
-    fruitacid:["GV","SK"], liftsummere:["GV","SK"], antiagefacial:["GV","SK"],
+    lashlift:["LL", "LT", "BR"],
+    hydrapeel:["GV", "SK", "HV"], signaturefacial:["GV", "SK", "HV", "MN"], fillme:["GV", "SK", "HV"],
+    fruitacid:["GV", "SK", "HV"], liftsummere:["GV", "SK", "HV"], antiagefacial:["GV", "SK", "HV"],
     detoxback:["GV","SK"], harmonizingbody:["GV","SK"], fullbodywrap:["GV","SK"],
-    facialworkshop:["GV","SK"], makeupworkshop:["GV"],
-    hotstone:["GV"], swedish:["GV"], swedishbackneck:["GV"], swedishlegs:["GV"],
-    backwrap:["GV"], slimmassage:["GV"], cupping:["GV"], cuppingpeeling:["GV"]
+    facialworkshop:["GV", "SK", "HV"], makeupworkshop:["GV"],
+    hotstone:["GV", "HS"], swedish:["GV"], swedishbackneck:["GV"], swedishlegs:["GV"],
+    backwrap:["GV"], slimmassage:["GV"], cupping:["GV"], cuppingpeeling:["GV"], browtint:["BR"], browlift:["BR"], hennabrows:["BR"], browshaping:["BR"], rug:["MN"], borst:["MN"], borstbuik:["MN"], schouders:["MN"]
   }
 };
+
+
+/* ============================================================
+   EXTRA FACTS (v126, 14/10/2026) from the Syntra courses:
+   BR brow lamination/henna, MN herenverzorging, HV huidveroudering,
+   HS hot stone. Client-facing, neutral. FR in lang-fr.js moreFacts.
+   ============================================================ */
+const EXTRA_FACTS = [
+  { code:"BR1", theme:"BR", nl:"Een wenkbrauwhaar groeit actief ongeveer 1 tot 2 maanden. Daarna volgen een korte overgangsfase en een rustfase van 2 tot 4 maanden.", en:"A brow hair grows actively for about 1 to 2 months, followed by a short transition phase and a resting phase of 2 to 4 months." },
+  { code:"BR2", theme:"BR", nl:"Op elk moment zit maar ongeveer 40% van je wenkbrauwharen in de groeifase. Daarom gun je je wenkbrauwen even rust tussen twee behandelingen.", en:"At any moment only about 40% of your brow hairs are in the growth phase. That is why your brows get a little rest between two treatments." },
+  { code:"BR3", theme:"BR", nl:"Een brow lamination geeft een mooi ‘brushed-up’ effect dat ongeveer 4 tot 6 weken blijft.", en:"A brow lamination gives a lovely ‘brushed-up’ effect that lasts about 4 to 6 weeks." },
+  { code:"BR4", theme:"BR", nl:"Een lamination werkt in twee stappen: eerst worden de bruggetjes in de keratine van het haar losgemaakt, daarna worden ze in de nieuwe vorm weer vastgezet.", en:"A lamination works in two steps: first the small bonds in the hair’s keratin are loosened, then they are set again in the new shape." },
+  { code:"BR5", theme:"BR", nl:"Henna en brow lamination combineer je niet op dezelfde dag: het is het één of het ander. Klassieke verf na een lamination kan wel.", en:"Henna and brow lamination are not combined on the same day: it’s one or the other. Classic tint after a lamination is fine." },
+  { code:"BR6", theme:"BR", nl:"Een eerste keer henna brows? Dan start je met een iets lichtere kleur of een kortere inwerktijd. Zo kan je rustig wennen aan je nieuwe look.", en:"First time henna brows? Then you start with a slightly lighter colour or a shorter processing time, so you can get used to your new look." },
+  { code:"BR7", theme:"BR", nl:"Een ombre-effect: de aanzet van de wenkbrauw wordt iets vroeger afgenomen. Zo begint hij zacht en wordt hij naar de staart toe intenser.", en:"An ombré effect: the start of the brow is removed a little earlier, so it begins soft and becomes more intense towards the tail." },
+  { code:"BR8", theme:"BR", nl:"Klassieke wenkbrauwverf kleurt enkel de haartjes. Henna kleurt ook de huid er licht onder, voor een voller effect.", en:"Classic brow tint only colours the hairs. Henna also lightly tints the skin underneath, for a fuller effect." },
+  { code:"BR9", theme:"BR", nl:"Eiwitrijke voeding, vitamine C en B en een zachte massage ondersteunen een sterke haargroei, ook van je wenkbrauwen.", en:"Protein-rich food, vitamins C and B and a gentle massage support strong hair growth, your brows included." },
+  { code:"BR10", theme:"BR", nl:"Henna wordt vooraf even getest op een klein plekje huid. Na 48 uur weet je dat je huid het goed verdraagt.", en:"Henna is first tested on a small patch of skin. After 48 hours you know your skin tolerates it well." },
+  { code:"MN1", theme:"MN", nl:"Mannen gebruiken al sinds de oertijd ‘make-up’: jagers kleurden hun gezicht als camouflage om dichter bij het wild te komen.", en:"Men have used ‘make-up’ since prehistoric times: hunters coloured their faces as camouflage to get closer to their prey." },
+  { code:"MN2", theme:"MN", nl:"Een mannenhuid is meestal dikker en heeft meer en grotere talgklieren. Een wat vettere huid is bij mannen dus heel normaal.", en:"Men’s skin is usually thicker, with more and larger sebaceous glands, so slightly oilier skin is perfectly normal for men." },
+  { code:"MN3", theme:"MN", nl:"De pH van een mannenhuid ligt iets hoger (ongeveer 5,6 tot 6,3) dan die van een vrouwenhuid (ongeveer 5,1 tot 5,8).", en:"The pH of men’s skin is slightly higher (about 5.6 to 6.3) than that of women’s skin (about 5.1 to 5.8)." },
+  { code:"MN4", theme:"MN", nl:"Kom gerust ongeschoren naar een gelaatsverzorging: dan zie ik je huid zoals ze echt is en kan ik de groeirichting van je baard volgen.", en:"Feel free to come unshaven to a facial: then your skin can be seen as it really is and the direction of your beard growth can be followed." },
+  { code:"MN5", theme:"MN", nl:"Een gelaatsmassage voor mannen volgt de groeirichting van de baard. Dat voelt kalmerend, tegen de haren in kan prikken.", en:"A facial massage for men follows the direction of the beard growth. That feels calming; against the hairs it can sting." },
+  { code:"MN6", theme:"MN", nl:"Bij een baard werkt een peeling met enzymen of zuren beter dan een korrelpeeling: korreltjes blijven tussen de haartjes hangen.", en:"With a beard, an enzyme or acid peel works better than a grainy scrub: grains get stuck between the hairs." },
+  { code:"MN7", theme:"MN", nl:"Scheren maakt de bovenste huidlaag na verloop van tijd dikker en kan ingegroeide haartjes geven. Een zachte peeling helpt.", en:"Shaving gradually thickens the top layer of the skin and can cause ingrown hairs. A gentle peel helps." },
+  { code:"MN8", theme:"MN", nl:"Mannenhaar op rug of borst is sterker. Daarom wordt er met kleine stroken gewaxt, met een kalmerende verzorging achteraf.", en:"Men’s hair on the back or chest is stronger, so waxing is done in small strips, with soothing care afterwards." },
+  { code:"MN9", theme:"MN", nl:"Neusharen verschijnen vaak rond 40 jaar, oorharen rond 50. Netjes en voorzichtig verwijderen kan gewoon in het salon.", en:"Nose hair often appears around 40, ear hair around 50. Neat, careful removal can simply be done in the salon." },
+  { code:"HV1", theme:"HV", nl:"Je opperhuid vernieuwt zich ongeveer elke 28 dagen: van de onderste laag schuiven nieuwe cellen naar boven.", en:"Your outer skin renews itself about every 28 days: new cells move up from the lowest layer." },
+  { code:"HV2", theme:"HV", nl:"Met de jaren vertraagt die vernieuwing tot zo’n 5 à 6 weken. Een regelmatige zachte peeling geeft de huid dan een frisse boost.", en:"Over the years that renewal slows to about 5 to 6 weeks. A regular gentle peel then gives the skin a fresh boost." },
+  { code:"HV3", theme:"HV", nl:"Je huidbarrière lijkt op een bakstenen muur: de huidcellen zijn de stenen, de huidvetten het cement dat alles samenhoudt.", en:"Your skin barrier is like a brick wall: the skin cells are the bricks, the skin lipids the mortar holding it together." },
+  { code:"HV4", theme:"HV", nl:"Dynamische rimpels zie je alleen als je beweegt, zoals lachen of fronsen. Statische rimpels blijven ook in rust zichtbaar.", en:"Dynamic wrinkles only show when you move, like smiling or frowning. Static wrinkles stay visible at rest too." },
+  { code:"HV5", theme:"HV", nl:"Kraaienpootjes ontstaan ook door veel lezen of naar een scherm kijken. De huid rond de ogen is dun: verwen ze met een oogverzorging.", en:"Crow’s feet also come from lots of reading or screen time. The skin around the eyes is thin: treat it to an eye care." },
+  { code:"HV6", theme:"HV", nl:"Zonlicht bestaat voor ongeveer 50% uit infrarood (die je als warmte voelt), 45% zichtbaar licht en maar zo’n 5% UV.", en:"Sunlight is about 50% infrared (felt as warmth), 45% visible light and only about 5% UV." },
+  { code:"HV7", theme:"HV", nl:"Hoe je huid ouder wordt, hangt af van je genen én van je levensstijl: zon, slaap, voeding en ontspanning maken een groot verschil.", en:"How your skin ages depends on your genes and on your lifestyle: sun, sleep, food and relaxation make a big difference." },
+  { code:"HV8", theme:"HV", nl:"Een ouderdomsvlek heeft ook mooiere namen: zonnevlek of zelfs ‘ervaringsvlek’.", en:"An age spot has nicer names too: sun spot or even ‘experience spot’." },
+  { code:"HS1", theme:"HS", nl:"Tijdens een hot stone massage zijn de stenen ongeveer 50 °C: heerlijk warm, maar altijd aangenaam voor de huid.", en:"During a hot stone massage the stones are about 50 °C: wonderfully warm, yet always comfortable on the skin." },
+  { code:"HS2", theme:"HS", nl:"De stenen worden na elke behandeling gereinigd en met tea tree-olie ingewreven. Zo krijgen ze na verloop van tijd hun mooie diepzwarte kleur.", en:"After every treatment the stones are cleaned and rubbed with tea tree oil, which gradually gives them their beautiful deep black colour." },
+  { code:"HS3", theme:"HS", nl:"Een hot stone massage gaat bewust langzaam: de stenen hebben tijd nodig om hun warmte aan je spieren af te geven.", en:"A hot stone massage is deliberately slow: the stones need time to pass their warmth on to your muscles." },
+  { code:"HS4", theme:"HS", nl:"Bij hot stone gebruik ik een zachte, ontspannende olie zoals zoete amandelolie, en nooit een verwarmende olie: de stenen zorgen al voor de warmte.", en:"Hot stone uses a soft, relaxing oil such as sweet almond oil, never a warming oil: the stones already provide the warmth." },
+  { code:"HS5", theme:"HS", nl:"Een steen te warm of net niet warm genoeg? Zeg het gerust, dan wordt hij meteen aangepast.", en:"A stone too warm or not quite warm enough? Just say so and it’s adjusted straight away." },
+];
 
 /* ============================================================
    UPSELL SUGGESTIONS — small add-ons shown on the result screen.

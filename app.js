@@ -1431,7 +1431,8 @@
     .concat(typeof NAIL_FACTS !== "undefined" ? NAIL_FACTS : [])
     .concat(typeof LASH_FACTS !== "undefined" ? LASH_FACTS : [])
     .concat(typeof FACIAL_FACTS !== "undefined" ? FACIAL_FACTS : [])
-    .concat(typeof SKINKNOW_FACTS !== "undefined" ? SKINKNOW_FACTS : []);
+    .concat(typeof SKINKNOW_FACTS !== "undefined" ? SKINKNOW_FACTS : [])
+    .concat(typeof EXTRA_FACTS !== "undefined" ? EXTRA_FACTS : []);
   function factPoolFor(m){
     if (m.isKid) return SKIN_FACTS.filter(f => SKIN_FACT_POOLS.kids.includes(f.theme));
     const skinThemes = SKIN_FACT_POOLS.byTreatment[m.treatment.id] || null;
@@ -1450,6 +1451,7 @@
         pool.push(...FACIAL_FACTS.filter(f => moreThemes.includes(f.theme)));
         pool.push(...SKINKNOW_FACTS.filter(f => moreThemes.includes(f.theme)));
       }
+      if (typeof EXTRA_FACTS !== "undefined") pool.push(...EXTRA_FACTS.filter(f => moreThemes.includes(f.theme)));
     }
     if (typeof CELL_FACTS !== "undefined" && pool.length) pool.push(...CELL_FACTS);
     return pool.length ? pool : ALL_FACTS.slice();
