@@ -1670,7 +1670,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v126 · 14/10/2026";
+const APP_VERSION = "v127 · 14/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -2680,16 +2680,16 @@ const SKINKNOW_FACTS = [
 const MORE_FACT_POOLS = {
   cellIntro: true,
   byTreatment: {
-    expressfacial:["GV", "SK", "HV", "MN"], lashtint:["LL","LT"], manicureexpress:["NA","NB","NC","ND","NE","NF"], cateye:["NA","NB","NC","ND","NE","NF"], harmonizingback:["GV","SK"], teambeauty:["GV"],
-    manicure:["NA","NB","NC","ND","NE","NF"], manipedispa:["NA","NB","NC","ND","NE","NF"],
+    expressfacial:["GV", "SK", "HV"], lashtint:["LL", "LT", "LS"], manicureexpress:["NA", "NB", "NC", "ND", "NE", "NF", "MC"], cateye:["NA", "NB", "NC", "ND", "NE", "NF", "MC"], harmonizingback:["GV", "SK", "MU"], teambeauty:["GV"],
+    manicure:["NA", "NB", "NC", "ND", "NE", "NF", "MC"], manipedispa:["NA", "NB", "NC", "ND", "NE", "NF", "MC"],
     pedicure:["NA","NB","NC","ND","NE","NF"], pedicureexpress:["NA","NB","NC","ND","NE","NF"],
-    lashlift:["LL", "LT", "BR"],
-    hydrapeel:["GV", "SK", "HV"], signaturefacial:["GV", "SK", "HV", "MN"], fillme:["GV", "SK", "HV"],
+    lashlift:["LL", "LT", "BR", "LS"],
+    hydrapeel:["GV", "SK", "HV"], signaturefacial:["GV", "SK", "HV"], fillme:["GV", "SK", "HV"],
     fruitacid:["GV", "SK", "HV"], liftsummere:["GV", "SK", "HV"], antiagefacial:["GV", "SK", "HV"],
-    detoxback:["GV","SK"], harmonizingbody:["GV","SK"], fullbodywrap:["GV","SK"],
+    detoxback:["GV", "SK", "BS"], harmonizingbody:["GV", "SK", "BS", "MU"], fullbodywrap:["GV", "SK", "BS"],
     facialworkshop:["GV", "SK", "HV"], makeupworkshop:["GV"],
-    hotstone:["GV", "HS"], swedish:["GV"], swedishbackneck:["GV"], swedishlegs:["GV"],
-    backwrap:["GV"], slimmassage:["GV"], cupping:["GV"], cuppingpeeling:["GV"], browtint:["BR"], browlift:["BR"], hennabrows:["BR"], browshaping:["BR"], rug:["MN"], borst:["MN"], borstbuik:["MN"], schouders:["MN"]
+    hotstone:["GV", "HS", "MU"], swedish:["GV", "MU"], swedishbackneck:["GV", "MU"], swedishlegs:["GV", "MU"],
+    backwrap:["GV", "BS"], slimmassage:["GV", "MU"], cupping:["GV", "MU"], cuppingpeeling:["GV", "BS", "MU"], browtint:["BR"], browlift:["BR"], hennabrows:["BR"], browshaping:["BR"], rug:["MN", "WX"], borst:["MN", "WX"], borstbuik:["MN", "WX"], schouders:["MN", "WX"], oksel:["WX"], been:["WX"], buik:["WX"], kin:["WX"], bovenlip:["WX"], wenkbrauwontharing:["WX"], volledigebenen:["WX"]
   }
 };
 
@@ -2700,6 +2700,31 @@ const MORE_FACT_POOLS = {
    HS hot stone. Client-facing, neutral. FR in lang-fr.js moreFacts.
    ============================================================ */
 const EXTRA_FACTS = [
+  { code:"LS1", theme:"LS", nl:"Een lash lift laat je wimpers langer lijken, niet voller. Wil je ook meer volume, dan doet een laagje mascara de rest.", en:"A lash lift makes your lashes look longer, not fuller. Want more volume too? A coat of mascara does the rest." },
+  { code:"LS2", theme:"LS", nl:"Voor een lash lift moeten je wimpers minstens zo’n 4 millimeter lang zijn.", en:"For a lash lift your lashes need to be at least about 4 millimetres long." },
+  { code:"LS3", theme:"LS", nl:"Een haar bestaat uit drie lagen: de kern (merg), de cortex met kleur en kracht, en de doorschijnende cuticula die alles beschermt.", en:"A hair has three layers: the core (medulla), the cortex with colour and strength, and the transparent cuticle that protects it all." },
+  { code:"LS4", theme:"LS", nl:"Na een lash lift neemt je wimper de verf sneller op. Daarom werkt de tint dan korter in dan bij een gewone wimperverf.", en:"After a lash lift your lashes take up tint faster, so the tint is left on for a shorter time than usual." },
+  { code:"WX1", theme:"WX", nl:"Om goed te kunnen waxen moeten de haartjes minstens zo’n halve centimeter lang zijn.", en:"For a good wax the hairs should be at least about half a centimetre long." },
+  { code:"WX2", theme:"WX", nl:"Bij waxen wordt het haar met wortel en al verwijderd. Het groeit daardoor trager terug, en na verloop van tijd vaak ook fijner.", en:"Waxing removes the hair including the root, so it grows back more slowly and over time often finer." },
+  { code:"WX3", theme:"WX", nl:"Warme hars mag nooit warmer zijn dan zo’n 40 °C. De temperatuur wordt altijd eerst getest op de binnenkant van de pols.", en:"Warm wax should never be hotter than about 40 °C. The temperature is always tested first on the inside of the wrist." },
+  { code:"WX4", theme:"WX", nl:"Wat jeuk een paar weken na het waxen? Dat zijn de nieuwe haartjes die teruggroeien. Een zachte peeling helpt ze vlot door de huid.", en:"A little itch a few weeks after waxing? That’s the new hairs growing back. A gentle scrub helps them through the skin." },
+  { code:"WX5", theme:"WX", nl:"Na het waxen van je oksels gun je je huid even rust: wacht een paar uur met deodorant.", en:"After an underarm wax, give your skin a break: wait a few hours before using deodorant." },
+  { code:"WX6", theme:"WX", nl:"Donshaartjes (vellushaar) zijn zacht, kleurloos en zelden langer dan 1 centimeter.", en:"Vellus hairs are soft, colourless and rarely longer than 1 centimetre." },
+  { code:"WX7", theme:"WX", nl:"Een hoofdhaar groeit ongeveer 0,3 mm per dag, en elke dag verlies je er gewoon 60 tot 100.", en:"A scalp hair grows about 0.3 mm a day, and losing 60 to 100 hairs a day is perfectly normal." },
+  { code:"WX8", theme:"WX", nl:"Een klamme huid op een warme dag? Een vleugje talk zorgt dat de hars alleen de haartjes meeneemt.", en:"Clammy skin on a warm day? A touch of talc makes sure the wax only takes the hairs." },
+  { code:"MC1", theme:"MC", nl:"Je hand telt 27 beenderen: 8 in de handwortel, 5 in de middenhand en 14 vingerkootjes.", en:"Your hand has 27 bones: 8 in the wrist, 5 in the palm and 14 finger bones." },
+  { code:"MC2", theme:"MC", nl:"Bij een nagelvijl geldt: hoe lager het getal (grit), hoe grover. Voor natuurlijke nagels gebruik je een fijne vijl, rond 180, en om te polijsten 600 of meer.", en:"With a nail file: the lower the number (grit), the coarser. Natural nails get a fine file around 180, and 600 or more for buffing." },
+  { code:"MC3", theme:"MC", nl:"Een klein wit vlekje op je nagel komt meestal van een stootje en groeit vanzelf weg.", en:"A small white spot on your nail usually comes from a little knock and grows out by itself." },
+  { code:"MC4", theme:"MC", nl:"Fijne ribbeltjes in de lengte van je nagel zijn meestal onschuldig en komen vaker voor naarmate je ouder wordt.", en:"Fine lengthwise ridges on your nail are usually harmless and become more common with age." },
+  { code:"MC5", theme:"MC", nl:"Tussen 5 en 30 jaar groeien je nagels het snelst. Daarna gaat het rustiger aan.", en:"Between 5 and 30 your nails grow fastest. After that they slow down." },
+  { code:"MC6", theme:"MC", nl:"Je handen zijn je visitekaartje: vaak het eerste wat iemand van je ziet.", en:"Your hands are your business card: often the first thing people notice about you." },
+  { code:"BS1", theme:"BS", nl:"Een lichaamsscrub met zeezout maakt je huid zacht en stralend, en zet de celvernieuwing en de doorbloeding in gang.", en:"A sea-salt body scrub makes your skin soft and radiant and boosts cell renewal and circulation." },
+  { code:"BS2", theme:"BS", nl:"Na een scrub neemt je huid de volgende verzorging, zoals een pakking of olie, veel beter op.", en:"After a scrub your skin absorbs the next care, like a wrap or oil, much better." },
+  { code:"BS3", theme:"BS", nl:"De beste momenten voor een lichaamsscrub: aan het einde van de winter, vóór de zomer en een paar dagen vóór het waxen.", en:"Best moments for a body scrub: at the end of winter, before summer and a few days before waxing." },
+  { code:"BS4", theme:"BS", nl:"Bij een volledige scrub begint men aan de achterkant van het lichaam en pas daarna aan de voorkant.", en:"A full-body scrub starts on the back of the body and only then moves to the front." },
+  { code:"MU1", theme:"MU", nl:"De kleermakersspier (sartorius) dankt haar naam aan de kleermakerszit: ze helpt je knie buigen en je dij naar buiten draaien.", en:"The tailor’s muscle (sartorius) is named after the cross-legged ‘tailor’s’ sitting position: it helps bend your knee and turn your thigh outward." },
+  { code:"MU2", theme:"MU", nl:"Je kauwspier (masseter) zit vaak gespannen bij stress. Een zachte massage van de kaak kan dan heerlijk ontspannen.", en:"Your chewing muscle (masseter) often tenses up with stress. A gentle jaw massage can be wonderfully relaxing." },
+  { code:"MU3", theme:"MU", nl:"Dankzij de lange halsspier (sternocleidomastoideus) kun je je hoofd draaien en knikken.", en:"Thanks to the long neck muscle (sternocleidomastoid) you can turn and nod your head." },
   { code:"BR1", theme:"BR", nl:"Een wenkbrauwhaar groeit actief ongeveer 1 tot 2 maanden. Daarna volgen een korte overgangsfase en een rustfase van 2 tot 4 maanden.", en:"A brow hair grows actively for about 1 to 2 months, followed by a short transition phase and a resting phase of 2 to 4 months." },
   { code:"BR2", theme:"BR", nl:"Op elk moment zit maar ongeveer 40% van je wenkbrauwharen in de groeifase. Daarom gun je je wenkbrauwen even rust tussen twee behandelingen.", en:"At any moment only about 40% of your brow hairs are in the growth phase. That is why your brows get a little rest between two treatments." },
   { code:"BR3", theme:"BR", nl:"Een brow lamination geeft een mooi ‘brushed-up’ effect dat ongeveer 4 tot 6 weken blijft.", en:"A brow lamination gives a lovely ‘brushed-up’ effect that lasts about 4 to 6 weeks." },
@@ -2713,9 +2738,6 @@ const EXTRA_FACTS = [
   { code:"MN1", theme:"MN", nl:"Mannen gebruiken al sinds de oertijd ‘make-up’: jagers kleurden hun gezicht als camouflage om dichter bij het wild te komen.", en:"Men have used ‘make-up’ since prehistoric times: hunters coloured their faces as camouflage to get closer to their prey." },
   { code:"MN2", theme:"MN", nl:"Een mannenhuid is meestal dikker en heeft meer en grotere talgklieren. Een wat vettere huid is bij mannen dus heel normaal.", en:"Men’s skin is usually thicker, with more and larger sebaceous glands, so slightly oilier skin is perfectly normal for men." },
   { code:"MN3", theme:"MN", nl:"De pH van een mannenhuid ligt iets hoger (ongeveer 5,6 tot 6,3) dan die van een vrouwenhuid (ongeveer 5,1 tot 5,8).", en:"The pH of men’s skin is slightly higher (about 5.6 to 6.3) than that of women’s skin (about 5.1 to 5.8)." },
-  { code:"MN4", theme:"MN", nl:"Kom gerust ongeschoren naar een gelaatsverzorging: dan zie ik je huid zoals ze echt is en kan ik de groeirichting van je baard volgen.", en:"Feel free to come unshaven to a facial: then your skin can be seen as it really is and the direction of your beard growth can be followed." },
-  { code:"MN5", theme:"MN", nl:"Een gelaatsmassage voor mannen volgt de groeirichting van de baard. Dat voelt kalmerend, tegen de haren in kan prikken.", en:"A facial massage for men follows the direction of the beard growth. That feels calming; against the hairs it can sting." },
-  { code:"MN6", theme:"MN", nl:"Bij een baard werkt een peeling met enzymen of zuren beter dan een korrelpeeling: korreltjes blijven tussen de haartjes hangen.", en:"With a beard, an enzyme or acid peel works better than a grainy scrub: grains get stuck between the hairs." },
   { code:"MN7", theme:"MN", nl:"Scheren maakt de bovenste huidlaag na verloop van tijd dikker en kan ingegroeide haartjes geven. Een zachte peeling helpt.", en:"Shaving gradually thickens the top layer of the skin and can cause ingrown hairs. A gentle peel helps." },
   { code:"MN8", theme:"MN", nl:"Mannenhaar op rug of borst is sterker. Daarom wordt er met kleine stroken gewaxt, met een kalmerende verzorging achteraf.", en:"Men’s hair on the back or chest is stronger, so waxing is done in small strips, with soothing care afterwards." },
   { code:"MN9", theme:"MN", nl:"Neusharen verschijnen vaak rond 40 jaar, oorharen rond 50. Netjes en voorzichtig verwijderen kan gewoon in het salon.", en:"Nose hair often appears around 40, ear hair around 50. Neat, careful removal can simply be done in the salon." },
