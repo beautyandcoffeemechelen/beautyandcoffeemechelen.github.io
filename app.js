@@ -5113,7 +5113,7 @@
         description:"Contact details, address, opening moments (weekends, by appointment only) and how to book at Beauty & Coffee, a beauty salon in Mechelen (Belgium). Booking is never automatic: Sandra confirms every appointment herself.",
         inputSchema:{ type:"object", properties:{} },
         async execute(){ return txt([
-          "Beauty & Coffee · Sandra Truong · Barbarastraat 25, 2800 Mechelen, Belgium",
+          "Beauty & Coffee · Barbarastraat 25, 2800 Mechelen, Belgium",
           "Phone / WhatsApp: +32 499 22 19 01 · Email: " + BOOKING_EMAIL,
           "By appointment only. Possible moments: " + slots() + ".",
           "To book: use the tool beauty_coffee_prepare_booking and let the person send the message. Sandra confirms personally.",

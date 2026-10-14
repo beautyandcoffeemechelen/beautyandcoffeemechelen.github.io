@@ -595,7 +595,7 @@
   "restart_button": "Recommencer",
   "footer_privacy": "Vos photos restent toujours sur votre appareil — 100 % privé.",
   "footer_reset_button": "Effacer mes données locales",
-  "footer_legal": "Beauty &amp; Coffee · Sandra Truong · Barbarastraat 25, 2800 Malines<br>0499 22 19 01 · sandra.truong@ikmail.com<br>Numéro d’entreprise 1033.711.875 · exonérée de TVA : les prix sont des prix finaux",
+  "footer_legal": "Beauty &amp; Coffee · Barbarastraat 25, 2800 Malines<br>0499 22 19 01 · sandra.truong@ikmail.com<br>Numéro d’entreprise 1033.711.875 · exonérée de TVA : les prix sont des prix finaux",
   "reminder_button": "Ajouter un rappel à mon agenda",
   "book_email_button": "📩 Réserver ce rendez-vous par e-mail",
   "book_email_subject": "Réservation - Beauty & Coffee",

@@ -599,7 +599,7 @@ const I18N = {
 
     footer_privacy: "Jouw foto's blijven altijd op je eigen toestel — 100% privé.",
     footer_reset_button: "Wis mijn lokale gegevens",
-    footer_legal: "Beauty &amp; Coffee · Sandra Truong · Barbarastraat 25, 2800 Mechelen<br>0499 22 19 01 · sandra.truong@ikmail.com<br>Ondernemingsnummer 1033.711.875 · vrijgesteld van btw: prijzen zijn eindprijzen",
+    footer_legal: "Beauty &amp; Coffee · Barbarastraat 25, 2800 Mechelen<br>0499 22 19 01 · sandra.truong@ikmail.com<br>Ondernemingsnummer 1033.711.875 · vrijgesteld van btw: prijzen zijn eindprijzen",
 
     reminder_button: "Zet een herinnering in mijn agenda",
     book_email_button: "📩 Boek deze afspraak per mail",
@@ -1310,7 +1310,7 @@ const I18N = {
 
     footer_privacy: "Your photos always stay on your own device — 100% private.",
     footer_reset_button: "Wipe my local data",
-    footer_legal: "Beauty &amp; Coffee · Sandra Truong · Barbarastraat 25, 2800 Mechelen (Belgium)<br>+32 499 22 19 01 · sandra.truong@ikmail.com<br>Company number 1033.711.875 · VAT-exempt: prices are final prices",
+    footer_legal: "Beauty &amp; Coffee · Barbarastraat 25, 2800 Mechelen (Belgium)<br>+32 499 22 19 01 · sandra.truong@ikmail.com<br>Company number 1033.711.875 · VAT-exempt: prices are final prices",
 
     reminder_button: "Add a reminder to my calendar",
     book_email_button: "📩 Book this appointment by email",
