@@ -1263,3 +1263,6 @@ p.season-card__shop{ text-decoration:none; margin:2px 0 0; font-style:italic; }
 .useup__txt summary{ cursor:pointer; font-size:14px; }
 .useup__txt pre{ white-space:pre-wrap; font:inherit; font-size:13px; background:var(--soft, #f6f1ea); padding:10px; border-radius:8px; margin:6px 0; }
 .useup__btns{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+
+/* December = gift month tagline (v145) */
+.advent-tagline,.advent-card__tagline{font-weight:600;color:var(--gold, #b08d57);margin:.25rem 0 .5rem;line-height:1.4}

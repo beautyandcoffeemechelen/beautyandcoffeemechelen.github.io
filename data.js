@@ -150,6 +150,15 @@ const KIDS_TREATMENT = "Kindermanicure";
      shorten only by cutting off whole sentences, and use first name +
      initial. Shown in the language the review was written in.
    ============================================================ */
+/* ONLINE BOOKING — the link to your own booking page (for example a free
+   Google Calendar "appointment schedule": Google Agenda → Maken → Afspraakschema
+   → share the link of the booking page). Leave "" to hide the button; then
+   clients book via WhatsApp or mail, as before. */
+const ONLINE_BOOKING_URL = "";
+/* Review reminder: shown in "Mijn afspraken" from this many hours after the
+   start of a saved appointment (20 = the day after), for 14 days. */
+const APPT_REVIEW_AFTER_HOURS = 20;
+
 const GOOGLE_REVIEWS = {
   rating: 4.9,
   count: 36,
@@ -1670,7 +1679,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v143 · 15/10/2026";
+const APP_VERSION = "v147 · 15/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1914,6 +1923,15 @@ const ADVENT = {
     gelpromo15: { type:"discount", icon:"💅", value:"15%", noMin:true,
       nl:"15% korting op gellak (alle kleuren)", en:"15% off gel polish (all colours)", fr:"15 % de réduction sur le vernis semi-permanent (toutes les couleurs)",
       treat:{ nl:"gellak (bij een manicure of pedicure)", en:"gel polish (with a manicure or pedicure)", fr:"vernis semi-permanent (avec une manucure ou pédicure)" } },
+    // nail polish & workshops (Sandra, 15/10): use up polish, fill workshops
+    nailpolishfree: { type:"extra", icon:"💅", with:{ nl:"manicure of pedicure", en:"manicure or pedicure", fr:"manucure ou pédicure" },
+      highlights:{ nl:"Een frisse kleur op je nagels als afwerking van je manicure of pedicure: kies een gewone nagellak uit onze kleurenmand (normaal €5).", en:"A fresh colour on your nails to finish your manicure or pedicure: pick a regular nail polish from our colour basket (normally €5).", fr:"Une couleur fraîche sur vos ongles pour finir votre manucure ou pédicure : choisissez un vernis classique dans notre panier de couleurs (normalement 5 €)." },
+      product:"Gewone nagellak (Yves Rocher, Only You, Rimmel, Bourjois, Max Factor, essence, Cien, Crisnail French)",
+      ingredients:"Zie Ingrediënten & allergieën: gewone nagellak en Crisnail French Lacquer.",
+      nl:"Gratis nagellak bij je manicure of pedicure", en:"Free nail polish with your manicure or pedicure", fr:"Vernis offert avec votre manucure ou pédicure" },
+    workshop15: { type:"discount", icon:"🎓", value:"15%", noMin:true,
+      nl:"15% korting op een beauty-workshop (Cat Eye-gellak, make-up of gelaatsverzorging)", en:"15% off a beauty workshop (Cat Eye gel polish, make-up or facial)", fr:"15 % de réduction sur un atelier beauté (vernis gel Cat Eye, maquillage ou soin du visage)",
+      treat:{ nl:"beauty-workshop (Cat Eye-gellak, make-up of gelaatsverzorging)", en:"beauty workshop (Cat Eye gel polish, make-up or facial)", fr:"atelier beauté (vernis gel Cat Eye, maquillage ou soin du visage)" } },
     // Lift Summum: uses up the Guinot Lift Summum kits (Sandra, 15/10 — replaces the mascara wand)
     liftsummum15: { type:"discount", icon:"✨", value:"15%",
       nl:"15% korting op een Lift Summum gelaatsverzorging", en:"15% off a Lift Summum facial", fr:"15 % de réduction sur un soin du visage Lift Summum",
@@ -1934,6 +1952,7 @@ const ADVENT = {
   ]},
   doorsByYear: {
   2026: [
+    { day:1,  item:"workshop15",    stock:null },   // workshops (Sandra, 15/10)
     { day:2,  item:"led",           stock:null },
     { day:3,  item:"gelpromo25",    stock:null },   // gellak opmaken: HEMA-reeks en minder gekozen kleuren (Sandra, 15/10)
     { day:4,  item:"handspa",       stock:null },
@@ -1941,7 +1960,7 @@ const ADVENT = {
     { day:6,  item:"facial10",      stock:null },
     { day:7,  item:"eyeflash",      stock:null },   // in het salon, bij een gelaatsverzorging (Sandra, 13/10)
     { day:8,  item:"peelsens",      stock:null },
-    { day:9,  item:"gelpromo15",    stock:null },   // gellak opmaken, alle kleuren
+    { day:9,  item:"nailpolishfree", stock:null },  // gewone nagellak opmaken (Sandra, 15/10); gellak blijft op 3 en 17
     { day:10, item:"hotstoneface",  stock:null },
     { day:11, item:"massage15",     stock:null },
     { day:12, item:"buffer",        stock:null },

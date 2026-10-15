@@ -1285,6 +1285,8 @@
         .replace("{slots}", slots);
       emailLink.href = `mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     }
+    const onl = $("#bookOnlineCta");
+    if (onl){ const u = (typeof ONLINE_BOOKING_URL !== "undefined" && ONLINE_BOOKING_URL) || ""; onl.hidden = !u; if (u) onl.href = u; }
     const waLink = $("#bookWhatsappCta");
     if (waLink){
       const waText = t("book_whatsapp_text", state.lang)
@@ -1619,6 +1621,8 @@
     });
     body.innerHTML = html || `<p class="price-empty">${t("pricelist_empty", lang)}</p>`;
 
+    const onl = $("#priceOnline");
+    if (onl){ const u = (typeof ONLINE_BOOKING_URL !== "undefined" && ONLINE_BOOKING_URL) || ""; onl.hidden = !u; if (u) onl.href = u; }
     const wa = $("#priceWhatsapp");
     if (wa) wa.href = `https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(t("pricelist_wa_text", lang))}`;
     const mail = $("#priceMail");
@@ -2936,6 +2940,25 @@
       `&subject=${encodeURIComponent(apptTitle(a))}&startdt=${encodeURIComponent(s.toISOString())}&enddt=${encodeURIComponent(e.toISOString())}` +
       `&location=${encodeURIComponent(APPT_LOCATION)}`;
   }
+  // review reminder the day after a saved appointment (once per appointment)
+  function apptReviewKey(a){ return String(a.date || "") + "T" + String(a.time || ""); }
+  function apptReviewHtml(x, now, L){
+    const h = (typeof APPT_REVIEW_AFTER_HOURS !== "undefined") ? APPT_REVIEW_AFTER_HOURS : 20;
+    if (!x || now - x.s.getTime() < h * 3600000) return "";
+    const done = localData.apptReviewDone || [];
+    if (done.includes(apptReviewKey(x.a))) return "";
+    const tl = apptTreatLabel(x.a) || ({ nl:"behandeling", en:"treatment", fr:"soin" }[L] || "behandeling");
+    return `<div class="review-prompt appt-review">
+        <p>${t("appt_review_text", L).replace("{t}", tl)}</p>
+        <a class="btn btn--primary" href="${GOOGLE_REVIEW_URL}" target="_blank" rel="noopener noreferrer" data-action="appt-review-done" data-appt-key="${esc(apptReviewKey(x.a))}">${t("review_prompt_button", L)}</a>
+        <button type="button" class="btn btn--text" data-action="appt-review-done" data-appt-key="${esc(apptReviewKey(x.a))}">${t("appt_review_later", L)}</button>
+      </div>`;
+  }
+  function apptReviewDone(key){
+    if (!key) return;
+    localData.apptReviewDone = (localData.apptReviewDone || []).filter(k => k !== key).concat([key]).slice(-30);
+    saveLocalData(); renderApptCard();
+  }
   function renderApptCard(){
     const card = $("#apptCard");
     if (!card || typeof localData === "undefined") return;
@@ -2952,6 +2975,7 @@
         <p class="appt-card__title">✨ ${t("appt_after_title", L)}</p>
         <p class="appt-card__text">${apptTreatLabel(recentPast.a)}</p>
         <div class="appt-card__buttons"><button type="button" class="btn btn--primary" data-action="open-photomoment">${t("pm_button", L)}</button></div>
+        ${apptReviewHtml(recentPast, now, L)}
         ${upcoming.length ? "" : reminderChipsHtml(recentPast.a.tcat || null, recentPast.a.ttext || (recentPast.a.tcat ? t("avoid." + recentPast.a.tcat, L) : ""))}
       </div>`;
     if (upcoming.length) html += `<p class="appt-card__title">📅 ${t(upcoming.length > 1 ? "appt_card_title_many" : "appt_card_title", L)}</p>`;
@@ -4322,6 +4346,7 @@
     let html = "";
     if (phase === "teaser"){
       html = `<p class="advent-card__title">🎄 ${t("adv_title", state.lang)}</p>
+        <p class="advent-card__tagline">${t("adv_tagline", state.lang)}</p>
         <p class="advent-card__text">${t("adv_card_teaser", state.lang)}</p>
         <button type="button" class="btn btn--primary btn--sm" data-action="open-advent">${t("adv_card_peek_btn", state.lang)}</button>`;
     } else if (phase === "live"){
@@ -4329,6 +4354,7 @@
       const st = d ? advDoorState(d) : null;
       const line = st === "today" ? t("adv_card_today", state.lang).replace("{n}", d) : t("adv_card_done", state.lang).replace("{n}", d);
       html = `<p class="advent-card__title">🎄 ${t("adv_title", state.lang)}</p>
+        <p class="advent-card__tagline">${t("adv_tagline", state.lang)}</p>
         <p class="advent-card__text">${line}</p>
         <button type="button" class="btn btn--primary btn--sm${st === "today" ? " advent-card__pulse" : ""}" data-action="open-advent">${t("adv_card_open_btn", state.lang)}</button>`;
     } else if (phase === "after" && openedCount){
@@ -4337,6 +4363,7 @@
         <button type="button" class="btn btn--primary btn--sm" data-action="open-advent">${t("adv_card_mine_btn", state.lang)}</button>`;
     } else if (advPreview){
       html = `<p class="advent-card__title">🎄 ${t("adv_title", state.lang)}</p>
+        <p class="advent-card__tagline">${t("adv_tagline", state.lang)}</p>
         <button type="button" class="btn btn--primary btn--sm" data-action="open-advent">${t("adv_card_peek_btn", state.lang)}</button>`;
     }
     card.hidden = !html;
@@ -5292,6 +5319,7 @@
       if (action === "add-reminder") addCalendarReminder();
       if (action === "reminder-weeks") downloadReminder(el.dataset.weeks, el.dataset.title);
       if (action === "dismiss-review") dismissReviewPrompt();
+      if (action === "appt-review-done") apptReviewDone(el.getAttribute("data-appt-key"));
     });
 
     $("#fileInput").addEventListener("change", e => handleFileUpload(e.target.files[0]));
