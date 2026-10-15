@@ -1670,7 +1670,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v127 · 14/10/2026";
+const APP_VERSION = "v128 · 15/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1810,11 +1810,6 @@ const ADVENT = {
   maxExtrasPerClient: null,     // free extras per client (null = no limit; 1 per treatment)
   showPhotos: true,             // true = show the drawings in assets/advent; false = icons only
   items: {
-    spoolie: { type:"gift", icon:"🖌️",
-      photo:"assets/advent/spoolie-ill.webp",
-      nl:"Mascaraborsteltje", en:"Mascara wand", fr:"Goupillon à mascara",
-      use:{ nl:"Om je wimpers en wenkbrauwen mooi in model te kammen. Persoonlijk gebruik.", en:"To comb your lashes and brows into shape. For personal use.", fr:"Pour peigner cils et sourcils. Usage personnel." },
-      ingredients:"", noIngredients:true },
     buffer: { type:"gift", icon:"💅",
       photo:"assets/advent/buffer-ill.webp",
       nl:"Mini buffervijltje voor de nagels", en:"Mini nail buffer", fr:"Mini polissoir à ongles",
@@ -1911,7 +1906,11 @@ const ADVENT = {
       treat:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" } },
     massage15: { type:"discount", icon:"💆", value:"15%",
       nl:"15% korting op een massage", en:"15% off a massage", fr:"15 % de réduction sur un massage",
-      treat:{ nl:"massage", en:"massage", fr:"massage" } }
+      treat:{ nl:"massage", en:"massage", fr:"massage" } },
+    // Lift Summum: uses up the Guinot Lift Summum kits (Sandra, 15/10 — replaces the mascara wand)
+    liftsummum15: { type:"discount", icon:"✨", value:"15%",
+      nl:"15% korting op een Lift Summum gelaatsverzorging", en:"15% off a Lift Summum facial", fr:"15 % de réduction sur un soin du visage Lift Summum",
+      treat:{ nl:"Lift Summum gelaatsverzorging", en:"Lift Summum facial", fr:"soin du visage Lift Summum" } }
   },
   // the massages for empty doors (in this order, then again from the top)
   autoFill: { value:"15%", massages:[
@@ -1930,7 +1929,7 @@ const ADVENT = {
   2026: [
     { day:2,  item:"led",           stock:null },
     { day:4,  item:"handspa",       stock:null },
-    { day:5,  item:"spoolie",       stock:null },
+    { day:5,  item:"liftsummum15",  stock:null },   // i.p.v. mascaraborsteltje (Sandra, 15/10)
     { day:6,  item:"facial10",      stock:null },
     { day:7,  item:"eyeflash",      stock:null },   // in het salon, bij een gelaatsverzorging (Sandra, 13/10)
     { day:8,  item:"peelsens",      stock:null },
@@ -1950,7 +1949,7 @@ const ADVENT = {
     { day:24, item:"goldmask",      stock:null },
     { day:25, item:"paraffinmask",  stock:null }   // gratis anti-aging paraffinemasker (Sandra, 09/10)
   ],
-  // 2027: [ { day:1, item:"spoolie", stock:null }, … ]   ← keep or change doors; missing days = massage discount
+  // 2027: [ { day:1, item:"facial10", stock:null }, … ]   ← keep or change doors; missing days = massage discount
   }
 };
 // Which calendar year is "on"? From March: this year's; in January/February
