@@ -832,7 +832,7 @@
    "aftercare": "Inscrivez-vous au moins 1 semaine à l'avance. Ensuite, notez votre café et votre méthode préférés pour la maison."
   },
   "cateye": {
-   "benefits": "Apprenez à créer vous-même un superbe effet magnétique « Cat Eye » sur vos ongles, avec tous les vernis professionnels, aimants et lampes UV/LED — ainsi que specialty coffee/thé et douceurs maison.",
+   "benefits": "Apprenez à créer vous-même un superbe effet magnétique « Cat Eye » sur vos ongles, avec tous les vernis professionnels, aimants et lampes UV/LED — ainsi que specialty coffee/thé et douceurs maison. Choisissez parmi 9 teintes magnétiques : les Pink Gellac Galactic Gemstones (Sunstone Gold, Majestic Amethyst, Starlit Silver, Ethereal Topaz, Divine Quartz — sans HEMA) et la gamme Cobra Galaxy (Apollo, Galileo, Comet, Cupid).",
    "funfact": "Le vernis gel cat eye contient de fines particules métalliques ; un aimant les aligne, ce qui crée ce reflet lumineux typique.",
    "aftercare": "Appliquez chaque jour de l'huile pour cuticules et faites toujours retirer le vernis gel par un professionnel (soak-off) — ne l'arrachez jamais.",
    "caution": "Max. 2 participantes. Vos ongles doivent être totalement libres de vernis, vernis gel ou ongles en gel au début."
@@ -1575,7 +1575,7 @@
     [
      "Cat Eye & Magnetische Gellak Manicure Workshop",
      "Atelier manucure Cat Eye & vernis gel magnétique",
-     "Apprenez à créer vous-même un superbe effet magnétique « Cat Eye » sur vos ongles. Tous les vernis professionnels, aimants et lampes UV/LED inclus, ainsi que specialty coffee/thé et douceurs maison.",
+     "Apprenez à créer vous-même un superbe effet magnétique « Cat Eye » sur vos ongles. Tous les vernis professionnels, aimants et lampes UV/LED inclus, ainsi que specialty coffee/thé et douceurs maison. Choisissez parmi 9 teintes magnétiques : les Pink Gellac Galactic Gemstones (Sunstone Gold, Majestic Amethyst, Starlit Silver, Ethereal Topaz, Divine Quartz — sans HEMA) et la gamme Cobra Galaxy (Apollo, Galileo, Comet, Cupid).",
      "Privé 1 à 1 : €85 · Duo : €75 p.p. · Max. 2 participants. Vos ongles doivent être totalement libres de vernis, vernis gel ou ongles en gel au début."
     ],
     [

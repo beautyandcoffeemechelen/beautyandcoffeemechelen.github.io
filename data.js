@@ -1431,8 +1431,8 @@ const TREATMENTS_CATALOG = [
 
   { id:"cateye", name:"Cat Eye & Magnetische Gellak Manicure Workshop", moods:["group","energetic"], genders:["vrouw"], sunSensitive:false, price:"€85 privé · duo €75 p.p. (90–120′)",
     homecare:{ category:"hand" },
-    benefits:{ nl:"Leer zelf een prachtig magnetisch ‘Cat Eye’-effect op je nagels maken, met alle professionele lakken, magneten en UV/LED-lampen — plus specialty coffee/thee en huisgemaakte zoetigheden.",
-               en:"Learn to create a beautiful magnetic ‘cat eye’ effect on your nails, with all professional polishes, magnets and UV/LED lamps — plus specialty coffee/tea and homemade sweets." },
+    benefits:{ nl:"Leer zelf een prachtig magnetisch ‘Cat Eye’-effect op je nagels maken, met alle professionele lakken, magneten en UV/LED-lampen — plus specialty coffee/thee en huisgemaakte zoetigheden. Kies uit 9 magnetische kleuren: de Pink Gellac Galactic Gemstones (Sunstone Gold, Majestic Amethyst, Starlit Silver, Ethereal Topaz, Divine Quartz — HEMA-vrij) en de Cobra Galaxy-reeks (Apollo, Galileo, Comet, Cupid).",
+               en:"Learn to create a beautiful magnetic ‘cat eye’ effect on your nails, with all professional polishes, magnets and UV/LED lamps — plus specialty coffee/tea and homemade sweets. Choose from 9 magnetic shades: Pink Gellac Galactic Gemstones (Sunstone Gold, Majestic Amethyst, Starlit Silver, Ethereal Topaz, Divine Quartz — HEMA-free) and the Cobra Galaxy range (Apollo, Galileo, Comet, Cupid)." },
     funfact:{ nl:"Cat eye-gellak bevat fijne metaalachtige deeltjes; met een magneet trek je ze in een lijn, waardoor die typische lichtstreep ontstaat.",
               en:"Cat eye gel polish contains fine metallic particles; a magnet pulls them into a line, creating that typical streak of light." },
     caution:{ nl:"Max. 2 deelnemers. Je nagels moeten bij aanvang volledig vrij zijn van lak, gellak of gelnagels.",
@@ -1670,7 +1670,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v128 · 15/10/2026";
+const APP_VERSION = "v143 · 15/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -1907,6 +1907,13 @@ const ADVENT = {
     massage15: { type:"discount", icon:"💆", value:"15%",
       nl:"15% korting op een massage", en:"15% off a massage", fr:"15 % de réduction sur un massage",
       treat:{ nl:"massage", en:"massage", fr:"massage" } },
+    // gel polish: Sandra wants to use up all gel polish asap (15/10), above all the HEMA range and the less-chosen colours
+    gelpromo25: { type:"discount", icon:"💅", value:"25%", noMin:true,
+      nl:"25% korting op gellak in een van onze actiekleuren", en:"25% off gel polish in one of our featured colours", fr:"25 % de réduction sur le vernis semi-permanent dans une de nos couleurs du moment",
+      treat:{ nl:"gellak in een actiekleur (bij een manicure of pedicure)", en:"gel polish in a featured colour (with a manicure or pedicure)", fr:"vernis semi-permanent dans une couleur du moment (avec une manucure ou pédicure)" } },
+    gelpromo15: { type:"discount", icon:"💅", value:"15%", noMin:true,
+      nl:"15% korting op gellak (alle kleuren)", en:"15% off gel polish (all colours)", fr:"15 % de réduction sur le vernis semi-permanent (toutes les couleurs)",
+      treat:{ nl:"gellak (bij een manicure of pedicure)", en:"gel polish (with a manicure or pedicure)", fr:"vernis semi-permanent (avec une manucure ou pédicure)" } },
     // Lift Summum: uses up the Guinot Lift Summum kits (Sandra, 15/10 — replaces the mascara wand)
     liftsummum15: { type:"discount", icon:"✨", value:"15%",
       nl:"15% korting op een Lift Summum gelaatsverzorging", en:"15% off a Lift Summum facial", fr:"15 % de réduction sur un soin du visage Lift Summum",
@@ -1928,11 +1935,13 @@ const ADVENT = {
   doorsByYear: {
   2026: [
     { day:2,  item:"led",           stock:null },
+    { day:3,  item:"gelpromo25",    stock:null },   // gellak opmaken: HEMA-reeks en minder gekozen kleuren (Sandra, 15/10)
     { day:4,  item:"handspa",       stock:null },
     { day:5,  item:"liftsummum15",  stock:null },   // i.p.v. mascaraborsteltje (Sandra, 15/10)
     { day:6,  item:"facial10",      stock:null },
     { day:7,  item:"eyeflash",      stock:null },   // in het salon, bij een gelaatsverzorging (Sandra, 13/10)
     { day:8,  item:"peelsens",      stock:null },
+    { day:9,  item:"gelpromo15",    stock:null },   // gellak opmaken, alle kleuren
     { day:10, item:"hotstoneface",  stock:null },
     { day:11, item:"massage15",     stock:null },
     { day:12, item:"buffer",        stock:null },
@@ -1940,6 +1949,7 @@ const ADVENT = {
     { day:14, item:"guinot",        stock:null },   // in het salon, bij een gelaatsverzorging
     { day:15, item:"spamani",       stock:null },
     { day:16, item:"peelblueberry", stock:null },   // ongeopend, volgens Sandra en haar leerkracht nog bruikbaar (13/10)
+    { day:17, item:"gelpromo25",    stock:null },   // gellak opmaken (2e keer)
     { day:18, item:"peelanti",      stock:null },
     { day:19, item:"eraser",        stock:null },
     { day:20, item:"handspa",       stock:null },   // extra hand peeling: uses up the MellowMoist lotion (Sandra, 09/10)
@@ -2106,8 +2116,8 @@ const PRICE_LIST = [
        "Facial care, beauty make-up or threading. Discover which techniques and products make your skin glow, with personal advice, all materials, specialty coffee, tea and treats.",
        "Privé 1 op 1: €75 · Duo: €65 p.p. · 3–4 personen: €55 p.p.","Private 1-to-1: €75 · Duo: €65 p.p. · 3–4 people: €55 p.p."),
     PI("Cat Eye & Magnetische Gellak Manicure Workshop","Cat Eye & Magnetic Gel Polish Manicure Workshop","90–120′","€85",
-       "Leer zelf een prachtig magnetisch ‘Cat Eye’-effect op je nagels maken. Inclusief alle professionele lakken, magneten en UV/LED-lampen, plus specialty coffee/thee en huisgemaakte zoetigheden.",
-       "Learn to create a beautiful magnetic ‘cat eye’ effect on your nails. Includes all professional polishes, magnets and UV/LED lamps, plus specialty coffee/tea and homemade sweets.",
+       "Leer zelf een prachtig magnetisch ‘Cat Eye’-effect op je nagels maken. Inclusief alle professionele lakken, magneten en UV/LED-lampen, plus specialty coffee/thee en huisgemaakte zoetigheden. Kies uit 9 magnetische kleuren: de Pink Gellac Galactic Gemstones (Sunstone Gold, Majestic Amethyst, Starlit Silver, Ethereal Topaz, Divine Quartz — HEMA-vrij) en de Cobra Galaxy-reeks (Apollo, Galileo, Comet, Cupid).",
+       "Learn to create a beautiful magnetic ‘cat eye’ effect on your nails. Includes all professional polishes, magnets and UV/LED lamps, plus specialty coffee/tea and homemade sweets. Choose from 9 magnetic shades: Pink Gellac Galactic Gemstones (Sunstone Gold, Majestic Amethyst, Starlit Silver, Ethereal Topaz, Divine Quartz — HEMA-free) and the Cobra Galaxy range (Apollo, Galileo, Comet, Cupid).",
        "Privé 1 op 1: €85 · Duo: €75 p.p. · Max. 2 deelnemers. Je nagels moeten bij aanvang volledig vrij zijn van lak, gellak of gelnagels.",
        "Private 1-to-1: €85 · Duo: €75 p.p. · Max. 2 participants. Your nails must be completely free of polish, gel polish or gel nails at the start."),
     PI("Koffieproeverij Basis","Coffee tasting – Basic","120′","€60 – €85 p.p.",
