@@ -1580,8 +1580,8 @@ const FOCUS_GUIDES = {
           { id:"bride", label:{ nl:"Mijn eigen huwelijk", en:"My own wedding", fr:"Mon propre mariage" }, s:{ bridalpackage:4, bridaltrial:3 }, mu:{ hd:2 } },
           { id:"guest", label:{ nl:"Een huwelijk als gast", en:"A wedding, as a guest", fr:"Un mariage, en tant qu’invitée" }, s:{ weddingguest:4 }, mu:{ mineral:1 } },
           { id:"learn", label:{ nl:"Ik wil het zelf leren", en:"I want to learn it myself", fr:"Je veux apprendre moi-même" }, s:{ makeupworkshop:5 }, mu:{ mineral:1 } },
-          { id:"business", label:{ nl:"Werk, een sollicitatie of een belangrijke afspraak", en:"Work, a job interview or an important meeting", fr:"Le travail, un entretien ou un rendez-vous important" }, s:{ makeupworkshop:3, glammakeup:2 }, mu:{ mineral:2 },
-            tip:{ nl:"Zakelijke look: een egale, frisse huid (primer zodat alles de hele dag blijft zitten), kringen weggewerkt, ogen naturel in kleuren die bij je kleding passen en verzorgde lippen. Geen smoky eyes. Wil je dit elke dag zelf kunnen? Dan leer je het in de workshop.", en:"Business look: even, fresh skin (primer so it lasts all day), dark circles concealed, natural eyes in colours that match your outfit and neat lips. No smoky eyes. Want to do it yourself every day? Learn it in the workshop.", fr:"Look professionnel : un teint frais et uniforme (base pour tenir toute la journée), cernes camouflés, yeux naturels assortis à la tenue et lèvres soignées. Pas de smoky eyes. Envie de le faire vous-même chaque jour ? Apprenez-le à l’atelier." } },
+          { id:"business", label:{ nl:"Werk, een sollicitatie of een belangrijke afspraak", en:"Work, a job interview or an important meeting", fr:"Le travail, un entretien ou un rendez-vous important" }, s:{ glammakeup:5 }, mu:{ mineral:2 },
+            tip:{ nl:"Zakelijke look: een egale, frisse huid (primer zodat alles de hele dag blijft zitten), kringen weggewerkt, ogen naturel in kleuren die bij je kleding passen en verzorgde lippen. Geen smoky eyes. Zelfde prijs als een avondmake-up.", en:"Business look: even, fresh skin (primer so it lasts all day), dark circles concealed, natural eyes in colours that match your outfit and neat lips. No smoky eyes. Same price as an evening make-up.", fr:"Look professionnel : un teint frais et uniforme (base pour tenir toute la journée), cernes camouflés, yeux naturels assortis à la tenue et lèvres soignées. Pas de smoky eyes. Même prix qu’un maquillage de soirée." } },
           { id:"theme", label:{ nl:"Een themafeest of retrolook (jaren ’20, ’50, ’60, ’80)", en:"A theme party or retro look (1920s, ’50s, ’60s, ’80s)", fr:"Une soirée à thème ou un look rétro (années 20, 50, 60, 80)" }, s:{ glammakeup:5 }, mu:{ hd:2 },
             tip:{ nl:"Retro kan: jaren ’20 met een bleke teint, donker omrande ogen en een kleine donkere mond; jaren ’50 met een dikke zwarte eyeliner en rode lippen; jaren ’60 met grote wimpers (ook onderaan) en lichte lippen; jaren ’80 met felle kleuren en veel blush. Breng gerust een foto van de look mee.", en:"Retro is possible: the ’20s with pale skin, dark-rimmed eyes and a small dark mouth; the ’50s with thick black eyeliner and red lips; the ’60s with big lashes (also below) and pale lips; the ’80s with bright colours and lots of blush. Feel free to bring a photo of the look.", fr:"Le rétro, c’est possible : années 20 avec teint pâle, yeux cernés de noir et petite bouche foncée ; années 50 avec eye-liner noir épais et lèvres rouges ; années 60 avec grands cils (aussi en bas) et lèvres claires ; années 80 avec couleurs vives et beaucoup de blush. Apportez une photo du look." } }
         ] },
@@ -1734,9 +1734,10 @@ const HEALTH_EXTRA = [
   { key:"varicose", icon:"🦵", exclude:[],
     label:{ nl:"Spataders", en:"Varicose veins", fr:"Varices" },
     note:{ nl:"Met spataders kan een massage gewoon: ik sla enkel de plekken met spataders zelf over en masseer daar niet.", en:"With varicose veins a massage is fine: I simply skip the areas with the veins themselves.", fr:"Avec des varices, le massage reste possible : j’évite simplement les zones des varices." } },
-  { key:"oncology", icon:"🎗️", exclude:["fruitacid","hydrapeel","cuppingpeeling"],
+  { key:"oncology", icon:"🎗️", exclude:["fruitacid","hydrapeel","cuppingpeeling","fillme","liftsummere","antiagefacial","expressuseup","facialworkshop"],
     label:{ nl:"Ik ben (of was kort geleden) in behandeling voor kanker", en:"I am (or recently was) being treated for cancer", fr:"Je suis (ou j’ai été récemment) traité(e) pour un cancer" },
-    note:{ nl:"Tijdens of na een kankerbehandeling ben je zeker welkom, ook voor een massage. Ik werk zachter en met aangepaste producten, en sla sterke peelings over.", en:"During or after cancer treatment you are very welcome, massages included. I work more gently with adapted products and skip strong peels.", fr:"Pendant ou après un traitement contre le cancer, vous êtes la bienvenue, massages compris. Je travaille plus en douceur avec des produits adaptés et je passe les peelings forts." } }
+    note:{ nl:"Tijdens of na een kankerbehandeling ben je zeker welkom, ook voor een massage. Voor je gezicht werk ik extra zacht, zonder peeling, met de kalmerende Janssen-lijn voor de gevoelige huid.", en:"During or after cancer treatment you are very welcome, massages included. For your face I work extra gently, without peels, with Janssen’s soothing line for sensitive skin.", fr:"Pendant ou après un traitement contre le cancer, vous êtes la bienvenue, massages compris. Pour le visage, je travaille tout en douceur, sans peeling, avec la gamme apaisante de Janssen pour peaux sensibles." },
+    sandraNote:{ nl:"Alleen voor jou: gelaat enkel met de roze lijn van Janssen (Sensitive Skin: Soft Cleansing Mousse, Soft Soothing Tonic, Intense Calming Serum en Cream, Instant Soothing Oil en Mask, Comfort Eye Care), volgens je oncologisch protocol. Geen peeling, geen ampullen met actieve zuren.", en:"Only for you: face only with Janssen’s pink line (Sensitive Skin), as in your oncology protocol. No peels.", fr:"Uniquement pour toi : visage uniquement avec la ligne rose Janssen (Sensitive Skin), selon ton protocole oncologique. Pas de peeling." } }
 ];
 
 /* ALLERGIES in the match (v156). The client ticks an allergy (optional, in
@@ -1776,7 +1777,8 @@ function matchTreatment(mood, gender, sunExposed, healthFlags, complaintText, fo
 
   const avoid = Array.isArray(healthFlags.avoid) ? healthFlags.avoid : [];
   const avoidOk = (item) => !avoid.some(g => (AVOID_GROUPS[g] || []).includes(item.id)) && !(healthFlags.allergyExclude || []).includes(item.id);
-  const allOk = (item) => avoidOk(item) && genderOk(item) && sunOk(item) && timeOk(item) && phlebitisOk(item) && dietOk(item) && menstruationOk(item) && pregnancyOk(item) && roaccutaneOk(item) && ageOk(item) && seasonOk(item) && monthRangeOk(item);
+  const actionOk = (item) => !item.stockAction || actionIsOn(item.id);
+  const allOk = (item) => actionOk(item) && avoidOk(item) && genderOk(item) && sunOk(item) && timeOk(item) && phlebitisOk(item) && dietOk(item) && menstruationOk(item) && pregnancyOk(item) && roaccutaneOk(item) && ageOk(item) && seasonOk(item) && monthRangeOk(item);
 
   // Gerichte match: highest score among the treatments that pass every rule
   if (focusScores && typeof focusScores === "object"){
@@ -1856,12 +1858,17 @@ const CURRENT_ACTIONS = [
      Guinot, Dr. Renaud, Safety4You) for €50 instead of €60, while stocks last.
      Stock gone? Delete this action, the "expressuseup" treatment in
      TREATMENTS_CATALOG and its price-list line. */
-  { id:"expressuseup", icon:"🌿", from:null, until:null,
+  /* soldOut:true = the action stops EVERYWHERE at once (banner, price list,
+     match). until:"2027-03-31" = stops by itself on that date. products =
+     what is being used up: in salon mode the stock tab warns when they are all
+     finished, so you know it is time to set soldOut:true. */
+  { id:"expressuseup", icon:"🌿", from:null, until:null, soldOut:false, priceItem:"Express gelaatsverzorging – opgebruikactie", treatment:"expressuseup",
+    products:"usedIn:expressuseup",
     title:{ nl:"Express gelaatsverzorging voor €50", en:"Express facial for €50", fr:"Soin du visage express à 50 €" },
     text:{ nl:"Een frisse huid in 30 minuten, voor €50 in plaats van €60, met kwaliteitsproducten uit mijn vorige assortiment (Bio Balance, Guinot, Dr. Renaud en Safety4You). Vermeld “opgebruikactie” als je boekt. Zolang de voorraad strekt.",
            en:"Fresh skin in 30 minutes, for €50 instead of €60, with quality products from my previous range (Bio Balance, Guinot, Dr. Renaud and Safety4You). Mention “special offer” when you book. While stocks last.",
            fr:"Une peau fraîche en 30 minutes, 50 € au lieu de 60 €, avec des produits de qualité de ma gamme précédente (Bio Balance, Guinot, Dr. Renaud et Safety4You). Mentionnez « offre spéciale » en réservant. Jusqu’à épuisement du stock." } },
-  { id:"grabbelton", icon:"🎁", from:null, until:null,
+  { id:"grabbelton", icon:"🎁", from:null, until:null, soldOut:false,
     title:{ nl:"Grabbelton", en:"Lucky dip" },
     text:{ nl:"Besteed je €75 of meer tijdens dezelfde afspraak? Dan mag je één keer grabbelen in de grabbelton. Zolang de voorraad strekt.",
            en:"Spend €75 or more during the same appointment and you get one grab from the lucky dip. While stocks last." } },
@@ -1945,7 +1952,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v159 · 17/10/2026";
+const APP_VERSION = "v163 · 18/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -2165,6 +2172,13 @@ const ADVENT = {
       product:"Guinot Gommage Éclat Parfait",
       ingredients:"Water/Eau (Aqua), Isopropyl Palmitate, Glyceryl Stearate SE, Cetearyl Alcohol, C10-18 Triglycerides, Glycerin, Cellulose Acetate, Propanediol, Steareth-21, Pentylene Glycol, Decyl Glucoside, Butyrospermum Parkii (Shea) Butter Extract, Prunus Amygdalus Dulcis (Sweet Almond) Oil, Cetearyl Glucoside, Tocopheryl Acetate, Fragrance (Parfum), Acrylates/C10-30 Alkyl Acrylate Crosspolymer, Caprylyl Glycol, Xanthan Gum, Butylene Glycol, BHT, Disodium EDTA, Hexyl Cinnamal, Linalool, Benzyl Benzoate, Red 4 (CI 14700), Yellow 5 (CI 19140)",
       nl:"Gratis Guinot Éclat Parfait scrub tijdens je gelaatsverzorging", en:"Free Guinot Éclat Parfait scrub during your facial", fr:"Gommage Guinot Éclat Parfait offert pendant votre soin du visage" },
+    neckcream: { type:"extra", icon:"🎀", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Als cadeau bij je gelaatsverzorging: een verstevigende verzorging voor hals en decolleté, met haverextract en hyaluronzuur, rustig ingemasseerd — voor een gladdere, stevigere huid. Bevat parfum.",
+                   en:"As a gift with your facial: a firming treatment for neck and décolleté with oat extract and hyaluronic acid, gently massaged in — for smoother, firmer skin. Contains fragrance.",
+                   fr:"En cadeau avec votre soin du visage : un soin raffermissant cou et décolleté à l’extrait d’avoine et à l’acide hyaluronique, massé tout en douceur — pour une peau plus lisse et ferme. Contient du parfum." },
+      product:"Janssen Cosmetics Firming Neck & Décolleté Cream (ref. 0071P)",
+      ingredients:"Aqua (Water), Butylene Glycol, Caprylic/Capric Triglyceride, Squalane, Isostearyl Isostearate, Decyl Oleate, Cetearyl Alcohol, Hydrogenated Coco-Glycerides, Methyl Glucose Sesquistearate, Glyceryl Stearate, Octyldodecanol, Pentylene Glycol, Avena Sativa (Oat) Kernel Extract, Yeast Extract, Sodium Hyaluronate, Lecithin, Ethylhexylglycerin, Glyceryl Caprylate, Hydrogenated Palm Glycerides Citrate, Dimethicone, Steareth-21, Citric Acid, Sodium Hydroxide, Ascorbyl Palmitate, Tocopherol, Tetrasodium Glutamate Diacetate, Parfum (Fragrance), Phenoxyethanol, Sodium Benzoate, CI 15985 (Yellow 6)",
+      nl:"Gratis verstevigende hals- en decolletéverzorging bij je gelaatsverzorging", en:"Free firming neck & décolleté treatment with your facial", fr:"Soin raffermissant cou et décolleté offert avec votre soin du visage" },
     // ---- more salon products ----
     luminoclear: { type:"extra", icon:"✨", stock:2, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met vitamine C, melkzuur (AHA), witte lelie en berendruif — voor een egalere, stralende teint bij pigmentvlekjes.", en:"With vitamin C, lactic acid (AHA), white lily and bearberry — for a more even, radiant complexion with pigment spots.", fr:"À la vitamine C, à l'acide lactique (AHA), au lys blanc et à la busserole — pour un teint plus uniforme et éclatant en cas de taches pigmentaires." },
@@ -2223,7 +2237,7 @@ const ADVENT = {
     { day:3,  item:"gelpromo25",    stock:null },   // gellak opmaken: HEMA-reeks en minder gekozen kleuren (Sandra, 15/10)
     { day:4,  item:"handspa",       stock:null },
     { day:5,  item:"liftsummum15",  stock:null },   // i.p.v. mascaraborsteltje (Sandra, 15/10)
-    { day:6,  item:"facial10",      stock:null },
+    { day:6,  item:"neckcream",     stock:null },   // Janssen Firming Neck & Décolleté als cadeau bij een gelaatsverzorging (Sandra, 17/10; i.p.v. 10% op een gelaatsverzorging)
     { day:7,  item:"eyeflash",      stock:null },   // in het salon, bij een gelaatsverzorging (Sandra, 13/10)
     { day:8,  item:"peelsens",      stock:null },
     { day:9,  item:"nailpolishfree", stock:null },  // gewone nagellak opmaken (Sandra, 15/10); gellak blijft op 3 en 17
@@ -2294,6 +2308,74 @@ const STAMP_REWARD = {
    ============================================================ */
 function PI(nl, en, time, price, dnl, den, nnl, nen){
   return { n:{nl, en}, d: dnl ? {nl:dnl, en:den} : null, time, price, note: nnl ? {nl:nnl, en:nen} : null };
+}
+/* SCENT (v163): after a match the client picks the scent of the drop of
+   essential oil in the steam/compress (facial, back) or the massage oil.
+   Lavender is Sandra's usual scent and is always offered first; the app adds
+   up to 3 others that suit the time of year (months) and the treatment
+   (boost). groups: face / massage / feet (= AVOID_GROUPS). Tea tree only for
+   the feet. notPregnant / notKids / allergy hide an oil when that applies.
+   A fragrance allergy = no scent. The choice goes into the WhatsApp/e-mail
+   message and the copied name for the online booking. */
+const SCENT_OPTIONS = [
+  { id:"lavender", product:"eolavender", icon:"💜", months:[1,2,3,4,5,6,7,8,9,10,11,12], groups:["face","massage","feet"], isDefault:true,
+    label:{ nl:"Lavendel", en:"Lavender", fr:"Lavande" },
+    text:{ nl:"rustgevend en zacht", en:"calming and soft", fr:"apaisante et douce" } },
+  { id:"eucalyptus", product:"eoeucalyptus", icon:"🌿", months:[10,11,12,1,2,3], groups:["face","massage"], boost:{ detoxback:2, swedishbackneck:1, cupping:1, harmonizingback:1 }, notKids:true,
+    label:{ nl:"Eucalyptus", en:"Eucalyptus", fr:"Eucalyptus" },
+    text:{ nl:"fris en vrij ademen, fijn in het verkoudheidsseizoen", en:"fresh, easy breathing, lovely in cold season", fr:"frais, respiration libre, idéal en saison des rhumes" } },
+  { id:"pine", product:"eopine", icon:"🌲", months:[11,12,1,2], groups:["massage"], boost:{ swedishbackneck:1, backwrap:1, detoxback:1 },
+    label:{ nl:"Grove den", en:"Scots pine", fr:"Pin sylvestre" },
+    text:{ nl:"een winterse boswandeling", en:"a winter walk in the woods", fr:"une balade en forêt l’hiver" } },
+  { id:"blackpepper", product:"eoblackpepper", icon:"🔥", months:[10,11,12,1,2,3], groups:["massage"], boost:{ cupping:3, swedishbackneck:2, harmonizingback:1, hotstone:1 },
+    label:{ nl:"Zwarte peper", en:"Black pepper", fr:"Poivre noir" },
+    text:{ nl:"verwarmend, voor stijve spieren", en:"warming, for stiff muscles", fr:"réchauffant, pour les muscles raides" } },
+  { id:"cedar", product:"eocedar", icon:"🪵", months:[10,11,12,1,2,3], groups:["massage"], boost:{ detoxback:2, hotstone:1 },
+    label:{ nl:"Atlasceder", en:"Atlas cedarwood", fr:"Cèdre de l’Atlas" },
+    text:{ nl:"houtig, aardend en rustig", en:"woody, grounding and calm", fr:"boisé, apaisant et ancrant" } },
+  { id:"bergamot", product:"eobergamot", icon:"🍊", months:[11,12,1,2], groups:["massage"], boost:{ swedish:1, harmonizingbody:1 },
+    label:{ nl:"Bergamot", en:"Bergamot", fr:"Bergamote" },
+    text:{ nl:"een zonnig, opgewekt geurtje in de donkere maanden", en:"a sunny, uplifting scent in the dark months", fr:"un parfum ensoleillé pendant les mois sombres" } },
+  { id:"staranise", product:"eostaranise", icon:"⭐", months:[11,12], groups:["massage"], boost:{ hotstone:2, swedish:1 }, notPregnant:true,
+    label:{ nl:"Steranijs", en:"Star anise", fr:"Badiane" },
+    text:{ nl:"warm en kruidig, een kerstgevoel", en:"warm and spicy, a Christmas feeling", fr:"chaude et épicée, un air de Noël" } },
+  { id:"patchouli", product:"eopatchouli", icon:"🍂", months:[9,10,11], groups:["massage"], boost:{ hotstone:1, backwrap:1 },
+    label:{ nl:"Patchoeli", en:"Patchouli", fr:"Patchouli" },
+    text:{ nl:"aards en warm, echt herfst", en:"earthy and warm, pure autumn", fr:"terreux et chaud, l’automne" } },
+  { id:"grapefruit", product:"eograpefruit", icon:"🍋", months:[1,2,3,4], groups:["massage"], boost:{ slimmassage:3, cuppingpeeling:1 },
+    label:{ nl:"Grapefruit", en:"Grapefruit", fr:"Pamplemousse" },
+    text:{ nl:"fris en opwekkend", en:"fresh and invigorating", fr:"frais et tonifiant" } },
+  { id:"peppermint", product:"eopeppermint", icon:"🌱", months:[5,6,7,8,9], groups:["massage","feet"], boost:{ swedishlegs:3, pedicure:1, pedicureexpress:1, manipedispa:1 }, notPregnant:true, notKids:true,
+    label:{ nl:"Pepermunt", en:"Peppermint", fr:"Menthe poivrée" },
+    text:{ nl:"verkoelend voor warme, zware benen en voeten", en:"cooling for warm, heavy legs and feet", fr:"rafraîchissante pour jambes et pieds lourds" } },
+  { id:"lemongrass", product:"eolemongrass", icon:"🍃", months:[5,6,7,8,9], groups:["massage","feet"], boost:{ swedishlegs:1, pedicure:1 },
+    label:{ nl:"Citroengras", en:"Lemongrass", fr:"Lemongrass" },
+    text:{ nl:"zomers fris en opwekkend", en:"summery fresh and uplifting", fr:"frais et estival" } },
+  { id:"chamomile", product:"eochamomile", icon:"🌼", months:[1,2,3,4,5,6,7,8,9,10,11,12], groups:["face","massage"], boost:{ signaturefacial:2, expressfacial:1 }, allergy:"asteraceae",
+    label:{ nl:"Echte kamille", en:"German chamomile", fr:"Camomille" },
+    text:{ nl:"zacht en kalmerend, ook voor een gevoelige huid", en:"soft and soothing, also for sensitive skin", fr:"douce et apaisante, aussi pour peau sensible" } },
+  { id:"rose", product:"eorose", icon:"🌹", months:[1,2,3,4,5,6,7,8,9,10,11,12], groups:["face","massage"], boost:{ antiagefacial:2, signaturefacial:1, liftsummere:1 },
+    label:{ nl:"Damascusroos", en:"Damask rose", fr:"Rose de Damas" },
+    text:{ nl:"bloemig en verwennend", en:"floral and pampering", fr:"florale et cocooning" } },
+  { id:"palmarosa", product:"eopalmarosa", icon:"🌸", months:[1,2,3,4,5,6,7,8,9,10,11,12], groups:["face","feet"], boost:{ hydrapeel:1, fruitacid:1, expressuseup:1 },
+    label:{ nl:"Palmarosa", en:"Palmarosa", fr:"Palmarosa" },
+    text:{ nl:"zacht bloemig, in balans voor de huid", en:"softly floral, balancing for the skin", fr:"florale et équilibrante pour la peau" } },
+  { id:"ylang", product:"eoylang", icon:"🌺", months:[1,2,3,4,5,6,7,8,9,10,11,12], groups:["massage"], boost:{ swedish:1, hotstone:1, harmonizingbody:1 },
+    label:{ nl:"Ylang-ylang", en:"Ylang-ylang", fr:"Ylang-ylang" },
+    text:{ nl:"exotisch, diep ontspannend", en:"exotic, deeply relaxing", fr:"exotique, profondément relaxant" } },
+  { id:"teatree", product:"teatree", icon:"🌿", months:[1,2,3,4,5,6,7,8,9,10,11,12], groups:["feet"], boost:{ pedicure:2, pedicureexpress:2 },
+    label:{ nl:"Tea tree", en:"Tea tree", fr:"Tea tree" },
+    text:{ nl:"fris en zuiverend voor de voeten", en:"fresh and purifying for the feet", fr:"frais et purifiant pour les pieds" } },
+];
+
+/* Is a (non-yearly) action on today? soldOut, from and until are checked.
+   Used by the banner, the price list and the match, so one switch stops all. */
+function actionIsOn(id, today){
+  const a = (typeof CURRENT_ACTIONS !== "undefined" ? CURRENT_ACTIONS : []).find(x => x.id === id);
+  if (!a) return false;
+  if (a.soldOut) return false;
+  if (!today){ const d = new Date(); today = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+  return (!a.from || today >= a.from) && (!a.until || today <= a.until);
 }
 const PRICE_LIST = [
   { id:"facial", icon:"🌿", title:{ nl:"Gelaatsverzorging", en:"Facials" }, items:[

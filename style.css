@@ -1316,3 +1316,25 @@ p.season-card__shop{ text-decoration:none; margin:2px 0 0; font-style:italic; }
 .proto-step{ margin:0; font-weight:600; white-space:pre-line; } .proto-prod, .proto-mat{ margin:3px 0 0; font-size:.92rem; white-space:pre-line; }
 .proto-intro{ font-size:.9rem; background:var(--cream); padding:8px 12px; border-radius:12px; } .proto-intro p{ margin:4px 0; }
 .proto-links{ margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; align-items:center; } .proto-links .match-why__title{ width:100%; }
+
+/* v160 copy treatment name for online booking */
+.copy-name{ margin:0 0 10px; padding:10px 12px; border:1px dashed var(--line, #d9c9b8); border-radius:12px; background:rgba(255,255,255,.55); }
+.copy-name__hint{ margin:0 0 6px; font-size:.88rem; line-height:1.35; }
+.copy-name__row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.copy-name__text{ flex:1 1 160px; font-weight:600; word-break:break-word; }
+.copy-name__btn{ flex:0 0 auto; padding:8px 14px; width:auto; }
+
+/* v162 use-up action status in the stock tab, health note for Sandra */
+.inv-action{ margin:0 0 12px; padding:10px 12px; border-radius:12px; background:rgba(120,160,110,.12); }
+.inv-action--done{ background:rgba(200,80,60,.14); }
+.proto-sandra{ margin:8px 0; padding:8px 10px; border-left:3px solid var(--accent, #b08a5a); background:rgba(255,255,255,.5); font-size:.9rem; }
+
+/* v163 scent choice */
+.scent-box{ margin:12px 0; padding:12px; border-radius:14px; background:rgba(255,255,255,.55); border:1px solid var(--line, #e3d6c6); }
+.scent-box__title{ margin:0 0 4px; font-weight:700; }
+.scent-box__hint{ margin:0 0 8px; font-size:.88rem; line-height:1.35; }
+.scent-chips{ display:flex; flex-direction:column; gap:6px; }
+.scent-chip{ text-align:left; padding:8px 12px; border-radius:12px; border:1px solid var(--line, #d9c9b8); background:#fff; cursor:pointer; font:inherit; color:inherit; }
+.scent-chip.is-selected{ border-color:var(--accent, #b08a5a); box-shadow:0 0 0 2px rgba(176,138,90,.25); background:#fffaf2; }
+.scent-chip__name{ display:block; font-weight:600; }
+.scent-chip__text{ display:block; font-size:.82rem; opacity:.8; }

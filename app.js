@@ -123,6 +123,7 @@
   function setLang(lang){
     state.lang = lang;
     applyI18n();
+    try { renderCopyName(); } catch(e){ /* not ready yet */ }
   }
 
   /* ---------------- step navigation ---------------- */
@@ -1139,7 +1140,52 @@
     ["benefits","funfact","aftercare"].forEach(k => { KID_CONTENT[k].fr = window.KID_CONTENT_FR[k]; });
   }
 
+  /* ---------------- scent of the essential oil (v163) ---------------- */
+  function scentGroup(tid){
+    if (typeof AVOID_GROUPS === "undefined") return null;
+    for (const g of ["feet", "face", "massage"]) if ((AVOID_GROUPS[g] || []).includes(tid)) return g;
+    return null;
+  }
+  function scentChoices(m){
+    if (!m || m.isKid || !m.treatment || typeof SCENT_OPTIONS === "undefined") return { list:[] };
+    const g = scentGroup(m.treatment.id); if (!g) return { list:[] };
+    const al = (state.allergies || []);
+    if (al.includes("fragrance")) return { list:[], noScent:true };
+    let today; try { today = seasonTodayKey(); } catch(e){ today = todayKey(); }
+    const month = Number(today.slice(5, 7)), tid = m.treatment.id;
+    const ok = o => o.groups.includes(g) && o.months.includes(month) && !(o.notPregnant && state.healthFlags.pregnant) && !(o.allergy && al.includes(o.allergy));
+    const pool = SCENT_OPTIONS.filter(ok);
+    const def = pool.find(o => o.isDefault);
+    const rest = pool.filter(o => !o.isDefault).map((o, i) => ({ o, sc: ((o.boost || {})[tid] || 0) * 3 + (o.months.length < 12 ? 7 : 0) - i * 0.01 }))
+      .sort((a, b) => b.sc - a.sc).slice(0, def ? 3 : 4).map(x => x.o);
+    return { list: (def ? [def] : []).concat(rest) };
+  }
+  function scentPicked(m){
+    const c = scentChoices(m); if (!c.list.length) return null;
+    if (state.scent === "none") return "none";
+    return c.list.find(o => o.id === state.scent) || c.list[0];
+  }
+  function scentLabel(m, L){
+    const p = scentPicked(m); if (!p) return "";
+    return p === "none" ? t("scent_none", L) : (p.label[L] || p.label.nl);
+  }
+  function scentHtml(m){
+    const L = state.lang, c = scentChoices(m);
+    if (c.noScent) return `<div class="scent-box"><p class="scent-box__title">🌿 ${t("scent_title", L)}</p><p class="scent-box__hint">${t("scent_fragrance", L)}</p></div>`;
+    if (!c.list.length) return "";
+    const cur = scentPicked(m), curId = cur === "none" ? "none" : cur.id;
+    const chip = (id, icon, label, text) => `<button type="button" class="scent-chip${curId === id ? " is-selected" : ""}" data-action="pick-scent" data-scent="${esc(id)}" aria-pressed="${curId === id}"><span class="scent-chip__name">${icon} ${esc(label)}</span>${text ? `<span class="scent-chip__text">${esc(text)}</span>` : ""}</button>`;
+    return `<div class="scent-box"><p class="scent-box__title">🌿 ${t("scent_title", L)}</p><p class="scent-box__hint">${t("scent_hint", L)}</p>
+      <div class="scent-chips">${c.list.map(o => chip(o.id, o.icon, o.label[L] || o.label.nl, (o.isDefault ? t("scent_usual", L) + " · " : "") + (o.text[L] || o.text.nl))).join("")}${chip("none", "○", t("scent_none", L), "")}</div></div>`;
+  }
+  function pickScent(id){
+    state.scent = id;
+    const b = $("#scentBlock"); if (b) b.innerHTML = scentHtml(state.match);
+    updateBookingLink(state.match, drinkFullFor(state.match));
+  }
+
   function generateMatch(){
+    state.scent = null;
     if (state.profile === "kind"){
       const drinkDef = KIDS_DRINKS.find(d => d.id === state.kidsDrink) || KIDS_DRINKS[0];
       const homecarePick = pickHomecareProduct("hand", null, "kind");
@@ -1328,7 +1374,7 @@
     return `<div class="match-why">
         <p class="match-why__title">💡 ${t("why_title", L)}</p>
         <p class="match-why__text">${parts.join(" ")}</p>
-      </div>${fa}${allergyClientHtml(m, L)}${(() => { try { return ingrSandra() ? protoLinksHtml(m.treatment.id, L) : ""; } catch(e){ return ""; } })()}`;
+      </div>${fa}${allergyClientHtml(m, L)}${(() => { try { return ingrSandra() ? healthSandraHtml(L) + protoLinksHtml(m.treatment.id, L) : ""; } catch(e){ return ""; } })()}`;
   }
 
   function renderResultDetails(){
@@ -1371,6 +1417,7 @@
           <div class="result-row__value">${trName(m.treatment.name, state.lang)}</div>
         </div>
       </div>
+      <div id="scentBlock">${scentHtml(m)}</div>
       ${whyHtml(m, drinkFull, drinkNotes)}`;
 
     const titleEl = $("#resultTitle");
@@ -1408,7 +1455,7 @@
       const body = t("book_email_body", state.lang)
         .replace("{treatment}", trName(m.treatment.name, state.lang))
         .replace("{drink}", drinkFull || "")
-        .replace("{slots}", slots) + (allergyPicked().length ? "\n" + t("book_allergy_line", state.lang).replace("{a}", allergyLabels(state.lang).join(", ")) : "");
+        .replace("{slots}", slots) + (scentLabel(m, state.lang) ? "\n" + t("book_scent_line", state.lang).replace("{s}", scentLabel(m, state.lang)) : "") + (allergyPicked().length ? "\n" + t("book_allergy_line", state.lang).replace("{a}", allergyLabels(state.lang).join(", ")) : "");
       emailLink.href = `mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     }
     const onl = $("#bookOnlineCta");
@@ -1419,9 +1466,10 @@
         .replace("{treatment}", trName(m.treatment.name, state.lang))
         .replace("{drink}", drinkFull || "")
         .replace("{slots}", slots)
-        .trim() + (allergyPicked().length ? " " + t("book_allergy_line", state.lang).replace("{a}", allergyLabels(state.lang).join(", ")) : "");
+        .trim() + (scentLabel(m, state.lang) ? " " + t("book_scent_line", state.lang).replace("{s}", scentLabel(m, state.lang)) : "") + (allergyPicked().length ? " " + t("book_allergy_line", state.lang).replace("{a}", allergyLabels(state.lang).join(", ")) : "");
       waLink.href = `https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(waText)}`;
     }
+    renderCopyName();
   }
 
   /* ---------------- slot picker (weekend preference) ---------------- */
@@ -1724,9 +1772,19 @@
       }));
     }
     let html = "";
+    let today; try { today = seasonTodayKey(); } catch(e){ today = todayKey(); }
+    const offItems = new Set((typeof CURRENT_ACTIONS !== "undefined" ? CURRENT_ACTIONS : []).filter(a => a.priceItem && !actionIsOn(a.id, today)).map(a => a.priceItem));
+    if (!state.priceCat && !q){
+      const acts = activeActionsNow(today);
+      if (acts.length) html += `<details class="price-section price-section--actions" data-sec="_actions" open>
+        <summary><span class="price-section__icon" aria-hidden="true"></span><span class="price-section__title">${t("pricelist_actions", lang)}</span><span class="price-section__count">${acts.length}</span></summary>
+        <ul class="price-items">${acts.map(a => `<li class="price-item"><div class="price-item__main"><span class="price-item__name">${a.icon || "🎁"} ${actionFill(a.title[lang] || a.title.nl, a, lang)}</span></div><div class="price-item__note">${actionFill(a.text[lang] || a.text.nl, a, lang)}</div></li>`).join("")}</ul>
+      </details>`;
+    }
     PRICE_LIST.forEach(sec => {
       if (state.priceCat && sec.id !== state.priceCat) return;
       const items = sec.items.filter(it => {
+        if (offItems.has(it.n.nl)) return false;
         if (!q) return true;
         const hay = [it.n.nl, it.n.en, it.n.fr, it.d && it.d.nl, it.d && it.d.en, it.d && it.d.fr, sec.title.nl, sec.title.en, sec.title.fr].join(" ").toLowerCase();
         return hay.includes(q);
@@ -1765,12 +1823,8 @@
     let today;
     try { today = seasonTodayKey(); } catch(e){ today = todayKey(); }   // preview: follows the chosen date
     const lang = state.lang;
-    const active = CURRENT_ACTIONS.map(a => actionWindow(a, today)).filter(a => a && (!a.from || today >= a.from) && (!a.until || today <= a.until))
-      .sort((x, y) => (y.yearly ? 1 : 0) - (x.yearly ? 1 : 0));   // seasonal actions first
-    const fill = (txt, a) => String(txt || "").replace(/\{value\}/g, lang === "fr" ? String(a.value || "").replace("%", " %") : (a.value || ""))
-      .replace(/\{treat\}/g, a.treat ? esc(a.treat[lang] || a.treat.nl) : "")
-      .replace(/\{treat2\}/g, a.treat2 ? esc(a.treat2[lang] || a.treat2.nl) : "")
-      .replace(/\{from\}/g, actionFmt(a.dealFrom, lang)).replace(/\{until\}/g, actionFmt(a.until, lang));
+    const active = activeActionsNow(today);
+    const fill = (txt, a) => actionFill(txt, a, lang);
     const card = a => `
       <div class="action-card${a.yearly ? " action-card--" + esc(a.id) : ""}">
         <span class="action-card__icon" aria-hidden="true">${a.icon || "🎁"}</span>
@@ -1784,6 +1838,18 @@
     wrap.innerHTML = active.filter(a => a.yearly).map(card).join("") + offers + active.filter(a => !a.yearly).map(card).join("");
     wraps.forEach(w => w.querySelectorAll("[data-offer-link]").forEach(x => x.addEventListener("click", () => trackEvent("offer-open"))));
     wraps.forEach(w => w.querySelectorAll("[data-offer-book]").forEach(x => x.addEventListener("click", () => trackEvent("offer-whatsapp"))));
+  }
+  // active actions today (yearly ones first); soldOut stops an action everywhere
+  function activeActionsNow(today){
+    if (typeof CURRENT_ACTIONS === "undefined") return [];
+    return CURRENT_ACTIONS.filter(a => !a.soldOut).map(a => actionWindow(a, today)).filter(a => a && (!a.from || today >= a.from) && (!a.until || today <= a.until))
+      .sort((x, y) => (y.yearly ? 1 : 0) - (x.yearly ? 1 : 0));
+  }
+  function actionFill(txt, a, lang){
+    return String(txt || "").replace(/\{value\}/g, lang === "fr" ? String(a.value || "").replace("%", " %") : (a.value || ""))
+      .replace(/\{treat\}/g, a.treat ? esc(a.treat[lang] || a.treat.nl) : "")
+      .replace(/\{treat2\}/g, a.treat2 ? esc(a.treat2[lang] || a.treat2.nl) : "")
+      .replace(/\{from\}/g, actionFmt(a.dealFrom, lang)).replace(/\{until\}/g, actionFmt(a.until, lang));
   }
   // yearly actions (e.g. Valentine): work out this year's weekends
   function actionWindow(a, today){
@@ -3070,6 +3136,32 @@
     });
     const alt = $("#bookAlt"); if (alt && !u) alt.open = true;
     document.querySelectorAll(".online-gmail-hint").forEach(h => { h.hidden = !u; });   // no booking page: WhatsApp/e-mail is the only way
+    renderCopyName();
+  }
+  /* v160: clients forget the exact treatment name after the match. A copy
+     button puts the name on the clipboard so they can paste it in the
+     Google booking form ("result" = current match, "last" = last match on
+     the start screen, only for 60 days). */
+  function copyNameText(src){
+    if (src === "result"){ const m = state.match; if (!(m && m.treatment)) return ""; const sc = scentLabel(m, state.lang); return trName(m.treatment.name, state.lang) + (sc ? " · " + t("book_scent_line", state.lang).replace("{s}", sc).replace(/\.$/, "") : ""); }
+    const lm = localData.lastMoment, at = localData.lastMatchAt;
+    if (!lm || !lm.treatmentId || !at || (Date.now() - new Date(at).getTime()) > 60 * 86400000) return "";
+    const tr = TREATMENTS_CATALOG.find(x => x.id === lm.treatmentId);
+    return tr ? trName(tr.name, state.lang) : "";
+  }
+  function renderCopyName(){
+    document.querySelectorAll(".copy-name").forEach(b => {
+      const txt = copyNameText(b.dataset.copySrc);
+      b.dataset.text = txt; b.hidden = !txt;
+      const s = b.querySelector(".copy-name__text"); if (s) s.textContent = txt;
+    });
+  }
+  function copyName(el){
+    const box = el.closest(".copy-name"), txt = box && box.dataset.text;
+    if (!txt) return;
+    const done = () => showToast(t("copy_name_toast", state.lang));
+    try { navigator.clipboard.writeText(txt).then(done, () => window.prompt(t("copy_name_btn", state.lang), txt)); }
+    catch(e){ window.prompt(t("copy_name_btn", state.lang), txt); }
   }
   function renderOnlineTake(){
     applyOnlineLinks();
@@ -4177,7 +4269,17 @@
     const catsOf = p => { const u = p.usedIn || []; const c = Object.keys(cats).filter(g => u.some(v => cats[g].includes(v))); return c.length ? c : ["other"]; };
     const chips = ["all"].concat(Object.keys(cats), ["other", "tracked"]).map(g => `<button type="button" class="chip${(ingr.invCat || "all") === g ? " is-selected" : ""}" data-inv-cat="${g}">${g === "all" ? t("tht_all", L) : g === "other" ? t("tht_other", L) : g === "tracked" ? t("inv_tracked", L) : t("avoid." + g, L)}</button>`).join("");
     const treats = ingrTreatments().filter(id => !ingrIsAdventUse(id)).map(id => [id, ingrTreatName(id)]).sort((a, b) => a[1].localeCompare(b[1]));
-    let html = `<p class="ingr-note">${t("inv_intro", L)}</p>
+    // use-up actions: are their products finished? (then switch the action off)
+    const actWarn = (typeof CURRENT_ACTIONS !== "undefined" ? CURRENT_ACTIONS : []).filter(a => a.products && !a.soldOut).map(a => {
+      const tag = String(a.products).replace(/^usedIn:/, "");
+      const ids = Object.keys(SALON_PRODUCTS).filter(id => (SALON_PRODUCTS[id].usedIn || []).includes(tag) && !/^Janssen/i.test(ingrName(SALON_PRODUCTS[id])));
+      const tracked = ids.filter(id => x.p[id] && x.p[id].per);
+      const empty = tracked.filter(id => invState(x.p[id]) === "order");
+      if (!tracked.length) return "";
+      const all = empty.length === tracked.length;
+      return `<div class="inv-action${all ? " inv-action--done" : ""}"><p class="inv-summary__title">${all ? "🛑" : "🌿"} ${esc(a.title[L] || a.title.nl)}</p><p>${t(all ? "inv_action_done" : "inv_action_count", L).replace("{n}", empty.length).replace("{m}", tracked.length)}</p></div>`;
+    }).join("");
+    let html = `<p class="ingr-note">${t("inv_intro", L)}</p>${actWarn}
       <div class="inv-summary">
         <p class="inv-summary__title">🛒 ${t("inv_reorder_title", L)} (${order.length})</p>
         ${order.length ? `<ul class="inv-list">${order.map(r => `<li>${nm(r.id)}</li>`).join("")}</ul>` : `<p class="ingr-muted">✓ ${t("inv_nothing", L)}</p>`}
@@ -4344,6 +4446,10 @@
     return `<div class="proto-links"><p class="match-why__title">📋 ${t("proto_result_title", L)}</p>${list.map(x => `<button type="button" class="btn btn--sm btn--outline" data-action="open-proto" data-proto="${esc(x.id)}">${esc(x.title)}</button>`).join(" ")}</div>`;
   }
 
+  function healthSandraHtml(L){
+    const hs = (typeof HEALTH_EXTRA !== "undefined" ? HEALTH_EXTRA : []).filter(h => state.healthFlags[h.key] && h.sandraNote);
+    return hs.map(h => `<p class="proto-sandra">🔒 ${esc(h.sandraNote[L] || h.sandraNote.nl)}</p>`).join("");
+  }
   function healthExtraExclude(){
     const hs = (typeof HEALTH_EXTRA !== "undefined" ? HEALTH_EXTRA : []).filter(h => state.healthFlags[h.key]);
     const ids = hs.flatMap(h => h.exclude || []);
@@ -5862,6 +5968,8 @@
       if (action === "appt-review-done") apptReviewDone(el.getAttribute("data-appt-key"));
       if (action === "online-book") onlineBookClicked(el.getAttribute("data-online-src"));
       if (action === "online-take") onlineTake();
+      if (action === "copy-name") copyName(el);
+      if (action === "pick-scent") pickScent(el.dataset.scent);
       if (action === "open-proto"){ ingr.unlocked = true; ingr.tab = "protocol"; ingr.proto = el.dataset.proto; goTo("ingredients"); }
       if (action === "online-dismiss") onlineDismiss();
     });
