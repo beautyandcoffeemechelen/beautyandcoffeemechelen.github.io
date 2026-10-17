@@ -1952,7 +1952,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v163 · 18/10/2026";
+const APP_VERSION = "v165 · 18/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -2135,12 +2135,12 @@ const ADVENT = {
     facecupping: { type:"extra", photo:"assets/advent/facecupping-ill.webp", icon:"✨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       nl:"Gratis liftende cuppingmassage voor het gelaat", en:"Free lifting cupping facial massage", fr:"Massage liftant aux ventouses du visage offert" },
     peelanti: { type:"extra", icon:"🌟", stock:6, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
-      highlights:{ nl:"Met kaviaarextract, hamamelis, lavendel en collageen — verstevigt en geeft de rijpere huid een frisse, gladde uitstraling. Vooraf een hyaluronzuurserum met komkommer voor extra vocht.", en:"With caviar extract, witch hazel, lavender and collagen — firms and gives mature skin a fresh, smooth look. First a hyaluronic acid serum with cucumber for extra moisture.", fr:"À l'extrait de caviar, à l'hamamélis, à la lavande et au collagène — raffermit et donne aux peaux matures un aspect frais et lisse. D'abord un sérum à l'acide hyaluronique et au concombre pour plus d'hydratation." },
+      highlights:{ nl:"Met kaviaarextract, hamamelis, lavendel en collageen — verstevigt en geeft de rijpere huid een frisse, gladde uitstraling. Vooraf een hyaluronzuurserum voor extra vocht.", en:"With caviar extract, witch hazel, lavender and collagen — firms and gives mature skin a fresh, smooth look. First a hyaluronic acid serum for extra moisture.", fr:"À l'extrait de caviar, à l'hamamélis, à la lavande et au collagène — raffermit et donne aux peaux matures un aspect frais et lisse. D'abord un sérum à l'acide hyaluronique pour plus d'hydratation." },
       product:"Bio Balance Algoherbal Ageing (poedermasker + Essence Gel) + Hya-Lift+ serum",
       ingredients:"Poeder (Lavender): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Lavandula Angustifolia (Lavender) Flower, Sodium Phosphate, CI 42090, Lavandula Angustifolia (Lavender) Oil. — Essence Gel (Lavender & Caviar): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Caviar Extract, Hamamelis Virginiana Extract, Lavandula Angustifolia Extract, Carbomer, Triethanolamine, Hyaluronic Acid, Hydrolyzed Collagen, Allantoin, PEG-40 Hydrogenated Castor Oil, Parfum, CI 42090, Phenoxyethanol, Limonene, Linalool, Geraniol, Alpha-Isomethyl Ionone, CI 16035",
       nl:"Gratis anti-aging peel-off masker", en:"Free anti-ageing peel-off mask", fr:"Masque peel-off anti-âge offert" },
     peelsens: { type:"extra", icon:"🌹", stock:1, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
-      highlights:{ nl:"Met rozenblaadjes, rozenolie, aloë vera, komkommer en hyaluronzuur — kalmeert, hydrateert en verzacht de gevoelige huid. Vooraf een mild hyaluronzuurserum zonder parfum.", en:"With rose petals, rose oil, aloe vera, cucumber and hyaluronic acid — calms, hydrates and softens sensitive skin. First a mild, fragrance-free hyaluronic acid serum.", fr:"Aux pétales de rose, à l'huile de rose, à l'aloe vera, au concombre et à l'acide hyaluronique — apaise, hydrate et adoucit les peaux sensibles. D'abord un sérum doux à l'acide hyaluronique, sans parfum." },
+      highlights:{ nl:"Met rozenblaadjes, rozenolie, aloë vera en hyaluronzuur — kalmeert, hydrateert en verzacht de gevoelige huid. Vooraf een mild hyaluronzuurserum zonder parfum.", en:"With rose petals, rose oil, aloe vera and hyaluronic acid — calms, hydrates and softens sensitive skin. First a mild, fragrance-free hyaluronic acid serum.", fr:"Aux pétales de rose, à l'huile de rose, à l'aloe vera et à l'acide hyaluronique — apaise, hydrate et adoucit les peaux sensibles. D'abord un sérum doux à l'acide hyaluronique, sans parfum." },
       product:"Bio Balance Algoherbal Sensitive – Rose (poedermasker + Essence Gel) + Hya-Lift+ serum",
       ingredients:"Poeder (Rose): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Rosa Centifolia Flower, Sodium Phosphate, CI 16035, Rosa Rugosa Flower Oil. — Essence Gel (Rose): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Cucumis Sativus Fruit Extract, Hydrolyzed Collagen, Carbomer, Triethanolamine, PEG-40 Hydrogenated Castor Oil, Hyaluronic Acid, Parfum, Disodium EDTA, Phenoxyethanol, Limonene, Linalool, Alpha-Isomethyl Ionone, CI 16035",
       nl:"Gratis rozen peel-off masker voor de gevoelige huid", en:"Free rose peel-off mask for sensitive skin", fr:"Masque peel-off à la rose pour peaux sensibles offert" },
@@ -2179,6 +2179,13 @@ const ADVENT = {
       product:"Janssen Cosmetics Firming Neck & Décolleté Cream (ref. 0071P)",
       ingredients:"Aqua (Water), Butylene Glycol, Caprylic/Capric Triglyceride, Squalane, Isostearyl Isostearate, Decyl Oleate, Cetearyl Alcohol, Hydrogenated Coco-Glycerides, Methyl Glucose Sesquistearate, Glyceryl Stearate, Octyldodecanol, Pentylene Glycol, Avena Sativa (Oat) Kernel Extract, Yeast Extract, Sodium Hyaluronate, Lecithin, Ethylhexylglycerin, Glyceryl Caprylate, Hydrogenated Palm Glycerides Citrate, Dimethicone, Steareth-21, Citric Acid, Sodium Hydroxide, Ascorbyl Palmitate, Tocopherol, Tetrasodium Glutamate Diacetate, Parfum (Fragrance), Phenoxyethanol, Sodium Benzoate, CI 15985 (Yellow 6)",
       nl:"Gratis verstevigende hals- en decolletéverzorging bij je gelaatsverzorging", en:"Free firming neck & décolleté treatment with your facial", fr:"Soin raffermissant cou et décolleté offert avec votre soin du visage" },
+    guasha: { type:"extra", icon:"🪨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Een rustgevende gua sha-gelaatsmassage met een gladde steen: ontspant, laat het vocht afvloeien en geeft een frisse, stralende huid. De steen glijdt over een hyaluronzuurserum zonder parfum.",
+                   en:"A relaxing gua sha facial massage with a smooth stone: relaxes, drains fluid and gives fresh, radiant skin. The stone glides over a fragrance-free hyaluronic acid serum.",
+                   fr:"Un massage du visage gua sha avec une pierre lisse : détend, draine et donne un teint frais et lumineux. La pierre glisse sur un sérum à l’acide hyaluronique, sans parfum." },
+      product:"Gua sha + Bio Balance Hya-Lift+ hyaluronzuurserum",
+      ingredients:"Aqua (Water), Cucumis Sativus (Cucumber) Fruit Extract, Sodium Hyaluronate, Alcohol, Phenoxyethanol",
+      nl:"Gratis gua sha-gelaatsmassage bij je gelaatsverzorging", en:"Free gua sha facial massage with your facial", fr:"Massage du visage gua sha offert avec votre soin du visage" },
     // ---- more salon products ----
     luminoclear: { type:"extra", icon:"✨", stock:2, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met vitamine C, melkzuur (AHA), witte lelie en berendruif — voor een egalere, stralende teint bij pigmentvlekjes.", en:"With vitamin C, lactic acid (AHA), white lily and bearberry — for a more even, radiant complexion with pigment spots.", fr:"À la vitamine C, à l'acide lactique (AHA), au lys blanc et à la busserole — pour un teint plus uniforme et éclatant en cas de taches pigmentaires." },
@@ -2241,7 +2248,7 @@ const ADVENT = {
     { day:7,  item:"eyeflash",      stock:null },   // in het salon, bij een gelaatsverzorging (Sandra, 13/10)
     { day:8,  item:"peelsens",      stock:null },
     { day:9,  item:"nailpolishfree", stock:null },  // gewone nagellak opmaken (Sandra, 15/10); gellak blijft op 3 en 17
-    { day:10, item:"hotstoneface",  stock:null },
+    { day:10, item:"guasha",        stock:null },   // gua sha met Hya-Lift+ serum (Sandra, 18/10; i.p.v. Hot Stone gelaatsmassage)
     { day:11, item:"massage15",     stock:null },
     { day:12, item:"buffer",        stock:null },
     { day:13, item:"facecupping",   stock:null },
