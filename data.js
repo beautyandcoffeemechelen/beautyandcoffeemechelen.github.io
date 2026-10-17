@@ -154,7 +154,7 @@ const KIDS_TREATMENT = "Kindermanicure";
    Google Calendar "appointment schedule": Google Agenda → Maken → Afspraakschema
    → share the link of the booking page). Leave "" to hide the button; then
    clients book via WhatsApp or mail, as before. */
-const ONLINE_BOOKING_URL = "";
+const ONLINE_BOOKING_URL = "https://calendar.app.google/TmLcen9zSQuZZjtEA";
 /* Review reminder: shown in "Mijn afspraken" from this many hours after the
    start of a saved appointment (20 = the day after), for 14 days. */
 const APPT_REVIEW_AFTER_HOURS = 20;
@@ -1679,7 +1679,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v148 · 17/10/2026";
+const APP_VERSION = "v149 · 17/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
