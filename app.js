@@ -2913,6 +2913,60 @@
      buttons for Google Agenda and Outlook, an .ics file for other calendars
      (Apple, Infomaniak, Telenet…), and the route. After a visit the app
      invites them to the photo moment, prefilled. */
+  /* ---- online booking → "Mijn afspraak" without double work ----
+     Google's booking page sends nothing back to the app (and the app has no
+     server, on purpose). So: when a client taps "book online" we remember the
+     treatment; when she comes back, one tap opens "Mijn afspraak" with the
+     treatment already filled in. She only copies day and time from Google's
+     confirmation. That appointment is already in her calendar (Google's
+     invitation), so the app doesn't offer to add it a second time. */
+  const ONLINE_PENDING_HOURS = 72;
+  function onlinePending(){
+    const p = localData.pendingOnline;
+    if (!p || !p.at) return null;
+    if (Date.now() - p.at > ONLINE_PENDING_HOURS * 3600000){ localData.pendingOnline = null; saveLocalData(); return null; }
+    return p;
+  }
+  function onlineBookClicked(src){
+    let tid = null, ttext = "";
+    if (src === "result" && state.match && state.match.treatment && !state.match.isKid){
+      tid = state.match.treatment.id; ttext = trName(state.match.treatment.name, state.lang);
+    } else if (src === "result" && state.match && state.match.isKid){ tid = "kindermanicure"; ttext = trName(state.match.treatment.name, state.lang); }
+    let tcat = tid ? (Object.keys(AVOID_GROUPS).find(g => AVOID_GROUPS[g].includes(tid)) || null) : null;
+    if (!tcat && tid === "kindermanicure") tcat = "hands";
+    localData.pendingOnline = { at: Date.now(), tcat, ttext: String(ttext || "").slice(0, 40) };
+    saveLocalData(); trackEvent("online-book-" + (src || "x"));
+    setTimeout(renderOnlineTake, 400);
+  }
+  function applyOnlineLinks(){
+    const u = (typeof ONLINE_BOOKING_URL !== "undefined" && ONLINE_BOOKING_URL) || "";
+    document.querySelectorAll('[data-action="online-book"]').forEach(a => {
+      a.hidden = !u || (a.id === "apptBookOnline" && !!state.apptFromOnline);
+      if (u) a.href = u;
+    });
+    const alt = $("#bookAlt"); if (alt && !u) alt.open = true;
+    document.querySelectorAll(".online-gmail-hint").forEach(h => { h.hidden = !u; });   // no booking page: WhatsApp/e-mail is the only way
+  }
+  function renderOnlineTake(){
+    applyOnlineLinks();
+    const on = !!onlinePending();
+    document.querySelectorAll(".online-take").forEach(b => { b.hidden = !on; });
+    renderApptCard();
+  }
+  function onlineTake(){
+    const p = onlinePending();
+    openMyAppt(null);
+    if (!p) return;
+    state.apptFromOnline = true;
+    state.apptPick = { tcat: p.tcat || null };
+    const tt = $("#apptTreatText"); if (tt) tt.value = p.ttext || "";
+    const h = $("#apptOnlineHint"); if (h) h.hidden = false;
+    { const g = $('section.step[data-step="myappt"] .step__hint'); if (g) g.style.display = "none"; }
+    { const a = $("#apptBookOnline"); if (a) a.hidden = true; }
+    renderApptForm();
+    const d = $("#apptDate"); if (d) setTimeout(() => { try { d.focus(); } catch(e){} }, 300);
+  }
+  function onlineDismiss(){ localData.pendingOnline = null; saveLocalData(); renderOnlineTake(); }
   function apptList(){
     if (!Array.isArray(localData.appointments)) localData.appointments = [];
     if (localData.appointment){ localData.appointments.push(localData.appointment); localData.appointment = null; saveLocalData(); }
@@ -2967,9 +3021,18 @@
     const list = apptList().map((a, i) => ({ a, i, s: apptStart(a) })).filter(x => x.s && !isNaN(x.s));
     const upcoming = list.filter(x => x.s.getTime() + 2*3600000 >= now).sort((x, y) => x.s - y.s);
     const recentPast = list.filter(x => x.s.getTime() + 2*3600000 < now && now - x.s.getTime() < 14*86400000).sort((x, y) => y.s - x.s)[0];
-    if (!upcoming.length && !recentPast){ card.hidden = true; return; }
+    const pend = onlinePending();
+    if (!upcoming.length && !recentPast && !pend){ card.hidden = true; return; }
     const when = s => s.toLocaleDateString(loc, { weekday:"long", day:"numeric", month:"long" }) + " · " + s.toLocaleTimeString(loc, { hour:"2-digit", minute:"2-digit" });
     let html = "";
+    if (pend) html += `
+      <div class="appt-item appt-item--online">
+        <p class="appt-card__title">📅 ${t("online_take_q", L)}</p>
+        <div class="appt-card__buttons">
+          <button type="button" class="btn btn--primary" data-action="online-take">${t("online_take_btn", L)}</button>
+          <button type="button" class="btn btn--text" data-action="online-dismiss">${t("online_take_no", L)}</button>
+        </div>
+      </div>`;
     if (recentPast) html += `
       <div class="appt-item appt-item--past">
         <p class="appt-card__title">✨ ${t("appt_after_title", L)}</p>
@@ -2984,12 +3047,12 @@
       <div class="appt-item">
         <p class="appt-card__when">${when(x.s)}</p>
         <p class="appt-card__text">${apptTreatLabel(x.a)}</p>
-        <p class="appt-card__label">${t("appt_add_to", L)}</p>
+        ${x.a.src === "online" ? `<p class="appt-card__label">✓ ${t("appt_online_incal", L)}</p>` : `<p class="appt-card__label">${t("appt_add_to", L)}</p>
         <div class="appt-card__buttons">
           <a class="btn btn--outline" href="${apptGoogleUrl(x.a)}" target="_blank" rel="noopener noreferrer" data-cal="google">Google</a>
           <a class="btn btn--outline" href="${apptOutlookUrl(x.a)}" target="_blank" rel="noopener noreferrer" data-cal="outlook">Outlook</a>
           <button type="button" class="btn btn--outline" data-action="appt-ics" data-appt-index="${x.i}">${t("appt_other_calendar", L)}</button>
-        </div>
+        </div>`}
         <div class="appt-card__buttons appt-card__buttons--small">
           <button type="button" class="btn btn--text" data-action="open-findme">📍 ${t("appt_route", L)}</button>
           <button type="button" class="btn btn--text" data-action="edit-appt" data-appt-index="${x.i}">✏️ ${t("appt_edit", L)}</button>
@@ -3015,6 +3078,9 @@
     state.apptIndex = (index != null && list[index]) ? index : null;
     const a = state.apptIndex != null ? list[state.apptIndex] : {};
     state.apptPick = { tcat: a.tcat || null };
+    state.apptFromOnline = !!a.src && a.src === "online";
+    applyOnlineLinks();
+    { const h = $("#apptOnlineHint"); if (h) h.hidden = !state.apptFromOnline; const g = $('section.step[data-step="myappt"] .step__hint'); if (g) g.style.display = state.apptFromOnline ? "none" : ""; }
     const d = $("#apptDate"), tm = $("#apptTime"), tt = $("#apptTreatText");
     if (d){ d.value = a.date || ""; d.min = todayKey(); }
     if (tm) tm.value = a.time || "";
@@ -3027,6 +3093,7 @@
     const ttext = (($("#apptTreatText") || {}).value || "").trim();
     if (!date || !time){ showToast(t("appt_need_datetime", state.lang)); return; }
     const appt = { date, time, tcat: state.apptPick && state.apptPick.tcat || null, ttext };
+    if (state.apptFromOnline){ appt.src = "online"; localData.pendingOnline = null; state.apptFromOnline = false; document.querySelectorAll(".online-take").forEach(b => { b.hidden = true; }); }
     const list = apptList();
     if (state.apptIndex != null && list[state.apptIndex]) list[state.apptIndex] = appt; else list.push(appt);
     // keep the list tidy: drop appointments older than 30 days
@@ -5262,9 +5329,11 @@
     setTimeout(maybeShowInstallBanner, 2500); // give the page a moment to settle first
     renderAdventCard();
     applySeason();
+    renderOnlineTake();
     // a phone left open overnight: refresh the doors when the app comes back
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState !== "visible") return;
+      renderOnlineTake();
       renderAdventCard();
       applySeason();
       if ($('[data-step="advent"]').classList.contains("is-active")) renderAdvent();
@@ -5359,6 +5428,9 @@
       if (action === "reminder-weeks") downloadReminder(el.dataset.weeks, el.dataset.title);
       if (action === "dismiss-review") dismissReviewPrompt();
       if (action === "appt-review-done") apptReviewDone(el.getAttribute("data-appt-key"));
+      if (action === "online-book") onlineBookClicked(el.getAttribute("data-online-src"));
+      if (action === "online-take") onlineTake();
+      if (action === "online-dismiss") onlineDismiss();
     });
 
     $("#fileInput").addEventListener("change", e => handleFileUpload(e.target.files[0]));

@@ -862,6 +862,9 @@ body{
 .appt-item{ padding:10px 0; border-top:1px solid var(--espresso-10, #eee); }
 .appt-item:first-of-type{ border-top:0; }
 .appt-item--past{ padding-top:0; }
+.appt-item--online{ padding-top:0; }
+.appt-online-hint{ margin-top:.5rem; padding:.6rem .8rem; border-radius:10px; background:var(--cream); font-size:.92rem; }
+.online-take{ margin-top:.5rem; }
 .appt-card__label{ font-size:12px; color:var(--espresso-60); margin:2px 0 6px; }
 .appt-card__buttons a.btn{ text-decoration:none; }
 .appt-card__buttons--small{ margin-top:4px; }
@@ -1273,3 +1276,16 @@ p.season-card__shop{ text-decoration:none; margin:2px 0 0; font-style:italic; }
 .salon-tht{margin-top:.5rem}
 /* December = gift month tagline (v145) */
 .advent-tagline,.advent-card__tagline{font-weight:600;color:var(--gold, #b08d57);margin:.25rem 0 .5rem;line-height:1.4}
+
+/* v151: booking made easy to find */
+.book-hub{ margin:14px 0 6px; padding:14px; border:1.5px solid var(--gold, #c8a25a); border-radius:16px; background:var(--cream, #fbf6ee); display:flex; flex-direction:column; gap:10px; }
+.book-hub__title{ margin:0; font-weight:700; font-size:1.05rem; }
+.book-hub__hint{ margin:0; font-size:.88rem; opacity:.8; text-align:center; }
+.book-box{ margin:14px 0; padding:14px; border:1.5px solid var(--gold, #c8a25a); border-radius:16px; display:flex; flex-direction:column; gap:10px; }
+.book-box__title{ margin:0; font-weight:700; font-size:1.05rem; }
+.book-alt{ border-top:1px solid rgba(0,0,0,.08); padding-top:8px; }
+.book-alt > summary{ cursor:pointer; font-weight:600; padding:6px 0; list-style-position:inside; }
+.book-alt[open]{ display:flex; flex-direction:column; gap:10px; }
+.book-alt .slot-picker{ margin:4px 0; }
+.appt-book-online{ display:inline-block; margin-top:6px; }
+.book-hub .btn, .book-box .btn{ text-align:center; justify-content:center; }

@@ -94,6 +94,15 @@
     <h2 class="step__title step__title--hero" data-i18n="welcome_title">Waar schoonheid koffie ontmoet</h2>
     <p class="step__lede" data-i18n="welcome_lede">Beantwoord een paar korte vragen.</p>
 
+    <div class="book-hub" id="bookHub">
+      <p class="book-hub__title" data-i18n="hub_title">📅 Een afspraak</p>
+      <a class="btn btn--primary btn--wide" id="hubOnline" href="#" target="_blank" rel="noopener noreferrer" data-action="online-book" data-online-src="welcome" data-i18n="hub_online" hidden>📅 Online boeken: zie meteen wanneer ik vrij ben</a>
+      <p class="book-hub__hint online-gmail-hint" data-i18n="online_gmail_hint" hidden>Met Gmail staat je afspraak meteen in je agenda.</p>
+      <button type="button" class="btn btn--primary btn--wide online-take" data-action="online-take" data-i18n="online_take_btn" hidden>✅ Geboekt? Neem je afspraak over in de app</button>
+      <button type="button" class="btn btn--outline btn--wide" data-action="open-myappt" data-i18n="hub_note">📝 Afspraak noteren in mijn app</button>
+      <p class="book-hub__hint" data-i18n="hub_note_hint">Noteren is een geheugensteun, alleen voor jezelf: ik krijg dit niet door.</p>
+    </div>
+
     <div class="actions-block actions-block--welcome" id="actionsBlockWelcome"></div>
     <div class="season-card" id="seasonCard" hidden></div>
     <div class="advent-card" id="adventCard" hidden></div>
@@ -102,7 +111,6 @@
 
     <button type="button" class="btn btn--primary btn--wide" data-action="start" data-i18n="start_button">Begin je match</button>
     <button type="button" class="btn btn--outline btn--wide welcome-stampcard" data-action="open-stampcard" data-i18n="stampcard_button">☕ Mijn stempelkaart</button>
-    <button type="button" class="btn btn--outline btn--wide welcome-myappt" data-action="open-myappt" data-i18n="appt_button">📅 Mijn afspraak toevoegen</button>
     <button type="button" class="btn btn--outline btn--wide welcome-photomoment" data-action="open-photomoment" data-i18n="pm_button">📸 Fotomoment</button>
     <button type="button" class="btn btn--outline btn--wide welcome-findme" data-action="open-findme" data-i18n="findme_button">📍 Zo vind je me &amp; parkeren</button>
     <button type="button" class="btn btn--gold-outline btn--wide welcome-pricelist" data-action="open-pricelist" data-i18n="pricelist_button">💶 Bekijk prijslijst</button>
@@ -391,14 +399,22 @@
 
     <div class="rules-teaser" id="houseRulesTeaser"></div>
 
-    <div class="slot-picker" id="slotPicker"></div>
+    <div class="book-box" id="bookBox">
+      <p class="book-box__title" data-i18n="book_box_title">📅 Deze afspraak maken</p>
+      <a class="btn btn--primary btn--wide" id="bookOnlineCta" href="#" target="_blank" rel="noopener noreferrer" data-action="online-book" data-online-src="result" hidden data-i18n="book_online_button">📅 Kies zelf een moment (online boeken)</a>
+      <p class="book-hub__hint online-gmail-hint" data-i18n="online_gmail_hint" hidden>Met Gmail staat je afspraak meteen in je agenda.</p>
+      <button type="button" class="btn btn--primary btn--wide online-take" data-action="online-take" data-i18n="online_take_btn" hidden>✅ Geboekt? Neem je afspraak over in de app</button>
+      <details class="book-alt" id="bookAlt">
+        <summary data-i18n="book_alt_summary">💬 Liever via WhatsApp of e-mail?</summary>
+        <div class="slot-picker" id="slotPicker"></div>
+        <a class="btn btn--outline btn--wide" id="bookWhatsappCta" href="#" target="_blank" rel="noopener noreferrer" data-i18n="book_whatsapp_button">💬 Boek deze afspraak via WhatsApp</a>
+        <a class="btn btn--outline btn--wide" id="bookEmailCta" href="#" data-i18n="book_email_button">📩 Boek deze afspraak per mail</a>
+      </details>
+    </div>
 
     <div class="result-actions" id="resultActionsSalon">
       <button type="button" class="btn btn--outline btn--wide" data-action="open-photo-share" data-i18n="add_photo_button">📸 Voeg een foto toe aan je moment</button>
       <button type="button" class="btn btn--primary btn--wide" data-action="share" data-i18n="share_button">Deel jouw match</button>
-      <a class="btn btn--gold-outline btn--wide" id="bookOnlineCta" href="#" target="_blank" rel="noopener noreferrer" hidden data-i18n="book_online_button">📅 Kies zelf een moment (online boeken)</a>
-      <a class="btn btn--primary btn--wide" id="bookEmailCta" href="#" data-i18n="book_email_button">📩 Boek deze afspraak per mail</a>
-      <a class="btn btn--primary btn--wide" id="bookWhatsappCta" href="#" target="_blank" rel="noopener noreferrer" data-i18n="book_whatsapp_button">💬 Boek deze afspraak via WhatsApp</a>
       <button type="button" class="btn btn--outline btn--wide" data-action="download" data-i18n="download_button">Download afbeelding</button>
       <button type="button" class="btn btn--outline btn--wide" data-action="add-reminder" data-i18n="reminder_button">📅 Zet een herinnering in mijn agenda</button>
       <button type="button" class="btn btn--gold-outline btn--wide" id="menuCta" data-action="open-pricelist" data-i18n="menu_cta">Bekijk menu &amp; prijzen</button>
@@ -481,6 +497,8 @@
     <div class="step__head">
       <h2 class="step__title" data-i18n="appt_title">Mijn afspraak</h2>
       <p class="step__hint" data-i18n="appt_hint"></p>
+      <p class="appt-online-hint" id="apptOnlineHint" data-i18n="online_take_hint" hidden></p>
+      <a class="btn btn--text appt-book-online" id="apptBookOnline" href="#" target="_blank" rel="noopener noreferrer" data-action="online-book" data-online-src="myappt" data-i18n="appt_book_online" hidden>Nog geen afspraak? Boek online →</a>
     </div>
     <div class="appt-row">
       <label class="pm-label" for="apptDate" data-i18n="appt_date">Datum</label>
@@ -540,7 +558,9 @@
     <div class="price-contact">
       <p class="price-contact__title" data-i18n="pricelist_contact_title">Een afspraak maken?</p>
       <p class="price-contact__hint" data-i18n="practical_info_hours">Momenteel enkel bereikbaar in het weekend.</p>
-      <a class="btn btn--gold-outline btn--wide" id="priceOnline" href="#" target="_blank" rel="noopener noreferrer" hidden data-i18n="book_online_button">📅 Kies zelf een moment (online boeken)</a>
+      <a class="btn btn--gold-outline btn--wide" id="priceOnline" href="#" target="_blank" rel="noopener noreferrer" data-action="online-book" data-online-src="price" hidden data-i18n="book_online_button">📅 Kies zelf een moment (online boeken)</a>
+      <p class="book-hub__hint online-gmail-hint" data-i18n="online_gmail_hint" hidden>Met Gmail staat je afspraak meteen in je agenda.</p>
+      <button type="button" class="btn btn--primary btn--wide online-take" data-action="online-take" data-i18n="online_take_btn" hidden>✅ Geboekt? Neem je afspraak over in de app</button>
       <a class="btn btn--primary btn--wide" id="priceWhatsapp" href="#" target="_blank" rel="noopener noreferrer" data-i18n="pricelist_wa_button">💬 Stuur een WhatsApp</a>
       <a class="btn btn--outline btn--wide" id="priceMail" href="#" data-i18n="pricelist_mail_button">📩 Stuur een mail</a>
       <button type="button" class="btn btn--text" data-action="open-houserules" data-i18n="houserules_button">📋 Lees de huisregels</button>
