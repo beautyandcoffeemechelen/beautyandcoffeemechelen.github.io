@@ -96,19 +96,19 @@
     if (state.match && !state.match.quick) { renderResultDetails(); renderResultBlocks(); renderMatchTools(); renderLoyaltyBlock(); }
     renderSlotPicker();
     const ps = $("#priceSearch"); if (ps) ps.placeholder = t("pricelist_search", state.lang) || "";
-    if (typeof PRICE_LIST !== "undefined" && $('[data-step="pricelist"]').classList.contains("is-active")) renderPriceList();
+    if (typeof PRICE_LIST !== "undefined" && $('section.step[data-step="pricelist"]').classList.contains("is-active")) renderPriceList();
     renderSunFact();
-    if (typeof HOUSE_RULES !== "undefined" && $('[data-step="houserules"]').classList.contains("is-active")) renderHouseRules();
-    if ($('[data-step="findme"]') && $('[data-step="findme"]').classList.contains("is-active")) renderFindMe();
+    if (typeof HOUSE_RULES !== "undefined" && $('section.step[data-step="houserules"]').classList.contains("is-active")) renderHouseRules();
+    if ($('section.step[data-step="findme"]') && $('section.step[data-step="findme"]').classList.contains("is-active")) renderFindMe();
     if (typeof localData !== "undefined" && ($("#loyaltyBlock") || $("#loyaltyBlockStandalone"))) renderLoyaltyBlock();
-    if ($('[data-step="photopick"]') && $('[data-step="photopick"]').classList.contains("is-active")) renderPhotoPick();
-    if (state.quickPhoto && $('[data-step="photoshare"]') && $('[data-step="photoshare"]').classList.contains("is-active")) drawResultCanvas();
+    if ($('section.step[data-step="photopick"]') && $('section.step[data-step="photopick"]').classList.contains("is-active")) renderPhotoPick();
+    if (state.quickPhoto && $('section.step[data-step="photoshare"]') && $('section.step[data-step="photoshare"]').classList.contains("is-active")) drawResultCanvas();
     if (typeof localData !== "undefined") renderReturningUserBlock();
     renderApptCard();
     if (season.theme) renderSeasonCard();
-    if (typeof renderAdventCard === "function"){ renderAdventCard(); if ($('[data-step="advent"]') && $('[data-step="advent"]').classList.contains("is-active")) renderAdvent(); }
-    if ($('[data-step="myappt"]') && $('[data-step="myappt"]').classList.contains("is-active")) renderApptForm();
-    if ($('[data-step="ingredients"]') && $('[data-step="ingredients"]').classList.contains("is-active")) renderIngredients();
+    if (typeof renderAdventCard === "function"){ renderAdventCard(); if ($('section.step[data-step="advent"]') && $('section.step[data-step="advent"]').classList.contains("is-active")) renderAdvent(); }
+    if ($('section.step[data-step="myappt"]') && $('section.step[data-step="myappt"]').classList.contains("is-active")) renderApptForm();
+    if ($('section.step[data-step="ingredients"]') && $('section.step[data-step="ingredients"]').classList.contains("is-active")) renderIngredients();
     renderSocialLinks();
     renderActions();
     if (typeof renderPreviewBar === "function") renderPreviewBar();
@@ -4423,7 +4423,7 @@
   }
   function advPreviewRerender(){
     renderAdventCard();
-    if ($('[data-step="advent"]') && $('[data-step="advent"]').classList.contains("is-active")) renderAdvent();
+    if ($('section.step[data-step="advent"]') && $('section.step[data-step="advent"]').classList.contains("is-active")) renderAdvent();
     renderSalonAdvent();
   }
   document.addEventListener("change", e => {
@@ -5336,7 +5336,7 @@
       renderOnlineTake();
       renderAdventCard();
       applySeason();
-      if ($('[data-step="advent"]').classList.contains("is-active")) renderAdvent();
+      if ($('section.step[data-step="advent"]').classList.contains("is-active")) renderAdvent();
     });
     checkSalonHash();                                   // salon mode: open the app with #salon
     window.addEventListener("hashchange", checkSalonHash);
