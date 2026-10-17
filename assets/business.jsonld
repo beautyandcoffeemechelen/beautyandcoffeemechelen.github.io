@@ -73,6 +73,15 @@
       "@type": "Offer",
       "itemOffered": {
        "@type": "Service",
+       "name": "Express gelaatsverzorging – opgebruikactie"
+      },
+      "price": "50",
+      "priceCurrency": "EUR"
+     },
+     {
+      "@type": "Offer",
+      "itemOffered": {
+       "@type": "Service",
        "name": "Signature gelaatsverzorging"
       },
       "price": "85",
