@@ -26,18 +26,32 @@
   "en",
   "fr"
  ],
- "potentialAction": {
-  "@type": "ReserveAction",
-  "name": "Afspraak aanvragen via WhatsApp",
-  "target": {
-   "@type": "EntryPoint",
-   "urlTemplate": "https://wa.me/32499221901",
-   "actionPlatform": [
-    "https://schema.org/MobileWebPlatform",
-    "https://schema.org/DesktopWebPlatform"
-   ]
+ "potentialAction": [
+  {
+   "@type": "ReserveAction",
+   "name": "Online een afspraak boeken",
+   "target": {
+    "@type": "EntryPoint",
+    "urlTemplate": "https://calendar.app.google/TmLcen9zSQuZZjtEA",
+    "actionPlatform": [
+     "https://schema.org/MobileWebPlatform",
+     "https://schema.org/DesktopWebPlatform"
+    ]
+   }
+  },
+  {
+   "@type": "ReserveAction",
+   "name": "Afspraak aanvragen via WhatsApp",
+   "target": {
+    "@type": "EntryPoint",
+    "urlTemplate": "https://wa.me/32499221901",
+    "actionPlatform": [
+     "https://schema.org/MobileWebPlatform",
+     "https://schema.org/DesktopWebPlatform"
+    ]
+   }
   }
- },
+ ],
  "hasOfferCatalog": {
   "@type": "OfferCatalog",
   "name": "Prijslijst",
