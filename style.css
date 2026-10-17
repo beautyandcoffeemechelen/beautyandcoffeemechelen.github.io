@@ -1264,5 +1264,12 @@ p.season-card__shop{ text-decoration:none; margin:2px 0 0; font-style:italic; }
 .useup__txt pre{ white-space:pre-wrap; font:inherit; font-size:13px; background:var(--soft, #f6f1ea); padding:10px; border-radius:8px; margin:6px 0; }
 .useup__btns{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
 
+/* shelf-life list filters (v148) */
+.open-filter{position:sticky;top:0;z-index:5;background:var(--cream);padding:.5rem 0 .25rem;margin-bottom:.5rem}
+.open-filter .price-search{width:100%;margin-bottom:.4rem}
+.open-chips{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:.35rem;padding-bottom:.2rem;-webkit-overflow-scrolling:touch}
+.open-chips .chip{flex:0 0 auto}
+.open-row[hidden]{display:none}
+.salon-tht{margin-top:.5rem}
 /* December = gift month tagline (v145) */
 .advent-tagline,.advent-card__tagline{font-weight:600;color:var(--gold, #b08d57);margin:.25rem 0 .5rem;line-height:1.4}

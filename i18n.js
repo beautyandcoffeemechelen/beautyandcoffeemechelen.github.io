@@ -257,6 +257,12 @@ const I18N = {
     reminder_in_weeks: "Over {n} weken",
     reminder_ics_desc: "Tijd voor jezelf: boek je volgende moment bij Beauty & Coffee via WhatsApp of 0499 22 19 01.",
     ingr_tab_open: "📅 Openingsdata",
+    tht_btn: "Houdbaarheid & openingsdata",
+    tht_search: "Zoek een product…",
+    tht_all: "Alles",
+    tht_other: "Overige",
+    tht_filled: "Ingevuld",
+    tht_count: "{n} van {t} producten",
     ingr_open_tht: "THT op de verpakking",
     ingr_open_tht_only: "Per stuk, per verpakking of poeder: alleen de THT telt.",
     ingr_open_incomplete: "Kies de houdbaarheid na openen, of vul de THT in.",
@@ -603,7 +609,7 @@ const I18N = {
 
     footer_privacy: "Jouw foto's blijven altijd op je eigen toestel — 100% privé.",
     footer_reset_button: "Wis mijn lokale gegevens",
-    footer_legal: "Beauty &amp; Coffee · Barbarastraat 25, 2800 Mechelen<br>0499 22 19 01 · sandra.truong@ikmail.com<br>Ondernemingsnummer 1033.711.875 · vrijgesteld van btw: prijzen zijn eindprijzen",
+    footer_legal: "Beauty &amp; Coffee · Barbarastraat 25, 2800 Mechelen<br>0499 22 19 01 · beautyandcoffeemechelen@gmail.com<br>Ondernemingsnummer 1033.711.875 · vrijgesteld van btw: prijzen zijn eindprijzen",
 
     reminder_button: "Zet een herinnering in mijn agenda",
     book_email_button: "📩 Boek deze afspraak per mail",
@@ -972,6 +978,12 @@ const I18N = {
     reminder_in_weeks: "In {n} weeks",
     reminder_ics_desc: "Time for yourself: book your next moment at Beauty & Coffee via WhatsApp or +32 499 22 19 01.",
     ingr_tab_open: "📅 Opening dates",
+    tht_btn: "Shelf life & opening dates",
+    tht_search: "Search a product…",
+    tht_all: "All",
+    tht_other: "Other",
+    tht_filled: "Filled in",
+    tht_count: "{n} of {t} products",
     ingr_open_tht: "Best before (on pack)",
     ingr_open_tht_only: "Per piece, per pack or powder: only the best-before date counts.",
     ingr_open_incomplete: "Choose how long it keeps after opening, or fill in the best-before date.",
@@ -1318,7 +1330,7 @@ const I18N = {
 
     footer_privacy: "Your photos always stay on your own device — 100% private.",
     footer_reset_button: "Wipe my local data",
-    footer_legal: "Beauty &amp; Coffee · Barbarastraat 25, 2800 Mechelen (Belgium)<br>+32 499 22 19 01 · sandra.truong@ikmail.com<br>Company number 1033.711.875 · VAT-exempt: prices are final prices",
+    footer_legal: "Beauty &amp; Coffee · Barbarastraat 25, 2800 Mechelen (Belgium)<br>+32 499 22 19 01 · beautyandcoffeemechelen@gmail.com<br>Company number 1033.711.875 · VAT-exempt: prices are final prices",
 
     reminder_button: "Add a reminder to my calendar",
     book_email_button: "📩 Book this appointment by email",

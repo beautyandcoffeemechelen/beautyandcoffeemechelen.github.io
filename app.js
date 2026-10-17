@@ -1253,7 +1253,7 @@
     updateBookingLink(m, drinkFull);
   }
 
-  const BOOKING_EMAIL = "sandra.truong@ikmail.com";
+  const BOOKING_EMAIL = "beautyandcoffeemechelen@gmail.com";
   const BOOKING_WHATSAPP = "32499221901"; // wa.me format: country code + number, no + or spaces
   function drinkFullFor(m){
     if (!m) return "";
@@ -3436,6 +3436,7 @@
         <p class="stamp-overlay__hint" id="salonHint">${t("salon_hint", state.lang)}</p>
         <div class="salon-adv" id="salonAdvent" hidden></div>
         <div class="salon-adv salon-stock" id="salonStock" hidden></div>
+        <button type="button" class="btn btn--primary btn--sm salon-ingr salon-tht" data-salon-ingr="open">⏰ ${t("tht_btn", state.lang)}</button>
         <button type="button" class="btn btn--text btn--sm salon-ingr" data-salon-ingr="1">${t("ingr_open_btn", state.lang)}</button>
       </div>`;
     document.body.appendChild(ov);
@@ -3457,7 +3458,8 @@
         if (a === "hookdel"){ try { localStorage.removeItem(STOCK_HOOK_KEY); } catch(err){ /* ignore */ } renderSalonStock(); }
         return;
       }
-      if (e.target.closest("[data-salon-ingr]")){ ingr.unlocked = true; closeSalonMode(); goTo("ingredients"); return; }
+      const si = e.target.closest("[data-salon-ingr]");
+      if (si){ ingr.unlocked = true; if (si.dataset.salonIngr === "open") ingr.tab = "open"; closeSalonMode(); goTo("ingredients"); return; }
       const adv = e.target.closest("[data-salon-adv]");
       if (adv){
         if (adv.dataset.salonAdv === "scan") openStampScanner("advent");
@@ -3572,6 +3574,11 @@
       return;
     }
     if (location.hash === "#salon") openSalonMode();
+    // Sandra's direct link to the shelf-life list (works only on her phone, with the salon key)
+    else if (location.hash === "#houdbaarheid" && ingrSandra()){
+      window.history.replaceState(null, "", location.pathname + location.search);
+      ingr.tab = "open"; goTo("ingredients");
+    }
     // direct link to the stamp card, e.g. a QR poster in the salon:
     // https://beautyandcoffeemechelen.github.io/#stempelkaart
     else if (location.hash === "#route" || location.hash === "#parkeren"){
@@ -3796,7 +3803,15 @@
     const rows = ingrCatalog().map(([id, p]) => ({ id, p, info: openInfo(id) }));
     const rank = i => !i ? 2 : (i.incomplete ? 1 : 0);
     rows.sort((a, b) => rank(a.info) - rank(b.info) || (rank(a.info) === 0 ? a.info.days - b.info.days : ingrName(a.p).localeCompare(ingrName(b.p))));
-    let html = `<p class="ingr-note">${t("ingr_open_intro", L)}</p><ul class="open-list">`;
+    const cats = openCats();
+    const catsOf = p => { const u = p.usedIn || []; const c = Object.keys(cats).filter(g => u.some(x => cats[g].includes(x) || (g === "face" && /^extra-facial/.test(x)))); return c.length ? c : ["other"]; };
+    const chips = ["all"].concat(Object.keys(cats), ["other", "filled"]).map(g => `<button type="button" class="chip${(ingr.openCat || "all") === g ? " is-selected" : ""}" data-open-cat="${g}">${g === "all" ? t("tht_all", L) : g === "other" ? t("tht_other", L) : g === "filled" ? "📅 " + t("tht_filled", L) : (AVOID_ICONS[g] || "") + " " + t("avoid." + g, L)}</button>`).join("");
+    let html = `<p class="ingr-note">${t("ingr_open_intro", L)}</p>
+      <div class="open-filter">
+        <input type="search" id="openSearch" class="price-search" placeholder="🔎 ${t("tht_search", L)}" value="${esc(ingr.openQ || "")}" autocomplete="off">
+        <div class="ingr-chips open-chips">${chips}</div>
+        <p class="ingr-muted" id="openCount"></p>
+      </div><ul class="open-list">`;
     rows.forEach(({ id, p, info }) => {
       const rec = all[id] || {}, thtOnly = openThtOnly(id);
       const m = rec.m === undefined || rec.m === null || rec.m === "" ? openPao(p) : Number(rec.m);
@@ -3810,7 +3825,7 @@
         status += ` <span class="ingr-muted">(${how})</span>`;
       }
       const opt = n => `<option value="${n}"${n === m ? " selected" : ""}>${n ? t("ingr_open_m", L).replace("{n}", n) : "—"}</option>`;
-      html += `<li class="open-row${cls}">
+      html += `<li class="open-row${cls}" data-cats="${catsOf(p).join(" ")}" data-filled="${info ? 1 : 0}" data-name="${esc(ingrNorm(ingrName(p) + " " + id))}">
           <p class="open-row__name">${esc(ingrName(p))}</p>
           ${thtOnly ? `<p class="ingr-muted open-row__hint">${t("ingr_open_tht_only", L)}</p>` : ""}
           <div class="open-row__fields">
@@ -3840,7 +3855,31 @@
     }
     return html;
   }
+  function openCats(){
+    const g = typeof AVOID_GROUPS !== "undefined" ? AVOID_GROUPS : {};
+    const order = ["face","hands","feet","massage","waxing","browlash","makeup"];
+    const out = {}; order.forEach(k => { if (g[k]) out[k] = g[k]; }); return out;
+  }
+  function openFilter(){
+    const q = ingrNorm(ingr.openQ || "").trim(), cat = ingr.openCat || "all";
+    let n = 0, total = 0;
+    $$(".open-list .open-row").forEach(li => {
+      total++;
+      const okQ = !q || li.dataset.name.includes(q);
+      const okC = cat === "all" || (cat === "filled" ? li.dataset.filled === "1" : li.dataset.cats.split(" ").includes(cat));
+      li.hidden = !(okQ && okC); if (!li.hidden) n++;
+    });
+    const c = $("#openCount"); if (c) c.textContent = t("tht_count", state.lang).replace("{n}", n).replace("{t}", total);
+  }
   function ingrOpenBind(){
+    const s = $("#openSearch");
+    if (s) s.addEventListener("input", () => { ingr.openQ = s.value; openFilter(); });
+    $$("[data-open-cat]").forEach(b => b.addEventListener("click", () => {
+      ingr.openCat = b.dataset.openCat;
+      $$("[data-open-cat]").forEach(x => x.classList.toggle("is-selected", x === b));
+      openFilter();
+    }));
+    openFilter();
     $$(".open-date, .open-months, .open-tht").forEach(el => el.addEventListener("change", () => {
       const id = el.dataset.openId;
       const d = ($(`.open-date[data-open-id="${id}"]`) || {}).value || "";
