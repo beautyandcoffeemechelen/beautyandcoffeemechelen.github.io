@@ -336,6 +336,10 @@ const NAME_I18N = {
   "en": "Express Facial",
   "fr": "Soin du visage express"
  },
+ "Express Gelaatsverzorging – Opgebruikactie": {
+  "en": "Express facial – special offer",
+  "fr": "Soin du visage express – offre spéciale"
+ },
 
  "Bridal Proefmake-up": {
   "en": "Bridal Trial Make-up",
@@ -630,6 +634,11 @@ const PRICELIST_NAMES = {
   "nl": "Express gelaatsverzorging",
   "en": "Express facial",
   "fr": "Soin du visage express"
+ },
+ "Express Gelaatsverzorging – Opgebruikactie": {
+  "nl": "Express gelaatsverzorging – opgebruikactie",
+  "en": "Express facial – special offer",
+  "fr": "Soin du visage express – offre spéciale"
  },
 
  "Bridal Proefmake-up": {
@@ -1281,6 +1290,17 @@ const TREATMENTS_CATALOG = [
                 en:"Avoid direct sun exposure, tanning beds, tight clothing, hot showers, and saunas for the first 24 to 48 hours. Always apply a high protection sunscreen (SPF 50) to exposed areas to prevent redness and hyperpigmentation." } },
 
   /* ---- added from the price list (v22) ---- */
+  { id:"expressuseup", name:"Express Gelaatsverzorging – Opgebruikactie", moods:["energetic","focus"], genders:["vrouw","man"], sunSensitive:false, price:"€50 (30′)", stockAction:true,
+    homecare:{ category:"facial" },
+    benefits:{ nl:"Dezelfde snelle, grondige opfrisbeurt als de Express (reiniging, dieptereiniging, masker en dagcrème), aan een voordeelprijs, met kwaliteitsproducten uit mijn vorige assortiment: Bio Balance, Guinot, Dr. Renaud en Safety4You. Zolang de voorraad strekt.",
+               en:"The same quick, thorough refresh as the Express (cleansing, deep cleansing, mask and day cream) at a special price, with quality products from my previous range: Bio Balance, Guinot, Dr. Renaud and Safety4You. While stocks last.",
+               fr:"Le même coup d’éclat rapide et complet que l’Express (nettoyage, nettoyage en profondeur, masque et crème de jour) à prix doux, avec des produits de qualité de ma gamme précédente : Bio Balance, Guinot, Dr. Renaud et Safety4You. Jusqu’à épuisement du stock." },
+    funfact:{ nl:"Ook een korte verzorging helpt: een propere huid neemt de actieve stoffen van een masker en dagcrème beter op.",
+              en:"Even a short treatment helps: clean skin absorbs the active ingredients of a mask and day cream better.",
+              fr:"Même un soin court aide : une peau propre absorbe mieux les actifs d’un masque et d’une crème de jour." },
+    aftercare:{ nl:"Gebruik de komende dagen dagelijks een SPF, drink voldoende water en laat je huid de eerste 24 uur zoveel mogelijk rusten zonder zware make-up.",
+                en:"Use SPF daily for the next few days, drink enough water and let your skin rest as much as possible for the first 24 hours without heavy make-up.",
+                fr:"Utilisez un SPF chaque jour pendant les prochains jours, buvez suffisamment d’eau et laissez votre peau se reposer pendant les 24 premières heures, sans maquillage lourd." } },
   { id:"expressfacial", name:"Express Gelaatsverzorging", moods:["energetic","focus"], genders:["vrouw","man"], sunSensitive:false, price:"€60 (30′)",
     homecare:{ category:"facial" },
     benefits:{ nl:"Een snelle maar grondige opfrisbeurt: reiniging, dieptereiniging, een crèmemasker en dagcrème — ideaal als je weinig tijd hebt en toch een frisse huid wil.",
@@ -1499,14 +1519,243 @@ const AVOID_GROUPS = {
   hands:    ["manicure","manicureexpress","manipedispa","cateye"],
   massage:  ["hotstone","cupping","cuppingpeeling","swedish","swedishbackneck","swedishlegs","backwrap","detoxback","harmonizingbody","fullbodywrap","slimmassage","harmonizingback"],
   waxing:   ["oksel","been","rug","buik","borst","browshaping","kin","bovenlip","wenkbrauwontharing","schouders","borstbuik","volledigebenen"],
-  face:     ["hydrapeel","signaturefacial","fillme","fruitacid","liftsummere","antiagefacial","expressfacial"],
+  face:     ["hydrapeel","signaturefacial","fillme","fruitacid","liftsummere","antiagefacial","expressfacial","expressuseup"],
   makeup:   ["glammakeup","bridaltrial","bridalpackage","weddingguest"],
   browlash: ["browlift","hennabrows","lashlift","browtint","browshaping","lashtint","wenkbrauwontharing"],
   workshop: ["makeupworkshop","facialworkshop","tastingbasic","tastingadvanced","baristaworkshop","teambeauty","teamcoffee","cateye"]
 };
 const AVOID_ICONS = { feet:"🦶", hands:"💅", massage:"💆", waxing:"🪒", face:"🧖", makeup:"💄", browlash:"👁️", workshop:"☕" };
 
-function matchTreatment(mood, gender, sunExposed, healthFlags, complaintText){
+
+/* ============================================================
+   GERICHTE MATCH (since v155)
+   "Ik wil een gelaatsverzorging, maar weet niet welke" — the client picks
+   a kind of treatment and answers 1–3 short questions. Every answer gives
+   points to treatments (s:{id:points}); the app picks the highest score
+   among the treatments that still pass all safety rules (age, gender, sun,
+   pregnancy, season…). Options with `months` only count in those months
+   (pigment: September–March); outside them `off` is used and `offNote`
+   is shown. Add, change or remove options here — nothing else changes.
+   ============================================================ */
+const FOCUS_GUIDES = {
+  face: { icon:"🌸", group:"face",
+    label:{ nl:"Gelaatsverzorging", en:"Facial", fr:"Soin du visage" },
+    sub:{ nl:"Ik weet niet welke het best past", en:"I don’t know which one suits me", fr:"Je ne sais pas lequel me convient" },
+    questions:[
+      { id:"wish", required:true, label:{ nl:"Waar wil je vooral aan werken?", en:"What would you like to work on most?", fr:"Sur quoi voulez-vous surtout travailler ?" },
+        options:[
+          { id:"clean", label:{ nl:"Onzuiverheden, mee-eters, grote poriën", en:"Blemishes, blackheads, large pores", fr:"Imperfections, points noirs, pores dilatés" }, s:{ hydrapeel:3, expressfacial:2, expressuseup:2, fruitacid:2, signaturefacial:1 } },
+          { id:"hydra", label:{ nl:"Droge, trekkerige of vale huid", en:"Dry, tight or dull skin", fr:"Peau sèche, qui tiraille ou terne" }, s:{ fillme:3, hydrapeel:2, signaturefacial:2 } },
+          { id:"pigment", label:{ nl:"Pigmentvlekken, een egalere teint", en:"Pigment spots, a more even tone", fr:"Taches pigmentaires, teint plus uniforme" }, months:[9,10,11,12,1,2,3], s:{ fruitacid:4, hydrapeel:2 }, off:{ fillme:3, signaturefacial:2 },
+            offNote:{ nl:"Pigmentvlekken behandel ik enkel van september tot eind maart, als de zon minder sterk is: anders kunnen de vlekken net terugkomen. Daarom nu een verzorging die je huid voorbereidt; plan je pigmentbehandeling (fruitzuurpeeling) vanaf september.", en:"I only treat pigment spots from September to the end of March, when the sun is weaker; otherwise the spots can come back. So for now a treatment that prepares your skin; plan your pigment treatment (fruit acid peel) from September.", fr:"Je ne traite les taches pigmentaires que de septembre à fin mars, quand le soleil est plus faible ; sinon elles peuvent revenir. Pour l’instant, un soin qui prépare la peau ; prévoyez le soin anti-taches (peeling aux acides de fruits) dès septembre." } },
+          { id:"age", label:{ nl:"Fijne lijntjes, rimpels, stevigheid", en:"Fine lines, wrinkles, firmness", fr:"Ridules, rides, fermeté" }, s:{ antiagefacial:4, liftsummere:3, fillme:2 },
+            ageNote:{ nl:"Een echte anti-agingbehandeling raad ik aan vanaf 45 jaar (Botanische Anti-Age) en de Lift Summum vanaf 30 jaar. Voor jou nu is hydratatie de beste preventie.", en:"I recommend a real anti-ageing treatment from age 45 (Botanical Anti-Age) and the Lift Summum from 30. For you right now, hydration is the best prevention.", fr:"Je conseille un vrai soin anti-âge à partir de 45 ans (Anti-Âge Botanique) et le Lift Summum dès 30 ans. Pour vous, l’hydratation est la meilleure prévention." } },
+          { id:"sensitive", label:{ nl:"Gevoelige of snel rode huid", en:"Sensitive or easily red skin", fr:"Peau sensible ou qui rougit vite" }, s:{ signaturefacial:4, expressfacial:1 } },
+          { id:"glow", label:{ nl:"Snel opfrissen, een frisse glow", en:"A quick refresh, a fresh glow", fr:"Un coup d’éclat rapide" }, s:{ expressfacial:3, expressuseup:3, fillme:2 } },
+          { id:"pamper", label:{ nl:"Vooral verwennen en ontspannen", en:"Mostly pampering and relaxing", fr:"Surtout me chouchouter et me détendre" }, s:{ signaturefacial:3, liftsummere:2, antiagefacial:2 } }
+        ] },
+      { id:"time", label:{ nl:"Hoeveel tijd heb je?", en:"How much time do you have?", fr:"Combien de temps avez-vous ?" },
+        options:[
+          { id:"t30", label:{ nl:"Ongeveer een halfuur", en:"About half an hour", fr:"Environ une demi-heure" }, s:{ expressfacial:3, expressuseup:3 } },
+          { id:"t60", label:{ nl:"Ongeveer een uur", en:"About an hour", fr:"Environ une heure" }, s:{ fillme:1, signaturefacial:1, liftsummere:1, fruitacid:1 } },
+          { id:"t90", label:{ nl:"Langer mag", en:"Longer is fine", fr:"Plus longtemps, c’est possible" }, s:{ hydrapeel:2, antiagefacial:2, signaturefacial:1 } }
+        ] },
+      { id:"budget", label:{ nl:"Wat wil je ongeveer uitgeven?", en:"Roughly what would you like to spend?", fr:"Quel budget environ ?" },
+        options:[
+          { id:"b60", label:{ nl:"Tot ongeveer €60", en:"Up to about €60", fr:"Jusqu’à environ 60 €" }, s:{ expressuseup:4, expressfacial:3 } },
+          { id:"b85", label:{ nl:"Rond €85", en:"Around €85", fr:"Autour de 85 €" }, s:{ signaturefacial:4, fillme:1 } },
+          { id:"b120", label:{ nl:"Het mag meer zijn (€100 tot €125)", en:"It can be more (€100 to €125)", fr:"Plus, c’est possible (100 à 125 €)" }, s:{ hydrapeel:2, fruitacid:2, antiagefacial:2, liftsummere:2, fillme:1 } }
+        ] }
+    ] },
+
+  makeup: { icon:"💄", group:"makeup",
+    label:{ nl:"Make-up", en:"Make-up", fr:"Maquillage" },
+    sub:{ nl:"Ik weet niet welke look of welke make-up", en:"I don’t know which look or which make-up", fr:"Je ne sais pas quel look ni quel maquillage" },
+    questions:[
+      { id:"occasion", required:true, label:{ nl:"Waarvoor is het?", en:"What is it for?", fr:"C’est pour quelle occasion ?" },
+        options:[
+          { id:"party", label:{ nl:"Een avond, feest of etentje", en:"An evening, party or dinner", fr:"Une soirée, une fête ou un dîner" }, s:{ glammakeup:4 }, mu:{ hd:1 } },
+          { id:"photo", label:{ nl:"Foto’s, video of film", en:"Photos, video or film", fr:"Photos, vidéo ou film" }, s:{ glammakeup:4 }, mu:{ hd:4 },
+            tip:{ nl:"Foto’s in zwart-wit? Zeg het me vooraf: dan werk ik met meer contrast tussen licht en schaduw, poeder ik goed af en gebruik ik weinig glans, want glans slaat wit uit op de foto.", en:"Black-and-white photos? Tell me beforehand: then I work with more contrast between light and shadow, powder well and use little shine, as shine turns white on photos.", fr:"Photos en noir et blanc ? Dites-le-moi à l’avance : je travaille alors plus de contraste entre ombre et lumière, je poudre bien et j’évite la brillance, qui ressort blanche sur la photo." } },
+          { id:"bride", label:{ nl:"Mijn eigen huwelijk", en:"My own wedding", fr:"Mon propre mariage" }, s:{ bridalpackage:4, bridaltrial:3 }, mu:{ hd:2 } },
+          { id:"guest", label:{ nl:"Een huwelijk als gast", en:"A wedding, as a guest", fr:"Un mariage, en tant qu’invitée" }, s:{ weddingguest:4 }, mu:{ mineral:1 } },
+          { id:"learn", label:{ nl:"Ik wil het zelf leren", en:"I want to learn it myself", fr:"Je veux apprendre moi-même" }, s:{ makeupworkshop:5 }, mu:{ mineral:1 } },
+          { id:"business", label:{ nl:"Werk, een sollicitatie of een belangrijke afspraak", en:"Work, a job interview or an important meeting", fr:"Le travail, un entretien ou un rendez-vous important" }, s:{ makeupworkshop:3, glammakeup:2 }, mu:{ mineral:2 },
+            tip:{ nl:"Zakelijke look: een egale, frisse huid (primer zodat alles de hele dag blijft zitten), kringen weggewerkt, ogen naturel in kleuren die bij je kleding passen en verzorgde lippen. Geen smoky eyes. Wil je dit elke dag zelf kunnen? Dan leer je het in de workshop.", en:"Business look: even, fresh skin (primer so it lasts all day), dark circles concealed, natural eyes in colours that match your outfit and neat lips. No smoky eyes. Want to do it yourself every day? Learn it in the workshop.", fr:"Look professionnel : un teint frais et uniforme (base pour tenir toute la journée), cernes camouflés, yeux naturels assortis à la tenue et lèvres soignées. Pas de smoky eyes. Envie de le faire vous-même chaque jour ? Apprenez-le à l’atelier." } },
+          { id:"theme", label:{ nl:"Een themafeest of retrolook (jaren ’20, ’50, ’60, ’80)", en:"A theme party or retro look (1920s, ’50s, ’60s, ’80s)", fr:"Une soirée à thème ou un look rétro (années 20, 50, 60, 80)" }, s:{ glammakeup:5 }, mu:{ hd:2 },
+            tip:{ nl:"Retro kan: jaren ’20 met een bleke teint, donker omrande ogen en een kleine donkere mond; jaren ’50 met een dikke zwarte eyeliner en rode lippen; jaren ’60 met grote wimpers (ook onderaan) en lichte lippen; jaren ’80 met felle kleuren en veel blush. Breng gerust een foto van de look mee.", en:"Retro is possible: the ’20s with pale skin, dark-rimmed eyes and a small dark mouth; the ’50s with thick black eyeliner and red lips; the ’60s with big lashes (also below) and pale lips; the ’80s with bright colours and lots of blush. Feel free to bring a photo of the look.", fr:"Le rétro, c’est possible : années 20 avec teint pâle, yeux cernés de noir et petite bouche foncée ; années 50 avec eye-liner noir épais et lèvres rouges ; années 60 avec grands cils (aussi en bas) et lèvres claires ; années 80 avec couleurs vives et beaucoup de blush. Apportez une photo du look." } }
+        ] },
+      { id:"look", label:{ nl:"Welke look spreekt je aan?", en:"Which look appeals to you?", fr:"Quel look vous attire ?" },
+        options:[
+          { id:"natural", label:{ nl:"Naturel en fris", en:"Natural and fresh", fr:"Naturel et frais" }, mu:{ mineral:2 },
+            tip:{ nl:"Naturel en fris: een stralende huid die nog als huid oogt, zachte tinten op ogen en wangen en verzorgde wenkbrauwen.", en:"Natural and fresh: glowing skin that still looks like skin, soft tones on eyes and cheeks and groomed brows.", fr:"Naturel et frais : une peau lumineuse qui reste naturelle, des tons doux sur les yeux et les joues, des sourcils soignés." } },
+          { id:"glam", label:{ nl:"Sprekend en glamoureus", en:"Striking and glamorous", fr:"Intense et glamour" }, mu:{ hd:2 },
+            tip:{ nl:"Sprekend en glamoureus: één blikvanger (smoky eyes óf opvallende lippen), contour en een vleugje glans. Valse wimpers kunnen, breng dan je eigen wimpers en lijm mee.", en:"Striking and glamorous: one focal point (smoky eyes or bold lips), contour and a touch of glow. False lashes are possible; bring your own lashes and glue.", fr:"Intense et glamour : un point fort (smoky eyes ou lèvres marquées), contouring et une touche d’éclat. Faux cils possibles : apportez vos cils et votre colle." } },
+          { id:"grooming", genders:["man"], label:{ nl:"Onzichtbaar verzorgd (niemand ziet dat je make-up draagt)", en:"Invisible grooming (nobody sees you’re wearing make-up)", fr:"Soin invisible (personne ne voit que vous êtes maquillé)" }, mu:{ hd:1 },
+            tip:{ nl:"Onzichtbare grooming-make-up: eerst hydrateren, dan alleen plaatselijk wegwerken (donkere kringen, roodheid, een puistje), heel dun uitgewerkt. Matterend poeder tegen glans, wenkbrauwen in model met een heldere gel en een kleurloze lippenbalsem. Wil je wat meer karakter, dan schaduw ik heel licht met een koel bruin.", en:"Invisible grooming make-up: hydrate first, then conceal only where needed (dark circles, redness, a blemish), blended very thinly. Mattifying powder against shine, brows set with a clear gel and a colourless lip balm. For a bit more character, I add a very light cool-brown shadow.", fr:"Maquillage « grooming » invisible : hydrater d’abord, puis corriger seulement là où il faut (cernes, rougeurs, un bouton), très finement estompé. Poudre matifiante, sourcils fixés au gel transparent et baume à lèvres incolore. Pour un peu plus de caractère, j’ombre très légèrement avec un brun froid." } },
+          { id:"feminine", genders:["man"], label:{ nl:"Een vrouwelijke of volledig opgemaakte look", en:"A feminine or fully made-up look", fr:"Un look féminin ou entièrement maquillé" }, mu:{ hd:3 },
+            tip:{ nl:"Een vrouwelijke of volledige look: iedereen is welkom, in alle rust en discretie. Ik werk met een sterk dekkende basis (HD of camouflage) en zachte contouren, en maak ogen en lippen zoals jij ze wil. Mooie hoge wenkbrauwbogen, ogen die ik ‘open’ met een licht potlood en eventueel valse wimpers (breng ze zelf mee) maken het geheel zachter. Vertel vooraf wat je in gedachten hebt (een foto helpt), dan bespreken we samen wat mogelijk is.", en:"A feminine or full look: everyone is welcome, calmly and discreetly. I use a high-coverage base (HD or camouflage) and soft contouring, and do eyes and lips the way you like. Tell me beforehand what you have in mind (a photo helps), and we’ll discuss together what is possible.", fr:"Un look féminin ou complet : tout le monde est bienvenu, en toute discrétion. Base très couvrante (HD ou camouflage), contouring doux, yeux et lèvres comme vous le souhaitez. Dites-moi à l’avance ce que vous imaginez (une photo aide), nous verrons ensemble ce qui est possible." } },
+          { id:"unsure", label:{ nl:"Ik weet het nog niet", en:"I don’t know yet", fr:"Je ne sais pas encore" },
+            tip:{ nl:"Nog geen idee? We kiezen samen, na een korte huidanalyse. Neem gerust een foto mee van een look die je mooi vindt, en van je outfit. Ik bekijk ook je kleurtype (winter, zomer, lente of herfst), zodat de kleuren je doen stralen.", en:"No idea yet? We’ll choose together after a short skin analysis. Feel free to bring a photo of a look you like, and of your outfit. I also look at your colour type (winter, summer, spring or autumn) so the colours make you glow.", fr:"Pas encore d’idée ? Nous choisirons ensemble après une courte analyse de peau. Apportez une photo d’un look qui vous plaît, et de votre tenue. Je regarde aussi votre type de couleurs (hiver, été, printemps ou automne) pour des teintes qui vous illuminent." } }
+        ] },
+      { id:"skin", label:{ nl:"Hoe is je huid?", en:"What is your skin like?", fr:"Comment est votre peau ?" },
+        options:[
+          { id:"normal", label:{ nl:"Normaal", en:"Normal", fr:"Normale" } },
+          { id:"sensitive", label:{ nl:"Gevoelig of allergisch", en:"Sensitive or allergic", fr:"Sensible ou allergique" }, mu:{ mineral:6 } },
+          { id:"oily", label:{ nl:"Snel glanzend of vet", en:"Quickly shiny or oily", fr:"Brille vite, grasse" }, mu:{ mineral:1 },
+            tip:{ nl:"Glanzende huid: ik werk met een matterende basis en fixeer met poeder, zodat je make-up de hele avond mooi blijft.", en:"Shiny skin: I use a mattifying base and set with powder, so your make-up stays lovely all evening.", fr:"Peau brillante : base matifiante et fixation à la poudre, pour un maquillage impeccable toute la soirée." } },
+          { id:"dry", label:{ nl:"Droog", en:"Dry", fr:"Sèche" }, mu:{ hd:1 },
+            tip:{ nl:"Droge huid: eerst goed hydrateren, dan een romige foundation, zodat niets schilferig oogt.", en:"Dry skin: plenty of hydration first, then a creamy foundation so nothing looks flaky.", fr:"Peau sèche : bien hydrater d’abord, puis un fond de teint crémeux, pour éviter tout effet sec." } },
+          { id:"cover", label:{ nl:"Vlekken, littekens of roodheid die ik wil wegwerken", en:"Spots, scars or redness I want to hide", fr:"Taches, cicatrices ou rougeurs à camoufler" }, mu:{ camouflage:9 } },
+          { id:"mature", label:{ nl:"Rijpere huid, fijne lijntjes", en:"Mature skin, fine lines", fr:"Peau mature, ridules" }, mu:{ mineral:2 },
+            tip:{ nl:"Rijpere huid: een luchtige make-up, zodat niets in de lijntjes kruipt. Een voedende dagcrème als basis, een romige foundation met een vochtig sponsje, matte oogschaduw, een crèmeblush en een lippenstift die niet vet is.", en:"Mature skin: a light make-up so nothing settles into the lines. A nourishing day cream as a base, a creamy foundation with a damp sponge, matte eyeshadow, a cream blush and a non-greasy lipstick.", fr:"Peau mature : un maquillage léger pour que rien ne se loge dans les ridules. Une crème de jour nourrissante, un fond de teint crémeux à l’éponge humide, des fards mats, un blush crème et un rouge à lèvres non gras." } }
+        ] },
+      { id:"glasses", label:{ nl:"Draag je een bril?", en:"Do you wear glasses?", fr:"Portez-vous des lunettes ?" },
+        options:[
+          { id:"no", label:{ nl:"Nee (of lenzen)", en:"No (or contact lenses)", fr:"Non (ou lentilles)" } },
+          { id:"far", label:{ nl:"Ja, om van dichtbij te lezen (plusglazen)", en:"Yes, for reading up close (plus lenses)", fr:"Oui, pour lire de près (verres convexes)" },
+            tip:{ nl:"Plusglazen vergroten je ogen: ik werk met mattere, iets donkerdere oogschaduw en een fijne eyeliner, en zorg voor heel nette wenkbrauwen, want de glazen vergroten alles.", en:"Plus lenses magnify your eyes: I use more matte, slightly darker eyeshadow and a fine eyeliner, and keep the brows very neat, as the lenses magnify everything.", fr:"Les verres convexes agrandissent les yeux : fards plus mats et un peu plus foncés, eye-liner fin et sourcils très nets, car les verres grossissent tout." } },
+          { id:"near", label:{ nl:"Ja, om veraf te zien (minglazen)", en:"Yes, for seeing far (minus lenses)", fr:"Oui, pour voir de loin (verres concaves)" },
+            tip:{ nl:"Minglazen verkleinen je ogen: ik werk met lichte oogschaduw op het ooglid, een licht potlood op de waterlijn, gekrulde wimpers en genoeg mascara, en houd de wenkbrauwen zacht.", en:"Minus lenses make your eyes look smaller: I use light eyeshadow on the lid, a light pencil on the waterline, curled lashes and enough mascara, and keep the brows soft.", fr:"Les verres concaves rapetissent les yeux : fard clair sur la paupière, crayon clair au ras de l’œil, cils recourbés et assez de mascara, sourcils doux." } },
+          { id:"tinted", label:{ nl:"Ja, met getinte glazen", en:"Yes, with tinted lenses", fr:"Oui, avec des verres teintés" },
+            tip:{ nl:"Getinte glazen: neem je bril mee, dan kies ik kleuren die goed uitkomen achter de tint van je glazen.", en:"Tinted lenses: bring your glasses, so I can choose colours that work behind the tint.", fr:"Verres teintés : apportez vos lunettes, je choisirai des couleurs qui ressortent derrière la teinte." } }
+        ] }
+    ] },
+
+  nails: { icon:"💅", group:"nails",
+    label:{ nl:"Handen & voeten", en:"Hands & feet", fr:"Mains & pieds" },
+    sub:{ nl:"Ik wil een kleur, maar weet niet welke", en:"I want a colour but don’t know which", fr:"Je veux une couleur mais je ne sais pas laquelle" },
+    questions:[
+      { id:"where", required:true, label:{ nl:"Handen of voeten?", en:"Hands or feet?", fr:"Mains ou pieds ?" },
+        options:[
+          { id:"hands", label:{ nl:"Handen", en:"Hands", fr:"Mains" }, s:{ manicure:4 } },
+          { id:"feet", label:{ nl:"Voeten", en:"Feet", fr:"Pieds" }, s:{ pedicure:4 } },
+          { id:"both", label:{ nl:"Allebei", en:"Both", fr:"Les deux" }, s:{ pedicure:3, manicure:3, manipedispa:2 },
+            tip:{ nl:"Handen én voeten in dezelfde kleur, of net in een andere tint die erbij past: allebei kan.", en:"Hands and feet in the same colour, or in a matching shade: both work.", fr:"Mains et pieds de la même couleur, ou dans une teinte assortie : les deux sont possibles." } }
+        ] },
+      { id:"last", label:{ nl:"Hoe lang moet het mooi blijven?", en:"How long should it last?", fr:"Combien de temps doit-il tenir ?" },
+        options:[
+          { id:"week", label:{ nl:"Ongeveer een week (nagellak)", en:"About a week (nail polish)", fr:"Environ une semaine (vernis)" },
+            tip:{ nl:"Gewone nagellak (supplement €5): droogt vanzelf en gaat er thuis af met remover.", en:"Regular nail polish (add-on €5): dries by itself and comes off at home with remover.", fr:"Vernis classique (supplément 5 €) : sèche tout seul et s’enlève à la maison au dissolvant." } },
+          { id:"gel", label:{ nl:"Twee à drie weken (gellak)", en:"Two to three weeks (gel polish)", fr:"Deux à trois semaines (gel)" },
+            tip:{ nl:"Gellak (supplement €20): hard onder de lamp, glanst weken en schilfert niet. Laat hem in de salon verwijderen, niet zelf afpeuteren.", en:"Gel polish (add-on €20): cured under the lamp, shines for weeks and doesn’t chip. Have it removed in the salon, don’t peel it off.", fr:"Gel (supplément 20 €) : durci sous la lampe, brille des semaines sans s’écailler. À faire retirer au salon, ne pas le décoller." } },
+          { id:"none", label:{ nl:"Geen kleur, enkel verzorgen", en:"No colour, just care", fr:"Pas de couleur, juste un soin" } }
+        ] },
+      { id:"style", label:{ nl:"Welke sfeer?", en:"Which mood?", fr:"Quelle ambiance ?" },
+        options:[
+          { id:"nude", label:{ nl:"Naturel en verzorgd (nude)", en:"Natural and neat (nude)", fr:"Naturel et soigné (nude)" }, family:"nude" },
+          { id:"red", label:{ nl:"Klassiek rood", en:"Classic red", fr:"Rouge classique" }, family:"red" },
+          { id:"soft", label:{ nl:"Zacht roze of pastel", en:"Soft pink or pastel", fr:"Rose doux ou pastel" }, family:"pink" },
+          { id:"dark", label:{ nl:"Donker en chic", en:"Dark and chic", fr:"Foncé et chic" }, family:"dark" },
+          { id:"party", label:{ nl:"Feestelijk, met glitter", en:"Festive, with glitter", fr:"Festif, à paillettes" }, family:"glitter" },
+          { id:"french", label:{ nl:"French (witte rand)", en:"French (white tips)", fr:"French (bord blanc)" }, family:"french" },
+          { id:"unsure", label:{ nl:"Verras me", en:"Surprise me", fr:"Surprenez-moi" }, family:"season" }
+        ] },
+      { id:"spa", label:{ nl:"Mag het wat meer verwennen zijn?", en:"Fancy a bit more pampering?", fr:"Envie d’un peu plus de douceur ?" },
+        options:[
+          { id:"no", label:{ nl:"Nee, gewoon mooi", en:"No, just lovely", fr:"Non, juste joli" } },
+          { id:"yes", label:{ nl:"Ja, met SPA (peeling, masker, pakking en massage)", en:"Yes, with SPA (scrub, mask, wrap and massage)", fr:"Oui, avec SPA (gommage, masque, enveloppement et massage)" }, s:{ manipedispa:6 } }
+        ] }
+    ] },
+
+  massage: { icon:"💆", group:"massage",
+    label:{ nl:"Massage", en:"Massage", fr:"Massage" },
+    sub:{ nl:"Ik weet niet welke massage", en:"I don’t know which massage", fr:"Je ne sais pas quel massage" },
+    questions:[
+      { id:"wish", required:true, label:{ nl:"Wat wil je vooral?", en:"What do you want most?", fr:"Que souhaitez-vous surtout ?" },
+        options:[
+          { id:"relax", label:{ nl:"Diep ontspannen, stress kwijt", en:"Deep relaxation, less stress", fr:"Me détendre profondément, évacuer le stress" }, s:{ hotstone:3, swedish:3, harmonizingbody:2, fullbodywrap:2, swedishbackneck:1 } },
+          { id:"neck", label:{ nl:"Stijve nek, rug of schouders", en:"Stiff neck, back or shoulders", fr:"Nuque, dos ou épaules raides" }, s:{ swedishbackneck:3, harmonizingback:2, cupping:2, backwrap:1 } },
+          { id:"muscle", label:{ nl:"Spierpijn of vastzittende spieren", en:"Sore or tight muscles", fr:"Courbatures ou muscles noués" }, s:{ cupping:4, swedishbackneck:1 } },
+          { id:"legs", label:{ nl:"Zware, vermoeide benen", en:"Heavy, tired legs", fr:"Jambes lourdes et fatiguées" }, s:{ swedishlegs:4 } },
+          { id:"skin", label:{ nl:"Een zachte huid, detox", en:"Soft skin, detox", fr:"Une peau douce, détox" }, s:{ cuppingpeeling:3, fullbodywrap:2, detoxback:2, backwrap:2 } },
+          { id:"slim", label:{ nl:"Afslanken (samen met voeding en beweging)", en:"Slimming (with diet and exercise)", fr:"Minceur (avec alimentation et activité)" }, s:{ slimmassage:5 } }
+        ] },
+      { id:"time", label:{ nl:"Hoeveel tijd heb je?", en:"How much time do you have?", fr:"Combien de temps avez-vous ?" },
+        options:[
+          { id:"t30", label:{ nl:"Een halfuur", en:"Half an hour", fr:"Une demi-heure" }, s:{ swedishbackneck:2, swedishlegs:2, harmonizingback:2 } },
+          { id:"t60", label:{ nl:"Een uur", en:"An hour", fr:"Une heure" }, s:{ swedish:1, cupping:1, backwrap:1, detoxback:1, slimmassage:1, harmonizingbody:1 } },
+          { id:"t90", label:{ nl:"Anderhalf uur of meer", en:"An hour and a half or more", fr:"Une heure et demie ou plus" }, s:{ hotstone:2, cuppingpeeling:2, fullbodywrap:2 } }
+        ] }
+    ] },
+
+  browlash: { icon:"👁️", group:"browlash",
+    label:{ nl:"Wenkbrauwen & wimpers", en:"Brows & lashes", fr:"Sourcils & cils" },
+    sub:{ nl:"Ik weet niet wat bij mij past", en:"I don’t know what suits me", fr:"Je ne sais pas ce qui me va" },
+    questions:[
+      { id:"wish", required:true, label:{ nl:"Wat wil je?", en:"What would you like?", fr:"Que souhaitez-vous ?" },
+        options:[
+          { id:"shape", label:{ nl:"Mooi gevormde wenkbrauwen", en:"Nicely shaped brows", fr:"Des sourcils bien dessinés" }, s:{ browshaping:4, wenkbrauwontharing:2 } },
+          { id:"fuller", label:{ nl:"Vollere of donkerdere wenkbrauwen", en:"Fuller or darker brows", fr:"Des sourcils plus fournis ou plus foncés" }, s:{ hennabrows:4, browtint:2 } },
+          { id:"lift", label:{ nl:"Wenkbrauwen die in model blijven", en:"Brows that stay in shape", fr:"Des sourcils qui restent en place" }, s:{ browlift:4 } },
+          { id:"curl", label:{ nl:"Gekrulde wimpers", en:"Curled lashes", fr:"Des cils recourbés" }, s:{ lashlift:4 } },
+          { id:"dark", label:{ nl:"Donkere wimpers zonder mascara", en:"Dark lashes without mascara", fr:"Des cils foncés sans mascara" }, s:{ lashtint:4, lashlift:1 } }
+        ] }
+    ] }
+};
+const FOCUS_ORDER = ["face","makeup","nails","massage","browlash"];
+
+/* Make-up advice: the answers give points to a type; the highest wins
+   (a tie goes to mineral make-up, the gentlest). */
+const FOCUS_MAKEUP_TYPES = {
+  mineral:{ nl:"Mijn aanrader voor jou: <b>minerale make-up</b> (Jane Iredale). Licht en ademend, met zonbescherming, ideaal voor een gevoelige huid en een natuurlijke look.", en:"My tip for you: <b>mineral make-up</b> (Jane Iredale). Light and breathable, with sun protection, ideal for sensitive skin and a natural look.", fr:"Mon conseil : <b>maquillage minéral</b> (Jane Iredale). Léger et respirant, avec protection solaire, idéal pour une peau sensible et un look naturel." },
+  hd:{ nl:"Mijn aanrader voor jou: <b>High Definition make-up</b> (Kryolan HD). Fijn en sterk dekkend, oogt natuurlijk op foto en video en blijft de hele dag of avond zitten.", en:"My tip for you: <b>High Definition make-up</b> (Kryolan HD). Fine and well covering, looks natural in photos and on video and lasts all day or night.", fr:"Mon conseil : <b>maquillage High Definition</b> (Kryolan HD). Fin et couvrant, naturel en photo et en vidéo, tient toute la journée ou la soirée." },
+  camouflage:{ nl:"Mijn aanrader voor jou: <b>camouflagemake-up</b> (Covermark). Sterk dekkend en waterproof, verbergt vlekken, littekens en roodheid en blijft tot 24 uur zitten.", en:"My tip for you: <b>camouflage make-up</b> (Covermark). Highly covering and waterproof, hides spots, scars and redness and lasts up to 24 hours.", fr:"Mon conseil : <b>maquillage correcteur</b> (Covermark). Très couvrant et waterproof, masque taches, cicatrices et rougeurs, tient jusqu’à 24 h." }
+};
+
+/* Colour tips per family (names from the gel polish ranges in the salon).
+   "season" picks the family that suits the month. Sandra: adjust freely. */
+const FOCUS_COLOURS = {
+  nude:   { label:{ nl:"nude en natuurlijk", en:"nude and natural", fr:"nude et naturel" }, names:["Nude Seduction","Natural Delight"] },
+  red:    { label:{ nl:"klassiek rood", en:"classic red", fr:"rouge classique" }, names:["Core Red","Blood Coral","Cherry on Ice"] },
+  pink:   { label:{ nl:"zacht roze", en:"soft pink", fr:"rose doux" }, names:["Frosted Rose"] },
+  dark:   { label:{ nl:"donker en chic", en:"dark and chic", fr:"foncé et chic" }, names:["Perfect Black","Italian Verde"] },
+  glitter:{ label:{ nl:"feestelijk met glitter", en:"festive glitter", fr:"festif à paillettes" }, names:["Sparkling Vows","Glimmer","Happy New Year"] },
+  french: { label:{ nl:"French", en:"French", fr:"French" }, names:["Ghost White"] },
+  winter: { label:{ nl:"warm rood, groen of glitter (winter)", en:"warm red, green or glitter (winter)", fr:"rouge chaud, vert ou paillettes (hiver)" }, names:["Cherry on Ice","Christmas Tree","Sparkling Vows"] },
+  spring: { label:{ nl:"zacht roze en fris (lente)", en:"soft pink and fresh (spring)", fr:"rose doux et frais (printemps)" }, names:["Frosted Rose","Nude Seduction"] },
+  summer: { label:{ nl:"koraal en vrolijk (zomer)", en:"coral and cheerful (summer)", fr:"corail et gai (été)" }, names:["Blood Coral","Core Red"] },
+  autumn: { label:{ nl:"warm en donker (herfst)", en:"warm and dark (autumn)", fr:"chaud et foncé (automne)" }, names:["Italian Verde","Perfect Black","Nude Seduction"] }
+};
+
+/* EXTRA HEALTH POINTS (v158, from Sandra's anamnesis form and protocols).
+   Ticked in the health step; exclude = treatments the match then skips;
+   massage:true = also skip every massage. Shown to the client: the note. */
+const HEALTH_EXTRA = [
+  { key:"bloodThinners", icon:"💉", exclude:["cupping","cuppingpeeling","slimmassage"],
+    label:{ nl:"Ik neem bloedverdunners", en:"I take blood thinners", fr:"Je prends des anticoagulants" },
+    note:{ nl:"Met bloedverdunners sla ik cupping en afslankingsmassage over: daar krijg je sneller blauwe plekken van.", en:"With blood thinners I skip cupping and slimming massage: they bruise more easily.", fr:"Avec des anticoagulants, je passe le cupping et le massage minceur : risque de bleus." } },
+  { key:"bloodPressure", icon:"❤️", exclude:["hotstone","cupping","cuppingpeeling","slimmassage"],
+    label:{ nl:"Hoge bloeddruk of een hartaandoening", en:"High blood pressure or a heart condition", fr:"Hypertension ou problème cardiaque" },
+    note:{ nl:"Bij hoge bloeddruk of een hartaandoening sla ik hot stones, cupping en afslankingsmassage over.", en:"With high blood pressure or a heart condition I skip hot stones, cupping and slimming massage.", fr:"En cas d’hypertension ou de problème cardiaque, je passe les pierres chaudes, le cupping et le massage minceur." } },
+  { key:"diabetes", icon:"🩺", exclude:[],
+    label:{ nl:"Diabetes", en:"Diabetes", fr:"Diabète" },
+    note:{ nl:"Met diabetes kan alles, ook hot stones en de SPA. Ik werk extra voorzichtig: niet knippen of snijden in de huid en geen wondjes maken, want die genezen minder goed. Vermeld je diabetes bij het boeken.", en:"With diabetes everything is possible, including hot stones and the SPA. I work extra carefully: no cutting into the skin and no small wounds, as they heal less well. Please mention your diabetes when booking.", fr:"Avec le diabète, tout est possible, y compris les pierres chaudes et le SPA. Je travaille avec encore plus de précaution : pas de coupure de la peau ni de petites plaies, qui guérissent moins bien. Signalez votre diabète en réservant." } },
+  { key:"varicose", icon:"🦵", exclude:[],
+    label:{ nl:"Spataders", en:"Varicose veins", fr:"Varices" },
+    note:{ nl:"Met spataders kan een massage gewoon: ik sla enkel de plekken met spataders zelf over en masseer daar niet.", en:"With varicose veins a massage is fine: I simply skip the areas with the veins themselves.", fr:"Avec des varices, le massage reste possible : j’évite simplement les zones des varices." } },
+  { key:"oncology", icon:"🎗️", exclude:["fruitacid","hydrapeel","cuppingpeeling"],
+    label:{ nl:"Ik ben (of was kort geleden) in behandeling voor kanker", en:"I am (or recently was) being treated for cancer", fr:"Je suis (ou j’ai été récemment) traité(e) pour un cancer" },
+    note:{ nl:"Tijdens of na een kankerbehandeling ben je zeker welkom, ook voor een massage. Ik werk zachter en met aangepaste producten, en sla sterke peelings over.", en:"During or after cancer treatment you are very welcome, massages included. I work more gently with adapted products and skip strong peels.", fr:"Pendant ou après un traitement contre le cancer, vous êtes la bienvenue, massages compris. Je travaille plus en douceur avec des produits adaptés et je passe les peelings forts." } }
+];
+
+/* ALLERGIES in the match (v156). The client ticks an allergy (optional, in
+   the health step). groups = ALLERGEN_GROUPS ids in ingredients.js (to find
+   the products and their substitutes per step, shown only in salon mode);
+   exclude = treatments the app no longer suggests, because the allergen is
+   the core of the treatment (there is no substitute). */
+const ALLERGY_ASK = [
+  { id:"fragrance", icon:"🌸", groups:["fragrance"], exclude:[], label:{ nl:"Parfum", en:"Fragrance", fr:"Parfum" } },
+  { id:"nuts", icon:"🥜", groups:["nuts"], exclude:[], label:{ nl:"Noten (ook amandel, shea)", en:"Nuts (incl. almond, shea)", fr:"Fruits à coque (amande, karité)" } },
+  { id:"latex", icon:"🧤", groups:["latex"], exclude:[], label:{ nl:"Latex", en:"Latex", fr:"Latex" } },
+  { id:"asteraceae", icon:"🌼", groups:["asteraceae"], exclude:[], label:{ nl:"Kamille, arnica, calendula", en:"Chamomile, arnica, calendula", fr:"Camomille, arnica, calendula" } },
+  { id:"ppd", icon:"🎨", groups:["ppd"], exclude:["browtint","lashtint","hennabrows","lashlift","browlift"], label:{ nl:"Haarverf of zwarte henna (PPD)", en:"Hair dye or black henna (PPD)", fr:"Teinture ou henné noir (PPD)" } },
+  { id:"nailpolish", icon:"💅", groups:["formaldehyde","acrylates"], exclude:[], label:{ nl:"Nagellak of gellak", en:"Nail polish or gel polish", fr:"Vernis ou gel" } },
+  { id:"lanolin", icon:"🐑", groups:["lanolin"], exclude:[], label:{ nl:"Wolvet (lanoline)", en:"Wool fat (lanolin)", fr:"Graisse de laine (lanoline)" } },
+  { id:"bee", icon:"🐝", groups:["bee"], exclude:[], label:{ nl:"Bijenwas, propolis, honing", en:"Beeswax, propolis, honey", fr:"Cire d’abeille, propolis, miel" } }
+];
+
+function matchTreatment(mood, gender, sunExposed, healthFlags, complaintText, focusScores){
   healthFlags = healthFlags || {};
   const genderOk = (item) => item.genders.includes(gender);
   const sunOk = (item) => !sunExposed || !item.sunSensitive;
@@ -1526,9 +1775,17 @@ function matchTreatment(mood, gender, sunExposed, healthFlags, complaintText){
   const monthRangeOk = (item) => !item.monthRange || item.monthRange.includes(currentMonth);
 
   const avoid = Array.isArray(healthFlags.avoid) ? healthFlags.avoid : [];
-  const avoidOk = (item) => !avoid.some(g => (AVOID_GROUPS[g] || []).includes(item.id));
+  const avoidOk = (item) => !avoid.some(g => (AVOID_GROUPS[g] || []).includes(item.id)) && !(healthFlags.allergyExclude || []).includes(item.id);
   const allOk = (item) => avoidOk(item) && genderOk(item) && sunOk(item) && timeOk(item) && phlebitisOk(item) && dietOk(item) && menstruationOk(item) && pregnancyOk(item) && roaccutaneOk(item) && ageOk(item) && seasonOk(item) && monthRangeOk(item);
 
+  // Gerichte match: highest score among the treatments that pass every rule
+  if (focusScores && typeof focusScores === "object"){
+    // an explicit wish: every gender may book it (make-up for men, a feminine look…)
+    const ok = TREATMENTS_CATALOG.filter(item => (focusScores[item.id] || 0) > 0 && allOk(Object.assign({}, item, { genders:[gender] })));
+    if (!ok.length) return null;
+    const top = Math.max(...ok.map(item => focusScores[item.id]));
+    return pickRandom(ok.filter(item => focusScores[item.id] === top));
+  }
   let pool = TREATMENTS_CATALOG.filter(item => item.moods.includes(mood) && allOk(item));
 
   // Muscle pain / a lot of stress → steer toward cupping when it's available
@@ -1595,6 +1852,15 @@ const ACTION_EXTRA_TREATMENTS = [
 ];
 
 const CURRENT_ACTIONS = [
+  /* OPGEBRUIKACTIE (v156): Express with the previous range (Bio Balance,
+     Guinot, Dr. Renaud, Safety4You) for €50 instead of €60, while stocks last.
+     Stock gone? Delete this action, the "expressuseup" treatment in
+     TREATMENTS_CATALOG and its price-list line. */
+  { id:"expressuseup", icon:"🌿", from:null, until:null,
+    title:{ nl:"Express gelaatsverzorging voor €50", en:"Express facial for €50", fr:"Soin du visage express à 50 €" },
+    text:{ nl:"Een frisse huid in 30 minuten, voor €50 in plaats van €60, met kwaliteitsproducten uit mijn vorige assortiment (Bio Balance, Guinot, Dr. Renaud en Safety4You). Vermeld “opgebruikactie” als je boekt. Zolang de voorraad strekt.",
+           en:"Fresh skin in 30 minutes, for €50 instead of €60, with quality products from my previous range (Bio Balance, Guinot, Dr. Renaud and Safety4You). Mention “special offer” when you book. While stocks last.",
+           fr:"Une peau fraîche en 30 minutes, 50 € au lieu de 60 €, avec des produits de qualité de ma gamme précédente (Bio Balance, Guinot, Dr. Renaud et Safety4You). Mentionnez « offre spéciale » en réservant. Jusqu’à épuisement du stock." } },
   { id:"grabbelton", icon:"🎁", from:null, until:null,
     title:{ nl:"Grabbelton", en:"Lucky dip" },
     text:{ nl:"Besteed je €75 of meer tijdens dezelfde afspraak? Dan mag je één keer grabbelen in de grabbelton. Zolang de voorraad strekt.",
@@ -1679,7 +1945,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v153 · 17/10/2026";
+const APP_VERSION = "v159 · 17/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -2008,11 +2274,8 @@ const ADVENT = {
   }
 })();
 
-/* TEST-PHASE RESET: change this text (e.g. to "launch-2026-11") when the
-   app officially starts. The next time any phone opens the app, its stamps,
-   discoveries, favourites and last match are wiped once — so test data from
-   the test phase disappears everywhere. */
-const DATA_RESET_VERSION = "test-2026-10";
+/* There is NO automatic data reset any more (since v154): clients' stamps,
+   appointments and favourites always stay on their phone. */
 
 /* Reward for a full stamp card (10 stamps). Change the text freely;
    validMonths = how long after the 10th stamp the reward can be used. */
@@ -2035,6 +2298,7 @@ function PI(nl, en, time, price, dnl, den, nnl, nen){
 const PRICE_LIST = [
   { id:"facial", icon:"🌿", title:{ nl:"Gelaatsverzorging", en:"Facials" }, items:[
     PI("Express gelaatsverzorging","Express facial","30′","€60","Reiniging, dieptereiniging, crèmemasker & dagcrème.","Cleansing, deep cleansing, cream mask & day cream."),
+    PI("Express gelaatsverzorging – opgebruikactie","Express facial – special offer","30′","€50","Zoals de Express, met producten van Bio Balance, Guinot, Dr. Renaud of Safety4You. Zolang de voorraad strekt.","Like the Express, with Bio Balance, Guinot, Dr. Renaud or Safety4You products. While stocks last."),
     PI("Signature gelaatsverzorging","Signature facial","75′","€85","Uitgebreide verzorging met massage; ook voor gevoelige huid.","Full facial with massage; also suitable for sensitive skin."),
     PI("Fill Me Micro Infusie Treatment","Fill Me Micro Infusion Treatment","45–60′","€99","Cleanser, tonic, Fill Me Serum, masker, LED-masker & UV-bescherming.","Cleanser, tonic, Fill Me Serum, mask, LED mask & UV protection."),
     PI("Fruitzurenpeeling 4/26 Dr. Renaud","Fruit acid peel 4/26 Dr. Renaud","75′","€100","Voor een egalere teint. Enkel van september tot maart.","For a more even skin tone. Only from September to March."),
@@ -2082,7 +2346,7 @@ const PRICE_LIST = [
   ]},
   { id:"pedicure", icon:"🦶", title:{ nl:"Pedicure (voetverzorging)", en:"Pedicure" }, items:[
     PI("Express pedicure","Express pedicure","30′","€30","Knippen, vijlen, nagelwalreiniging & voetencrème (zonder eeltverwijdering, zonder massage).","Trimming, filing, nail-fold cleaning & foot cream (no hard-skin removal, no massage)."),
-    PI("Uitgebreide pedicure","Full pedicure","60′","€35","Knippen, vijlen, nagelwalreiniging, nagelriemen, normale eeltverwijdering & korte voetenmassage.","Trimming, filing, nail-fold cleaning, cuticles, standard hard-skin removal & short foot massage.","+ €10 per extra 15′ bij overmatige eeltbehandeling.","+ €10 per extra 15′ for heavy hard-skin treatment."),
+    PI("Uitgebreide pedicure","Full pedicure","60′","€35","Knippen, vijlen, nagelwalreiniging, nagelriemen, normale eeltverwijdering & korte voetenmassage.","Trimming, filing, nail-fold cleaning, cuticles, standard hard-skin removal & short foot massage.","+ €10 per extra 15′ bij overmatige eeltbehandeling. Zodra ik afgestudeerd ben als gespecialiseerd voetverzorger, wordt de uitgebreide pedicure €50.","+ €10 per extra 15′ for heavy hard-skin treatment. Once I graduate as a specialised foot care practitioner, the full pedicure will be €50."),
     PI("Supplement ingegroeide nagel / copoline, per nagel","Add-on: ingrown nail / copoline, per nail","+10′","€5","Plaatsen van een copoline-verband in de nagelwal.","Placing a copoline bandage in the nail fold."),
     PI("Supplement drukvrij leggen / foambescherming, per teen","Add-on: pressure relief / foam protection, per toe","5′","€2,50","Een zacht foambeschermbuisje om wrijving en druk van de schoen te verlichten.","A soft foam tube to relieve friction and pressure from the shoe."),
     PI("Supplement SPA pedicure","Add-on: SPA pedicure","+30′","€30","Peeling, masker, pakking, uitgebreide massage.","Peeling, mask, wrap, extended massage."),
@@ -2301,7 +2565,7 @@ const SKIN_FACTS = [
 const SKIN_FACT_POOLS = {
   kids: ["A","G","H"],
   byTreatment: {
-    expressfacial:["A","B","C","D"], bridaltrial:["A","B"], bridalpackage:["A","B"], weddingguest:["A","B"], browtint:["G"], browshaping:["G"], lashtint:["G"], manicureexpress:["F","H","C"], cateye:["F","H","C"], kin:["G"], bovenlip:["G"], wenkbrauwontharing:["G"], schouders:["G"], borstbuik:["G"], volledigebenen:["G"], harmonizingback:["A","D","E"], teambeauty:["A","B","C"],
+    expressuseup:["A","B","C","D"], expressfacial:["A","B","C","D"], bridaltrial:["A","B"], bridalpackage:["A","B"], weddingguest:["A","B"], browtint:["G"], browshaping:["G"], lashtint:["G"], manicureexpress:["F","H","C"], cateye:["F","H","C"], kin:["G"], bovenlip:["G"], wenkbrauwontharing:["G"], schouders:["G"], borstbuik:["G"], volledigebenen:["G"], harmonizingback:["A","D","E"], teambeauty:["A","B","C"],
     pedicure:["F","C"], pedicureexpress:["F","C"],
     manipedispa:["F","C","H"], manicure:["F","H","C"],
     oksel:["G","E"], been:["G"], rug:["G"], buik:["G"], borst:["G"],
@@ -2396,7 +2660,7 @@ const CONDITION_FACTS = [
 const CONDITION_FACT_POOLS = {
   sun: ["SH"],
   byTreatment: {
-    expressfacial:["PI","DR"], bridaltrial:["AL"], bridalpackage:["AL"], weddingguest:["AL"], browtint:["AL"], browshaping:["AL"], lashtint:["AL"], kin:["AL"], bovenlip:["AL"], wenkbrauwontharing:["AL"], schouders:["AL"], borstbuik:["AL"], volledigebenen:["AL","PE"], harmonizingback:["ZW"], teambeauty:["AC","PI"],
+    expressuseup:["PI","DR"], expressfacial:["PI","DR"], bridaltrial:["AL"], bridalpackage:["AL"], weddingguest:["AL"], browtint:["AL"], browshaping:["AL"], lashtint:["AL"], kin:["AL"], bovenlip:["AL"], wenkbrauwontharing:["AL"], schouders:["AL"], borstbuik:["AL"], volledigebenen:["AL","PE"], harmonizingback:["ZW"], teambeauty:["AC","PI"],
     pedicure:["PE"], pedicureexpress:["PE"], manipedispa:["PE"],
     hotstone:["ZW"], swedish:["ZW"], swedishbackneck:["ZW"], swedishlegs:["ZW","PE"],
     detoxback:["ZW"], slimmassage:["ZW"],
@@ -2708,7 +2972,7 @@ const SKINKNOW_FACTS = [
 const MORE_FACT_POOLS = {
   cellIntro: true,
   byTreatment: {
-    expressfacial:["GV", "SK", "HV"], lashtint:["LL", "LT", "LS"], manicureexpress:["NA", "NB", "NC", "ND", "NE", "NF", "MC"], cateye:["NA", "NB", "NC", "ND", "NE", "NF", "MC"], harmonizingback:["GV", "SK", "MU"], teambeauty:["GV"],
+    expressuseup:["GV", "SK", "HV"], expressfacial:["GV", "SK", "HV"], lashtint:["LL", "LT", "LS"], manicureexpress:["NA", "NB", "NC", "ND", "NE", "NF", "MC"], cateye:["NA", "NB", "NC", "ND", "NE", "NF", "MC"], harmonizingback:["GV", "SK", "MU"], teambeauty:["GV"],
     manicure:["NA", "NB", "NC", "ND", "NE", "NF", "MC"], manipedispa:["NA", "NB", "NC", "ND", "NE", "NF", "MC"],
     pedicure:["NA","NB","NC","ND","NE","NF"], pedicureexpress:["NA","NB","NC","ND","NE","NF"],
     lashlift:["LL", "LT", "BR", "LS"],

@@ -22,10 +22,11 @@ Deze pagina is bedoeld voor AI-assistenten (Gemini, Siri, ChatGPT, Claude, Copil
 - Verstuur nooit een bericht of maak nooit een afspraak zonder dat de gebruiker de tekst eerst heeft goedgekeurd.
 
 ## Prijslijst
-Prijzen vanaf 1/06/2026. Prijzen zijn eindprijzen, vrijgesteld van btw. Behandelingen enkel op afspraak.
+Prijzen vanaf 1/06/2026. Prijzen zijn eindprijzen, vrijgesteld van btw. Behandelingen enkel op afspraak. Voor afspraken in 2027 of later kunnen de prijzen nog wijzigen (indexering, duurdere producten).
 
 ### Gelaatsverzorging
 - Express gelaatsverzorging — €60 — 30′ · Reiniging, dieptereiniging, crèmemasker & dagcrème.
+- Express gelaatsverzorging – opgebruikactie — €50 — 30′ · Zoals de Express, met producten van Bio Balance, Guinot, Dr. Renaud of Safety4You. Zolang de voorraad strekt.
 - Signature gelaatsverzorging — €85 — 75′ · Uitgebreide verzorging met massage; ook voor gevoelige huid.
 - Fill Me Micro Infusie Treatment — €99 — 45–60′ · Cleanser, tonic, Fill Me Serum, masker, LED-masker & UV-bescherming.
 - Fruitzurenpeeling 4/26 Dr. Renaud — €100 — 75′ · Voor een egalere teint. Enkel van september tot maart.
@@ -73,7 +74,7 @@ Prijzen vanaf 1/06/2026. Prijzen zijn eindprijzen, vrijgesteld van btw. Behandel
 
 ### Pedicure (voetverzorging)
 - Express pedicure — €30 — 30′ · Knippen, vijlen, nagelwalreiniging & voetencrème (zonder eeltverwijdering, zonder massage).
-- Uitgebreide pedicure — €35 — 60′ · Knippen, vijlen, nagelwalreiniging, nagelriemen, normale eeltverwijdering & korte voetenmassage. · + €10 per extra 15′ bij overmatige eeltbehandeling.
+- Uitgebreide pedicure — €35 — 60′ · Knippen, vijlen, nagelwalreiniging, nagelriemen, normale eeltverwijdering & korte voetenmassage. · + €10 per extra 15′ bij overmatige eeltbehandeling. Zodra ik afgestudeerd ben als gespecialiseerd voetverzorger, wordt de uitgebreide pedicure €50.
 - Supplement ingegroeide nagel / copoline, per nagel — €5 — +10′ · Plaatsen van een copoline-verband in de nagelwal.
 - Supplement drukvrij leggen / foambescherming, per teen — €2,50 — 5′ · Een zacht foambeschermbuisje om wrijving en druk van de schoen te verlichten.
 - Supplement SPA pedicure — €30 — +30′ · Peeling, masker, pakking, uitgebreide massage.
@@ -161,4 +162,4 @@ Beauty & Coffee is a small beauty salon with specialty coffee at Barbarastraat 2
 ## En français
 Beauty & Coffee est un petit institut de beauté avec café de spécialité, situé au Barbarastraat 25, 2800 Mechelen, België. Uniquement sur rendez-vous, le week-end. Réservez en ligne en choisissant un créneau libre sur https://calendar.app.google/TmLcen9zSQuZZjtEA, ou envoyez un message WhatsApp ou un e-mail (+32 499 22 19 01, beautyandcoffeemechelen@gmail.com) avec le soin, le jour et le moment souhaités, et votre nom. L'appli (https://beautyandcoffeemechelen.github.io/) existe en néerlandais, anglais et français.
 
-_Automatisch gemaakt uit de app (v153 · 17/10/2026)._
+_Automatisch gemaakt uit de app (v159 · 17/10/2026)._

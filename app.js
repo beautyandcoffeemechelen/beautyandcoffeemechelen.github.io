@@ -12,6 +12,8 @@
     sunExposed: null,     // bool
     healthFlags: { phlebitis:false, contactLenses:false, menstruation:false, pregnant:false, musclePain:false, roaccutane:false, dietExercise:false, sport:false, diet:false },
     kidsDrink: null,      // 'water' | 'chocolate'
+    allergies: [],        // allergy ids from ALLERGY_ASK (session only)
+    focus: null,          // gerichte match: { cat, ans:{questionId:optionId} } or null
     mood: null,
     complaintText: "",
     avoid: [],
@@ -31,7 +33,7 @@
   };
 
   const STEP_WEIGHTS = {
-    welcome:0, profile:8, age:16, sunCheck:24, healthCheck:30, kidsDrink:16, mood:38, category:48,
+    welcome:0, profile:8, age:16, sunCheck:24, healthCheck:30, kidsDrink:16, focus:34, focuswish:36, mood:38, category:48,
     temperature:56, caffeine:66, toppings:76, context:84, photo:92, loading:96, result:100
   };
   let history = ["welcome"];
@@ -86,6 +88,8 @@
     renderHealthOptions();
     renderKidsDrinkOptions();
     renderMoodOptions();
+    renderFocusOptions();
+    if (state.focus) renderFocusWish();
     renderCategoryOptions();
     renderTemperatureOptions();
     renderCaffeineOptions();
@@ -137,6 +141,8 @@
     if (name === "pricelist") {
       renderPriceList();
     }
+    if (name === "focus") renderFocusOptions();
+    if (name === "focuswish") renderFocusWish();
     if (name === "houserules") {
       renderHouseRules();
       const il = $("#rulesIngrLink"); if (il) il.hidden = !(typeof ingrIsLive === "function" && ingrIsLive());
@@ -267,6 +273,7 @@
   }
 
   function renderHealthOptions(){
+    renderAllergyOptions();
     const checkWrap = $("#healthChecklist");
     if (checkWrap){
       checkWrap.innerHTML = "";
@@ -277,16 +284,24 @@
         ["roaccutane", "💊"]
       ];
       if (state.profile === "vrouw") items.push(["menstruation", "🌙"], ["pregnant", "🤰"]);
-      items.forEach(([key, icon]) => {
+      (typeof HEALTH_EXTRA !== "undefined" ? HEALTH_EXTRA : []).forEach(h => items.push([h.key, h.icon, h]));
+      items.forEach(([key, icon, h]) => {
         const chip = document.createElement("button");
         chip.type = "button";
         chip.className = "chip chip--check" + (state.healthFlags[key] ? " is-selected" : "");
-        chip.innerHTML = `<span class="chip__icon">${icon}</span> ${t(`health_${key}`, state.lang)}`;
+        chip.innerHTML = `<span class="chip__icon">${icon}</span> ${h ? esc(h.label[state.lang] || h.label.nl) : t(`health_${key}`, state.lang)}`;
         chip.addEventListener("click", () => {
           state.healthFlags[key] = !state.healthFlags[key];
           renderHealthOptions();
         });
         checkWrap.appendChild(chip);
+      });
+      // notes for the extra health points
+      checkWrap.parentElement.querySelectorAll(".health-extra-notice").forEach(n => n.remove());
+      (typeof HEALTH_EXTRA !== "undefined" ? HEALTH_EXTRA : []).filter(h => state.healthFlags[h.key]).reverse().forEach(h => {
+        const n = document.createElement("div"); n.className = "sun-notice health-extra-notice";
+        n.innerHTML = `<span class="sun-notice__icon">${h.icon}</span><span>${esc(h.note[state.lang] || h.note.nl)}</span>`;
+        checkWrap.insertAdjacentElement("afterend", n);
       });
       let rNotice = checkWrap.parentElement.querySelector(".roaccutane-notice");
       if (state.healthFlags.roaccutane){
@@ -339,6 +354,95 @@
       tile.addEventListener("click", () => { state.kidsDrink = d.id; renderKidsDrinkOptions(); setTimeout(()=>{ state.context = "salon"; runGeneration(); }, 200); });
       wrap.appendChild(tile);
     });
+  }
+
+  /* ---------------- gerichte match (v155) ---------------- */
+  function focusGuides(){
+    if (typeof FOCUS_GUIDES === "undefined") return [];
+    return FOCUS_ORDER.filter(id => FOCUS_GUIDES[id] && (!FOCUS_GUIDES[id].genders || FOCUS_GUIDES[id].genders.includes(state.profile)));
+  }
+  function fx(o){ return o ? (o[state.lang] || o.nl || "") : ""; }
+  function renderFocusOptions(){
+    const wrap = $("#focusOptions"); if (!wrap) return;
+    wrap.innerHTML = "";
+    const add = (id, icon, title, sub) => {
+      const card = document.createElement("button");
+      card.type = "button";
+      const sel = id === "surprise" ? (state.focus === null && history.includes("mood")) : (state.focus && state.focus.cat === id);
+      card.className = "option-card" + (sel ? " is-selected" : "");
+      card.dataset.focus = id;
+      card.innerHTML = `<span class="option-card__icon">${icon}</span><span class="option-card__text"><span class="option-card__title">${title}</span><span class="option-card__sub">${sub}</span></span>`;
+      card.addEventListener("click", () => {
+        if (id === "surprise"){ state.focus = null; setTimeout(() => goTo("mood"), 200); }
+        else { if (!state.focus || state.focus.cat !== id) state.focus = { cat:id, ans:{} }; setTimeout(() => goTo("focuswish"), 200); }
+        renderFocusOptions();
+      });
+      wrap.appendChild(card);
+    };
+    focusGuides().forEach(id => { const g = FOCUS_GUIDES[id]; add(id, g.icon, fx(g.label), fx(g.sub)); });
+    add("surprise", "✨", t("focus_surprise_title", state.lang), t("focus_surprise_sub", state.lang));
+  }
+  function renderFocusWish(){
+    const wrap = $("#focusQuestions"); if (!wrap || !state.focus) return;
+    const g = FOCUS_GUIDES[state.focus.cat]; if (!g) return;
+    const ttl = $("#focusWishTitle"); if (ttl) ttl.textContent = g.icon + " " + fx(g.label);
+    wrap.innerHTML = g.questions.map(q => `
+      <div class="focus-q">
+        <p class="focus-q__label">${esc(fx(q.label))}${q.required ? "" : ` <span class="focus-q__opt">${t("focus_optional", state.lang)}</span>`}</p>
+        <div class="options options--chip">${q.options.filter(o => !o.genders || o.genders.includes(state.profile)).map(o => {
+          const on = state.focus.ans[q.id] === o.id;
+          return `<button type="button" class="chip${on ? " is-selected" : ""}" data-fq="${q.id}" data-fo="${o.id}" aria-pressed="${on}">${esc(fx(o.label))}</button>`;
+        }).join("")}</div>
+      </div>`).join("");
+    wrap.querySelectorAll("[data-fq]").forEach(b => b.addEventListener("click", () => {
+      const q = b.dataset.fq, o = b.dataset.fo;
+      if (state.focus.ans[q] === o) delete state.focus.ans[q]; else state.focus.ans[q] = o;
+      renderFocusWish();
+    }));
+  }
+  function focusNext(){
+    const g = state.focus && FOCUS_GUIDES[state.focus.cat];
+    if (!g) { goTo("mood"); return; }
+    const missing = g.questions.find(q => q.required && !state.focus.ans[q.id]);
+    if (missing){ showToast(t("focus_need", state.lang)); return; }
+    goTo("category");
+  }
+  // scores + notes + advice from the answers (used by generateMatch)
+  function focusEvaluate(){
+    const f = state.focus, g = f && FOCUS_GUIDES[f.cat];
+    if (!g) return null;
+    const month = new Date().getMonth() + 1;
+    const scores = {}, notes = [], tips = [], labels = [], mu = {};
+    let family = null;
+    const addS = obj => Object.entries(obj || {}).forEach(([k, v]) => { scores[k] = (scores[k] || 0) + v; });
+    g.questions.forEach(q => {
+      const o = q.options.find(x => x.id === f.ans[q.id] && (!x.genders || x.genders.includes(state.profile))); if (!o) return;
+      labels.push(fx(o.label));
+      if (o.months && !o.months.includes(month)){ addS(o.off); if (o.offNote) notes.push(fx(o.offNote)); }
+      else addS(o.s);
+      if (o.ageNote && state.ageBracket !== "45plus") notes.push(fx(o.ageNote));
+      if (o.tip) tips.push(fx(o.tip));
+      Object.entries(o.mu || {}).forEach(([k, v]) => { mu[k] = (mu[k] || 0) + v; });
+      if (o.family) family = o.family;
+    });
+    // make-up: which type suits best
+    if (f.cat === "makeup"){
+      let best = "mineral", bv = mu.mineral || 0;
+      ["hd","camouflage"].forEach(k => { if ((mu[k] || 0) > bv){ best = k; bv = mu[k]; } });
+      if (typeof FOCUS_MAKEUP_TYPES !== "undefined") tips.unshift(fx(FOCUS_MAKEUP_TYPES[best]));
+    }
+    // nails: colour tips (not when "no colour")
+    if (f.cat === "nails" && f.ans.last !== "none" && typeof FOCUS_COLOURS !== "undefined"){
+      let fam = family || "season";
+      if (fam === "season") fam = [12,1,2].includes(month) ? "winter" : [3,4,5].includes(month) ? "spring" : [6,7,8].includes(month) ? "summer" : "autumn";
+      const c = FOCUS_COLOURS[fam];
+      if (c) tips.push(t("focus_colours", state.lang).replace("{family}", fx(c.label)).replace("{names}", c.names.join(", ")));
+    }
+    return { cat:f.cat, scores, notes, tips, labels, group: g.group };
+  }
+  function focusGroupIds(group){
+    if (group === "nails") return [...new Set([...(AVOID_GROUPS.hands || []), ...(AVOID_GROUPS.feet || [])])].filter(id => id !== "cateye");
+    return AVOID_GROUPS[group] || [];
   }
 
   function renderMoodOptions(){
@@ -1050,12 +1154,25 @@
       return;
     }
 
-    const treatmentObj = matchTreatment(state.mood, state.profile, !!state.sunExposed, {
+    const mFlags = {
       ...state.healthFlags,
       avoid: state.avoid || [],
       age30Plus: state.ageBracket === "30-44" || state.ageBracket === "45plus",
-      age45Plus: state.ageBracket === "45plus"
-    }, state.complaintText);
+      age45Plus: state.ageBracket === "45plus",
+      allergyExclude: allergyPicked().flatMap(a => a.exclude || []).concat(healthExtraExclude())
+    };
+    const focusEval = state.focus ? focusEvaluate() : null;
+    let treatmentObj = null;
+    if (focusEval){
+      // the client's own wishes, then any treatment of that kind that is safe for her
+      treatmentObj = matchTreatment(null, state.profile, !!state.sunExposed, { ...mFlags, avoid: [] }, "", focusEval.scores);
+      if (!treatmentObj){
+        const any = {}; focusGroupIds(focusEval.group).forEach(id => { any[id] = 1; });
+        treatmentObj = matchTreatment(null, state.profile, !!state.sunExposed, { ...mFlags, avoid: [] }, "", any);
+        if (treatmentObj) focusEval.fallback = true; else focusEval.none = true;
+      }
+    }
+    if (!treatmentObj) treatmentObj = matchTreatment(state.mood || "relax", state.profile, !!state.sunExposed, mFlags, state.complaintText);
     let drink;
     const wantsMilk = state.milk !== "none";
     const isIced = state.temperature === "iced";
@@ -1108,7 +1225,7 @@
       milkId: state.milk, extrasIds: [...state.extras],
       homecarePick, soapPick,
       // the answers behind this match, for "Waarom deze match?"
-      why: { mood: state.mood, sun: !!state.sunExposed, complaint: complaintMatched(state.complaintText, treatment.id),
+      why: { mood: focusEval ? null : state.mood, focus: focusEval ? { fallback: !!focusEval.fallback, none: !!focusEval.none } : null, sun: !!state.sunExposed, complaint: complaintMatched(state.complaintText, treatment.id),
              category: state.category, caffeine: state.caffeine, temperature: state.temperature }
     };
   }
@@ -1191,6 +1308,10 @@
     const L = state.lang, w = m.why, tn = trName(m.treatment.name, L);
     const parts = [];
     if (w.mood) parts.push(t("why_mood_" + w.mood, L).replace("{treatment}", tn));
+    const fe = w.focus && state.focus ? focusEvaluate() : null;   // re-evaluated so a language switch translates it
+    if (fe && w.focus.fallback) fe.notes.push(t("focus_fallback", L));
+    if (fe && w.focus.none) fe.notes.push(t("focus_none", L));
+    if (fe) parts.push(t("why_focus", L).replace("{cat}", fx(FOCUS_GUIDES[fe.cat] && FOCUS_GUIDES[fe.cat].label).toLowerCase()).replace("{answers}", fe.labels.map(x => x.charAt(0).toLowerCase() + x.slice(1)).join(", ")).replace("{treatment}", tn));
     if (w.complaint) parts.push(t("why_complaint", L));
     if (w.sun) parts.push(t("why_sun", L));
     let dk;
@@ -1199,10 +1320,15 @@
     else if (w.category === "tea") dk = w.caffeine === "decaf" ? "why_drink_tea_decaf" : "why_drink_tea";
     else dk = w.caffeine === "decaf" ? "why_drink_decaf" : (drinkNotes ? "why_drink_coffee_notes" : "why_drink_coffee");
     parts.push(t(dk, L).replace("{drink}", drinkFull).replace("{notes}", (drinkNotes || "").toLowerCase()));
+    const fa = fe && (fe.notes.length || fe.tips.length) ? `<div class="match-focus">
+        <p class="match-why__title">🎯 ${t("focus_advice_title", L)}</p>
+        ${fe.notes.map(n => `<p class="match-focus__note">${n}</p>`).join("")}
+        ${fe.tips.length ? `<ul class="match-focus__tips">${fe.tips.map(x => `<li>${x}</li>`).join("")}</ul>` : ""}
+      </div>` : "";
     return `<div class="match-why">
         <p class="match-why__title">💡 ${t("why_title", L)}</p>
         <p class="match-why__text">${parts.join(" ")}</p>
-      </div>`;
+      </div>${fa}${allergyClientHtml(m, L)}${(() => { try { return ingrSandra() ? protoLinksHtml(m.treatment.id, L) : ""; } catch(e){ return ""; } })()}`;
   }
 
   function renderResultDetails(){
@@ -1282,7 +1408,7 @@
       const body = t("book_email_body", state.lang)
         .replace("{treatment}", trName(m.treatment.name, state.lang))
         .replace("{drink}", drinkFull || "")
-        .replace("{slots}", slots);
+        .replace("{slots}", slots) + (allergyPicked().length ? "\n" + t("book_allergy_line", state.lang).replace("{a}", allergyLabels(state.lang).join(", ")) : "");
       emailLink.href = `mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     }
     const onl = $("#bookOnlineCta");
@@ -1293,7 +1419,7 @@
         .replace("{treatment}", trName(m.treatment.name, state.lang))
         .replace("{drink}", drinkFull || "")
         .replace("{slots}", slots)
-        .trim();
+        .trim() + (allergyPicked().length ? " " + t("book_allergy_line", state.lang).replace("{a}", allergyLabels(state.lang).join(", ")) : "");
       waLink.href = `https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(waText)}`;
     }
   }
@@ -2663,7 +2789,7 @@
     cameraFacing = "user";
     state.profile = null; state.ageBracket = null; state.sunExposed = null; state.kidsDrink = null;
     state.healthFlags = { phlebitis:false, contactLenses:false, menstruation:false, pregnant:false, musclePain:false, roaccutane:false, dietExercise:false, sport:false, diet:false };
-    state.mood = null; state.category = null; state.temperature = null; state.caffeine = null; state.complaintText = "";
+    state.mood = null; state.focus = null; state.allergies = []; state.category = null; state.temperature = null; state.caffeine = null; state.complaintText = "";
     const complaintEl = $("#complaintInput"); if (complaintEl) complaintEl.value = "";
     state.milk = "none"; state.extras = []; state.context = null;
     state.photoDataUrl = null; state.filter = "none"; state.match = null; state.slots = []; state.skinFact = null; state.sunFact = null;
@@ -2690,14 +2816,12 @@
         if (parsed && typeof parsed === "object") Object.assign(localData, parsed);
       }
     } catch(e){ /* private browsing or storage disabled — app still works without memory */ }
-    // Test-phase reset: when Sandra changes DATA_RESET_VERSION in data.js,
-    // every phone wipes its stamps/discoveries/favourites once.
-    if (typeof DATA_RESET_VERSION === "string"){
-      if (!localData.resetVersion){ localData.resetVersion = DATA_RESET_VERSION; saveLocalData(); }
-      else if (localData.resetVersion !== DATA_RESET_VERSION){
-        wipeLocalData(); localData.resetVersion = DATA_RESET_VERSION; saveLocalData();
-      }
-    }
+    // No automatic reset any more (v154): stamps, appointments and favourites
+    // of real clients must never disappear by an update. Only the client herself
+    // can wipe her data (button "reset", with a confirmation).
+    // Ask the browser to keep this storage (Safari/Chrome may otherwise clear
+    // it after a while when space runs low or the site is not opened).
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persisted().then(p => { if (!p) navigator.storage.persist(); }).catch(() => {}); } catch(e){}
     // treatments that were taken off the menu (e.g. acne facial, v91) no longer count
     try {
       const known = new Set(TREATMENTS_CATALOG.map(x => x.id).concat(["kindermanicure"]));
@@ -3503,6 +3627,7 @@
         <p class="stamp-overlay__hint" id="salonHint">${t("salon_hint", state.lang)}</p>
         <div class="salon-adv" id="salonAdvent" hidden></div>
         <div class="salon-adv salon-stock" id="salonStock" hidden></div>
+        <button type="button" class="btn btn--primary btn--sm salon-ingr salon-tht" data-salon-ingr="stock">📦 ${t("inv_btn", state.lang)}</button>
         <button type="button" class="btn btn--primary btn--sm salon-ingr salon-tht" data-salon-ingr="open">⏰ ${t("tht_btn", state.lang)}</button>
         <button type="button" class="btn btn--text btn--sm salon-ingr" data-salon-ingr="1">${t("ingr_open_btn", state.lang)}</button>
       </div>`;
@@ -3526,7 +3651,7 @@
         return;
       }
       const si = e.target.closest("[data-salon-ingr]");
-      if (si){ ingr.unlocked = true; if (si.dataset.salonIngr === "open") ingr.tab = "open"; closeSalonMode(); goTo("ingredients"); return; }
+      if (si){ ingr.unlocked = true; if (si.dataset.salonIngr === "open" || si.dataset.salonIngr === "stock") ingr.tab = si.dataset.salonIngr; closeSalonMode(); goTo("ingredients"); return; }
       const adv = e.target.closest("[data-salon-adv]");
       if (adv){
         if (adv.dataset.salonAdv === "scan") openStampScanner("advent");
@@ -3645,6 +3770,10 @@
     else if (location.hash === "#houdbaarheid" && ingrSandra()){
       window.history.replaceState(null, "", location.pathname + location.search);
       ingr.tab = "open"; goTo("ingredients");
+    }
+    else if (location.hash === "#voorraad" && ingrSandra()){
+      window.history.replaceState(null, "", location.pathname + location.search);
+      ingr.tab = "stock"; goTo("ingredients");
     }
     // direct link to the stamp card, e.g. a QR poster in the salon:
     // https://beautyandcoffeemechelen.github.io/#stempelkaart
@@ -3774,8 +3903,8 @@
     if (!ingrHasConfig()){ body.innerHTML = `<p class="ingr-note">${t("ingr_none_config", L)}</p>`; return; }
     if (!ingrAllowed()){ body.innerHTML = `<p class="ingr-note">${t("ingr_not_yet", L)}</p>`; return; }
     const sandra = ingrSandra();
-    if (!sandra && (ingr.tab === "todo" || ingr.tab === "order" || ingr.tab === "open" || ingr.tab === "useup")) ingr.tab = "search";
-    const tabs = (sandra ? ["search", "treat", "order", "open", "useup", "todo"] : ["search", "treat"]).map(k => `<button type="button" class="chip${ingr.tab === k ? " is-selected" : ""}" data-action="ingr-tab" data-tab="${k}" aria-pressed="${ingr.tab === k}">${t("ingr_tab_" + k, L)}</button>`).join("");
+    if (!sandra && (ingr.tab === "todo" || ingr.tab === "order" || ingr.tab === "open" || ingr.tab === "useup" || ingr.tab === "stock" || ingr.tab === "protocol")) ingr.tab = "search";
+    const tabs = (sandra ? ["search", "treat", "stock", "protocol", "order", "open", "useup", "todo"] : ["search", "treat"]).map(k => `<button type="button" class="chip${ingr.tab === k ? " is-selected" : ""}" data-action="ingr-tab" data-tab="${k}" aria-pressed="${ingr.tab === k}">${t("ingr_tab_" + k, L)}</button>`).join("");
     let html = ingrIsLive() ? "" : `<div class="advent-preview ingr-preview"><p>🧪 <b>${t("ingr_pv_title", L)}</b> — ${t("ingr_pv_text", L).replace("{d}", advFmt(INGREDIENTS_LIVE.liveFrom))}</p></div>`;
     html += `<div class="ingr-tabs" role="tablist">${tabs}</div>`;
     if (ingr.tab === "search"){
@@ -3792,6 +3921,10 @@
       html += ingrOrderHtml();
     } else if (ingr.tab === "open"){
       html += ingrOpenHtml();
+    } else if (ingr.tab === "stock"){
+      html += invHtml();
+    } else if (ingr.tab === "protocol"){
+      html += protoHtml();
     } else if (ingr.tab === "useup"){
       html += useupHtml();
     } else {
@@ -3813,6 +3946,8 @@
       renderIngrResults();
     }
     if (ingr.tab === "open") ingrOpenBind();
+    if (ingr.tab === "stock") invBind();
+    if (ingr.tab === "protocol") protoBind();
     if (ingr.tab === "treat"){
       const sel = $("#ingrTreat");
       sel.addEventListener("change", () => { ingr.treat = sel.value; renderIngrTreat(); });
@@ -3960,6 +4095,301 @@
       renderIngredients();
     }));
   }
+  /* ---------------- VOORRAAD & VERKOOP (v156) ----------------
+     Only on Sandra's phone. Per product: unopened packages (n), uses per
+     package (per, a guess from the name until she changes it), uses left in
+     the open package (left), sale price and number sold. "−1 gebruikt"
+     counts down; at ±3 uses left it warns: start the next package, or order.
+     Stored in this phone's browser (bc_inv_v1) — hence the back-up button. */
+  const INV_KEY = "bc_inv_v1", INV_WARN = 3;
+  // ml (or g) per use: face products from Sandra's course (les 2: cleanser 5, tonic 5, peeling 10,
+  // mask 10, massage cream 10, serum 3, eye cream 2, day cream 3); powder masks 30 g (protocols)
+  const INV_DOSE = { facecleanse:5, facetoner:5, facemassage:10, facescrub:10, mask:10, daycream:3, nightcream:3, serum:3, eyeserum:2, eyecleanse:3, spf:2, lipbalm:0.2, tint:0.5, oxidant:0.3,
+    bodyscrub:30, bodylotion:15, bodyfirming:5, massageoil:20, essentialoil:0.3, handcream:3, footcream:4, footscrub:10, footmask:15, handscrub:10, handmask:10,
+    waxpost:10, waxpre:5, waxsoothe:5, cuticle:1, nailoil:0.5, cuticleoil:0.5, gelcolour:0.3, nailpolish:0.3, topcoat:0.3, basecoat:0.3, foundation:0.5, powder:0.5, concealer:0.3 };
+  function invData(){
+    try { const x = JSON.parse(localStorage.getItem(INV_KEY) || "null"); if (x && x.p) return Object.assign({ log:[], sets:{} }, x); } catch(e){ /* ignore */ }
+    return { p:{}, log:[], sets:{} };
+  }
+  function invSave(x){ try { localStorage.setItem(INV_KEY, JSON.stringify(x)); return true; } catch(e){ showToast(t("inv_toast_nosave", state.lang)); return false; } }
+  const INV_DOSE_ID = { renaudhydra:30, renaudiris:30, renaudcamomile:4, s4ychamomile:30, s4ygold:30, janssenacerola:30, janssenaloe:30, janssendeadsea:30 };
+  function invGuess(p, id){
+    const n = String((p.name && (p.name.nl || p.name)) || "") + " " + String((p.note && p.note.nl) || "");
+    let m = n.match(/doos (\d+) stuks/i) || n.match(/(\d+) doekjes/i) || n.match(/(\d+)\s*[×x]\s*\d/);
+    if (m) return { per: Number(m[1]), guess: false };
+    if (/per stuk/i.test(n)) return { per: 1, guess: false };
+    // the package = the biggest amount on the label (not the 30 g per mask)
+    const all = [...n.matchAll(/(\d+(?:[.,]\d+)?)\s*(ml|g)\b/gi)].map(x => [Number(x[1].replace(",", ".")), x[2]]).sort((a, b) => b[0] - a[0]);
+    m = all.length ? [null, String(all[0][0]), all[0][1]] : null;
+    if (m){ const v = Number(m[1]), d = INV_DOSE_ID[id] || INV_DOSE[p.slot] || 3; return { per: Math.max(1, Math.round(v / d)), guess: true, dose: d, unit: m[2].toLowerCase() }; }
+    return { per: 0, guess: true };
+  }
+  function invRec(x, id){ return x.p[id] || null; }
+  function invState(r){
+    if (!r || !r.per) return "untracked";
+    const left = r.left == null ? 0 : r.left;
+    if ((r.n || 0) <= 0 && left <= INV_WARN) return "order";
+    if (r.left != null && r.left <= INV_WARN) return "low";
+    return "ok";
+  }
+  function invLog(x, id, k, q, price){
+    x.log.push({ d: todayKey(), id, k, q: q || 1, p: price || null });
+    if (x.log.length > 3000) x.log = x.log.slice(-3000);
+  }
+  function invUse(id, silent){
+    const x = invData(), r = x.p[id];
+    if (!r || !r.per){ if (!silent) showToast(t("inv_toast_setup", state.lang)); return false; }
+    if (r.left == null || r.left <= 0){
+      if ((r.n || 0) > 0){ r.n -= 1; r.left = r.per; }
+      else { if (!silent) showToast(t("inv_toast_empty", state.lang).replace("{p}", ingrName(SALON_PRODUCTS[id]))); return false; }
+    }
+    r.left -= 1; invLog(x, id, "use", 1); invSave(x);
+    if (r.left <= INV_WARN){
+      const msg = t((r.n || 0) > 0 ? "inv_toast_low_next" : "inv_toast_low_order", state.lang).replace("{p}", ingrName(SALON_PRODUCTS[id])).replace("{n}", r.left);
+      if (silent) return msg; showToast(msg);
+    }
+    return true;
+  }
+  function invSell(id){
+    const x = invData(), r = x.p[id];
+    if (!r || (r.n || 0) <= 0){ showToast(t("inv_toast_nosale", state.lang)); return; }
+    r.n -= 1; r.sold = (r.sold || 0) + 1; invLog(x, id, "sale", 1, r.price || null); invSave(x);
+    showToast(t("inv_toast_sold", state.lang).replace("{p}", ingrName(SALON_PRODUCTS[id])));
+    if (invState(r) === "order") setTimeout(() => showToast(t("inv_toast_low_order", state.lang).replace("{p}", ingrName(SALON_PRODUCTS[id])).replace("{n}", r.left || 0)), 2600);
+  }
+  function invIn(id){
+    const x = invData(), g = invGuess(SALON_PRODUCTS[id], id);
+    const r = x.p[id] || (x.p[id] = { n:0, per:g.per || 1, left:null, sold:0 });
+    r.n = (r.n || 0) + 1; invLog(x, id, "in", 1); invSave(x);
+  }
+  function invPrice(v){ const n = Number(String(v || "").replace(",", ".").replace(/[^\d.]/g, "")); return isFinite(n) && n > 0 ? n : null; }
+  function invHtml(){
+    const L = state.lang, x = invData();
+    const rows = ingrCatalog().map(([id, p]) => ({ id, p, r: x.p[id] || null, st: invState(x.p[id]) }));
+    const rank = { order:0, low:1, ok:2, untracked:3 };
+    rows.sort((a, b) => rank[a.st] - rank[b.st] || ingrName(a.p).localeCompare(ingrName(b.p)));
+    const order = rows.filter(r => r.st === "order"), low = rows.filter(r => r.st === "low");
+    const ym = todayKey().slice(0, 7);
+    const sales = x.log.filter(l => l.k === "sale" && String(l.d).slice(0, 7) === ym);
+    const total = sales.reduce((s, l) => s + (l.p || 0), 0);
+    const nm = id => esc(ingrName(SALON_PRODUCTS[id] || { name:id }));
+    const cats = openCats();
+    const catsOf = p => { const u = p.usedIn || []; const c = Object.keys(cats).filter(g => u.some(v => cats[g].includes(v))); return c.length ? c : ["other"]; };
+    const chips = ["all"].concat(Object.keys(cats), ["other", "tracked"]).map(g => `<button type="button" class="chip${(ingr.invCat || "all") === g ? " is-selected" : ""}" data-inv-cat="${g}">${g === "all" ? t("tht_all", L) : g === "other" ? t("tht_other", L) : g === "tracked" ? t("inv_tracked", L) : t("avoid." + g, L)}</button>`).join("");
+    const treats = ingrTreatments().filter(id => !ingrIsAdventUse(id)).map(id => [id, ingrTreatName(id)]).sort((a, b) => a[1].localeCompare(b[1]));
+    let html = `<p class="ingr-note">${t("inv_intro", L)}</p>
+      <div class="inv-summary">
+        <p class="inv-summary__title">🛒 ${t("inv_reorder_title", L)} (${order.length})</p>
+        ${order.length ? `<ul class="inv-list">${order.map(r => `<li>${nm(r.id)}</li>`).join("")}</ul>` : `<p class="ingr-muted">✓ ${t("inv_nothing", L)}</p>`}
+        <p class="inv-summary__title">⚠️ ${t("inv_low_title", L)} (${low.length})</p>
+        ${low.length ? `<ul class="inv-list">${low.map(r => `<li>${nm(r.id)} — ${t("inv_left_short", L).replace("{n}", r.r.left).replace("{u}", r.r.n || 0)}</li>`).join("")}</ul>` : `<p class="ingr-muted">✓ ${t("inv_nothing", L)}</p>`}
+        <p class="inv-summary__title">💶 ${t("inv_sales_title", L)}</p>
+        <p>${t("inv_sales_line", L).replace("{n}", sales.length).replace("{e}", total.toFixed(2).replace(".", ","))}</p>
+        ${sales.length ? `<ul class="inv-list">${sales.slice(-10).reverse().map(l => `<li>${advFmt(l.d)} · ${nm(l.id)}${l.p ? " · €" + l.p.toFixed(2).replace(".", ",") : ""}</li>`).join("")}</ul>` : ""}
+      </div>
+      <div class="inv-quick">
+        <p class="inv-summary__title">✅ ${t("inv_quick_title", L)}</p>
+        <select id="invTreat" class="ingr-select"><option value="">${t("inv_quick_choose", L)}</option>${treats.map(([id, n]) => `<option value="${esc(id)}"${ingr.invTreat === id ? " selected" : ""}>${esc(n)}</option>`).join("")}</select>
+        <div id="invQuickList"></div>
+      </div>
+      <div class="open-filter">
+        <input type="search" id="invSearch" class="price-search" placeholder="🔎 ${t("tht_search", L)}" value="${esc(ingr.invQ || "")}" autocomplete="off">
+        <div class="ingr-chips open-chips">${chips}</div>
+        <p class="ingr-muted" id="invCount"></p>
+      </div><ul class="open-list inv-rows">`;
+    rows.forEach(({ id, p, r, st }) => {
+      const g = invGuess(p, id);
+      const status = !r || !r.per ? `<span class="ingr-muted">${t("inv_untracked", L)}</span>`
+        : t("inv_status", L).replace("{u}", r.n || 0).replace("{l}", r.left == null ? "—" : r.left).replace("{p}", r.per) + (r.sold ? ` · ${t("inv_sold_n", L).replace("{n}", r.sold)}` : "");
+      const cls = st === "order" ? " is-expired" : st === "low" ? " is-soon" : "";
+      html += `<li class="open-row inv-row${cls}" data-cats="${catsOf(p).join(" ")}" data-tracked="${r && r.per ? 1 : 0}" data-name="${esc(ingrNorm(ingrName(p) + " " + id))}">
+          <p class="open-row__name">${esc(ingrName(p))}</p>
+          <p class="open-row__status">${status}</p>
+          <div class="open-row__btns">
+            <button type="button" class="btn btn--sm btn--primary" data-inv="use" data-id="${esc(id)}">−1 ${t("inv_use", L)}</button>
+            <button type="button" class="btn btn--sm btn--outline" data-inv="sale" data-id="${esc(id)}">💶 ${t("inv_sale", L)}</button>
+            <button type="button" class="btn btn--sm btn--outline" data-inv="in" data-id="${esc(id)}">＋1 ${t("inv_in", L)}</button>
+          </div>
+          <details class="inv-edit"${ingr.invOpen === id ? " open" : ""}><summary>⚙️ ${t("inv_edit", L)}</summary>
+            <div class="open-row__fields">
+              <label>${t("inv_n", L)} <input type="number" min="0" step="1" class="pm-input inv-f" data-f="n" data-id="${esc(id)}" value="${r ? (r.n || 0) : 0}"></label>
+              <label>${t("inv_per", L)} <input type="number" min="1" step="1" class="pm-input inv-f" data-f="per" data-id="${esc(id)}" value="${r && r.per ? r.per : (g.per || "")}"></label>
+              <label>${t("inv_left", L)} <input type="number" min="0" step="1" class="pm-input inv-f" data-f="left" data-id="${esc(id)}" value="${r && r.left != null ? r.left : ""}" placeholder="—"></label>
+              <label>${t("inv_price", L)} <input type="text" inputmode="decimal" class="pm-input inv-f" data-f="price" data-id="${esc(id)}" value="${r && r.price ? String(r.price).replace(".", ",") : ""}" placeholder="€"></label>
+            </div>
+            ${g.guess && g.per && !(r && r.per) ? `<p class="ingr-muted">${t("inv_guess", L).replace("{n}", g.per).replace("{d}", String(g.dose).replace(".", ",") + " " + (g.unit || "ml"))}</p>` : ""}
+            <button type="button" class="btn btn--sm btn--primary" data-inv="save" data-id="${esc(id)}">${t("inv_save", L)}</button>
+          </details>
+        </li>`;
+    });
+    html += `</ul>
+      <div class="inv-backup">
+        <p class="ingr-muted">${t("inv_backup_hint", L)}</p>
+        <button type="button" class="btn btn--sm btn--outline" data-inv="backup">💾 ${t("inv_backup", L)}</button>
+        <label class="btn btn--sm btn--ghost inv-restore">↩️ ${t("inv_restore", L)}<input type="file" accept="application/json,.json" id="invRestore" hidden></label>
+      </div>`;
+    return html;
+  }
+  function invQuickRender(){
+    const wrap = $("#invQuickList"); if (!wrap) return;
+    const tid = ingr.invTreat, L = state.lang;
+    if (!tid){ wrap.innerHTML = ""; return; }
+    const x = invData(), prev = x.sets[tid] || [];
+    const list = ingrProductsFor(tid).sort((a, b) => ingrName(a[1]).localeCompare(ingrName(b[1])));
+    wrap.innerHTML = `<p class="ingr-muted">${t("inv_quick_hint", L)}</p>
+      <div class="inv-checks">${list.map(([id, p]) => `<label class="inv-check"><input type="checkbox" value="${esc(id)}"${prev.includes(id) ? " checked" : ""}> ${esc(ingrName(p))}${x.p[id] && x.p[id].per ? "" : ` <span class="ingr-muted">(${t("inv_untracked_short", L)})</span>`}</label>`).join("")}</div>
+      <button type="button" class="btn btn--sm btn--primary" data-inv="quick">${t("inv_quick_btn", L)}</button>`;
+  }
+  function invFilter(){
+    const q = ingrNorm(ingr.invQ || "").trim(), cat = ingr.invCat || "all";
+    let n = 0, total = 0;
+    $$(".inv-rows .inv-row").forEach(li => {
+      total++;
+      const okQ = !q || li.dataset.name.includes(q);
+      const okC = cat === "all" || (cat === "tracked" ? li.dataset.tracked === "1" : li.dataset.cats.split(" ").includes(cat));
+      li.hidden = !(okQ && okC); if (!li.hidden) n++;
+    });
+    const c = $("#invCount"); if (c) c.textContent = t("tht_count", state.lang).replace("{n}", n).replace("{t}", total);
+  }
+  function invBind(){
+    const body = $("#ingrBody");
+    if (body && !body.dataset.invBound){ body.dataset.invBound = "1"; body.addEventListener("click", e => { const el = e.target.closest("[data-inv]"); if (el && ingr.tab === "stock") invAction(el); }); }
+    const s = $("#invSearch");
+    if (s) s.addEventListener("input", () => { ingr.invQ = s.value; invFilter(); });
+    $$("[data-inv-cat]").forEach(b => b.addEventListener("click", () => {
+      ingr.invCat = b.dataset.invCat; $$("[data-inv-cat]").forEach(x => x.classList.toggle("is-selected", x === b)); invFilter();
+    }));
+    invFilter();
+    const sel = $("#invTreat"); if (sel) sel.addEventListener("change", () => { ingr.invTreat = sel.value; invQuickRender(); });
+    invQuickRender();
+    const rf = $("#invRestore"); if (rf) rf.addEventListener("change", () => {
+      const f = rf.files && rf.files[0]; if (!f) return;
+      const rd = new FileReader();
+      rd.onload = () => {
+        try {
+          const b = JSON.parse(rd.result);
+          if (!b || b.app !== "beauty-coffee") throw new Error("bad");
+          if (b.inv && b.inv.p) localStorage.setItem(INV_KEY, JSON.stringify(b.inv));
+          if (b.open) localStorage.setItem(PROD_OPEN_KEY, JSON.stringify(b.open));
+          if (b.op) localStorage.setItem(PROD_OP_KEY, JSON.stringify(b.op));
+          showToast(t("inv_restored", state.lang)); renderIngredients();
+        } catch(e){ showToast(t("inv_bad", state.lang)); }
+      };
+      rd.readAsText(f);
+    });
+  }
+  function invAction(el){
+    const a = el.dataset.inv, id = el.dataset.id;
+    if (a === "use"){ invUse(id); renderIngredients(); return; }
+    if (a === "sale"){ invSell(id); renderIngredients(); return; }
+    if (a === "in"){ invIn(id); showToast(t("inv_toast_in", state.lang).replace("{p}", ingrName(SALON_PRODUCTS[id]))); renderIngredients(); return; }
+    if (a === "save"){
+      const x = invData(), r = x.p[id] || (x.p[id] = { n:0, per:1, left:null, sold:0 });
+      const v = f => (($(`.inv-f[data-f="${f}"][data-id="${id}"]`) || {}).value || "").trim();
+      r.n = Math.max(0, parseInt(v("n"), 10) || 0);
+      r.per = Math.max(1, parseInt(v("per"), 10) || 1);
+      r.left = v("left") === "" ? null : Math.max(0, parseInt(v("left"), 10) || 0);
+      r.price = invPrice(v("price"));
+      invSave(x); ingr.invOpen = null; showToast(t("inv_toast_saved", state.lang)); renderIngredients(); return;
+    }
+    if (a === "quick"){
+      const tid = ingr.invTreat; if (!tid) return;
+      const ids = $$("#invQuickList input:checked").map(c => c.value);
+      const x = invData(); x.sets[tid] = ids; invSave(x);
+      const warns = []; let done = 0;
+      ids.forEach(pid => { const r = invUse(pid, true); if (r) done++; if (typeof r === "string") warns.push(r); });
+      showToast(t("inv_quick_done", state.lang).replace("{n}", done));
+      warns.forEach((w, i) => setTimeout(() => showToast(w), 2600 * (i + 1)));
+      renderIngredients(); return;
+    }
+    if (a === "backup"){
+      let open = {}, op = [];
+      try { open = JSON.parse(localStorage.getItem(PROD_OPEN_KEY) || "{}"); op = JSON.parse(localStorage.getItem(PROD_OP_KEY) || "[]"); } catch(e){ /* ignore */ }
+      const blob = new Blob([JSON.stringify({ app:"beauty-coffee", made: new Date().toISOString(), inv: invData(), open, op }, null, 1)], { type:"application/json" });
+      const aEl = document.createElement("a"); aEl.href = URL.createObjectURL(blob); aEl.download = `beauty-coffee-voorraad-${todayKey()}.json`;
+      document.body.appendChild(aEl); aEl.click(); setTimeout(() => { URL.revokeObjectURL(aEl.href); aEl.remove(); }, 1000);
+      return;
+    }
+  }
+  // once a day on Sandra's phone: how many products to order
+  function invDailyNote(){
+    try {
+      if (!ingrSandra() || !ingrHasConfig()) return;
+      const k = "bc_inv_note_day"; if (localStorage.getItem(k) === todayKey()) return;
+      const x = invData(), n = Object.keys(x.p).filter(id => SALON_PRODUCTS[id] && invState(x.p[id]) === "order").length;
+      if (!n) return;
+      localStorage.setItem(k, todayKey());
+      setTimeout(() => showToast(t("inv_daily", state.lang).replace("{n}", n)), 6000);
+    } catch(e){ /* ignore */ }
+  }
+
+  /* ---------------- PROTOCOLLEN (v156, protocols.js) — only on Sandra's phone ---------------- */
+  function protoList(){ return typeof PROTOCOLS !== "undefined" && Array.isArray(PROTOCOLS) ? PROTOCOLS : []; }
+  function protoHtml(){
+    const L = state.lang, list = protoList();
+    if (!ingr.proto && list.length) ingr.proto = list[0].id;
+    const pr = list.find(x => x.id === ingr.proto);
+    let html = `<p class="ingr-note">${t("proto_intro", L)}</p>
+      <select id="protoSel" class="ingr-select">${list.map(x => `<option value="${esc(x.id)}"${x.id === ingr.proto ? " selected" : ""}>${esc(x.title)}</option>`).join("")}</select>`;
+    if (!pr) return html;
+    html += `<p class="ingr-muted">${pr.treat.length ? t("proto_for", L) + " " + esc(pr.treat.map(ingrTreatName).join(", ")) : t("proto_unlinked", L)}</p>`;
+    if (pr.intro.length) html += `<div class="proto-intro">${pr.intro.map(x => `<p>${esc(x)}</p>`).join("")}</div>`;
+    html += `<ol class="proto-steps">${pr.rows.map(r => `<li><p class="proto-step">${esc(r[0])}</p>${r[1] ? `<p class="proto-prod">🧴 ${esc(r[1])}</p>` : ""}${r[2] ? `<p class="proto-mat">🧰 ${esc(r[2])}</p>` : ""}</li>`).join("")}</ol>`;
+    return html;
+  }
+  function protoBind(){ const sel = $("#protoSel"); if (sel) sel.addEventListener("change", () => { ingr.proto = sel.value; renderIngredients(); }); }
+  function protoLinksHtml(tid, L){
+    const list = protoList().filter(x => x.treat.includes(tid));
+    if (!list.length) return "";
+    return `<div class="proto-links"><p class="match-why__title">📋 ${t("proto_result_title", L)}</p>${list.map(x => `<button type="button" class="btn btn--sm btn--outline" data-action="open-proto" data-proto="${esc(x.id)}">${esc(x.title)}</button>`).join(" ")}</div>`;
+  }
+
+  function healthExtraExclude(){
+    const hs = (typeof HEALTH_EXTRA !== "undefined" ? HEALTH_EXTRA : []).filter(h => state.healthFlags[h.key]);
+    const ids = hs.flatMap(h => h.exclude || []);
+    if (hs.some(h => h.massage)) TREATMENTS_CATALOG.filter(x => x.isMassage).forEach(x => ids.push(x.id));
+    return ids;
+  }
+  /* ---------------- allergies in the match (v156) ---------------- */
+  function allergyPicked(){ return (typeof ALLERGY_ASK !== "undefined" ? ALLERGY_ASK : []).filter(a => (state.allergies || []).includes(a.id)); }
+  function allergyLabels(L){ return allergyPicked().map(a => a.label[L] || a.label.nl); }
+  function renderAllergyOptions(){
+    const wrap = $("#allergyOptions"); if (!wrap || typeof ALLERGY_ASK === "undefined") return;
+    state.allergies = state.allergies || [];
+    wrap.innerHTML = ALLERGY_ASK.map(a => {
+      const on = state.allergies.includes(a.id);
+      return `<button type="button" class="chip chip--check${on ? " is-selected" : ""}" data-allergy="${a.id}" aria-pressed="${on}"><span class="chip__icon">${a.icon}</span> ${esc(a.label[state.lang] || a.label.nl)}</button>`;
+    }).join("");
+    wrap.querySelectorAll("[data-allergy]").forEach(b => b.addEventListener("click", () => {
+      const id = b.dataset.allergy, l = state.allergies, i = l.indexOf(id);
+      if (i >= 0) l.splice(i, 1); else l.push(id);
+      renderAllergyOptions();
+    }));
+  }
+  // per step of the chosen treatment: which product to swap, and for what (salon mode only)
+  function allergySwapHtml(tid, L){
+    const picked = allergyPicked(); if (!picked.length || !ingrHasConfig()) return "";
+    const keys = [...new Set(picked.flatMap(a => a.groups).flatMap(g => { const gr = ALLERGEN_GROUPS.find(x => x.id === g); return gr ? gr.match : []; }))];
+    const hit = p => { const inci = ingrInci(p); return inci ? ingrParts(inci).some(part => ingrHit(part, keys)) : null; };
+    const bySlot = {};
+    ingrProductsFor(tid).forEach(([id, p]) => { (bySlot[p.slot || id] = bySlot[p.slot || id] || []).push([id, p, hit(p)]); });
+    const lines = [];
+    Object.values(bySlot).forEach(list => {
+      const bad = list.filter(x => x[2] === true), safe = list.filter(x => x[2] === false), unk = list.filter(x => x[2] === null);
+      if (!bad.length) return;
+      const alt = safe.length ? `→ ${t("allergy_use", L)} <b>${safe.map(x => esc(ingrName(x[1]))).join(" / ")}</b>` : `→ <b>${t("allergy_noalt", L)}</b>`;
+      lines.push(`<li>❌ ${bad.map(x => esc(ingrName(x[1]))).join(" / ")} ${alt}${unk.length ? ` <span class="ingr-muted">(${t("allergy_unknown", L)}: ${unk.map(x => esc(ingrName(x[1]))).join(", ")})</span>` : ""}</li>`);
+    });
+    return `<div class="allergy-swap"><p class="match-why__title">🔒 ${t("allergy_swap_title", L).replace("{a}", esc(allergyLabels(L).join(", ")))}</p>
+      ${lines.length ? `<ul>${lines.join("")}</ul>` : `<p>✓ ${t("allergy_swap_none", L)}</p>`}</div>`;
+  }
+  function allergyClientHtml(m, L){
+    if (!m || m.isKid || !allergyPicked().length) return "";
+    let html = `<div class="match-allergy"><p>🌿 ${t("allergy_client", L).replace("{a}", esc(allergyLabels(L).join(", ")))}</p></div>`;
+    try { if (ingrSandra()) html += allergySwapHtml(m.treatment.id, L); } catch(e){ /* ignore */ }
+    return html;
+  }
+
   // once a day on Sandra's phone: a gentle note when something expires within 7 days
   function openDueToast(){
     try {
@@ -5319,6 +5749,7 @@
     setupCameraZoom();
     try { setupAgentTools(); } catch(e){ /* AI tools are optional */ }
     openDueToast();
+    invDailyNote();
     useupToast();
     const newsletterForm = $("#newsletterForm");
     if (newsletterForm) newsletterForm.addEventListener("submit", submitNewsletter);
@@ -5363,7 +5794,8 @@
         goTo("profile");
       }
       if (action === "back") back();
-      if (action === "to-mood") goTo("mood");
+      if (action === "to-mood") goTo("focus");
+      if (action === "focus-next") focusNext();
       if (action === "to-context"){ state.context = "salon"; runGeneration(); }
       if (action === "open-camera") openCamera();
       if (action === "switch-camera") switchCamera();
@@ -5430,6 +5862,7 @@
       if (action === "appt-review-done") apptReviewDone(el.getAttribute("data-appt-key"));
       if (action === "online-book") onlineBookClicked(el.getAttribute("data-online-src"));
       if (action === "online-take") onlineTake();
+      if (action === "open-proto"){ ingr.unlocked = true; ingr.tab = "protocol"; ingr.proto = el.dataset.proto; goTo("ingredients"); }
       if (action === "online-dismiss") onlineDismiss();
     });
 

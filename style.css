@@ -1289,3 +1289,30 @@ p.season-card__shop{ text-decoration:none; margin:2px 0 0; font-style:italic; }
 .book-alt .slot-picker{ margin:4px 0; }
 .appt-book-online{ display:inline-block; margin-top:6px; }
 .book-hub .btn, .book-box .btn{ text-align:center; justify-content:center; }
+
+/* v155: gerichte match */
+.focus-q{ margin:14px 0; }
+.focus-q__label{ font-weight:700; margin:0 0 8px; }
+.focus-q__opt{ font-weight:400; opacity:.65; font-size:.88em; }
+.match-focus{ margin-top:12px; padding:12px 14px; border-radius:14px; border:1.5px solid var(--gold); background:var(--cream); }
+.match-focus__note{ margin:6px 0; font-size:.95rem; }
+.match-focus__tips{ margin:6px 0 0; padding-left:18px; }
+.match-focus__tips li{ margin:5px 0; font-size:.95rem; }
+
+/* v156: voorraad, allergie */
+.inv-summary, .inv-quick{ margin:12px 0; padding:12px 14px; border-radius:14px; background:var(--cream); border:1px solid rgba(0,0,0,.08); }
+.inv-summary__title{ font-weight:700; margin:8px 0 4px; }
+.inv-list{ margin:0 0 6px; padding-left:18px; font-size:.92rem; }
+.inv-checks{ display:flex; flex-direction:column; gap:6px; margin:8px 0; font-size:.92rem; }
+.inv-check{ display:flex; gap:8px; align-items:flex-start; }
+.inv-edit{ margin-top:6px; } .inv-edit > summary{ cursor:pointer; font-size:.9rem; padding:4px 0; }
+.inv-backup{ margin:16px 0; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.inv-restore{ cursor:pointer; }
+.match-allergy{ margin-top:12px; padding:10px 14px; border-radius:14px; background:var(--cream); }
+.allergy-swap{ margin-top:10px; padding:10px 14px; border-radius:14px; border:1.5px dashed var(--gold); font-size:.92rem; }
+.allergy-swap ul{ margin:6px 0 0; padding-left:4px; list-style:none; } .allergy-swap li{ margin:5px 0; }
+
+.proto-steps{ padding-left:22px; margin:10px 0; } .proto-steps li{ margin:10px 0; padding-bottom:8px; border-bottom:1px solid rgba(0,0,0,.06); }
+.proto-step{ margin:0; font-weight:600; white-space:pre-line; } .proto-prod, .proto-mat{ margin:3px 0 0; font-size:.92rem; white-space:pre-line; }
+.proto-intro{ font-size:.9rem; background:var(--cream); padding:8px 12px; border-radius:12px; } .proto-intro p{ margin:4px 0; }
+.proto-links{ margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; align-items:center; } .proto-links .match-why__title{ width:100%; }
