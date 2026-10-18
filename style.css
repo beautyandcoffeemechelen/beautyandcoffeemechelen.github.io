@@ -1338,6 +1338,11 @@ p.season-card__shop{ text-decoration:none; margin:2px 0 0; font-style:italic; }
 .scent-chip.is-selected{ border-color:var(--accent, #b08a5a); box-shadow:0 0 0 2px rgba(176,138,90,.25); background:#fffaf2; }
 .scent-chip__name{ display:block; font-weight:600; }
 .scent-chip__text{ display:block; font-size:.82rem; opacity:.8; }
+.scent-needs{ margin:0 0 10px; }
+.scent-needs summary{ cursor:pointer; font-weight:600; font-size:.92rem; margin-bottom:6px; }
+.scent-needs__chips{ display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 8px; }
+.scent-need{ padding:6px 10px; border-radius:999px; border:1px solid var(--line, #d9c9b8); background:#fff; cursor:pointer; font:inherit; font-size:.85rem; color:inherit; }
+.scent-need.is-selected{ border-color:var(--accent, #b08a5a); background:#fffaf2; box-shadow:0 0 0 2px rgba(176,138,90,.25); font-weight:600; }
 
 /* v168 second life for expired products */
 .open-row__reuse{ display:block; margin-top:6px; font-size:.86rem; line-height:1.35; }

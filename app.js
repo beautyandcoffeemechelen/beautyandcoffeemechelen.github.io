@@ -1146,19 +1146,37 @@
     for (const g of ["feet", "face", "massage"]) if ((AVOID_GROUPS[g] || []).includes(tid)) return g;
     return null;
   }
+  /* v170: needs ("ergens last van?") → recommended oil. Auto-filled from the
+     match, adjustable in the scent box (state.scentNeeds). */
+  function scentNeedsAuto(){
+    if (typeof SCENT_NEEDS === "undefined") return [];
+    const out = new Set();
+    const txt = " " + (state.complaintText || "").toLowerCase().replace(/[^a-zà-ÿ'’ -]+/g, " ").replace(/\s+/g, " ") + " ";
+    SCENT_NEEDS.forEach(n => { if (n.words.some(w => txt.includes(" " + w + " ") || (w.length >= 6 && txt.includes(" " + w)))) out.add(n.id); });
+    const wish = state.focus && state.focus.ans ? state.focus.ans.wish : null;
+    if (state.mood === "relax" || wish === "relax") out.add("stress");
+    if (wish === "legs") out.add("circulation");
+    return SCENT_NEEDS.filter(n => out.has(n.id)).map(n => n.id);
+  }
+  function scentNeedList(){ return (typeof SCENT_NEEDS === "undefined" ? [] : SCENT_NEEDS).filter(n => (state.scentNeeds || []).includes(n.id)); }
+  function scentRecFor(oid){ return scentNeedList().filter(n => n.oils.includes(oid)); }
   function scentChoices(m){
     if (!m || m.isKid || !m.treatment || typeof SCENT_OPTIONS === "undefined") return { list:[] };
     const g = scentGroup(m.treatment.id); if (!g) return { list:[] };
-    const al = (state.allergies || []);
+    const al = (state.allergies || []), hf = state.healthFlags || {};
     if (al.includes("fragrance")) return { list:[], noScent:true };
     let today; try { today = seasonTodayKey(); } catch(e){ today = todayKey(); }
     const month = Number(today.slice(5, 7)), tid = m.treatment.id;
-    const ok = o => o.groups.includes(g) && o.months.includes(month) && !(o.notPregnant && state.healthFlags.pregnant) && !(o.allergy && al.includes(o.allergy));
-    const pool = SCENT_OPTIONS.filter(ok);
+    const needs = scentNeedList();
+    const rank = id => { let r = 99; needs.forEach(n => { const i = n.oils.indexOf(id); if (i >= 0 && i < r) r = i; }); return r; };
+    const safe = o => o.groups.includes(g) && !(o.notPregnant && hf.pregnant) && !(o.notEpilepsy && hf.epilepsy) && !(o.allergy && al.includes(o.allergy));
+    const pool = SCENT_OPTIONS.filter(o => safe(o) && (o.months.includes(month) || rank(o.id) < 99));
+    const rec = pool.filter(o => rank(o.id) < 99).sort((a, b) => rank(a.id) - rank(b.id)).slice(0, 3);
     const def = pool.find(o => o.isDefault);
-    const rest = pool.filter(o => !o.isDefault).map((o, i) => ({ o, sc: ((o.boost || {})[tid] || 0) * 3 + (o.months.length < 12 ? 7 : 0) - i * 0.01 }))
-      .sort((a, b) => b.sc - a.sc).slice(0, def ? 3 : 4).map(x => x.o);
-    return { list: (def ? [def] : []).concat(rest) };
+    const head = rec.slice(); if (def && !head.includes(def)) head.push(def);
+    const rest = pool.filter(o => !head.includes(o) && (rank(o.id) === 99)).map((o, i) => ({ o, sc: ((o.boost || {})[tid] || 0) * 3 + (o.months.length < 12 ? 7 : 0) - i * 0.01 }))
+      .sort((a, b) => b.sc - a.sc).slice(0, Math.max(0, 4 - head.length)).map(x => x.o);
+    return { list: head.concat(rest), group: g };
   }
   function scentPicked(m){
     const c = scentChoices(m); if (!c.list.length) return null;
@@ -1167,7 +1185,9 @@
   }
   function scentLabel(m, L){
     const p = scentPicked(m); if (!p) return "";
-    return p === "none" ? t("scent_none", L) : (p.label[L] || p.label.nl);
+    if (p === "none") return t("scent_none", L);
+    const r = scentRecFor(p.id);
+    return (p.label[L] || p.label.nl) + (r.length ? " (" + r.map(n => (n.label[L] || n.label.nl).split(" (")[0].toLowerCase()).join(", ") + ")" : "");
   }
   function scentHtml(m){
     const L = state.lang, c = scentChoices(m);
@@ -1175,17 +1195,30 @@
     if (!c.list.length) return "";
     const cur = scentPicked(m), curId = cur === "none" ? "none" : cur.id;
     const chip = (id, icon, label, text) => `<button type="button" class="scent-chip${curId === id ? " is-selected" : ""}" data-action="pick-scent" data-scent="${esc(id)}" aria-pressed="${curId === id}"><span class="scent-chip__name">${icon} ${esc(label)}</span>${text ? `<span class="scent-chip__text">${esc(text)}</span>` : ""}</button>`;
+    const sel = state.scentNeeds || [];
+    const needChips = (typeof SCENT_NEEDS === "undefined" ? [] : SCENT_NEEDS).map(n => `<button type="button" class="scent-need${sel.includes(n.id) ? " is-selected" : ""}" data-action="pick-scent-need" data-need="${esc(n.id)}" aria-pressed="${sel.includes(n.id)}">${n.icon} ${esc(n.label[L] || n.label.nl)}</button>`).join("");
+    const needs = scentNeedList(), noFit = needs.filter(n => !c.list.some(o => n.oils.includes(o.id)));
+    const txt = o => { const r = scentRecFor(o.id); return [r.length ? "⭐ " + t("scent_rec", L) + " " + r.map(n => (n.label[L] || n.label.nl).split(" (")[0].toLowerCase()).join(", ") : "", o.isDefault ? t("scent_usual", L) : "", o.text[L] || o.text.nl].filter(Boolean).join(" · "); };
     return `<div class="scent-box"><p class="scent-box__title">🌿 ${t("scent_title", L)}</p><p class="scent-box__hint">${t("scent_hint", L)}</p>
-      <div class="scent-chips">${c.list.map(o => chip(o.id, o.icon, o.label[L] || o.label.nl, (o.isDefault ? t("scent_usual", L) + " · " : "") + (o.text[L] || o.text.nl))).join("")}${chip("none", "○", t("scent_none", L), "")}</div></div>`;
+      <details class="scent-needs"${sel.length ? " open" : ""}><summary>${t("scent_need_q", L)}</summary><div class="scent-needs__chips">${needChips}</div><p class="scent-box__hint">${t("scent_need_note", L)}</p>${noFit.length ? `<p class="scent-box__hint">${esc(t("scent_need_nofit", L).replace("{n}", noFit.map(n => (n.label[L] || n.label.nl).split(" (")[0].toLowerCase()).join(", ")))}</p>` : ""}</details>
+      <div class="scent-chips">${c.list.map(o => chip(o.id, o.icon, o.label[L] || o.label.nl, txt(o))).join("")}${chip("none", "○", t("scent_none", L), "")}</div></div>`;
   }
   function pickScent(id){
     state.scent = id;
     const b = $("#scentBlock"); if (b) b.innerHTML = scentHtml(state.match);
     updateBookingLink(state.match, drinkFullFor(state.match));
+    try { renderCopyName(); } catch(e){}
+  }
+  function pickScentNeed(id){
+    const a = new Set(state.scentNeeds || []);
+    a.has(id) ? a.delete(id) : a.add(id);
+    state.scentNeeds = (typeof SCENT_NEEDS === "undefined" ? [] : SCENT_NEEDS).filter(n => a.has(n.id)).map(n => n.id);
+    state.scent = null;
+    pickScent(null);
   }
 
   function generateMatch(){
-    state.scent = null;
+    state.scent = null; state.scentNeeds = scentNeedsAuto();
     if (state.profile === "kind"){
       const drinkDef = KIDS_DRINKS.find(d => d.id === state.kidsDrink) || KIDS_DRINKS[0];
       const homecarePick = pickHomecareProduct("hand", null, "kind");
@@ -4485,7 +4518,12 @@
     Object.values(bySlot).forEach(list => {
       const bad = list.filter(x => x[2] === true), safe = list.filter(x => x[2] === false), unk = list.filter(x => x[2] === null);
       if (!bad.length) return;
-      const alt = safe.length ? `→ ${t("allergy_use", L)} <b>${safe.map(x => esc(ingrName(x[1]))).join(" / ")}</b>` : `→ <b>${t("allergy_noalt", L)}</b>`;
+      // v169: nothing safe within this treatment? Look in the whole salon for the same kind of product
+      const inT = new Set(list.map(x => x[0])), slot = list[0][1].slot;
+      const other = safe.length || !slot ? [] : ingrCatalog().filter(([id, p]) => !inT.has(id) && p.slot === slot && hit(p) === false);
+      const alt = safe.length ? `→ ${t("allergy_use", L)} <b>${safe.map(x => esc(ingrName(x[1]))).join(" / ")}</b>`
+        : other.length ? `→ ${t("allergy_use", L)} <b>${other.map(([id, p]) => esc(ingrName(p))).join(" / ")}</b> <span class="ingr-muted">(${t("allergy_other", L)})</span>`
+        : `→ <b>${t("allergy_noalt", L)}</b>`;
       lines.push(`<li>❌ ${bad.map(x => esc(ingrName(x[1]))).join(" / ")} ${alt}${unk.length ? ` <span class="ingr-muted">(${t("allergy_unknown", L)}: ${unk.map(x => esc(ingrName(x[1]))).join(", ")})</span>` : ""}</li>`);
     });
     return `<div class="allergy-swap"><p class="match-why__title">🔒 ${t("allergy_swap_title", L).replace("{a}", esc(allergyLabels(L).join(", ")))}</p>
@@ -5972,6 +6010,7 @@
       if (action === "online-take") onlineTake();
       if (action === "copy-name") copyName(el);
       if (action === "pick-scent") pickScent(el.dataset.scent);
+      if (action === "pick-scent-need") pickScentNeed(el.dataset.need);
       if (action === "open-proto"){ ingr.unlocked = true; ingr.tab = "protocol"; ingr.proto = el.dataset.proto; goTo("ingredients"); }
       if (action === "online-dismiss") onlineDismiss();
     });

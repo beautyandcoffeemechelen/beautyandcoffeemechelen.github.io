@@ -1737,7 +1737,11 @@ const HEALTH_EXTRA = [
   { key:"oncology", icon:"🎗️", exclude:["fruitacid","hydrapeel","cuppingpeeling","fillme","liftsummere","antiagefacial","expressuseup","facialworkshop"],
     label:{ nl:"Ik ben (of was kort geleden) in behandeling voor kanker", en:"I am (or recently was) being treated for cancer", fr:"Je suis (ou j’ai été récemment) traité(e) pour un cancer" },
     note:{ nl:"Tijdens of na een kankerbehandeling ben je zeker welkom, ook voor een massage. Voor je gezicht werk ik extra zacht, zonder peeling, met de kalmerende Janssen-lijn voor de gevoelige huid.", en:"During or after cancer treatment you are very welcome, massages included. For your face I work extra gently, without peels, with Janssen’s soothing line for sensitive skin.", fr:"Pendant ou après un traitement contre le cancer, vous êtes la bienvenue, massages compris. Pour le visage, je travaille tout en douceur, sans peeling, avec la gamme apaisante de Janssen pour peaux sensibles." },
-    sandraNote:{ nl:"Alleen voor jou: gelaat enkel met de roze lijn van Janssen (Sensitive Skin: Soft Cleansing Mousse, Soft Soothing Tonic, Intense Calming Serum en Cream, Instant Soothing Oil en Mask, Comfort Eye Care), volgens je oncologisch protocol. Geen peeling, geen ampullen met actieve zuren.", en:"Only for you: face only with Janssen’s pink line (Sensitive Skin), as in your oncology protocol. No peels.", fr:"Uniquement pour toi : visage uniquement avec la ligne rose Janssen (Sensitive Skin), selon ton protocole oncologique. Pas de peeling." } }
+    sandraNote:{ nl:"Alleen voor jou: gelaat enkel met de roze lijn van Janssen (Sensitive Skin: Soft Cleansing Mousse, Soft Soothing Tonic, Intense Calming Serum en Cream, Instant Soothing Oil en Mask, Comfort Eye Care), volgens je oncologisch protocol. Geen peeling, geen ampullen met actieve zuren.", en:"Only for you: face only with Janssen’s pink line (Sensitive Skin), as in your oncology protocol. No peels.", fr:"Uniquement pour toi : visage uniquement avec la ligne rose Janssen (Sensitive Skin), selon ton protocole oncologique. Pas de peeling." } },
+  { key:"epilepsy", icon:"🧠", exclude:[],
+    label:{ nl:"Epilepsie", en:"Epilepsy", fr:"Épilepsie" },
+    note:{ nl:"Met epilepsie ben je welkom voor elke verzorging. Ik kies dan een rustig geurtje, zonder rozemarijn, pepermunt of eucalyptus.", en:"With epilepsy you are welcome for every treatment. I then choose a calm scent, without rosemary, peppermint or eucalyptus.", fr:"Avec l’épilepsie, vous êtes bienvenu(e) pour tous les soins. Je choisis alors un parfum doux, sans romarin, menthe poivrée ni eucalyptus." },
+    sandraNote:{ nl:"Alleen voor jou: geen rozemarijn, (peper)munt of eucalyptus, ook niet in de stomer of het kompres (de app verbergt ze in de geurkeuze). Bij LED-therapie: vraag of de epilepsie lichtgevoelig is; zo ja, geen LED.", en:"Only for you: no rosemary, (pepper)mint or eucalyptus, also not in the steamer or compress (the app hides them). LED therapy: ask whether the epilepsy is light-sensitive; if so, no LED.", fr:"Uniquement pour toi : pas de romarin, menthe ni eucalyptus, même pas dans le vaporisateur (l’app les masque). LED : demande si l’épilepsie est photosensible ; si oui, pas de LED." } },
 ];
 
 /* ALLERGIES in the match (v156). The client ticks an allergy (optional, in
@@ -1952,7 +1956,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v168 · 18/10/2026";
+const APP_VERSION = "v170 · 18/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -2328,7 +2332,7 @@ const SCENT_OPTIONS = [
   { id:"lavender", product:"eolavender", icon:"💜", months:[1,2,3,4,5,6,7,8,9,10,11,12], groups:["face","massage","feet"], isDefault:true,
     label:{ nl:"Lavendel", en:"Lavender", fr:"Lavande" },
     text:{ nl:"rustgevend en zacht", en:"calming and soft", fr:"apaisante et douce" } },
-  { id:"eucalyptus", product:"eoeucalyptus", icon:"🌿", months:[10,11,12,1,2,3], groups:["face","massage"], boost:{ detoxback:2, swedishbackneck:1, cupping:1, harmonizingback:1 }, notKids:true,
+  { id:"eucalyptus", product:"eoeucalyptus", icon:"🌿", months:[10,11,12,1,2,3], groups:["face","massage"], boost:{ detoxback:2, swedishbackneck:1, cupping:1, harmonizingback:1 }, notKids:true, notEpilepsy:true,
     label:{ nl:"Eucalyptus", en:"Eucalyptus", fr:"Eucalyptus" },
     text:{ nl:"fris en vrij ademen, fijn in het verkoudheidsseizoen", en:"fresh, easy breathing, lovely in cold season", fr:"frais, respiration libre, idéal en saison des rhumes" } },
   { id:"pine", product:"eopine", icon:"🌲", months:[11,12,1,2], groups:["massage"], boost:{ swedishbackneck:1, backwrap:1, detoxback:1 },
@@ -2352,10 +2356,10 @@ const SCENT_OPTIONS = [
   { id:"grapefruit", product:"eograpefruit", icon:"🍋", months:[1,2,3,4], groups:["massage"], boost:{ slimmassage:3, cuppingpeeling:1 },
     label:{ nl:"Grapefruit", en:"Grapefruit", fr:"Pamplemousse" },
     text:{ nl:"fris en opwekkend", en:"fresh and invigorating", fr:"frais et tonifiant" } },
-  { id:"peppermint", product:"eopeppermint", icon:"🌱", months:[5,6,7,8,9], groups:["massage","feet"], boost:{ swedishlegs:3, pedicure:1, pedicureexpress:1, manipedispa:1 }, notPregnant:true, notKids:true,
+  { id:"peppermint", product:"eopeppermint", icon:"🌱", months:[5,6,7,8,9], groups:["massage","feet"], boost:{ swedishlegs:3, pedicure:1, pedicureexpress:1, manipedispa:1 }, notPregnant:true, notKids:true, notEpilepsy:true,
     label:{ nl:"Pepermunt", en:"Peppermint", fr:"Menthe poivrée" },
     text:{ nl:"verkoelend voor warme, zware benen en voeten", en:"cooling for warm, heavy legs and feet", fr:"rafraîchissante pour jambes et pieds lourds" } },
-  { id:"lemongrass", product:"eolemongrass", icon:"🍃", months:[5,6,7,8,9], groups:["massage","feet"], boost:{ swedishlegs:1, pedicure:1 },
+  { id:"lemongrass", product:"eolemongrass", icon:"🍃", months:[5,6,7,8,9], groups:["massage","feet"], boost:{ swedishlegs:1, pedicure:1 }, notPregnant:true,
     label:{ nl:"Citroengras", en:"Lemongrass", fr:"Lemongrass" },
     text:{ nl:"zomers fris en opwekkend", en:"summery fresh and uplifting", fr:"frais et estival" } },
   { id:"chamomile", product:"eochamomile", icon:"🌼", months:[1,2,3,4,5,6,7,8,9,10,11,12], groups:["face","massage"], boost:{ signaturefacial:2, expressfacial:1 }, allergy:"asteraceae",
@@ -2370,9 +2374,47 @@ const SCENT_OPTIONS = [
   { id:"ylang", product:"eoylang", icon:"🌺", months:[1,2,3,4,5,6,7,8,9,10,11,12], groups:["massage"], boost:{ swedish:1, hotstone:1, harmonizingbody:1 },
     label:{ nl:"Ylang-ylang", en:"Ylang-ylang", fr:"Ylang-ylang" },
     text:{ nl:"exotisch, diep ontspannend", en:"exotic, deeply relaxing", fr:"exotique, profondément relaxant" } },
+  { id:"rosemary", product:"eorosemary", icon:"🌱", months:[1,2,3,4,5,6,7,8,9,10,11,12], groups:["face","massage"], boost:{}, notPregnant:true, notKids:true, notEpilepsy:true,
+    label:{ nl:"Rozemarijn", en:"Rosemary", fr:"Romarin" },
+    text:{ nl:"kruidig en helder, fijn voor het herstel van de huid", en:"herbal and clear, lovely for skin recovery", fr:"herbacé et clair, agréable pour la récupération de la peau" } },
+  { id:"mandarin", product:"eomandarin", icon:"🍊", months:[11,12,1,2], groups:["massage"], boost:{ hotstone:1, swedish:1 }, notPregnant:true,
+    label:{ nl:"Mandarijn", en:"Mandarin", fr:"Mandarine" },
+    text:{ nl:"zoet en vrolijk, een gezellig wintergeurtje", en:"sweet and cheerful, a cosy winter scent", fr:"douce et joyeuse, un parfum d’hiver chaleureux" } },
   { id:"teatree", product:"teatree", icon:"🌿", months:[1,2,3,4,5,6,7,8,9,10,11,12], groups:["feet"], boost:{ pedicure:2, pedicureexpress:2 },
     label:{ nl:"Tea tree", en:"Tea tree", fr:"Tea tree" },
     text:{ nl:"fris en zuiverend voor de voeten", en:"fresh and purifying for the feet", fr:"frais et purifiant pour les pieds" } },
+];
+
+/* SCENT_NEEDS (v170): "ergens last van?" → the right essential oil is
+   recommended (and pre-selected) in the scent box. Filled in automatically
+   from the match (relax/stress wish, legs wish, free-text complaint words);
+   the client can tick or untick needs in the scent box. oils = SCENT_OPTIONS
+   ids in order of preference; a recommended oil is shown even outside its
+   season, but the safety rules (pregnancy, epilepsy, allergy, kids, body
+   area) still apply. Sandra's list (Oct 2026): lavender = stress, blood
+   circulation, arthritis; lemongrass = nerve pain, headache, wounds;
+   rosemary = healing (not pregnant/epilepsy); mandarin = not in the first
+   6 months of pregnancy; mint = flu (not pregnant); chamomile = relaxation,
+   breathing, burns. */
+const SCENT_NEEDS = [
+  { id:"stress", icon:"😮‍💨", oils:["lavender","chamomile"], words:["stress","gestrest","spanning","gespannen","onrust","onrustig","nerveus","piekeren","slapen","slaap","slapeloos","ontspannen","ontspanning","relax","relaxen","tension","anxious","sleep","relaxation","stressé","stressée","détente","sommeil","angoisse"],
+    label:{ nl:"Stress of ontspanning", en:"Stress or relaxation", fr:"Stress ou détente" } },
+  { id:"headache", icon:"🤕", oils:["lemongrass"], words:["hoofdpijn","migraine","headache","céphalée"],
+    label:{ nl:"Hoofdpijn", en:"Headache", fr:"Maux de tête" } },
+  { id:"nervepain", icon:"⚡", oils:["lemongrass"], words:["zenuwpijn","zenuw","zenuwen","ischias","hernia","nerve","sciatica","névralgie","nerf","sciatique"],
+    label:{ nl:"Zenuwpijn", en:"Nerve pain", fr:"Douleur nerveuse" } },
+  { id:"joints", icon:"🦴", oils:["lavender"], words:["artritis","artrose","reuma","gewricht","gewrichten","gewrichtspijn","arthritis","joint","joints","arthrite","arthrose","rhumatisme","articulation"],
+    label:{ nl:"Gewrichtspijn of artritis", en:"Joint pain or arthritis", fr:"Douleurs articulaires ou arthrite" } },
+  { id:"circulation", icon:"🩸", oils:["lavender"], words:["bloedsomloop","doorbloeding","circulatie","koude handen","koude voeten","zware benen","circulation","cold hands","cold feet","heavy legs","jambes lourdes","mains froides","pieds froids"],
+    label:{ nl:"Bloedcirculatie (koude handen of voeten, zware benen)", en:"Blood circulation (cold hands or feet, heavy legs)", fr:"Circulation (mains ou pieds froids, jambes lourdes)" } },
+  { id:"flu", icon:"🤧", oils:["peppermint","eucalyptus"], words:["griep","verkouden","verkoudheid","snotneus","neus verstopt","flu","a cold","blocked nose","grippe","rhume","nez bouché"],
+    label:{ nl:"Griep of verkoudheid", en:"Flu or a cold", fr:"Grippe ou rhume" } },
+  { id:"breathing", icon:"🌬️", oils:["chamomile"], words:["ademhaling","ademen","benauwd","kortademig","breathing","breathe","short of breath","respiration","respirer","essoufflé"],
+    label:{ nl:"Ademhaling", en:"Breathing", fr:"Respiration" } },
+  { id:"healing", icon:"🩹", oils:["rosemary","lemongrass"], words:["wonde","wondje","wondjes","wonden","genezing","genezen","litteken","herstel","wound","healing","scar","plaie","cicatrice","cicatrisation"],
+    label:{ nl:"Huidherstel, wondjes", en:"Skin recovery, small wounds", fr:"Réparation de la peau, petites plaies" } },
+  { id:"burn", icon:"🔥", oils:["chamomile"], words:["brandwonde","brandwond","verbrand","zonnebrand","verbrande","burn","sunburn","burnt","brûlure","coup de soleil"],
+    label:{ nl:"Verbrande of geïrriteerde huid (ook door de zon)", en:"Burnt or irritated skin (also from the sun)", fr:"Peau brûlée ou irritée (aussi par le soleil)" } },
 ];
 
 /* Is a (non-yearly) action on today? soldOut, from and until are checked.
