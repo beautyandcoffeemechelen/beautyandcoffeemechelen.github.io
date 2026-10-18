@@ -3276,6 +3276,15 @@
     localData.apptReviewDone = (localData.apptReviewDone || []).filter(k => k !== key).concat([key]).slice(-30);
     saveLocalData(); renderApptCard();
   }
+  function apptPrepHtml(a, L){
+    if (typeof APPT_PREP === "undefined" || !a) return "";
+    const cats = new Set(); if (a.tcat) cats.add(a.tcat);
+    const txt = String(a.ttext || "").toLowerCase();
+    if (txt) Object.entries(APPT_PREP_WORDS).forEach(([c, ws]) => { if (ws.some(w => txt.includes(w))) cats.add(c); });
+    const tips = [...cats].flatMap(c => APPT_PREP[c] || []);
+    if (!tips.length) return "";
+    return `<div class="appt-prep"><p class="appt-prep__title">💡 ${t("appt_prep_title", L)}</p><ul>${tips.map(x => `<li>${esc(x[L] || x.nl)}</li>`).join("")}</ul></div>`;
+  }
   function renderApptCard(){
     const card = $("#apptCard");
     if (!card || typeof localData === "undefined") return;
@@ -3310,6 +3319,7 @@
       <div class="appt-item">
         <p class="appt-card__when">${when(x.s)}</p>
         <p class="appt-card__text">${apptTreatLabel(x.a)}</p>
+        ${apptPrepHtml(x.a, L)}
         ${x.a.src === "online" ? `<p class="appt-card__label">✓ ${t("appt_online_incal", L)}</p>` : `<p class="appt-card__label">${t("appt_add_to", L)}</p>
         <div class="appt-card__buttons">
           <a class="btn btn--outline" href="${apptGoogleUrl(x.a)}" target="_blank" rel="noopener noreferrer" data-cal="google">Google</a>
@@ -3489,8 +3499,9 @@
      data.js holds only the PUBLIC key, which can check a code but cannot
      make one. So nobody can produce a stamp code at home by reading the
      source. QR payload: "BCS1:" + kind letter + counter (base 36) + "." + signature. */
-  const SALON_CODE_KINDS = ["STAMP","REDEEM","UNDO"];
-  const SALON_KIND_LETTER = { STAMP:"S", REDEEM:"R", UNDO:"U" };
+  const SALON_CODE_KINDS = ["STAMP","EXTRA","REDEEM","UNDO"];
+  const SALON_KIND_LETTER = { STAMP:"S", EXTRA:"X", REDEEM:"R", UNDO:"U" };
+  let lastSalonCounter = null;   // counter of the last valid scanned code (EXTRA: each code only once)
   const SALON_KEY_STORE = "bc_salon_key_v1";
   const b64u = bytes => btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   const unb64u = str => { const s2 = str.replace(/-/g, "+").replace(/_/g, "/"); const bin = atob(s2 + "===".slice((s2.length + 3) % 4)); return Uint8Array.from(bin, c => c.charCodeAt(0)); };
@@ -3539,13 +3550,14 @@
   // Accepts the current code and the previous ~90 s (clock differences,
   // slow scanning) plus one step ahead (a phone clock running slow).
   async function resolveSalonCode(raw){
-    const m = String(raw || "").trim().match(/^BCS1:([SRU])([0-9a-z]{1,10})\.([A-Za-z0-9_-]{80,90})$/);
+    const m = String(raw || "").trim().match(/^BCS1:([SXRU])([0-9a-z]{1,10})\.([A-Za-z0-9_-]{80,90})$/);
     if (!m) return null;
     const kind = SALON_CODE_KINDS.find(k => SALON_KIND_LETTER[k] === m[1]);
     const counter = parseInt(m[2], 36), now = stampCounterNow();
     if (!(counter >= now - 3 && counter <= now + 1)) return null;
     try {
       const ok = await crypto.subtle.verify(ECDSA_SIGN, await getSalonPubKey(), unb64u(m[3]), new TextEncoder().encode("BC-" + kind + "|" + counter));
+      if (ok) lastSalonCounter = counter;
       return ok ? kind : null;
     } catch(e){ return null; }
   }
@@ -3688,6 +3700,16 @@
       localData.lastStampDay = todayKey();
       if (localData.stamps >= 10 && !localData.cardFullAt) localData.cardFullAt = new Date().toISOString();
       finishSalonCode(localData.stamps === 10 ? "stamp_card_full_toast" : "stamp_added_toast", "stamp-added");
+      return;
+    }
+    if (kind === "EXTRA"){
+      // v177: a missed or lost stamp (e.g. browser data wiped), given by Sandra on top of
+      // today's stamp. Not bound to the 1-per-day rule, but every code works only once.
+      if (localData.lastExtraCounter != null && lastSalonCounter <= localData.lastExtraCounter){ closeStampScanner(); showToast(t("stamp_extra_used", state.lang)); return; }
+      localData.lastExtraCounter = lastSalonCounter;
+      localData.stamps++;
+      if (localData.stamps >= 10 && !localData.cardFullAt) localData.cardFullAt = new Date().toISOString();
+      finishSalonCode(localData.stamps === 10 ? "stamp_card_full_toast" : "stamp_extra_toast", "stamp-extra");
       return;
     }
     if (kind === "UNDO"){
@@ -4792,7 +4814,7 @@
       const syn = (typeof PRODUCT_FINDER_SYN !== "undefined" ? PRODUCT_FINDER_SYN : {});
       const terms = [...new Set([fq].concat(syn[fq] || [], ...fq.split(/\s+/).filter(w => w.length >= 4 && w !== "huid" && w !== "skin" && w !== "peau").map(w => syn[w] || [])))].map(ingrNorm);
       const neg = /\b(niet|geen|not|no|pas|sans|vermijd|avoid|zonder|without)\b[^.;]{0,30}$/;
-      const has = (txt) => terms.some(tm => { let k = txt.indexOf(tm); while (k >= 0){ if (!neg.test(txt.slice(Math.max(0, k - 40), k))) return true; k = txt.indexOf(tm, k + 1); } return false; });
+      const has = (txt) => terms.some(tm => { let k = txt.indexOf(tm); while (k >= 0){ if ((k === 0 || !/[a-z0-9à-ÿ]/.test(txt[k - 1])) && !neg.test(txt.slice(Math.max(0, k - 40), k))) return true; k = txt.indexOf(tm, k + 1); } return false; });
       const txtOf = x => ingrNorm(typeof x === "string" ? x : Object.values(x || {}).join(" | "));
       const fit = all.filter(([id]) => !hitIds.has(id)).map(([id, p]) => [id, p, has(txtOf(p.name)) ? 2 : (has(txtOf(p.note)) ? 1 : 0)]).filter(x => x[2] > 0).sort((a, b) => b[2] - a[2]);
       if (fit.length && !hit.length) html = html.replace(`<p class="ingr-ok">✅ ${t("ingr_none_found", L)}</p>`, "");

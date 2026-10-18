@@ -1351,3 +1351,6 @@ p.season-card__shop{ text-decoration:none; margin:2px 0 0; font-style:italic; }
 .oil-use li{ margin:2px 0; }
 .preg-stage{ margin:8px 0 4px; }
 .preg-stage__q{ margin:0 0 6px; font-weight:600; font-size:.92rem; }
+.appt-prep{ margin:8px 0; padding:8px 10px; border-radius:10px; background:#fffaf2; border:1px solid var(--line, #e3d6c6); font-size:.88rem; line-height:1.4; }
+.appt-prep__title{ margin:0 0 4px; font-weight:700; }
+.appt-prep ul{ margin:0 0 0 18px; padding:0; }

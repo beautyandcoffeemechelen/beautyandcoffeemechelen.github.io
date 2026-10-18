@@ -1737,7 +1737,7 @@ const HEALTH_EXTRA = [
   { key:"oncology", icon:"🎗️", exclude:["fruitacid","hydrapeel","cuppingpeeling","fillme","liftsummere","antiagefacial","expressuseup","facialworkshop"],
     label:{ nl:"Ik ben (of was kort geleden) in behandeling voor kanker", en:"I am (or recently was) being treated for cancer", fr:"Je suis (ou j’ai été récemment) traité(e) pour un cancer" },
     note:{ nl:"Tijdens of na een kankerbehandeling ben je zeker welkom, ook voor een massage. Voor je gezicht werk ik extra zacht, zonder peeling, met de kalmerende Janssen-lijn voor de gevoelige huid.", en:"During or after cancer treatment you are very welcome, massages included. For your face I work extra gently, without peels, with Janssen’s soothing line for sensitive skin.", fr:"Pendant ou après un traitement contre le cancer, vous êtes la bienvenue, massages compris. Pour le visage, je travaille tout en douceur, sans peeling, avec la gamme apaisante de Janssen pour peaux sensibles." },
-    sandraNote:{ nl:"Alleen voor jou: gelaat enkel met de roze lijn van Janssen (Sensitive Skin: Soft Cleansing Mousse, Soft Soothing Tonic, Intense Calming Serum en Cream, Instant Soothing Oil en Mask, Comfort Eye Care), volgens je oncologisch protocol. Geen peeling, geen ampullen met actieve zuren.", en:"Only for you: face only with Janssen’s pink line (Sensitive Skin), as in your oncology protocol. No peels.", fr:"Uniquement pour toi : visage uniquement avec la ligne rose Janssen (Sensitive Skin), selon ton protocole oncologique. Pas de peeling." } },
+    sandraNote:{ nl:"Alleen voor jou: gelaat enkel met de roze lijn van Janssen (Sensitive Skin: Soft Cleansing Mousse, Soft Soothing Tonic, Intense Calming Serum en Cream, Instant Soothing Oil en Mask, Comfort Eye Care; staan allemaal in je voorraad, zoek op “gevoelige huid”), volgens je oncologisch protocol. Geen peeling, geen ampullen met actieve zuren.", en:"Only for you: face only with Janssen’s pink line (Sensitive Skin), as in your oncology protocol. No peels.", fr:"Uniquement pour toi : visage uniquement avec la ligne rose Janssen (Sensitive Skin), selon ton protocole oncologique. Pas de peeling." } },
   { key:"epilepsy", icon:"🧠", exclude:[],
     label:{ nl:"Epilepsie", en:"Epilepsy", fr:"Épilepsie" },
     note:{ nl:"Met epilepsie ben je welkom voor elke verzorging. Ik kies dan een rustig geurtje, zonder rozemarijn, pepermunt of eucalyptus.", en:"With epilepsy you are welcome for every treatment. I then choose a calm scent, without rosemary, peppermint or eucalyptus.", fr:"Avec l’épilepsie, vous êtes bienvenu(e) pour tous les soins. Je choisis alors un parfum doux, sans romarin, menthe poivrée ni eucalyptus." },
@@ -1956,7 +1956,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v173 · 18/10/2026";
+const APP_VERSION = "v178 · 18/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -2416,6 +2416,41 @@ const SCENT_NEEDS = [
   { id:"burn", icon:"🔥", oils:["chamomile"], words:["brandwonde","brandwond","verbrand","zonnebrand","verbrande","burn","sunburn","burnt","brûlure","coup de soleil"],
     label:{ nl:"Verbrande of geïrriteerde huid (ook door de zon)", en:"Burnt or irritated skin (also from the sun)", fr:"Peau brûlée ou irritée (aussi par le soleil)" } },
 ];
+
+/* APPT_PREP (v178): "denk eraan" tips shown with every upcoming appointment the
+   client saved in the app (per category of AVOID_GROUPS). Sandra's own points:
+   facials = lenses out + bring the case, beard: shave the day before, not the
+   same day; lash lift / tinting = lenses out + bring glasses for the way home.
+   Edit freely: one line = one tip. */
+const APPT_PREP = {
+  face: [
+    { nl:"Draag je contactlenzen? Doe ze uit voor de verzorging en neem je lenzendoosje (en eventueel je bril) mee.", en:"Do you wear contact lenses? Take them out for the facial and bring your lens case (and glasses if needed).", fr:"Vous portez des lentilles ? Retirez-les pour le soin et apportez votre étui (et vos lunettes si besoin)." },
+    { nl:"Heb je een baard of snor en wil je die scheren? Doe dat de dag ervoor, niet op de dag zelf: zo is je huid niet geïrriteerd.", en:"Have a beard or moustache you want to shave? Do it the day before, not on the day itself, so your skin isn’t irritated.", fr:"Vous voulez raser votre barbe ou moustache ? Faites-le la veille, pas le jour même : votre peau ne sera pas irritée." },
+    { nl:"Kom gerust zonder make-up, dan kunnen we meteen beginnen.", en:"Feel free to come without make-up, so we can start right away.", fr:"Venez de préférence sans maquillage, nous pourrons commencer tout de suite." }
+  ],
+  browlash: [
+    { nl:"Draag je contactlenzen? Doe ze uit vóór de behandeling en neem je bril mee om veilig thuis te geraken.", en:"Do you wear contact lenses? Take them out before the treatment and bring your glasses to get home safely.", fr:"Vous portez des lentilles ? Retirez-les avant le soin et apportez vos lunettes pour rentrer en toute sécurité." },
+    { nl:"Kom zonder mascara en oogmake-up.", en:"Come without mascara and eye make-up.", fr:"Venez sans mascara ni maquillage des yeux." }
+  ],
+  makeup: [
+    { nl:"Kom met een gereinigde huid zonder make-up. Draag je lenzen? Doe ze vooraf in.", en:"Come with clean skin and no make-up. Wear lenses? Put them in beforehand.", fr:"Venez la peau propre, sans maquillage. Des lentilles ? Mettez-les avant." },
+    { nl:"Valse wimpers? Breng je eigen wimpers en wimperlijm mee.", en:"False lashes? Bring your own lashes and lash glue.", fr:"Faux cils ? Apportez vos cils et votre colle." }
+  ],
+  waxing: [
+    { nl:"Laat het haar minstens een halve centimeter groeien en smeer de dag zelf geen bodylotion of olie op die plek.", en:"Let the hair grow at least half a centimetre and don’t apply body lotion or oil there on the day.", fr:"Laissez pousser les poils d’au moins un demi-centimètre et n’appliquez pas de lotion ni d’huile le jour même." }
+  ],
+  feet: [
+    { nl:"Neem gerust open schoenen of slippers mee, dan blijft de nagellak mooi.", en:"Feel free to bring open shoes or flip-flops, so the polish stays perfect.", fr:"Apportez des chaussures ouvertes ou des tongs, le vernis restera impeccable." }
+  ],
+  hands: [
+    { nl:"Heb je nog gellak van ergens anders? Zeg het bij het boeken, dan plan ik tijd om het te verwijderen.", en:"Still wearing gel polish from elsewhere? Mention it when booking, so I plan time to remove it.", fr:"Encore du vernis gel d’ailleurs ? Signalez-le à la réservation, je prévois le temps pour le retirer." }
+  ],
+  massage: [
+    { nl:"Eet licht in het uur vóór je massage, en drink erna voldoende water.", en:"Eat lightly in the hour before your massage, and drink plenty of water afterwards.", fr:"Mangez léger dans l’heure qui précède le massage et buvez bien de l’eau après." }
+  ]
+};
+/* free text in the appointment ("lash lift", "kleuren"…) → category */
+const APPT_PREP_WORDS = { browlash:["lash","wimper","wenkbrauw","brow","henna","tint","kleur","cils","sourcil"], face:["gelaat","facial","soin du visage","peeling","fill me","lift summum","anti-age"], makeup:["make-up","makeup","visagie","bruid","bridal","maquillage"], waxing:["ontharen","wax","harsen","épilation"], feet:["pedicure","pédicure","voet"], hands:["manicure","manucure","nagel","gellak"], massage:["massage","cupping","hot stone"] };
 
 /* Is a (non-yearly) action on today? soldOut, from and until are checked.
    Used by the banner, the price list and the match, so one switch stops all. */
