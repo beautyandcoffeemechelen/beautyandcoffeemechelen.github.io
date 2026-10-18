@@ -115,6 +115,7 @@
     if (typeof renderAdventCard === "function"){ renderAdventCard(); if ($('section.step[data-step="advent"]') && $('section.step[data-step="advent"]').classList.contains("is-active")) renderAdvent(); }
     if ($('section.step[data-step="myappt"]') && $('section.step[data-step="myappt"]').classList.contains("is-active")) renderApptForm();
     if ($('section.step[data-step="ingredients"]') && $('section.step[data-step="ingredients"]').classList.contains("is-active")) renderIngredients();
+    if ($('section.step[data-step="giftcard"]') && $('section.step[data-step="giftcard"]').classList.contains("is-active")) renderGiftCard();
     renderSocialLinks();
     renderActions();
     if (typeof renderPreviewBar === "function") renderPreviewBar();
@@ -132,7 +133,7 @@
   function updateProgress(name){
     const w = STEP_WEIGHTS[name] ?? 0;
     $("#progressFill").style.width = w + "%";
-    $(".progress").style.visibility = (name==="welcome" || name==="pricelist" || name==="houserules" || name==="stampcard" || name==="findme" || name==="myappt" || name==="photopick" || name==="photoshare" || name==="advent" || name==="ingredients" || (name==="photo" && state.quickPhoto)) ? "hidden" : "visible";
+    $(".progress").style.visibility = (name==="welcome" || name==="giftcard" || name==="pricelist" || name==="houserules" || name==="stampcard" || name==="findme" || name==="myappt" || name==="photopick" || name==="photoshare" || name==="advent" || name==="ingredients" || (name==="photo" && state.quickPhoto)) ? "hidden" : "visible";
   }
 
   function showStep(name){
@@ -155,6 +156,9 @@
     }
     if (name === "stampcard") {
       renderLoyaltyBlock();
+    }
+    if (name === "giftcard") {
+      renderGiftCard(); giftBind();
     }
     if (name === "findme") {
       renderFindMe();
@@ -2714,7 +2718,7 @@
         <div class="action-card__body">
           <p class="action-card__title">${t("specials_title", L)}</p>
           <ul class="offer-lines">${rows}</ul>
-          <a class="offer-book" href="${wa}" target="_blank" rel="noopener noreferrer" data-offer-book>${t("specials_book", L)}</a>
+          ${typeof ONLINE_BOOKING_URL !== "undefined" && ONLINE_BOOKING_URL ? `<a class="offer-book" href="${esc(ONLINE_BOOKING_URL)}" target="_blank" rel="noopener noreferrer" data-action="online-book" data-online-src="offers">${t("specials_book_online", L)}</a> · ` : ""}<a class="offer-book" href="${wa}" target="_blank" rel="noopener noreferrer" data-offer-book>${t("specials_book", L)}</a>
         </div>
       </div>`;
   }
@@ -3790,6 +3794,7 @@
         <p class="stamp-overlay__hint" id="salonHint">${t("salon_hint", state.lang)}</p>
         <div class="salon-adv" id="salonAdvent" hidden></div>
         <div class="salon-adv salon-stock" id="salonStock" hidden></div>
+        <button type="button" class="btn btn--primary btn--sm salon-ingr salon-tht" data-salon-gift="1">🎁 ${t("gift_salon_btn", state.lang)}</button>
         <button type="button" class="btn btn--primary btn--sm salon-ingr salon-tht" data-salon-ingr="stock">📦 ${t("inv_btn", state.lang)}</button>
         <button type="button" class="btn btn--primary btn--sm salon-ingr salon-tht" data-salon-ingr="open">⏰ ${t("tht_btn", state.lang)}</button>
         <button type="button" class="btn btn--text btn--sm salon-ingr" data-salon-ingr="1">${t("ingr_open_btn", state.lang)}</button>
@@ -3813,6 +3818,7 @@
         if (a === "hookdel"){ try { localStorage.removeItem(STOCK_HOOK_KEY); } catch(err){ /* ignore */ } renderSalonStock(); }
         return;
       }
+      if (e.target.closest("[data-salon-gift]")){ closeSalonMode(); goTo("giftcard"); return; }
       const si = e.target.closest("[data-salon-ingr]");
       if (si){ ingr.unlocked = true; if (si.dataset.salonIngr === "open" || si.dataset.salonIngr === "stock") ingr.tab = si.dataset.salonIngr; closeSalonMode(); goTo("ingredients"); return; }
       const adv = e.target.closest("[data-salon-adv]");
@@ -3964,10 +3970,457 @@
       window.history.replaceState(null, "", location.pathname + location.search);
       goTo("findme");
     }
+    else if (/^#bon=BCG2\./.test(location.hash)){
+      const tok = location.hash.slice(5);
+      window.history.replaceState(null, "", location.pathname + location.search);
+      giftFromHash(tok);
+    }
+    else if (/^#(cadeaubon|cadeaubonnen|giftcard|bon)$/i.test(location.hash)){
+      window.history.replaceState(null, "", location.pathname + location.search);
+      goTo("giftcard");
+    }
     else if (location.hash === "#stempelkaart" || location.hash === "#stamps"){
       window.history.replaceState(null, "", location.pathname + location.search);
       goTo("stampcard");
     }
+  }
+
+  /* ---------------- gift cards (v183, live saldo v184) ----------------
+     Sandra keeps the register on her phone (salon key). Every voucher has
+     a random secret; the voucher link/QR she gives (…/#bon=BCG2.<payload>.<sig>)
+     is signed with the salon key, so nobody can make or raise a voucher.
+     Live balance: after every change her phone publishes cadeaubonnen.json
+     to the GitHub repo of this site (token only on her phone, never in the
+     code). The file holds no numbers or names, only SHA-256(number|secret)
+     → amount/balance/valid, so only someone with the voucher link can look
+     up a balance. payload = number~secret~amountCents~balanceCents~validUntil~issued~rev~standDate */
+  const GIFT_REG_KEY = "bc_gift_reg_v1", GIFT_MINE_KEY = "bc_gift_mine_v1", GIFT_BACKUP_KEY = "bc_gift_backup_v1", GIFT_GH_KEY = "bc_gift_gh_v1", GIFT_PUB_KEY = "bc_gift_pub_v1";
+  const GIFT = (typeof GIFT_CARDS === "object" && GIFT_CARDS) ? GIFT_CARDS : { validityMonths:12, amounts:[25,50,75,100], minAmount:10, seed:[] };
+  const gift = { open:"", buyAmount:0, buyPay:"transfer", live:null, liveAt:0, liveBusy:null, publishing:false };
+  const giftEuro = c => { const v = (Number(c) || 0) / 100; return "€" + (Number.isInteger(v) ? String(v) : v.toFixed(2).replace(".", ",")); };
+  const giftCents = s => { const m = String(s || "").replace(/[€\s]/g, "").replace(",", ".").match(/^\d+(\.\d{1,2})?$/); return m ? Math.round(parseFloat(m[0]) * 100) : NaN; };
+  function giftAddMonths(key, months){
+    const [y, m, d] = key.split("-").map(Number);
+    const dt = new Date(y, m - 1 + months, d);
+    if (dt.getDate() !== d) dt.setDate(0);   // 31/01 + 1 month → end of February
+    return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+  }
+  // validity: GIFT.validityMonths, or longer from a given date (Belgium: 2 years for vouchers sold from 1/4/2027)
+  function giftMonthsFor(issued){
+    let m = GIFT.validityMonths || 12;
+    (GIFT.validityRules || []).forEach(r => { if (issued >= r.from && r.months > m) m = r.months; });
+    return m;
+  }
+  function giftLoad(k, def){ try { const v = JSON.parse(localStorage.getItem(k) || "null"); return v && typeof v === "object" ? v : def; } catch(e){ return def; } }
+  function giftSave(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } }
+  function giftSecret(){ const a = "abcdefghjkmnpqrstuvwxyz23456789", r = crypto.getRandomValues(new Uint8Array(10)); return Array.from(r, x => a[x % a.length]).join(""); }
+  async function giftHash(n, s){
+    const h = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode("BCG|" + n + "|" + s)));
+    return Array.from(h.slice(0, 12), x => x.toString(16).padStart(2, "0")).join("");
+  }
+
+  /* ---- Sandra's register ---- */
+  function giftReg(){
+    const r = giftLoad(GIFT_REG_KEY, { v:{} });
+    if (!r.v) r.v = {};
+    let ch = false;
+    if (!r.seeded){   // the paper vouchers sold before the app (data.js), added once
+      (GIFT.seed || []).forEach(s => { if (!r.v[s.n]) r.v[s.n] = { a: Math.round(s.a * 100), issued: s.issued, valid: s.valid, paper: !!s.paper, buyer:"", to:"", pay: s.pay || "", note:"", rev:1, uses:[] }; });
+      r.seeded = 1; ch = true;
+    }
+    Object.values(r.v).forEach(v => { if (!v.s){ v.s = giftSecret(); ch = true; } });
+    if (ch) giftSave(GIFT_REG_KEY, r);
+    return r;
+  }
+  const giftBal = v => v.a - (v.uses || []).reduce((s, u) => s + (u.c || 0), 0);
+  function giftStatus(v, bal){
+    if (bal <= 0) return "used";
+    if (v.valid < todayKey()) return "expired";
+    return "open";
+  }
+  function giftNextNumber(r){
+    const y = todayKey().slice(0, 4);
+    const nums = Object.keys(r.v).filter(n => n.startsWith(y)).map(n => parseInt(n.slice(4), 10)).filter(Number.isFinite);
+    return y + String((nums.length ? Math.max(...nums) : 0) + 1).padStart(2, "0");
+  }
+  async function giftToken(n, v){
+    const p = [n, v.s, v.a, Math.max(0, giftBal(v)), v.valid, v.issued, v.rev || 1, todayKey()].join("~");
+    const sig = await crypto.subtle.sign(ECDSA_SIGN, await getSalonPrivKey(), new TextEncoder().encode("BC-GIFT|" + p));
+    return "BCG2." + b64u(new TextEncoder().encode(p)) + "." + b64u(sig);
+  }
+  const giftLink = tok => location.origin + location.pathname + "#bon=" + tok;
+  async function giftVerify(tok){
+    const m = String(tok || "").trim().match(/(?:#bon=)?(BCG2\.([A-Za-z0-9_-]{8,240})\.([A-Za-z0-9_-]{80,90}))\s*$/);
+    if (!m) return null;
+    try {
+      const p = new TextDecoder().decode(unb64u(m[2]));
+      const ok = await crypto.subtle.verify(ECDSA_SIGN, await getSalonPubKey(), unb64u(m[3]), new TextEncoder().encode("BC-GIFT|" + p));
+      if (!ok) return null;
+      const [n, s, a, b, valid, issued, rev, stand] = p.split("~");
+      if (!/^\d{4,10}$/.test(n) || !/^[a-z0-9]{6,20}$/.test(s)) return null;
+      return { n, s, a:+a, b:+b, valid, issued, rev:+rev || 1, stand, tok:m[1] };
+    } catch(e){ return null; }
+  }
+
+  /* ---- live balances (GitHub) ---- */
+  function giftRepo(){
+    const L = GIFT.live || {}, host = location.hostname || "";
+    const owner = L.owner || (/\.github\.io$/.test(host) ? host.split(".")[0] : "");
+    const repo = L.repo || (/\.github\.io$/.test(host) ? host : "");
+    return { owner, repo, file: L.file || "cadeaubonnen.json" };
+  }
+  async function giftLiveFetch(force){
+    if (!force && gift.live && Date.now() - gift.liveAt < 60000) return gift.live;
+    if (gift.liveBusy) return gift.liveBusy;
+    const { owner, repo, file } = giftRepo();
+    gift.liveBusy = (async () => {
+      const tries = [];
+      if (owner && repo) tries.push([`https://api.github.com/repos/${owner}/${repo}/contents/${file}`, { headers:{ Accept:"application/vnd.github.raw+json" }, cache:"no-store" }]);
+      tries.push([`${file}?t=${Date.now()}`, { cache:"no-store" }]);
+      for (const [u, o] of tries){
+        try {
+          const res = await fetch(u, o);
+          if (!res.ok) continue;
+          const j = JSON.parse(await res.text());
+          if (j && j.b){ gift.live = j; gift.liveAt = Date.now(); return j; }
+        } catch(e){ /* next */ }
+      }
+      return null;
+    })();
+    try { return await gift.liveBusy; } finally { gift.liveBusy = null; }
+  }
+  function giftToken64(str){ return btoa(unescape(encodeURIComponent(str))); }
+  async function giftPublish(silent){
+    const L = state.lang, tok = (() => { try { return localStorage.getItem(GIFT_GH_KEY) || ""; } catch(e){ return ""; } })();
+    if (!tok) return false;
+    const { owner, repo, file } = giftRepo();
+    if (!owner || !repo){ if (!silent) showToast(t("gift_live_norepo", L)); return false; }
+    if (gift.publishing) return false;
+    gift.publishing = true;
+    const r = giftReg(), out = { v:1, u: new Date().toISOString(), b:{} };
+    for (const [n, v] of Object.entries(r.v)) out.b[await giftHash(n, v.s)] = { a: v.a, b: Math.max(0, giftBal(v)), valid: v.valid, rev: v.rev || 1 };
+    const api = `https://api.github.com/repos/${owner}/${repo}/contents/${file}`;
+    const H = { Authorization: "Bearer " + tok, Accept: "application/vnd.github+json" };
+    let ok = false, err = "";
+    for (let attempt = 0; attempt < 2 && !ok; attempt++){
+      try {
+        let sha;
+        const g = await fetch(api, { headers: H, cache:"no-store" });
+        if (g.ok) sha = (await g.json()).sha; else if (g.status !== 404){ err = "GET " + g.status; continue; }
+        const p = await fetch(api, { method:"PUT", headers: { ...H, "Content-Type":"application/json" },
+          body: JSON.stringify({ message: "Cadeaubonnen bijgewerkt (app)", content: giftToken64(JSON.stringify(out)), ...(sha ? { sha } : {}) }) });
+        if (p.ok) ok = true; else err = "PUT " + p.status;
+      } catch(e){ err = String(e && e.message || e); }
+    }
+    gift.publishing = false;
+    giftSave(GIFT_PUB_KEY, { d: new Date().toISOString(), ok, err });
+    if (ok){ gift.live = out; gift.liveAt = Date.now(); }
+    if (!silent || !ok) showToast(t(ok ? "gift_live_ok" : "gift_live_fail", L).replace("{e}", err));
+    return ok;
+  }
+
+  // client: keep the newest signed state of every voucher on this phone
+  function giftMine(){ return giftLoad(GIFT_MINE_KEY, {}); }
+  function giftKeep(g){
+    const mine = giftMine(), old = mine[g.n];
+    if (old && old.rev > g.rev) return "older";
+    mine[g.n] = { s:g.s, a:g.a, b:g.b, valid:g.valid, issued:g.issued, rev:g.rev, stand:g.stand, tok:g.tok };
+    giftSave(GIFT_MINE_KEY, mine);
+    return old ? "updated" : "added";
+  }
+  async function giftFromHash(tok){
+    const g = await giftVerify(tok);
+    if (!g){ showToast(t("gift_bad_code", state.lang)); return; }
+    const r = giftKeep(g);
+    showToast(t(r === "older" ? "gift_older" : "gift_saved", state.lang));
+    goTo("giftcard");
+  }
+  // live state for the vouchers on this phone (newer than the link → shown and kept)
+  async function giftApplyLive(){
+    const mine = giftMine(), nums = Object.keys(mine).filter(n => mine[n].s);
+    if (!nums.length) return false;
+    const live = await giftLiveFetch();
+    if (!live) return false;
+    let ch = false;
+    for (const n of nums){
+      const x = mine[n], rec = live.b[await giftHash(n, x.s)];
+      if (rec && (rec.rev || 0) >= (x.rev || 0)){ Object.assign(x, { a:rec.a, b:rec.b, valid:rec.valid, rev:rec.rev, stand:todayKey(), live:true }); ch = true; }
+      else if (!rec && x.live){ x.live = false; ch = true; }
+    }
+    if (ch) giftSave(GIFT_MINE_KEY, mine);
+    return ch;
+  }
+
+  function giftCardHtml(n, x, L){
+    const st = x.b <= 0 ? "used" : (x.valid < todayKey() ? "expired" : "open");
+    return `<div class="gift-card gift-card--${st}">
+        <div class="gift-card__top"><span class="gift-card__brand">BEAUTY &amp; COFFEE</span><span class="gift-card__nr">${t("gift_nr", L)} ${esc(n)}</span></div>
+        <p class="gift-card__label">${t("gift_balance", L)}</p>
+        <p class="gift-card__amount">${giftEuro(x.b)}</p>
+        <p class="gift-card__of">${t("gift_of", L).replace("{a}", giftEuro(x.a))}</p>
+        <p class="gift-card__valid">${st === "used" ? t("gift_st_used", L) : st === "expired" ? t("gift_st_expired", L).replace("{d}", advFmt(x.valid)) : t("gift_valid_until", L).replace("{d}", advFmt(x.valid))}</p>
+        <p class="gift-card__stand">${x.live ? `<span class="gift-live-dot"></span> ${t("gift_live", L)}` : t("gift_stand", L).replace("{d}", advFmt(x.stand || todayKey()))}</p>
+        <p class="gift-card__terms">${t("gift_terms", L)}</p>
+        <div class="gift-card__foot">Beauty &amp; Coffee · Barbarastraat 25, 2800 Mechelen · 0499 22 19 01 · ${esc(BOOKING_EMAIL)}</div>
+      </div>
+      <div class="gift-card__actions">
+        ${st === "open" && typeof ONLINE_BOOKING_URL !== "undefined" && ONLINE_BOOKING_URL ? `<a class="btn btn--outline btn--sm" href="${esc(ONLINE_BOOKING_URL)}" target="_blank" rel="noopener noreferrer" data-action="online-book" data-online-src="gift">📅 ${t("gift_book_online", L)}</a>` : ""}
+        <a class="btn btn--text btn--sm" target="_blank" rel="noopener noreferrer" href="https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(t("gift_ask_text", L).replace("{n}", n))}">💬 ${t("gift_ask_btn", L)}</a>
+      </div>`;
+  }
+
+  function renderGiftCard(){
+    const L = state.lang, body = $("#giftBody"); if (!body) return;
+    const mine = giftMine(), nums = Object.keys(mine).sort();
+    const months = giftMonthsFor(todayKey());
+    const amounts = (GIFT.amounts || [25, 50, 75, 100]).map(a => `<button type="button" class="chip${gift.buyAmount === a * 100 ? " is-selected" : ""}" data-gift-amt="${a}">€${a}</button>`).join("");
+    const iban = GIFT.iban ? `<div class="gift-bank"><p><b>${t("gift_bank_title", L)}</b></p>
+          <p>${t("gift_bank_to", L)} <b>${esc(GIFT.beneficiary || "Beauty & Coffee")}</b></p>
+          <p>IBAN <b class="gift-copy" data-gift-copy="${esc(GIFT.iban.replace(/\s/g, ""))}">${esc(GIFT.iban)}</b> <span class="ingr-muted">(${t("gift_tap_copy", L)})</span></p>
+          <p>${t("gift_bank_amount", L)} <b id="giftAmtRef">…</b></p>
+          <p>${t("gift_bank_msg", L)} <b id="giftMsgRef"></b></p>
+          <canvas id="giftEpc" class="gift-qr" width="420" height="420" hidden></canvas>
+          <p class="ingr-muted" id="giftEpcHint" hidden>${t("gift_epc_hint", L)}</p></div>` : `<p class="ingr-muted">${t("gift_bank_ask", L)}</p>`;
+    let html = "";
+    if (hasSalonKey()) html += `<div class="gift-salon" id="giftSalon">${giftSalonHtml()}</div>`;
+    html += `<div class="gift-block">
+        <p class="gift-block__title">🎁 ${t("gift_mine_title", L)}</p>
+        ${nums.length ? nums.map(n => giftCardHtml(n, mine[n], L)).join("") : `<p class="ingr-muted">${t("gift_mine_none", L)}</p>`}
+        <label class="pm-label" for="giftCodeIn">${t("gift_code_label", L)}</label>
+        <input type="text" id="giftCodeIn" class="pm-input" autocomplete="off" placeholder="${t("gift_code_ph", L)}">
+        <button type="button" class="btn btn--outline btn--sm" data-action="gift-check">${t("gift_check_btn", L)}</button>
+        <p class="ingr-muted" id="giftCheckOut"></p>
+      </div>
+      <div class="gift-block">
+        <p class="gift-block__title">💝 ${t("gift_buy_title", L)}</p>
+        <p class="ingr-note">${t("gift_buy_intro", L).replace("{m}", months)}</p>
+        <p class="gift-terms">${t("gift_terms_full", L)}</p>
+        <div class="ingr-chips">${amounts}</div>
+        <input type="text" inputmode="decimal" id="giftOwnAmt" class="pm-input" placeholder="${t("gift_own_amount", L).replace("{min}", GIFT.minAmount || 10)}">
+        <input type="text" id="giftFor" class="pm-input" maxlength="40" placeholder="${t("gift_for_ph", L)}">
+        <input type="text" id="giftFrom" class="pm-input" maxlength="40" placeholder="${t("gift_from_ph", L)}">
+        <input type="text" id="giftNote" class="pm-input" maxlength="140" placeholder="${t("gift_note_ph", L)}">
+        <div class="ingr-chips">
+          <button type="button" class="chip${gift.buyPay === "transfer" ? " is-selected" : ""}" data-gift-pay="transfer">🏦 ${t("gift_pay_transfer", L)}</button>
+          <button type="button" class="chip${gift.buyPay === "salon" ? " is-selected" : ""}" data-gift-pay="salon">💳 ${t("gift_pay_salon", L)}</button>
+        </div>
+        <div id="giftPayInfo">${gift.buyPay === "transfer" ? iban : `<p class="ingr-muted">${t("gift_pay_salon_info", L)}</p>`}</div>
+        <a class="btn btn--primary btn--wide" id="giftWa" target="_blank" rel="noopener noreferrer" href="#">💬 ${t("gift_send_wa", L)}</a>
+        <a class="btn btn--text btn--sm" id="giftMail" href="#">✉️ ${t("gift_send_mail", L)}</a>
+        <p class="ingr-muted">${t("gift_how", L)}</p>
+      </div>`;
+    body.innerHTML = html;
+    giftBuyUpdate();
+    if (hasSalonKey()) giftSalonAfter();
+    // live balances: update the cards once the file is in
+    if (nums.some(n => mine[n].s)) giftApplyLive().then(ch => { if (ch && $('section.step[data-step="giftcard"]').classList.contains("is-active")) giftRerenderMine(); });
+  }
+  function giftRerenderMine(){
+    const L = state.lang, mine = giftMine(), blk = $("#giftBody .gift-block"); if (!blk) return;
+    $$("#giftBody .gift-block .gift-card, #giftBody .gift-block .gift-card__actions").forEach(e => e.remove());
+    const title = blk.querySelector(".gift-block__title");
+    const none = blk.querySelector(".gift-block__title + .ingr-muted"); if (none) none.remove();
+    title.insertAdjacentHTML("afterend", Object.keys(mine).sort().map(n => giftCardHtml(n, mine[n], L)).join(""));
+  }
+  function giftEpcText(cents, ref){
+    const ib = String(GIFT.iban || "").replace(/\s/g, "");
+    return ["BCD", "002", "1", "SCT", GIFT.bic || "", (GIFT.beneficiary || "Beauty & Coffee").slice(0, 70), ib, "EUR" + (cents / 100).toFixed(2), "", "", ref.slice(0, 140), ""].join("\n");
+  }
+  function giftBuyUpdate(){
+    const L = state.lang;
+    const own = giftCents(($("#giftOwnAmt") || {}).value);
+    const amt = Number.isFinite(own) && own > 0 ? own : gift.buyAmount;
+    const forN = (($("#giftFor") || {}).value || "").trim(), fromN = (($("#giftFrom") || {}).value || "").trim(), note = (($("#giftNote") || {}).value || "").trim();
+    const ref = (t("gift_ref", L) + (forN ? " " + forN : "") + (fromN ? " – " + fromN : "")).slice(0, 140);
+    const okAmt = amt >= (GIFT.minAmount || 10) * 100;
+    const r = $("#giftMsgRef"); if (r) r.textContent = ref;
+    const ar = $("#giftAmtRef"); if (ar) ar.textContent = okAmt ? giftEuro(amt) : "…";
+    const cv = $("#giftEpc"), hint = $("#giftEpcHint");
+    if (cv){
+      cv.hidden = !okAmt; if (hint) hint.hidden = !okAmt;
+      if (okAmt) loadFirstScript(["assets/lib/qr-encoder.js"], () => !!window.BCQRCode).then(ok => { if (ok) drawQrToCanvas(cv, giftEpcText(amt, ref)); });
+    }
+    const text = t("gift_wa_text", L).replace("{a}", okAmt ? giftEuro(amt) : "…").replace("{for}", forN || "…").replace("{from}", fromN || "…")
+      .replace("{pay}", t(gift.buyPay === "transfer" ? "gift_pay_transfer" : "gift_pay_salon", L)) + (note ? "\n" + t("gift_note_line", L) + " " + note : "");
+    const wa = $("#giftWa"), ml = $("#giftMail");
+    if (wa){ wa.href = `https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(text)}`; wa.classList.toggle("is-disabled", !okAmt); }
+    if (ml) ml.href = `mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent(t("gift_mail_subject", L))}&body=${encodeURIComponent(text)}`;
+  }
+  async function giftCheck(){
+    const L = state.lang, v = (($("#giftCodeIn") || {}).value || "").trim(), out = $("#giftCheckOut");
+    if (!v) return;
+    const g = await giftVerify(v);
+    if (g){ const r = giftKeep(g); showToast(t(r === "older" ? "gift_older" : "gift_saved", L)); renderGiftCard(); return; }
+    const nr = v.replace(/\D/g, "");
+    if (out) out.innerHTML = /^\d{4,10}$/.test(nr)
+      ? `${t("gift_paper_info", L).replace("{n}", esc(nr))} <a target="_blank" rel="noopener noreferrer" href="https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(t("gift_ask_text", L).replace("{n}", nr))}">💬 ${t("gift_ask_btn", L)}</a>`
+      : t("gift_bad_code", L);
+  }
+
+  /* ---- salon side ---- */
+  function giftHasToken(){ try { return !!localStorage.getItem(GIFT_GH_KEY); } catch(e){ return false; } }
+  function giftSalonHtml(){
+    const L = state.lang, r = giftReg(), today = todayKey();
+    const rows = Object.entries(r.v).map(([n, v]) => ({ n, v, bal: giftBal(v) })).map(x => ({ ...x, st: giftStatus(x.v, x.bal) }));
+    const open = rows.filter(x => x.st === "open"), totalOpen = open.reduce((s, x) => s + x.bal, 0);
+    const soon = open.filter(x => x.v.valid <= giftAddMonths(today, 1));
+    const order = { open:0, expired:1, used:2 };
+    rows.sort((a, b) => order[a.st] - order[b.st] || a.n.localeCompare(b.n));
+    const bk = giftLoad(GIFT_BACKUP_KEY, {}).d || "";
+    const bkOld = !bk || (new Date(today) - new Date(bk)) / 86400000 > 14;
+    const pub = giftLoad(GIFT_PUB_KEY, {});
+    const liveHtml = giftHasToken()
+      ? `<p class="gift-live-status${pub.ok === false ? " is-bad" : ""}">${pub.ok === false ? "⚠️ " + t("gift_live_last_fail", L).replace("{e}", esc(pub.err || "")) : pub.d ? `<span class="gift-live-dot"></span> ${t("gift_live_last", L).replace("{d}", new Date(pub.d).toLocaleString(L === "en" ? "en-GB" : L === "fr" ? "fr-BE" : "nl-BE", { dateStyle:"short", timeStyle:"short" }))}` : t("gift_live_never", L)}</p>
+         <button type="button" class="btn btn--outline btn--sm" data-action="gift-publish">🔄 ${t("gift_live_publish", L)}</button>
+         <button type="button" class="btn btn--text btn--sm" data-action="gift-token-del">${t("gift_live_token_del", L)}</button>`
+      : `<p class="gift-warn">🌐 ${t("gift_live_off", L)}</p>
+         <button type="button" class="btn btn--outline btn--sm" data-action="gift-token">🔑 ${t("gift_live_token_btn", L)}</button>`;
+    const list = rows.map(x => `<li class="gift-row gift-row--${x.st}${gift.open === x.n ? " is-open" : ""}">
+        <button type="button" class="gift-row__head" data-gift-open="${esc(x.n)}">
+          <span><b>${esc(x.n)}</b>${x.v.paper ? " 📄" : ""}${x.v.to ? " · " + esc(x.v.to) : ""}</span>
+          <span>${giftEuro(x.bal)} / ${giftEuro(x.v.a)} · ${t("gift_st_" + x.st + "_short", L)} ${x.st === "used" ? "" : advFmt(x.v.valid)}</span>
+        </button>
+        ${gift.open === x.n ? giftDetailHtml(x.n, x.v, x.bal, x.st) : ""}
+      </li>`).join("");
+    return `<p class="gift-block__title">🔒 ${t("gift_salon_title", L)}</p>
+      <p class="ingr-note">${t("gift_salon_sum", L).replace("{n}", open.length).replace("{t}", giftEuro(totalOpen))}${soon.length ? ` · ⚠️ ${t("gift_salon_soon", L).replace("{n}", soon.length)}` : ""}</p>
+      <div class="gift-live">${liveHtml}</div>
+      ${bkOld ? `<p class="gift-warn">💾 ${t(bk ? "gift_backup_old" : "gift_backup_never", L).replace("{d}", bk ? advFmt(bk) : "")}</p>` : ""}
+      <input type="search" id="giftFind" class="price-search" placeholder="🔎 ${t("gift_find_ph", L)}" autocomplete="off">
+      <ul class="gift-list">${list}</ul>
+      <details class="gift-new"${Object.keys(r.v).length ? "" : " open"}><summary>➕ ${t("gift_new_title", L)}</summary>
+        <label class="pm-label">${t("gift_new_nr", L)}</label><input type="text" id="giftNewNr" class="pm-input" value="${giftNextNumber(r)}" inputmode="numeric">
+        <label class="pm-label">${t("gift_new_amt", L)}</label><input type="text" id="giftNewAmt" class="pm-input" inputmode="decimal" placeholder="100">
+        <label class="pm-label">${t("gift_new_date", L).replace("{m}", giftMonthsFor(today))}</label><input type="date" id="giftNewDate" class="pm-input" value="${today}">
+        <input type="text" id="giftNewBuyer" class="pm-input" maxlength="40" placeholder="${t("gift_new_buyer", L)}">
+        <input type="text" id="giftNewTo" class="pm-input" maxlength="40" placeholder="${t("gift_new_to", L)}">
+        <select id="giftNewPay" class="pm-input">${["transfer", "cash", "payconiq", "card"].map(p => `<option value="${p}">${t("gift_paid_" + p, L)}</option>`).join("")}</select>
+        <label class="chip chip--check"><input type="checkbox" id="giftNewPaper"> ${t("gift_new_paper", L)}</label>
+        <button type="button" class="btn btn--primary btn--sm" data-action="gift-create">${t("gift_new_save", L)}</button>
+      </details>
+      <div class="gift-backup">
+        <button type="button" class="btn btn--outline btn--sm" data-action="gift-backup">💾 ${t("gift_backup_btn", L)}</button>
+        <label class="btn btn--text btn--sm">📂 ${t("gift_restore_btn", L)}<input type="file" id="giftRestore" accept="application/json,.json" hidden></label>
+      </div>`;
+  }
+  function giftDetailHtml(n, v, bal, st){
+    const L = state.lang;
+    const uses = (v.uses || []).map((u, i) => `<li>${advFmt(u.d)} · −${giftEuro(u.c)}${u.w ? " · " + esc(u.w) : ""} <button type="button" class="btn btn--text btn--sm" data-gift-undo="${i}">↩︎</button></li>`).join("");
+    return `<div class="gift-detail">
+        <p>${t("gift_d_issued", L)} ${advFmt(v.issued)} · ${t("gift_d_valid", L)} ${advFmt(v.valid)}${v.pay ? " · " + t("gift_paid_" + v.pay, L) : ""}</p>
+        ${v.buyer ? `<p>${t("gift_d_buyer", L)} ${esc(v.buyer)}</p>` : ""}
+        ${uses ? `<ul class="gift-uses">${uses}</ul>` : `<p class="ingr-muted">${t("gift_d_nouse", L)}</p>`}
+        ${st === "open" ? `<div class="gift-use">
+          <input type="text" inputmode="decimal" id="giftUseAmt" class="pm-input" placeholder="${t("gift_use_amt", L).replace("{b}", giftEuro(bal))}">
+          <input type="text" id="giftUseWhat" class="pm-input" maxlength="60" placeholder="${t("gift_use_what", L)}">
+          <button type="button" class="btn btn--primary btn--sm" data-action="gift-use">${t("gift_use_btn", L)}</button></div>` : ""}
+        ${st === "expired" ? `<p class="gift-warn">${t("gift_d_expired_note", L)}</p>
+          <button type="button" class="btn btn--outline btn--sm" data-action="gift-extend">${t("gift_extend_btn", L)}</button>` : ""}
+        <div class="gift-share">
+          <button type="button" class="btn btn--outline btn--sm" data-action="gift-share">📲 ${t("gift_share_btn", L)}</button>
+          <canvas id="giftQr" class="gift-qr" width="480" height="480" hidden></canvas>
+          <p class="ingr-muted" id="giftShareOut"></p>
+        </div>
+        <button type="button" class="btn btn--text btn--sm gift-del" data-action="gift-delete">🗑 ${t("gift_delete_btn", L)}</button>
+      </div>`;
+  }
+  function giftSalonRefresh(){ const s = $("#giftSalon"); if (s){ s.innerHTML = giftSalonHtml(); giftSalonAfter(); } }
+  function giftSalonAfter(){
+    const f = $("#giftFind");
+    if (f) f.addEventListener("input", () => {
+      const q = f.value.trim().toLowerCase();
+      $$(".gift-row").forEach(li => { li.hidden = !!q && !li.textContent.toLowerCase().includes(q); });
+    });
+    const rs = $("#giftRestore");
+    if (rs) rs.addEventListener("change", () => {
+      const file = rs.files && rs.files[0]; if (!file) return;
+      file.text().then(txt => {
+        const d = JSON.parse(txt);
+        if (!d || !d.v) throw new Error("bad");
+        const r = giftReg(); let n = 0;
+        Object.entries(d.v).forEach(([k, v]) => { if (!r.v[k] || (v.rev || 0) >= (r.v[k].rev || 0)){ r.v[k] = v; n++; } });
+        giftSave(GIFT_REG_KEY, r); showToast(t("gift_restored", state.lang).replace("{n}", n)); giftSalonRefresh(); giftPublish(true);
+      }).catch(() => showToast(t("gift_restore_bad", state.lang)));
+    });
+  }
+  // every change: save, refresh, publish the live balances (silent unless it fails)
+  function giftCommit(r){ giftSave(GIFT_REG_KEY, r); giftSalonRefresh(); giftPublish(true).then(() => giftSalonRefresh()); }
+  function giftChange(fn){ const r = giftReg(), v = r.v[gift.open]; if (!v) return; fn(v, r); v.rev = (v.rev || 1) + 1; giftCommit(r); }
+  function giftCreate(){
+    const L = state.lang, r = giftReg();
+    const n = (($("#giftNewNr") || {}).value || "").replace(/\D/g, ""), a = giftCents(($("#giftNewAmt") || {}).value), d = ($("#giftNewDate") || {}).value || todayKey();
+    if (!/^\d{4,10}$/.test(n)){ showToast(t("gift_err_nr", L)); return; }
+    if (r.v[n]){ showToast(t("gift_err_exists", L).replace("{n}", n)); return; }
+    if (!(a > 0)){ showToast(t("gift_err_amt", L)); return; }
+    r.v[n] = { a, issued:d, valid: giftAddMonths(d, giftMonthsFor(d)), paper: !!($("#giftNewPaper") || {}).checked, s: giftSecret(),
+      buyer: (($("#giftNewBuyer") || {}).value || "").trim(), to: (($("#giftNewTo") || {}).value || "").trim(), pay: ($("#giftNewPay") || {}).value || "", note:"", rev:1, uses:[] };
+    gift.open = n; showToast(t("gift_created", L).replace("{n}", n)); giftCommit(r);
+  }
+  function giftUse(){
+    const L = state.lang, c = giftCents(($("#giftUseAmt") || {}).value), w = (($("#giftUseWhat") || {}).value || "").trim();
+    const r = giftReg(), v = r.v[gift.open]; if (!v) return;
+    const bal = giftBal(v);
+    if (!(c > 0)){ showToast(t("gift_err_amt", L)); return; }
+    if (c > bal){ showToast(t("gift_err_over", L).replace("{b}", giftEuro(bal))); return; }
+    if (!confirm(t("gift_use_confirm", L).replace("{a}", giftEuro(c)).replace("{n}", gift.open).replace("{b}", giftEuro(bal - c)))) return;
+    giftChange(v2 => { v2.uses = (v2.uses || []).concat([{ d: todayKey(), c, w }]); });
+    showToast(t("gift_used_ok", L).replace("{b}", giftEuro(bal - c)));
+  }
+  async function giftShare(){
+    const L = state.lang, r = giftReg(), v = r.v[gift.open]; if (!v) return;
+    let tok;
+    try { tok = await giftToken(gift.open, v); } catch(e){ showToast(t("stamp_unsupported", L)); return; }
+    const link = giftLink(tok), out = $("#giftShareOut"), cv = $("#giftQr");
+    const msg = t("gift_share_text", L).replace("{n}", gift.open).replace("{b}", giftEuro(giftBal(v))).replace("{d}", advFmt(v.valid)) + "\n" + link;
+    if (await loadFirstScript(["assets/lib/qr-encoder.js"], () => !!window.BCQRCode) && cv){ cv.hidden = false; drawQrToCanvas(cv, link); }
+    if (out) out.innerHTML = `${t("gift_share_hint", L)}<br>
+      <a class="btn btn--primary btn--sm" target="_blank" rel="noopener noreferrer" href="https://wa.me/?text=${encodeURIComponent(msg)}">💬 WhatsApp</a>
+      <a class="btn btn--outline btn--sm" href="mailto:?subject=${encodeURIComponent(t("gift_mail_subject_salon", L).replace("{n}", gift.open))}&body=${encodeURIComponent(msg)}">✉️ E-mail</a>
+      <button type="button" class="btn btn--text btn--sm" data-gift-copy="${esc(link)}">📋 ${t("gift_copy_link", L)}</button>`;
+  }
+  function giftBackup(){
+    const r = giftReg(), blob = new Blob([JSON.stringify(r, null, 1)], { type:"application/json" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `cadeaubonnen-${todayKey()}.json`;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    giftSave(GIFT_BACKUP_KEY, { d: todayKey() }); giftSalonRefresh();
+  }
+  function giftBind(){
+    const body = $("#giftBody"); if (!body || body.dataset.giftBound) return;
+    body.dataset.giftBound = "1";
+    body.addEventListener("input", e => { if (e.target.closest("#giftOwnAmt, #giftFor, #giftFrom, #giftNote")){ if (e.target.id === "giftOwnAmt" && e.target.value){ gift.buyAmount = 0; $$("[data-gift-amt]").forEach(b => b.classList.remove("is-selected")); } giftBuyUpdate(); } });
+    body.addEventListener("click", e => {
+      const L = state.lang;
+      const am = e.target.closest("[data-gift-amt]");
+      if (am){ gift.buyAmount = Number(am.dataset.giftAmt) * 100; const o = $("#giftOwnAmt"); if (o) o.value = ""; $$("[data-gift-amt]").forEach(b => b.classList.toggle("is-selected", b === am)); giftBuyUpdate(); return; }
+      const pay = e.target.closest("[data-gift-pay]");
+      if (pay){ const keep = ["giftOwnAmt", "giftFor", "giftFrom", "giftNote"].map(id => (($("#" + id) || {}).value || "")); gift.buyPay = pay.dataset.giftPay; renderGiftCard();
+        ["giftOwnAmt", "giftFor", "giftFrom", "giftNote"].forEach((id, i) => { const x = $("#" + id); if (x) x.value = keep[i]; }); giftBuyUpdate(); return; }
+      const wa = e.target.closest("#giftWa");
+      if (wa && wa.classList.contains("is-disabled")){ e.preventDefault(); showToast(t("gift_err_min", L).replace("{min}", GIFT.minAmount || 10)); return; }
+      const cp = e.target.closest("[data-gift-copy]");
+      if (cp){ const c = cp.dataset.giftCopy; try { navigator.clipboard.writeText(c).then(() => showToast(t("gift_copied", L)), () => showToast(c)); } catch(err){ showToast(c); } return; }
+      const op = e.target.closest("[data-gift-open]");
+      if (op){ gift.open = gift.open === op.dataset.giftOpen ? "" : op.dataset.giftOpen; giftSalonRefresh(); return; }
+      const un = e.target.closest("[data-gift-undo]");
+      if (un){ if (confirm(t("gift_undo_confirm", L))) giftChange(v => { v.uses.splice(Number(un.dataset.giftUndo), 1); }); return; }
+      const act = e.target.closest("[data-action]"); if (!act) return;
+      const a = act.dataset.action;
+      if (a === "gift-check") giftCheck();
+      if (a === "gift-create") giftCreate();
+      if (a === "gift-use") giftUse();
+      if (a === "gift-share") giftShare();
+      if (a === "gift-backup") giftBackup();
+      if (a === "gift-publish") giftPublish(false).then(() => giftSalonRefresh());
+      if (a === "gift-token"){
+        const k = (prompt(t("gift_live_token_prompt", L)) || "").trim();
+        if (k){ if (!/^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/.test(k)){ showToast(t("gift_live_token_bad", L)); return; }
+          try { localStorage.setItem(GIFT_GH_KEY, k); } catch(err){ /* ignore */ }
+          giftPublish(false).then(() => giftSalonRefresh()); }
+      }
+      if (a === "gift-token-del"){ if (confirm(t("gift_live_token_del_confirm", L))){ try { localStorage.removeItem(GIFT_GH_KEY); } catch(err){ /* ignore */ } giftSalonRefresh(); } }
+      if (a === "gift-extend"){ const nd = prompt(t("gift_extend_prompt", L), giftAddMonths(todayKey(), 1)); if (nd && /^\d{4}-\d{2}-\d{2}$/.test(nd)) giftChange(v => { v.valid = nd; }); }
+      if (a === "gift-delete"){ if (confirm(t("gift_delete_confirm", L).replace("{n}", gift.open))){ const r = giftReg(); delete r.v[gift.open]; gift.open = ""; giftCommit(r); } }
+    });
   }
 
   /* ---------------- ingredients & allergies (ingredients.js) ----------------
@@ -4169,8 +4622,8 @@
     const rank = i => !i ? 2 : (i.incomplete ? 1 : 0);
     rows.sort((a, b) => rank(a.info) - rank(b.info) || (rank(a.info) === 0 ? a.info.days - b.info.days : ingrName(a.p).localeCompare(ingrName(b.p))));
     const cats = openCats();
-    const catsOf = p => { const u = p.usedIn || []; const c = Object.keys(cats).filter(g => u.some(x => cats[g].includes(x) || (g === "face" && /^extra-facial/.test(x)))); return c.length ? c : ["other"]; };
-    const chips = ["all"].concat(Object.keys(cats), ["other", "filled"]).map(g => `<button type="button" class="chip${(ingr.openCat || "all") === g ? " is-selected" : ""}" data-open-cat="${g}">${g === "all" ? t("tht_all", L) : g === "other" ? t("tht_other", L) : g === "filled" ? "📅 " + t("tht_filled", L) : (AVOID_ICONS[g] || "") + " " + t("avoid." + g, L)}</button>`).join("");
+    const catsOf = p => { if (DIY_SLOTS.includes(p.slot)) return ["diy"]; const u = p.usedIn || []; const c = Object.keys(cats).filter(g => u.some(x => cats[g].includes(x) || (g === "face" && /^extra-facial/.test(x)))); return c.length ? c : ["other"]; };
+    const chips = ["all"].concat(Object.keys(cats), ["diy", "other", "filled"]).map(g => `<button type="button" class="chip${(ingr.openCat || "all") === g ? " is-selected" : ""}" data-open-cat="${g}">${g === "all" ? t("tht_all", L) : g === "other" ? t("tht_other", L) : g === "diy" ? "🧼 " + t("tht_diy", L) : g === "filled" ? "📅 " + t("tht_filled", L) : (AVOID_ICONS[g] || "") + " " + t("avoid." + g, L)}</button>`).join("");
     let html = `<p class="ingr-note">${t("ingr_open_intro", L)}</p>
       <div class="open-filter">
         <input type="search" id="openSearch" class="price-search" placeholder="🔎 ${t("tht_search", L)}" value="${esc(ingr.openQ || "")}" autocomplete="off">
@@ -4185,7 +4638,7 @@
       else if (info){
         const how = info.by === "tht" ? t("ingr_open_by_tht", L) : t("ingr_open_by_pao", L);
         if (info.days < 0){ status = t("ingr_open_expired", L).replace("{d}", advFmt(info.expKey)); cls = " is-expired";
-          const ru = (typeof EXPIRED_REUSE !== "undefined") ? (EXPIRED_REUSE[p.slot] || EXPIRED_REUSE.default) : null;
+          const ru = p.reuse || ((typeof EXPIRED_REUSE !== "undefined") ? (EXPIRED_REUSE[p.slot] || EXPIRED_REUSE.default) : null);
           if (ru) status += `<span class="open-row__reuse">♻️ ${esc(t("ingr_open_reuse", L))} ${esc(ru[L] || ru.nl)}</span>`; }
         else if (info.days <= 7){ status = t("ingr_open_soon", L).replace("{n}", info.days).replace("{d}", advFmt(info.expKey)); cls = " is-soon"; }
         else status = t("ingr_open_left", L).replace("{n}", info.days).replace("{d}", advFmt(info.expKey));
@@ -4222,6 +4675,8 @@
     }
     return html;
   }
+  // v182: soap / homemade-cosmetics raw materials get their own filter chip
+  const DIY_SLOTS = ["diy","plantoil","fragranceoil"];
   function openCats(){
     const g = typeof AVOID_GROUPS !== "undefined" ? AVOID_GROUPS : {};
     const order = ["face","hands","feet","massage","waxing","browlash","makeup"];
@@ -4339,8 +4794,8 @@
     const total = sales.reduce((s, l) => s + (l.p || 0), 0);
     const nm = id => esc(ingrName(SALON_PRODUCTS[id] || { name:id }));
     const cats = openCats();
-    const catsOf = p => { const u = p.usedIn || []; const c = Object.keys(cats).filter(g => u.some(v => cats[g].includes(v))); return c.length ? c : ["other"]; };
-    const chips = ["all"].concat(Object.keys(cats), ["other", "tracked"]).map(g => `<button type="button" class="chip${(ingr.invCat || "all") === g ? " is-selected" : ""}" data-inv-cat="${g}">${g === "all" ? t("tht_all", L) : g === "other" ? t("tht_other", L) : g === "tracked" ? t("inv_tracked", L) : t("avoid." + g, L)}</button>`).join("");
+    const catsOf = p => { if (DIY_SLOTS.includes(p.slot)) return ["diy"]; const u = p.usedIn || []; const c = Object.keys(cats).filter(g => u.some(v => cats[g].includes(v))); return c.length ? c : ["other"]; };
+    const chips = ["all"].concat(Object.keys(cats), ["diy", "other", "tracked"]).map(g => `<button type="button" class="chip${(ingr.invCat || "all") === g ? " is-selected" : ""}" data-inv-cat="${g}">${g === "all" ? t("tht_all", L) : g === "other" ? t("tht_other", L) : g === "diy" ? "🧼 " + t("tht_diy", L) : g === "tracked" ? t("inv_tracked", L) : t("avoid." + g, L)}</button>`).join("");
     const treats = ingrTreatments().filter(id => !ingrIsAdventUse(id)).map(id => [id, ingrTreatName(id)]).sort((a, b) => a[1].localeCompare(b[1]));
     // use-up actions: are their products finished? (then switch the action off)
     const actWarn = (typeof CURRENT_ACTIONS !== "undefined" ? CURRENT_ACTIONS : []).filter(a => a.products && !a.soldOut).map(a => {
@@ -4768,6 +5223,11 @@
     const lines = [t("oil_steam_" + u.steam, L), t("oil_massage", L).replace("{d}", u.drops) + (u.sun ? " " + t("oil_sun", L) : ""), t("oil_foot_" + u.foot, L), t("oil_diffuser", L)];
     return `<div class="ingr-card__note ingr-card__note--sandra oil-use"><b>🧴 ${t("oil_use_title", L)}</b><ul>${lines.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>`;
   }
+  function tipsHtml(id, L){
+    const tp = (typeof PRODUCT_TIPS !== "undefined" ? PRODUCT_TIPS : {})[id]; if (!tp) return "";
+    const lines = tp[L] || tp.nl || [];
+    return `<div class="ingr-card__note ingr-card__note--sandra oil-use"><b>💡 ${t("tips_title", L)}</b><ul>${lines.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>`;
+  }
   function ingrProductCard(id, p, keys){
     const L = state.lang, inci = ingrInci(p);
     const hits = keys ? ingrParts(inci).filter(x => ingrHit(x, keys)) : [];
@@ -4779,6 +5239,7 @@
         ${note.pub ? `<p class="ingr-card__note">${esc(note.pub)}</p>` : ""}
         ${priv && ingrSandra() ? `<p class="ingr-card__note ingr-card__note--sandra">🔒 ${esc(priv)}</p>` : ""}
         ${ingrSandra() ? oilUseHtml(id, L) : ""}
+        ${ingrSandra() ? tipsHtml(id, L) : ""}
         <p class="ingr-muted">${t("ingr_used_in", L)} ${esc((p.usedIn || []).map(ingrTreatName).join(", ") || "—")}</p>
         <details class="ingr-inci"><summary>${t("ingr_full_list", L)}</summary><p>${inci ? esc(inci) : t("ingr_inci_missing", L)}</p></details>
       </div>`;
@@ -4818,7 +5279,7 @@
       const neg = /\b(niet|geen|not|no|pas|sans|vermijd|avoid|zonder|without)\b[^.;]{0,30}$/;
       const has = (txt) => terms.some(tm => { let k = txt.indexOf(tm); while (k >= 0){ if ((k === 0 || !/[a-z0-9à-ÿ]/.test(txt[k - 1])) && !neg.test(txt.slice(Math.max(0, k - 40), k))) return true; k = txt.indexOf(tm, k + 1); } return false; });
       const txtOf = x => ingrNorm(typeof x === "string" ? x : Object.values(x || {}).join(" | "));
-      const fit = all.filter(([id]) => !hitIds.has(id)).map(([id, p]) => [id, p, has(txtOf(p.name)) ? 2 : (has(txtOf(p.note)) ? 1 : 0)]).filter(x => x[2] > 0).sort((a, b) => b[2] - a[2]);
+      const fit = all.filter(([id]) => !hitIds.has(id)).map(([id, p]) => [id, p, has(txtOf(p.name)) ? 2 : ((has(txtOf(p.note)) || (ingrSandra() && typeof PRODUCT_TIPS !== "undefined" && PRODUCT_TIPS[id] && has(txtOf(PRODUCT_TIPS[id].nl.concat(PRODUCT_TIPS[id].en || []))))) ? 1 : 0)]).filter(x => x[2] > 0).sort((a, b) => b[2] - a[2]);
       if (fit.length && !hit.length) html = html.replace(`<p class="ingr-ok">✅ ${t("ingr_none_found", L)}</p>`, "");
       if (fit.length) html += `<h3 class="ingr-h">🔎 ${t("ingr_fit_found", L).replace("{n}", fit.length)}</h3>` + fit.slice(0, 30).map(([id, p]) => ingrProductCard(id, p, null)).join("");
     }
@@ -5252,8 +5713,10 @@
         ${door.ingredients ? `<p class="advent-voucher__ingr">${t("adv_allergy_ask", state.lang)}</p>` : ""}</div>` : "";
     const waText = advFill(t("adv_book_wa_text", state.lang), door).replace("{gift}", advDoorText(door, state.lang)).replace("{code}", rec.code);
     const bookHtml = expired ? "" : `<div class="advent-voucher__book">
-        <a class="btn btn--primary btn--sm" href="https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(waText)}" target="_blank" rel="noopener noreferrer">💬 ${t("adv_book_wa", state.lang)}</a>
+        ${typeof ONLINE_BOOKING_URL !== "undefined" && ONLINE_BOOKING_URL ? `<a class="btn btn--primary btn--sm" href="${esc(ONLINE_BOOKING_URL)}" target="_blank" rel="noopener noreferrer" data-action="online-book" data-online-src="advent">📅 ${t("adv_book_online", state.lang)}</a>` : ""}
+        <a class="btn btn--outline btn--sm" href="https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(waText)}" target="_blank" rel="noopener noreferrer">💬 ${t("adv_book_wa", state.lang)}</a>
         <button type="button" class="btn btn--outline btn--sm" data-adv="copy">📋 ${t("adv_copy_code", state.lang)}</button>
+        <p class="advent-voucher__online">${t("adv_book_online_hint", state.lang)}</p>
         ${door.itemStock != null || door.replacedFrom ? `<button type="button" class="btn btn--text btn--sm" data-adv="scanrepl">🔄 ${t("adv_repl_scan_btn", state.lang)}</button>` : ""}
       </div>`;
     const ov = document.createElement("div");
@@ -6030,6 +6493,7 @@
       if (action === "ingr-op-copy"){ const c = el.dataset.code; try { navigator.clipboard.writeText(c).then(() => showToast(t("ingr_op_copied", state.lang)), () => showToast(c)); } catch(e){ showToast(c); } }
       if (action === "ingr-chip"){ const g = ALLERGEN_GROUPS.find(x => x.id === el.dataset.group); ingr.q = g ? (g.label[state.lang] || g.label.nl) : ""; const inp = $("#ingrSearch"); if (inp) inp.value = ingr.q; renderIngrResults(); }
       if (action === "open-stampcard") goTo("stampcard");
+      if (action === "open-giftcard") goTo("giftcard");
       if (action === "open-advent") goTo("advent");
       if (action === "season-fact") nextSeasonFact();
       if (action === "season-shop") trackEvent("season-shop");

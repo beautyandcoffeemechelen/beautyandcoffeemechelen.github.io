@@ -870,6 +870,106 @@ const SALON_PRODUCTS = {
     inci:"Isooctyl Palmitate, Polyisobutene, Tridecyl Trimellitate, Mineral Oil, Ozokerite, Microcrystalline Wax, Phenoxyethanol. May contain: Mica (CI 77019), Titanium Dioxide (CI 77891), Red 27 (CI 45410:1), Red 33 (CI 17200), Red 7 (CI 15850:1), Red 6 (CI 15850), Iron Oxides (CI 77491, CI 77492, CI 77499)",
     note:{ nl:"12 minerale lipkleuren om te mengen tot je eigen tint: Envy, Catwalk, La Diva, Mandarina, Bellalicious, Va Va Voom!, Ruby, Cherry Pop, Burlesque, Couture, Fierce en Luminous. Met het penseel aanbrengen.", en:"12 mineral lip shades to mix into your own colour, from Envy to Luminous. Apply with the brush.", fr:"12 rouges minéraux à mélanger, d’Envy à Luminous. Appliquer au pinceau." },
     sandraNote:{ nl:"Alleen voor jou: zonder parfum, zonder karmijn (vegan). Neem de kleur met een spatel op een paletje, nooit rechtstreeks van klant tot klant; penseel na elke klant reinigen. Na openen 24 maanden.", en:"Only for you: fragrance- and carmine-free. Use a spatula, never straight from client to client. 24 months.", fr:"Uniquement pour toi : sans parfum ni carmin. Spatule, jamais directement d’une cliente à l’autre. 24 mois." } },
+  druleucidal: { name:{"nl": "Druantia – Leucidal SF Complete, natuurlijk conserveermiddel (50 ml)", "en": "Druantia – Leucidal SF Complete, natural preservative (50 ml)", "fr": "Druantia – Leucidal SF Complete, conservateur naturel (50 ml)"}, usedIn:[], slot:"diy", inci:"Lactobacillus Ferment, Lactobacillus, Cocos Nucifera Fruit Extract",
+    note:{"nl": "Waarvoor: een natuurlijk conserveermiddel (gefermenteerde melkzuurbacteriën met kokos) voor zelfgemaakte crèmes, lotions en gels met water erin. Dosering 2–4% van het eindproduct, toevoegen als het mengsel afgekoeld is onder 70 °C; werkt van pH 3 tot 8. Voor gebruik schudden, op kamertemperatuur bewaren.", "en": "What for: a natural preservative (fermented lactic bacteria with coconut) for homemade creams, lotions and gels that contain water. Use 2–4% of the finished product, added once the mix has cooled below 70 °C; works from pH 3 to 8. Shake before use, store at room temperature.", "fr": "À quoi ça sert : conservateur naturel (bactéries lactiques fermentées et coco) pour crèmes, lotions et gels maison contenant de l’eau. 2–4 % du produit fini, à ajouter sous 70 °C ; efficace de pH 3 à 8. Agiter avant emploi, conserver à température ambiante."},
+    reuse:{"nl": "Niet meer als conserveermiddel. Wel nog als extraatje (een theelepel) in een eigen stuk zeep (koudproces): zeep heeft geen conservering nodig. Anders: afvoeren met het restafval.", "en": "No longer as a preservative. You can still stir a teaspoon into your own cold-process soap (soap needs no preservative). Otherwise: throw away with household waste.", "fr": "Plus comme conservateur. Encore possible : une cuillère à café dans ton propre savon à froid (le savon n’a pas besoin de conservateur). Sinon : ordures ménagères."},
+    sandraNote:{"nl": "Alleen voor jou: THT 04/2023 = vervallen. Een conserveermiddel dat over datum is, beschermt je product niet meer tegen schimmels en bacteriën: niet meer gebruiken om iets mee te bewaren. Nieuwe fles: 12 maanden na opening houdbaar.", "en": "Only for you: Best before 04/2023 = expired. An expired preservative no longer protects against mould and bacteria: do not use it to preserve anything. New bottle: 12 months after opening.", "fr": "Uniquement pour toi : DLUO 04/2023 = périmé. Un conservateur périmé ne protège plus contre moisissures et bactéries : ne plus l’utiliser pour conserver. Nouveau flacon : 12 mois après ouverture."} },
+  drupanthenol: { name:{"nl": "Druantia – d-Panthenol 75% (provitamine B5, 50 ml)", "en": "Druantia – d-Panthenol 75% (provitamin B5, 50 ml)", "fr": "Druantia – d-Panthénol 75 % (provitamine B5, 50 ml)"}, usedIn:[], slot:"diy", inci:"Panthenol, Aqua",
+    note:{"nl": "Waarvoor: provitamine B5 om zelf te mengen. Houdt vocht vast, kalmeert en helpt de huidbarrière herstellen; in haarproducten geeft het glans en maakt het haar soepeler. Dosering 0,2–5% (5% voor after-sun of een geïrriteerde huid). In de waterfase toevoegen, onder 50 °C.", "en": "What for: provitamin B5 to mix yourself. Holds moisture, soothes and helps repair the skin barrier; in hair products it adds shine and softness. Use 0.2–5% (5% for after-sun or irritated skin). Add to the water phase below 50 °C.", "fr": "À quoi ça sert : provitamine B5 à mélanger soi-même. Hydrate, apaise et aide à réparer la barrière cutanée ; dans les produits capillaires, apporte brillance et souplesse. 0,2–5 % (5 % pour après-soleil ou peau irritée). Dans la phase aqueuse, sous 50 °C."},
+    reuse:{"nl": "Is het over datum of troebel geworden: niet meer op de huid. Een paar druppels in het water van je kamerplanten kan geen kwaad; anders afvoeren met het restafval.", "en": "Expired or cloudy: no longer on the skin. Throw away with household waste.", "fr": "Périmé ou trouble : plus sur la peau. À jeter avec les ordures ménagères."},
+    sandraNote:{"nl": "Alleen voor jou: Het etiket is deels weg, de datum is niet leesbaar. Panthenol is lang houdbaar als het koel en donker staat. Idee: een scheutje (2–5%) in je eigen aloëgel of hydrolaat voor een kalmerende after-sun of gezichtsspray (wel met conservering). Bovenop een kant-en-klare gel of lotion mag ook.", "en": "Only for you: Label partly gone, date unreadable. Panthenol keeps long if cool and dark. Idea: 2–5% in your own aloe gel or hydrosol for a soothing after-sun or face mist (with preservative).", "fr": "Uniquement pour toi : Étiquette en partie effacée, date illisible. Le panthénol se garde longtemps au frais et à l’abri de la lumière. Idée : 2–5 % dans un gel d’aloé ou un hydrolat pour un après-soleil ou une brume apaisante (avec conservateur)."} },
+  druriceprotein: { name:{"nl": "Druantia – Rijstproteïne, gehydrolyseerd (50 ml)", "en": "Druantia – Hydrolysed rice protein (50 ml)", "fr": "Druantia – Protéine de riz hydrolysée (50 ml)"}, usedIn:[], slot:"diy", inci:"Hydrolysed Rice Protein",
+    note:{"nl": "Waarvoor: plantaardig eiwit voor zelfgemaakte shampoo, conditioner, haarspray en crèmes. Legt een zacht laagje op haar en huid, maakt het haar voller en de huid soepeler. Meestal 1–5%, in de waterfase.", "en": "What for: plant protein for homemade shampoo, conditioner, hair mist and creams. Leaves a soft film on hair and skin, adds volume and softness. Usually 1–5%, in the water phase.", "fr": "À quoi ça sert : protéine végétale pour shampooing, après-shampooing, brume capillaire et crèmes maison. Laisse un film doux sur cheveux et peau, donne du volume. Souvent 1–5 %, en phase aqueuse."},
+    reuse:{"nl": "Niet meer in cosmetica. Ruikt het nog goed: verdund (1 theelepel op 1 liter) als voeding bij je kamerplanten of op de composthoop.", "en": "Not in cosmetics any more. If it still smells fine: diluted (1 tsp per litre) for house plants, or on the compost.", "fr": "Plus en cosmétique. S’il sent encore bon : dilué (1 c. à café par litre) pour les plantes, ou au compost."},
+    sandraNote:{"nl": "Alleen voor jou: THT 09/2023 = vervallen. Eiwitten in water bederven makkelijk: ruik eraan, bij een vreemde geur of schimmel meteen weg.", "en": "Only for you: Best before 09/2023 = expired. Proteins in water spoil easily: smell it, throw away if it smells off or shows mould.", "fr": "Uniquement pour toi : DLUO 09/2023 = périmé. Les protéines en solution s’abîment vite : sentir, jeter si odeur bizarre ou moisissure."} },
+  drualoegel: { name:{"nl": "Druantia – Aloë vera gel 1:1, 98% (100 ml)", "en": "Druantia – Aloe vera gel 1:1, 98% (100 ml)", "fr": "Druantia – Gel d’aloe vera 1:1, 98 % (100 ml)"}, usedIn:[], slot:"diy", inci:"Aloe Barbadensis (Leaf Juice), Sodium Benzoate, Citric Acid, Potassium Sorbate",
+    note:{"nl": "Waarvoor: pure aloëgel als basis voor zelfgemaakte gels, after-sun, gezichtsmaskers en lotions; koelt en hydrateert. Kan ook puur op de huid.", "en": "What for: pure aloe gel as a base for homemade gels, after-sun, face masks and lotions; cools and hydrates. Can also be used neat.", "fr": "À quoi ça sert : gel d’aloé pur comme base pour gels, après-soleil, masques et lotions maison ; rafraîchit et hydrate. Utilisable pur."},
+    reuse:{"nl": "Niet meer op de huid. Verdund (1 eetlepel op 1 liter water) bij je planten of op de composthoop.", "en": "Not on skin any more. Diluted (1 tbsp per litre of water) for your plants, or on the compost.", "fr": "Plus sur la peau. Dilué (1 c. à soupe par litre) pour les plantes, ou au compost."},
+    sandraNote:{"nl": "Alleen voor jou: THT 12/2022 = vervallen; aloë bederft snel en de conservering is uitgewerkt.", "en": "Only for you: Best before 12/2022 = expired; aloe spoils quickly and the preservative is spent.", "fr": "Uniquement pour toi : DLUO 12/2022 = périmé ; l’aloé s’abîme vite et le conservateur ne protège plus."} },
+  druplantaren: { name:{"nl": "Druantia – Plantaren, 52% wasactieve stof (250 ml)", "en": "Druantia – Plantaren, 52% active cleansing agent (250 ml)", "fr": "Druantia – Plantaren, 52 % de tensioactif (250 ml)"}, usedIn:[], slot:"diy", inci:"Decyl Glucoside",
+    note:{"nl": "Waarvoor: een milde plantaardige wasbasis (uit suiker en kokos/maïs) om zelf shampoo, douchegel, handzeep of een gezichtsreiniger te maken. Schuimt zacht, ook geschikt voor de gevoelige huid.", "en": "What for: a mild plant-based cleansing base (from sugar and coconut/corn) to make your own shampoo, shower gel, hand wash or face cleanser. Gentle foam, suits sensitive skin.", "fr": "À quoi ça sert : base lavante végétale douce (sucre et coco/maïs) pour shampooing, gel douche, savon pour les mains ou nettoyant visage maison. Mousse douce, convient aux peaux sensibles."},
+    reuse:{"nl": "Ideaal als reiniger voor je make-upkwasten en sponsjes (1 theelepel in een kom lauw water), om je spatels en kommetjes af te wassen of als milde allesreiniger voor de werktafel.", "en": "Great as a cleaner for make-up brushes and sponges (1 tsp in a bowl of warm water), to wash spatulas and bowls, or as a mild all-purpose cleaner for the work table.", "fr": "Idéal pour nettoyer pinceaux et éponges (1 c. à café dans un bol d’eau tiède), laver spatules et bols, ou comme nettoyant doux pour la table."},
+    sandraNote:{"nl": "Alleen voor jou: THT 12/2024 = vervallen. Wasactieve stoffen blijven lang goed werken, maar voor cosmetica die je aan iemand geeft gebruik je best een nieuwe fles.", "en": "Only for you: Best before 12/2024 = expired. Surfactants keep working a long time, but use a new bottle for cosmetics you give to anyone.", "fr": "Uniquement pour toi : DLUO 12/2024 = périmé. Les tensioactifs restent efficaces longtemps, mais prends un flacon neuf pour des cosmétiques que tu donnes."} },
+  mmbiokons: { name:{"nl": "Marion Maakt – Biokons, conserveermiddel (100 ml)", "en": "Marion Maakt – Biokons, preservative (100 ml)", "fr": "Marion Maakt – Biokons, conservateur (100 ml)"}, usedIn:[], slot:"diy", inci:"Propanediol, Phenethyl Alcohol, Undecyl Alcohol, Tocopherol",
+    note:{"nl": "Waarvoor: een conserveermiddel op basis van alcoholen uit planten (met vitamine E) voor zelfgemaakte crèmes, lotions, gels en shampoo met water erin. Houd je aan de dosering van Marion Maakt.", "en": "What for: a preservative based on plant-derived alcohols (with vitamin E) for homemade creams, lotions, gels and shampoo that contain water. Follow Marion Maakt’s dosage.", "fr": "À quoi ça sert : conservateur à base d’alcools d’origine végétale (avec vitamine E) pour crèmes, lotions, gels et shampooings maison contenant de l’eau. Respecter le dosage de Marion Maakt."},
+    reuse:{"nl": "Vervallen: niet meer als conserveermiddel. Het is vooral alcohol: nog bruikbaar om glas, spiegels of je werktafel af te nemen. Anders naar het containerpark (klein gevaarlijk afval).", "en": "Expired: no longer as a preservative. It is mainly alcohol: still fine to wipe glass, mirrors or the work table. Otherwise to the recycling park.", "fr": "Périmé : plus comme conservateur. C’est surtout de l’alcool : encore bon pour nettoyer verre, miroirs ou la table. Sinon au recyparc."},
+    sandraNote:{"nl": "Alleen voor jou: LOT 2020IIPRE005, THT 02/11/2022 = vervallen: hij beschermt je product niet meer, dus niet meer gebruiken om iets te bewaren. Kan prikken bij de ogen.", "en": "Only for you: Lot 2020IIPRE005, best before 02/11/2022 = expired: no longer protects, do not use to preserve. May sting the eyes.", "fr": "Uniquement pour toi : L’étiquette indique une date de 2022 (peu lisible). Si c’est la DLUO, il est périmé et ne protège plus : ne plus l’utiliser pour conserver. Peut piquer les yeux."} },
+  mmsqualane: { name:{"nl": "Marion Maakt – Plantaardige squalane uit olijven", "en": "Marion Maakt – Plant squalane from olives", "fr": "Marion Maakt – Squalane végétal d’olive"}, usedIn:[], slot:"plantoil", inci:"Squalane (Olea Europaea Fruit Oil)",
+    note:{"nl": "Waarvoor: een heel lichte, geurloze olie die snel intrekt en niet vet aanvoelt. Puur als gezichtsolie (2–3 druppels), op droge plekjes, nagelriemen of haarpunten, of als lichte olie in zelfgemaakte serums en crèmes. Niet comedogeen, wordt niet snel ranzig.", "en": "What for: a very light, odourless oil that absorbs fast and is not greasy. Neat as a face oil (2–3 drops), on dry spots, cuticles or hair ends, or as a light oil in homemade serums and creams. Non-comedogenic, very stable.", "fr": "À quoi ça sert : huile très légère et inodore, qui pénètre vite sans gras. Pure comme huile visage (2–3 gouttes), sur zones sèches, cuticules ou pointes, ou dans des sérums et crèmes maison. Non comédogène, très stable."},
+    reuse:{"nl": "Ruikt hij nog neutraal: houten handvatten, kammen of leer ermee insmeren. Ranzige geur: weggooien.", "en": "Still neutral smell: oil wooden handles, combs or leather. Rancid: throw away.", "fr": "Odeur encore neutre : nourrir manches en bois, peignes ou cuir. Rance : jeter."},
+    sandraNote:{"nl": "Alleen voor jou: vervallen (volgens jou; de exacte THT is niet leesbaar op de foto). Niet meer op klanten gebruiken.", "en": "Only for you: expired (according to you; exact date unreadable). Not on clients any more.", "fr": "Uniquement pour toi : Lot et DLUO sur le côté, illisibles sur la photo : vérifier et remplir l’onglet DLUO."} },
+  mmlecithin: { name:{"nl": "Marion Maakt – Lecithine", "en": "Marion Maakt – Lecithin", "fr": "Marion Maakt – Lécithine"}, usedIn:[], slot:"diy", inci:"Lecithin",
+    note:{"nl": "Waarvoor: een natuurlijke emulgator (meestal uit zonnebloem of soja). Laat olie en water beter mengen, bv. een badolie die in het bad niet bovendrijft, en verzorgt de huid in balsems en crèmes. Meestal 1–5%.", "en": "What for: a natural emulsifier (usually sunflower or soy). Helps oil and water mix, e.g. a bath oil that does not float on top, and conditions the skin in balms and creams. Usually 1–5%.", "fr": "À quoi ça sert : émulsifiant naturel (souvent tournesol ou soja). Aide huile et eau à se mélanger, par ex. une huile de bain qui ne flotte pas, et soigne la peau dans baumes et crèmes. Souvent 1–5 %."},
+    reuse:{"nl": "Ranzig of vervallen: niet meer op de huid; met het restafval weg (kleine hoeveelheid mag ook op de composthoop).", "en": "Rancid or expired: not on skin; household waste (a small amount may go on the compost).", "fr": "Rance ou périmé : plus sur la peau ; ordures ménagères (un peu au compost, c’est possible)."},
+    sandraNote:{"nl": "Alleen voor jou: LOT 300317KW, THT 03/2022 = vervallen (Marion Maakt, Gent). Bij soja-allergie: nakijken of het zonnebloemlecithine is. Lecithine wordt na lange tijd ranzig: ruik eraan.", "en": "Only for you: Lot 300317KW, best before 03/2022 = expired. Soy allergy: check whether it is sunflower lecithin. Goes rancid with time: smell it.", "fr": "Uniquement pour toi : Date illisible (2022 ?). Allergie au soja : vérifier s’il s’agit de lécithine de tournesol. Rancit avec le temps : sentir."} },
+  detuinenargan: { name:{"nl": "De Tuinen – 100% pure arganolie voor de huid (100 ml)", "en": "De Tuinen – 100% pure argan skin oil (100 ml)", "fr": "De Tuinen – Huile d’argan 100 % pure pour la peau (100 ml)"}, usedIn:[], slot:"plantoil", inci:"Argania Spinosa Kernel Oil",
+    note:{"nl": "Waarvoor: verzorgende olie voor droge huid, haar en nagels; trekt goed in. Puur op de huid, als nagelriemolie, in de haarpunten of als olie in zelfgemaakte balsems, crèmes en zeep. Parfumvrij.", "en": "What for: nourishing oil for dry skin, hair and nails; absorbs well. Neat on skin, as cuticle oil, on hair ends, or in homemade balms, creams and soap. Fragrance-free.", "fr": "À quoi ça sert : huile nourrissante pour peau sèche, cheveux et ongles ; pénètre bien. Pure sur la peau, sur les cuticules, les pointes, ou dans baumes, crèmes et savons maison. Sans parfum."},
+    reuse:{"nl": "Ruikt de olie nog goed: houten handvatten, kammen, een snijplank of leer ermee insmeren, of krakende scharnieren. Ranzige geur: weggooien (niet in de gootsteen).", "en": "Still smells fine: oil wooden handles, combs, a chopping board or leather, or squeaky hinges. Rancid: throw away (not down the sink).", "fr": "Sent encore bon : nourrir manches en bois, peignes, planche à découper ou cuir, ou charnières qui grincent. Rance : jeter (pas dans l’évier)."},
+    sandraNote:{"nl": "Alleen voor jou: Je hebt er meerdere flessen van. Argan komt van een noot (arganboom): vraag bij een notenallergie toch even na. Na openen koel en donker bewaren; ongeveer 12 maanden goed.", "en": "Only for you: You have several bottles. Argan comes from a kernel: ask about nut allergies. After opening keep cool and dark; about 12 months.", "fr": "Uniquement pour toi : Tu en as plusieurs flacons. L’argan vient d’une amande : demander en cas d’allergie aux noix. Après ouverture, au frais et à l’abri de la lumière ; env. 12 mois."} },
+  printempsargan: { name:{"nl": "Printemps – Huile d’argan, 100% pure arganolie (60 ml, Marokko)", "en": "Printemps – Huile d’argan, 100% pure argan oil (60 ml, Morocco)", "fr": "Printemps – Huile d’argan 100 % pure (60 ml, Maroc)"}, usedIn:[], slot:"plantoil", inci:"Argania Spinosa Kernel Oil",
+    note:{"nl": "Waarvoor: pure Marokkaanse arganolie voor lichaam, haar en gezicht. Voedt en beschermt de droge huid, geeft glans aan haar, verzorgt wenkbrauwen, wimpers en nagels; volgens het etiket ook bij striemen, kloofjes en littekens.", "en": "What for: pure Moroccan argan oil for body, hair and face. Nourishes dry skin, adds shine to hair, cares for brows, lashes and nails; the label also mentions stretch marks, cracks and scars.", "fr": "À quoi ça sert : huile d’argan pure du Maroc pour corps, cheveux et visage. Nourrit la peau sèche, fait briller les cheveux, soigne sourcils, cils et ongles ; l’étiquette cite aussi vergetures, gerçures et cicatrices."},
+    reuse:{"nl": "Ruikt de olie nog goed: houten handvatten, kammen, een snijplank of leer ermee insmeren, of krakende scharnieren. Ranzige geur: weggooien (niet in de gootsteen).", "en": "Still smells fine: oil wooden handles, combs, a chopping board or leather, or squeaky hinges. Rancid: throw away (not down the sink).", "fr": "Sent encore bon : nourrir manches en bois, peignes, planche à découper ou cuir, ou charnières qui grincent. Rance : jeter (pas dans l’évier)."},
+    sandraNote:{"nl": "Alleen voor jou: Na openen 24 maanden (PAO 24M). Zelfde tip als bij elke arganolie: vraag naar een notenallergie.", "en": "Only for you: 24 months after opening (PAO 24M). Ask about nut allergy.", "fr": "Uniquement pour toi : 24 mois après ouverture. Demander en cas d’allergie aux noix."} },
+  berivitahemp: { name:{"nl": "Berivita – Hennepolie, huid & haar (100 ml)", "en": "Berivita – Hemp seed oil, skin & hair (100 ml)", "fr": "Berivita – Huile de chanvre, peau & cheveux (100 ml)"}, usedIn:[], slot:"plantoil", inci:"Cannabis Sativa Seed Oil (99,9%), Tocopherol (vitamine E, 0,1%)",
+    note:{"nl": "Waarvoor: lichte groene olie uit hennepzaad (geen THC), rijk aan omega 3 en 6. Voor de droge en gevoelige huid en bij huidaandoeningen (volgens het etiket regenererend). Mooi in een gezichtsolie of in zeep (maximaal ongeveer 10–15% van de oliën, anders wordt de zeep zacht en ranzig).", "en": "What for: light green oil from hemp seed (no THC), rich in omega 3 and 6. For dry and sensitive skin (regenerating, says the label). Nice in a face oil or in soap (up to about 10–15% of the oils).", "fr": "À quoi ça sert : huile verte légère de graines de chanvre (sans THC), riche en oméga 3 et 6. Pour peau sèche et sensible (régénérante selon l’étiquette). Dans une huile visage ou un savon (max. env. 10–15 % des huiles)."},
+    reuse:{"nl": "Niet meer op de huid. Ruikt ze nog neutraal: in je eigen zeep (max. 10% van de oliën) of houten handvatten insmeren. Ranzig: weggooien.", "en": "Not on skin. Still neutral: in your own soap (max. 10% of the oils) or oil wooden handles. Rancid: throw away.", "fr": "Plus sur la peau. Encore neutre : dans ton savon (max. 10 % des huiles) ou pour le bois. Rance : jeter."},
+    sandraNote:{"nl": "Alleen voor jou: Gemaakt door de Nederlandse Bereidingsapotheek, charge HENO/D22, THT 02/2024 = vervallen, na openen 12 maanden. Hennepolie wordt snel ranzig: in de koelkast bewaren en binnen een paar maanden opgebruiken.", "en": "Only for you: Batch HENO/D22, best before 02/2024 = expired, 12 months after opening. Hemp oil goes rancid quickly: keep it in the fridge and use within a few months.", "fr": "Uniquement pour toi : Lot HENO/D22, DLUO 02/2024 = périmée, 12 mois après ouverture. Rancit vite : conserver au frigo et utiliser en quelques mois."} },
+  nhgreencoffee: { name:{"nl": "Natural Heroes – 133. Groene koffie-olie, koudgeperst (100 ml)", "en": "Natural Heroes – 133. Green coffee oil, cold-pressed (100 ml)", "fr": "Natural Heroes – 133. Huile de café vert, pressée à froid (100 ml)"}, usedIn:[], slot:"plantoil", inci:"Coffea Arabica Seed Oil",
+    note:{"nl": "Waarvoor: olie uit ongebrande koffiebonen met van nature cafeïne en antioxidanten. Voor oogserums tegen wallen en kringen, in een verstevigende lichaamsolie of anti-cellulitismassage, en als verzorgende olie voor de rijpe huid. Meestal 5–20% in een mengsel.", "en": "What for: oil from unroasted coffee beans with natural caffeine and antioxidants. For eye serums against puffiness, in a firming body oil or anti-cellulite massage, and for mature skin. Usually 5–20% in a blend.", "fr": "À quoi ça sert : huile de grains de café non torréfiés, avec caféine et antioxydants naturels. Pour sérums contour des yeux, huile corps raffermissante ou massage anti-cellulite, peaux matures. Souvent 5–20 % d’un mélange."},
+    reuse:{"nl": "Niet meer op klanten. Ruikt ze nog goed: in je eigen koffiezeep (met wat koffiedik als scrub) of om houten handvatten en leer in te smeren. Ranzig: weggooien.", "en": "Not on clients. Still fine: in your own coffee soap (with coffee grounds as scrub) or to oil wooden handles and leather. Rancid: throw away.", "fr": "Plus sur les clientes. Encore bonne : dans ton savon au café (marc de café en gommage) ou pour nourrir bois et cuir. Rance : jeter."},
+    sandraNote:{"nl": "Alleen voor jou: THT 22/06/2025 = vervallen (batch MO-15764). Ruik eraan: ruikt ze scherp of naar oude verf, dan is ze ranzig. Past bij jouw thema koffie: leuk voor een eigen afslankmassage-olie (niet aan een behandeling gekoppeld zolang het geen bestaand product is).", "en": "Only for you: Best before 22/06/2025 = expired. Rancid = sharp, old-paint smell. Fits your coffee theme: nice for your own slimming massage oil (not linked while it is not a finished product).", "fr": "Uniquement pour toi : DLUO 22/06/2025 = périmée. Rance = odeur âcre de vieille peinture. Colle à ton thème café : sympa pour ta propre huile de massage minceur (non liée)."} },
+  berivitatamanu: { name:{"nl": "Berivita – Tamanu-olie, gezicht & huid (50 ml)", "en": "Berivita – Tamanu oil, face & skin (50 ml)", "fr": "Berivita – Huile de tamanu, visage & peau (50 ml)"}, usedIn:[], slot:"plantoil", inci:"Calophyllum Inophyllum Seed Oil (99,9%), Tocopherol (vitamine E, 0,1%)",
+    note:{"nl": "Waarvoor: dikke groene olie met een nootachtige geur, voor de beschadigde huid, littekens, kloven, rimpels en couperose (volgens het etiket: verbetering en herstel van de huid). Meestal 5–10% in een gezichtsolie, balsem of zalfje; puur op een klein plekje.", "en": "What for: thick green oil with a nutty smell, for damaged skin, scars, cracks, wrinkles and couperose (the label says: improves and restores the skin). Usually 5–10% in a face oil, balm or salve; neat on a small spot.", "fr": "À quoi ça sert : huile verte épaisse à l’odeur de noisette, pour peau abîmée, cicatrices, gerçures, rides et couperose (selon l’étiquette : améliore et répare la peau). Souvent 5–10 % dans une huile, un baume ; pure sur une petite zone."},
+    reuse:{"nl": "Ruikt de olie nog goed: houten handvatten, kammen, een snijplank of leer ermee insmeren, of krakende scharnieren. Ranzige geur: weggooien (niet in de gootsteen).", "en": "Still smells fine: oil wooden handles, combs, a chopping board or leather, or squeaky hinges. Rancid: throw away (not down the sink).", "fr": "Sent encore bon : nourrir manches en bois, peignes, planche à découper ou cuir, ou charnières qui grincent. Rance : jeter (pas dans l’évier)."},
+    sandraNote:{"nl": "Alleen voor jou: Nederlandse Bereidingsapotheek, charge TAM/B22, THT 02/2024 = vervallen, na openen 12 maanden. Tamanu komt uit een noot: niet bij een notenallergie. Kan een kleine huidreactie geven: eerst testen op een klein plekje.", "en": "Only for you: Batch TAM/B22, best before 02/2024 = expired. Tamanu is a nut oil: not with nut allergy. Patch test first.", "fr": "Uniquement pour toi : Le tamanu vient d’une noix : pas en cas d’allergie aux noix. Faire un test."} },
+  detuinenapricot: { name:{"nl": "De Tuinen – 100% pure abrikozenpitolie, huid & massage (150 ml)", "en": "De Tuinen – 100% pure apricot kernel oil, skin & massage", "fr": "De Tuinen – Huile de noyau d’abricot 100 % pure, peau & massage"}, usedIn:[], slot:"plantoil", inci:"Prunus Armeniaca Kernel Oil",
+    note:{"nl": "Waarvoor: lichte, zachte olie die goed intrekt; mooi als massageolie (ook voor de gevoelige huid), als basis voor een gezichtsolie of om etherische oliën in te verdunnen. In zeep geeft ze een zachte, verzorgende reep.", "en": "What for: light, soft oil that absorbs well; nice as a massage oil (also for sensitive skin), a base for a face oil or to dilute essential oils. In soap it gives a soft, nourishing bar.", "fr": "À quoi ça sert : huile légère et douce qui pénètre bien ; huile de massage (aussi peaux sensibles), base d’huile visage ou pour diluer les huiles essentielles. Dans un savon, donne une barre douce."},
+    reuse:{"nl": "Ruikt de olie nog goed: houten handvatten, kammen, een snijplank of leer ermee insmeren, of krakende scharnieren. Ranzige geur: weggooien (niet in de gootsteen).", "en": "Still smells fine: oil wooden handles, combs, a chopping board or leather, or squeaky hinges. Rancid: throw away (not down the sink).", "fr": "Sent encore bon : nourrir manches en bois, peignes, planche à découper ou cuir, ou charnières qui grincent. Rance : jeter (pas dans l’évier)."},
+    sandraNote:{"nl": "Alleen voor jou: Holland & Barrett (De Tuinen), 150 ml, na openen 6 maanden. Het etiket noemt ze zeer geschikt als massageolie en voor de babyhuid. Abrikozenpit is een steenvrucht-pit: vraag bij een notenallergie toch even na. Niet aan een behandeling gekoppeld, dus ze staat niet in de allergielijsten van de massages.", "en": "Only for you: 150 ml, 6 months after opening; label: very suitable as massage oil and for baby skin. Ask about nut allergies. Not linked to a treatment.", "fr": "Uniquement pour toi : Noyau d’abricot : demander en cas d’allergie aux noix. Pas encore liée à un massage."} },
+  berivitalaurel: { name:{"nl": "Berivita – Laurierolie (laurierbesolie, puur, 100 ml)", "en": "Berivita – Laurel berry oil (pure, 100 ml)", "fr": "Berivita – Huile de baies de laurier (pure, 100 ml)"}, usedIn:[], slot:"plantoil", inci:"Laurus Nobilis Fruit Oil (99,9%), Tocopherol (vitamine E, 0,1%)",
+    note:{"nl": "Waarvoor: groene, kruidig ruikende olie uit laurierbessen; de klassieke olie van Aleppozeep (met olijfolie, meestal 10–40% laurierolie). Volgens het etiket ook puur of gemengd met een andere olie voor de huid en de hoofdhuid (roos, onzuivere huid).", "en": "What for: green, herbal-smelling oil from laurel berries; the classic oil of Aleppo soap (with olive oil, usually 10–40% laurel oil). The label also allows it neat or mixed for skin and scalp.", "fr": "À quoi ça sert : huile verte aux notes herbacées, tirée des baies de laurier ; l’huile classique du savon d’Alep (avec huile d’olive, souvent 10–40 %). Selon l’étiquette, aussi pure ou mélangée pour peau et cuir chevelu."},
+    reuse:{"nl": "Niet meer op de huid. Ruikt ze nog goed kruidig: in je eigen Aleppo-achtige zeep met olijfolie (de zeep rijpt toch 4–6 weken). Ranzig: weggooien.", "en": "Not on skin. Still smells herbal: in your own Aleppo-style soap with olive oil. Rancid: throw away.", "fr": "Plus sur la peau. Odeur encore herbacée : dans ton savon type Alep à l’huile d’olive. Rance : jeter."},
+    sandraNote:{"nl": "Alleen voor jou: Charge LAUR/0521, THT 04/2023 = vervallen, na openen 12 maanden. Laurierbesolie is bij kamertemperatuur half vast en wordt vloeibaar op de warme huid. Laurier kan een allergie geven (bekende contactallergeen): niet op klanten zonder test en zeker niet bij een gevoelige huid. Het beste gebruik is in je eigen zeep.", "en": "Only for you: Batch LAUR/0521, best before 04/2023 = expired. Semi-solid at room temperature. Laurel is a known contact allergen: not on clients without a test, never on sensitive skin. Best used in your own soap.", "fr": "Uniquement pour toi : Lot LAUR/0521, DLUO 04/2023 = périmée. Semi-solide à température ambiante. Le laurier est un allergène de contact connu : pas sur les clientes sans test. Idéal dans ton propre savon."} },
+  youmadusea: { name:{"nl": "You Madu – Duindoornolie, koudgeperst (100 ml)", "en": "You Madu – Sea buckthorn oil, cold-pressed (100 ml)", "fr": "You Madu – Huile d’argousier, pressée à froid (100 ml)"}, usedIn:[], slot:"plantoil", inci:"Hippophae Rhamnoides Oil",
+    note:{"nl": "Waarvoor: oranjerode olie vol vitamine A, C en E en omega 7; helpt bij een droge, rijpe of beschadigde huid en een geïrriteerde hoofdhuid. Altijd verdund gebruiken: een paar druppels (1–5%) in een gezichtsolie, crème of zeep; geeft een warme oranje kleur.", "en": "What for: orange-red oil full of vitamins A, C, E and omega 7; for dry, mature or damaged skin and an irritated scalp. Always diluted: a few drops (1–5%) in a face oil, cream or soap; gives a warm orange colour.", "fr": "À quoi ça sert : huile rouge orangé riche en vitamines A, C, E et oméga 7 ; pour peau sèche, mature ou abîmée et cuir chevelu irrité. Toujours diluée : quelques gouttes (1–5 %) dans huile, crème ou savon ; colore en orange."},
+    reuse:{"nl": "Ruikt ze nog goed: een paar druppels als natuurlijke oranje kleurstof in je eigen zeep. Ranzig: weggooien.", "en": "Still smells fine: a few drops as natural orange colour in your own soap. Rancid: throw away.", "fr": "Sent encore bon : quelques gouttes comme colorant orange dans ton savon. Rance : jeter."},
+    sandraNote:{"nl": "Alleen voor jou: Kleurt huid, handdoeken en je werktafel oranje: onverdund niet gebruiken en handschoenen aan. Koel en donker bewaren.", "en": "Only for you: Stains skin, towels and the table orange: never neat, wear gloves. Keep cool and dark.", "fr": "Uniquement pour toi : Tache la peau, les serviettes et la table en orange : jamais pure, gants. Au frais et à l’abri de la lumière."} },
+  bathoilvital: { name:{"nl": "Rainpharma – Revitalising Foot Bath Oil, voetbadolie (60 ml)", "en": "Rainpharma – Revitalising Foot Bath Oil (60 ml)", "fr": "Rainpharma – Revitalising Foot Bath Oil, huile pour bain de pieds (60 ml)"}, usedIn:[], slot:"footbathoil", inci:"",
+    note:{"nl": "Waarvoor: een scheutje in een voetbad. Mentholkristallen ontgeuren, verfrissen en kalmeren vermoeide voeten; cosmetische zuren helpen eelt en dode huidcellen los te maken; amandel- en druivenpitolie verzachten en beschermen. Plantaardig, gemaakt in België.", "en": "What for: a splash in a foot bath. Menthol crystals deodorise, refresh and calm tired feet; cosmetic acids help loosen callus and dead skin; almond and grape seed oil soften and protect. Plant-based, made in Belgium.", "fr": "À quoi ça sert : un trait dans un bain de pieds. Les cristaux de menthol désodorisent, rafraîchissent et apaisent les pieds fatigués ; des acides cosmétiques aident à détacher callosités et peaux mortes ; les huiles d’amande et de pépins de raisin adoucissent et protègent. Végétal, fabriqué en Belgique."},
+    reuse:{"nl": "Voor je eigen voetbad thuis, of een scheutje in warm sop om de voetenbak of de vloer te dweilen (frisse muntgeur).", "en": "For your own foot bath at home, or a splash in warm soapy water to clean the foot bowl or mop the floor.", "fr": "Pour ton propre bain de pieds, ou un trait dans de l’eau savonneuse pour nettoyer la bassine ou le sol."},
+    sandraNote:{"nl": "Alleen voor jou: Je hebt er 3 flesjes van. Past bij het voetbad dat je later bij de pedicure wil invoeren. De volledige ingrediëntenlijst staat niet op de foto's: bevat zeker amandelolie (notenallergie!), druivenpitolie en menthol. Niet bij open wondjes, kloven of bij diabetische voeten (zuren en menthol). Houdbaarheid na openen: zie het potje-symbool op de fles.", "en": "Only for you: You have 3 bottles. Fits the foot bath you want to add to the pedicure later. Full INCI not on the photos: contains almond oil (nut allergy!), grape seed oil and menthol. Not on open wounds, cracks or diabetic feet.", "fr": "Uniquement pour toi : Tu en as 3 flacons. Convient au futur bain de pieds de la pédicure. INCI complète absente des photos : contient huile d’amande (allergie aux noix !), pépins de raisin et menthol. Pas sur plaies, crevasses ni pieds diabétiques."} },
+  lampoils: { name:{"nl": "Geuroliën voor de oliebrander (LAMP): Winterwereld, Peperkoek, Dennen, Kaneel-sinaasappel (10 ml)", "en": "Oil-burner scented oils (LAMP): Winter world, Gingerbread, Pine, Cinnamon orange (10 ml)", "fr": "Huiles parfumées pour brûleur (LAMP) : Monde d’hiver, Pain d’épices, Sapin, Cannelle-orange (10 ml)"}, usedIn:[], slot:"fragranceoil", inci:"",
+    note:{"nl": "Waarvoor: enkel om de ruimte een geur te geven, in de oliebrander of geurlamp (een paar druppels in het water). Leuk in de winter en rond kerst.", "en": "What for: only to scent the room, in the oil burner (a few drops in the water). Nice in winter and around Christmas.", "fr": "À quoi ça sert : uniquement pour parfumer la pièce, au brûleur (quelques gouttes dans l’eau). Sympa en hiver et à Noël."},
+    reuse:{"nl": "Op potpourri, dennenappels of een geurzakje voor de kast (niet op de huid).", "en": "On potpourri, pine cones or a wardrobe sachet (not on skin).", "fr": "Sur un pot-pourri, des pommes de pin ou un sachet pour l’armoire (pas sur la peau)."},
+    sandraNote:{"nl": "Alleen voor jou: Geen cosmetica: nooit op de huid, niet in zeep of in de vapozone. Brander niet onbewaakt laten branden en niet tijdens een behandeling met etherische olie (geurmengsel). Kaneel en kruidnagel kunnen hoofdpijn geven bij gevoelige klanten.", "en": "Only for you: Not cosmetics: never on skin, not in soap or the vapozone. Never leave the burner unattended.", "fr": "Uniquement pour toi : Pas cosmétique : jamais sur la peau, ni dans le savon ni dans le vapozone. Ne jamais laisser le brûleur sans surveillance."} },
+  berivitapatchouli: { name:{"nl": "Berivita – Patchoeli, etherische olie (10 ml, voor de lamp)", "en": "Berivita – Patchouli essential oil (10 ml, for the burner)", "fr": "Berivita – Huile essentielle de patchouli (10 ml, pour le brûleur)"}, usedIn:[], slot:"fragranceoil", inci:"Pogostemon Cablin Leaf Oil",
+    note:{"nl": "Waarvoor: echte etherische patchoeli-olie met een aardse, warme geur; je gebruikt ze in de oliebrander.", "en": "What for: real patchouli essential oil with an earthy, warm scent; you use it in the oil burner.", "fr": "À quoi ça sert : vraie huile essentielle de patchouli, odeur chaude et terreuse ; tu l’utilises au brûleur."},
+    reuse:{"nl": "In de oliebrander of op potpourri; een paar druppels in een geurzakje houdt motten uit de kast.", "en": "In the oil burner or on potpourri; a few drops on a sachet keep moths out of the wardrobe.", "fr": "Au brûleur ou sur un pot-pourri ; quelques gouttes sur un sachet éloignent les mites."},
+    sandraNote:{"nl": "Alleen voor jou: THT 12/2024 = vervallen, daarom op ‘LAMP’ gezet: niet meer op de huid of in de vapozone (daarvoor heb je de patchoeli van Physalis).", "en": "Only for you: Best before 12/2024 = expired, hence marked ‘LAMP’: no longer on skin or in the vapozone (use the Physalis patchouli).", "fr": "Uniquement pour toi : DLUO 12/2024 = périmée, d’où « LAMP » : plus sur la peau ni dans le vapozone (prendre le patchouli Physalis)."} },
+  geurolievanille: { name:{"nl": "Soap Queen – Geurolie Vanille Crème (cosmetische geurolie, 10 ml)", "en": "Soap Queen – Vanilla Crème fragrance oil (cosmetic, 10 ml)", "fr": "Soap Queen – Huile parfumée Vanille Crème (cosmétique, 10 ml)"}, usedIn:[], slot:"fragranceoil", inci:"",
+    note:{"nl": "Waarvoor: synthetische geurolie met vanillegeur voor zeep, badbommen, kaarsen en cosmetica die je zelf maakt. Houd je aan de maximale dosering op het etiket.", "en": "What for: synthetic vanilla fragrance oil for homemade soap, bath bombs, candles and cosmetics. Keep to the maximum dosage on the label.", "fr": "À quoi ça sert : huile parfumée synthétique à la vanille pour savons, bombes de bain, bougies et cosmétiques maison. Respecter le dosage maximal de l’étiquette."},
+    sandraNote:{"nl": "Alleen voor jou: Geurolie, geen etherische olie: niet onverdund op de huid en niet als geurtje bij de behandelingen. Vanillegeuroliën kleuren zeep vaak bruin.", "en": "Only for you: Fragrance oil, not essential oil: not neat on skin, not as treatment scent. Vanilla often turns soap brown.", "fr": "Uniquement pour toi : Huile parfumée, pas essentielle : pas pure sur la peau, pas comme parfum de soin. La vanille brunit souvent le savon."} },
+  alcohol96: { name:{"nl": "Soap Queen – Alcohol 96% (gedenatureerd, navulfles 500 ml)", "en": "Soap Queen – Alcohol 96% (denatured, 500 ml refill)", "fr": "Soap Queen – Alcool 96 % (dénaturé, recharge 500 ml)"}, usedIn:[], slot:"diy", inci:"Alcohol Denat. (Ethanol 96%, CAS 64-17-5)",
+    note:{"nl": "Waarvoor: om zelf kamerspray, linnenspray of parfum te maken (etherische olie of geurolie lost erin op), om zeepbelletjes weg te spuiten bij gietzeep en om glas, spiegels en werkoppervlakken te ontvetten.", "en": "What for: to make your own room spray, linen spray or perfume (essential or fragrance oil dissolves in it), to spray away bubbles on melt-and-pour soap, and to degrease glass, mirrors and work surfaces.", "fr": "À quoi ça sert : pour faire spray d’ambiance, spray textile ou parfum (les huiles s’y dissolvent), éliminer les bulles sur le savon à fondre, et dégraisser verre, miroirs et plans de travail."},
+    reuse:{"nl": "Alcohol verloopt nauwelijks; is de fles lang open geweest, dan is er wat water bij gekomen: nog prima om te poetsen of stickerresten te verwijderen.", "en": "Alcohol hardly expires; after long opening it absorbs some water: still fine for cleaning or removing sticker residue.", "fr": "L’alcool ne périme presque pas ; ouvert longtemps, il prend un peu d’eau : encore parfait pour nettoyer ou enlever des restes d’autocollant."},
+    sandraNote:{"nl": "Alleen voor jou: Licht ontvlambaar: weg van de brander, kaarsen en de vapozone. Niet drinkbaar, niet in de richting van de ogen sprayen. 96% ontsmet minder goed dan 70% (verdunnen: 7 delen alcohol + 2,5 delen gedestilleerd water) – voor je instrumenten blijf je bij je gewone ontsmetting.", "en": "Only for you: Highly flammable: keep away from the burner, candles and vapozone. Not drinkable, do not spray towards the eyes. 96% disinfects less well than 70%; keep using your normal tool disinfection.", "fr": "Uniquement pour toi : Très inflammable : loin du brûleur, des bougies et du vapozone. Non buvable, ne pas vaporiser vers les yeux. 96 % désinfecte moins bien que 70 % ; garde ta désinfection habituelle."} },
+  h2o2ten: { name:{"nl": "Zuurstofwater 10% (waterstofperoxide, in een Bio Balance-flesje)", "en": "Hydrogen peroxide 10% (in a Bio Balance bottle)", "fr": "Eau oxygénée 10 % (dans un flacon Bio Balance)"}, usedIn:[], slot:"chemical", inci:"Hydrogen Peroxide 10%, Aqua",
+    note:{"nl": "Waarvoor: sterk zuurstofwater om te bleken en te reinigen: vergeelde witte handdoeken en vlekken (bloed, make-up) uit wit textiel, voegen en wit plastic. Voor de huid of de vrije nagelrand gebruik je het zuurstofwater 3% (Mercurochrome of Reymerink).", "en": "What for: strong peroxide to bleach and clean: yellowed white towels and stains (blood, make-up) on white textiles, grout and white plastic. For skin or the free nail edge use the 3% peroxide.", "fr": "À quoi ça sert : eau oxygénée forte pour blanchir et nettoyer : serviettes blanches jaunies, taches (sang, maquillage) sur textile blanc, joints, plastique blanc. Pour la peau ou le bord libre de l’ongle, prendre la 3 %."},
+    reuse:{"nl": "Oud zuurstofwater werkt nog als bleek- en poetsmiddel: in de was bij witte handdoeken (scheutje bij het wasmiddel) of op de voegen van de badkamer. Verdund met veel water mag het daarna gewoon door de gootsteen.", "en": "Old peroxide still works for bleaching and cleaning: a splash in the white towel wash or on bathroom grout. Diluted with plenty of water it can go down the sink.", "fr": "Ancienne, elle sert encore à blanchir et nettoyer : un trait dans la lessive des serviettes blanches ou sur les joints. Diluée avec beaucoup d’eau, elle peut aller à l’évier."},
+    sandraNote:{"nl": "Alleen voor jou: 10% is te sterk voor de huid (in Europa mag een huidproduct maximaal 4% bevatten): nooit puur bij klanten, handschoenen aan, weg van de ogen. Het zit in een serumflesje met pipet en etiket ‘Hyaluronic Acid Serum’: gevaar voor verwisseling! Zet er een groot etiket op (‘Zuurstofwater 10% – niet op de huid’) of giet het over in een bruine fles met dop, buiten bereik van kinderen. Zuurstofwater verliest langzaam zijn kracht; datum onbekend.", "en": "Only for you: 10% is too strong for skin (EU limit for skin products is 4%): never on clients, gloves on, away from eyes. It sits in a serum dropper bottle labelled ‘Hyaluronic Acid Serum’: risk of mix-up! Put a big label on it or move it into a brown bottle with a cap, out of children’s reach. Loses strength over time; date unknown.", "fr": "Uniquement pour toi : 10 % est trop fort pour la peau (max. 4 % dans un produit pour la peau en UE) : jamais sur les clientes, gants, loin des yeux. Il est dans un flacon de sérum « Hyaluronic Acid Serum » : risque de confusion ! Grande étiquette ou flacon brun avec bouchon, hors de portée des enfants. Perd sa force avec le temps ; date inconnue."} },
+  collodium: { name:{"nl": "Apotheker Broeckx – Collodium (bereiding apotheek)", "en": "Pharmacy Broeckx – Collodion (pharmacy preparation)", "fr": "Pharmacie Broeckx – Collodion (préparation officinale)"}, usedIn:[], slot:"firstaid", inci:"Pyroxylin (Nitrocellulose) in Ether & Ethanol",
+    note:{"nl": "Waarvoor: een vloeibaar ‘pleister’-laagje. Je strijkt een dun laagje uit; als de ether verdampt blijft er een doorzichtig, waterafstotend vliesje over. Bij de pedicure om een klein oppervlakkig sneetje of kloofje af te dekken of een likdoornpleistertje/kompresje vast te zetten. In de make-up (stijve collodium) om valse littekens te maken.", "en": "What for: a liquid ‘plaster’. Brush on a thin layer; as the ether evaporates a clear, water-repellent film remains. In pedicure to cover a small superficial cut or crack, or to fix a small dressing. In make-up (rigid collodion) to create fake scars.", "fr": "À quoi ça sert : un « pansement » liquide. On étale une fine couche ; l’éther s’évapore et laisse un film transparent et hydrofuge. En pédicure, pour couvrir une petite coupure ou crevasse superficielle ou fixer une compresse. En maquillage (collodion rigide) pour de fausses cicatrices."},
+    reuse:{"nl": "Ingedikt of over datum: niet meer op de huid, ook niet als litteken-effect. Het is brandbaar afval: naar het containerpark (klein gevaarlijk afval) of terug naar de apotheek.", "en": "Thickened or expired: not on skin any more. Flammable waste: recycling park or back to the pharmacy.", "fr": "Épaissi ou périmé : plus sur la peau. Déchet inflammable : recyparc ou retour à la pharmacie."},
+    sandraNote:{"nl": "Alleen voor jou: Bevat ether: extreem ontvlambaar, dampen niet inademen, goed verluchten, ver van de frees, lamp, brander en vapozone. Niet op een open, diepe of bloedende wonde, niet op geïnfecteerde huid, niet bij diabetici zonder overleg en niet rond de ogen. Spant op de huid en kan irriteren. Fles goed dicht, koel en donker. Vraag de apotheker of het gewone of elastische collodium is (elastisch bevat ricinusolie en blijft soepeler).", "en": "Only for you: Contains ether: extremely flammable, do not inhale, ventilate, keep away from drill, lamp, burner and vapozone. Not on open, deep or bleeding wounds, infected skin, diabetics without advice, or near the eyes. Keep tightly closed, cool and dark. Ask the pharmacist whether it is plain or flexible collodion.", "fr": "Uniquement pour toi : Contient de l’éther : extrêmement inflammable, ne pas inhaler, aérer, loin de la fraise, de la lampe, du brûleur et du vapozone. Pas sur plaie ouverte, profonde ou qui saigne, peau infectée, diabétiques sans avis, ni près des yeux. Bien fermé, au frais et à l’abri de la lumière. Demander au pharmacien s’il est simple ou élastique."} },
+  bellacocoa: { name:{"nl": "Bellápierre – Shimmer Powder Cocoa SP070 (2,35 g)", "en": "Bellápierre – Shimmer Powder Cocoa SP070 (2.35 g)", "fr": "Bellápierre – Poudre scintillante Cocoa SP070 (2,35 g)"}, usedIn:["glammakeup", "bridaltrial", "bridalpackage", "weddingguest", "makeupworkshop"], slot:"eyeshadow", inci:"Mica (CI 77019), Titanium Dioxide (CI 77891). May contain: Iron Oxides (CI 77491, CI 77492, CI 77499, CI 77288, CI 77289), Carmine (CI 75470), Ferric Ferrocyanide (CI 77510)",
+    note:{"nl": "Warm bruine minerale glanspoeder: droog als oogschaduw of bronzende highlight, vochtig als eyeliner.", "en": "Warm brown mineral shimmer powder: dry as eyeshadow or bronzing highlight, wet as eyeliner.", "fr": "Poudre minérale brun chaud : à sec en fard ou enlumineur bronzant, humide en eye-liner."},
+    sandraNote:{"nl": "Alleen voor jou: geopend op 06/03/2019, na openen 36 maanden = vervallen sinds 06/03/2022. Kan karmijn bevatten. Zonder parfum.", "en": "Only for you: opened 06/03/2019, 36 months = expired since 06/03/2022. May contain carmine.", "fr": "Uniquement pour toi : ouvert le 06/03/2019, 36 mois = périmé depuis le 06/03/2022. Peut contenir du carmin."} },
+  nyxglitter: { name:{"nl": "NYX Professional Makeup – Face & Body Glitter: GLI03 Teal, GLI05 Gold, GLI09 Red (2,5 g)", "en": "NYX Professional Makeup – Face & Body Glitter: GLI03 Teal, GLI05 Gold, GLI09 Red (2.5 g)", "fr": "NYX Professional Makeup – Paillettes visage & corps : GLI03 Teal, GLI05 Gold, GLI09 Red (2,5 g)"}, usedIn:["glammakeup", "bridaltrial", "bridalpackage", "weddingguest", "makeupworkshop"], slot:"sfx", inci:"Polyethylene Terephthalate, Polyurethane-11. May contain: Aluminum Powder (CI 77000), Black 2 (CI 77266) (Nano), Ferric Ammonium Ferrocyanide (CI 77510), Red 7 (CI 15850), Yellow 5 (CI 19140)",
+    note:{"nl": "Losse glitter voor gezicht en lichaam (jukbeenderen, decolleté, schouders, haarlijn) bij feest-, festival- en kerstlooks. Volgens het etiket niet rond de ogen en niet op de lippen. Na openen 24 maanden.", "en": "Loose face and body glitter (cheekbones, décolleté, shoulders, hairline) for party, festival and Christmas looks. Per the label not around the eyes and not on the lips. 24 months after opening.", "fr": "Paillettes libres visage et corps (pommettes, décolleté, épaules) pour looks de fête. Selon l’étiquette, pas autour des yeux ni sur les lèvres. 24 mois après ouverture."},
+    sandraNote:{"nl": "Alleen voor jou: plastic glitter (PET). Sinds 17/10/2023 mag losse plastic glitter in de EU niet meer verkocht worden (microplastic-verbod); wat je hebt mag je opgebruiken, maar je kan hem niet bijkopen en niet doorverkopen. Bevat aluminium en (rode) kleurstoffen; Black 2 is nano. Brengt niets mee in de ogen: aanbrengen op een glitterlijm of een dun laagje vaseline, met een plat penseel.", "en": "Only for you: plastic glitter (PET). Since 17/10/2023 loose plastic glitter may no longer be sold in the EU; you may use up your stock but not resell it. Contains aluminium and colorants; Black 2 is nano. Apply on glitter glue or a thin layer of petroleum jelly with a flat brush.", "fr": "Uniquement pour toi : paillettes plastiques (PET). Depuis le 17/10/2023 la vente de paillettes plastiques libres est interdite dans l’UE ; tu peux écouler ton stock, pas le revendre."} },
+  qusainegel: { name:{"nl": "Qusaine (Lab fS) – Hydroalcoholische handgel met aloë vera, 70% alcohol (500 ml)", "en": "Qusaine (Lab fS) – Hydroalcoholic hand gel with aloe vera, 70% alcohol (500 ml)", "fr": "Qusaine (Lab fS) – Gel hydroalcoolique à l’aloe vera, 70 % d’alcool (500 ml)"}, usedIn:[], slot:"handdisinfect", inci:"Alcohol Denat., Aqua, Aloe Barbadensis Leaf Juice, Parfum, Acrylates/C10-30 Alkyl Acrylate Crosspolymer, Aminomethyl Propanol, Potassium Sorbate, Sodium Benzoate, CI 42051",
+    note:{"nl": "Handgel voor de hygiëne, zonder water: op de handen verdelen tot hij volledig verdampt is. Verfrist en hydrateert dankzij aloë vera. Na openen 12 maanden.", "en": "Hand hygiene gel without water: spread until fully evaporated. Refreshes and hydrates thanks to aloe vera. 12 months after opening.", "fr": "Gel d’hygiène pour les mains sans eau : répartir jusqu’à évaporation complète. 12 mois après ouverture."},
+    sandraNote:{"nl": "Alleen voor jou: dit is cosmetica (‘voor hygiënische doeleinden’), geen geregistreerd ontsmettingsmiddel (biocide) zoals Hantisept. Voor je hygiëneprotocol bij de manicure/pedicure gebruik je dus best het biocide; deze gel is ideaal voor jezelf tussendoor of aan de inkom voor klanten. Bevat parfum. Licht ontvlambaar, niet in de ogen.", "en": "Only for you: a cosmetic (hygiene purposes), not a registered biocide like Hantisept. For your hygiene protocol use the biocide; this gel is fine for yourself or at the entrance for clients. Contains fragrance. Flammable.", "fr": "Uniquement pour toi : cosmétique, pas un biocide enregistré comme Hantisept. Pour ton protocole d’hygiène, utilise le biocide. Contient du parfum. Inflammable."} },
   janssenbalancing: { name:{ nl:"Janssen Cosmetics – Balancing Cream, gemengde huid (200 ml, ref. 6620P)", en:"Janssen Cosmetics – Balancing Cream, combination skin (200 ml, ref. 6620P)", fr:"Janssen Cosmetics – Crème Équilibrante, peau mixte (200 ml, réf. 6620P)" }, usedIn:["signaturefacial","expressfacial"], slot:"daycream",
     inci:"Aqua (Water), Butylene Glycol, C12-15 Alkyl Benzoate, Propylheptyl Caprylate, Dicaprylyl Carbonate, Glycerin, Cetearyl Alcohol, Cetearyl Olivate, Hydrogenated Coco-Glycerides, 1,2-Hexanediol, Sorbitan Olivate, Microcrystalline Cellulose, Glyceryl Stearate, Inositol, Hydrogenated Vegetable Oil, Parfum (Fragrance), Hydroxyacetophenone, Caprylic/Capric Triglyceride, Xanthan Gum, Hydrogenated Phosphatidylcholine, Tocopherol, Aloe Barbadensis Leaf Juice Powder, Tetrasodium Glutamate Diacetate, Butyrospermum Parkii (Shea) Butter, Pentylene Glycol, Helianthus Annuus (Sunflower) Seed Oil, Squalene, Phenethyl Alcohol, Sodium Carrageenan, Ceramide NP, Sodium Hydroxide, Maris Sal (Sea Salt), Citric Acid, Pogostemon Cablin Oil, Rose Ketones, Trimethylcyclopentenyl Methylisopentenol",
     note:{ nl:"Lichte, uitbalancerende verzorgingscrème met rode algen, rijstzemelen en aloë vera: hydrateert zonder te glanzen, ideaal voor een gemengde huid.", en:"Light balancing cream with red algae, rice bran and aloe vera: hydrates without shine, ideal for combination skin.", fr:"Crème équilibrante légère aux algues rouges, au son de riz et à l’aloe vera : hydrate sans faire briller, idéale pour la peau mixte." },
@@ -1362,7 +1462,557 @@ const EXPIRED_REUSE = {
   mask:{ nl:"Kleimaskers: als geurzakje of om vetvlekken op te zuigen. Andere maskers: weggooien.", en:"Clay masks: absorb grease stains. Others: throw away.", fr:"Masques à l’argile : absorber les taches de gras. Autres : jeter." },
   powder:{ nl:"Talk of poeder: op een vetvlek strooien en laten intrekken, of in je eigen schoenen tegen geurtjes.", en:"Sprinkle on a grease stain, or in your own shoes against odour.", fr:"Sur une tache de gras ou dans vos chaussures." },
   waxtalc:{ nl:"Op een vetvlek strooien, of in je eigen schoenen tegen geurtjes.", en:"On a grease stain or in your own shoes.", fr:"Sur une tache de gras ou dans vos chaussures." },
+  plantoil:{"nl": "Ruikt de olie nog goed: houten handvatten, kammen, een snijplank of leer ermee insmeren, of krakende scharnieren. Ranzige geur: weggooien (niet in de gootsteen).", "en": "Still smells fine: oil wooden handles, combs, a chopping board or leather, or squeaky hinges. Rancid: throw away (not down the sink).", "fr": "Sent encore bon : nourrir manches en bois, peignes, planche à découper ou cuir, ou charnières qui grincent. Rance : jeter (pas dans l’évier)."},
+  chemical:{"nl":"Nog als poets- of bleekmiddel als het daarvoor geschikt is; anders naar het containerpark (klein gevaarlijk afval).","en":"Still as a cleaner or bleach if suitable; otherwise to the recycling park.","fr":"Encore comme nettoyant ou blanchissant si adapté ; sinon au recyparc."},
   default:{ nl:"Niet meer bij klanten gebruiken. Is er geen veilig tweede gebruik, voer het dan af via het containerpark (klein gevaarlijk afval) of bij de restafval als het etiket dat toelaat.", en:"No longer for clients. Without a safe second use, take it to the recycling park.", fr:"Plus pour les clientes. Sinon, au parc à conteneurs." }
+};
+
+/* PRODUCT_TIPS (v184): how to use, combinations and recipes — Sandra only
+   (shown on the product card in salon mode and searched by the product finder). */
+const PRODUCT_TIPS = {
+"almondoil": {
+"nl": [
+"Basisolie voor elke massage: glijdt goed, trekt traag in, geschikt voor droge en gevoelige huid (ook baby's).",
+"Combinatie: 70% amandel + 30% druivenpit = lichter en minder vet; voor de rug + 2–3 druppels lavendel per 10 ml.",
+"Recept lipscrub voor jezelf: 1 el suiker + 1 tl amandelolie + ½ tl honing.",
+"Let op: notenallergie (amandel)."
+],
+"en": [
+"Base oil for any massage: good glide, absorbs slowly, suits dry and sensitive skin.",
+"Blend: 70% almond + 30% grapeseed = lighter; for the back add 2–3 drops lavender per 10 ml.",
+"Lip scrub for yourself: 1 tbsp sugar + 1 tsp almond oil + ½ tsp honey.",
+"Nut allergy (almond)."
+],
+"fr": [
+"Huile de base pour tout massage : bonne glisse, peaux sèches et sensibles.",
+"Mélange : 70 % amande + 30 % pépins de raisin = plus léger ; dos : + 2–3 gouttes de lavande par 10 ml.",
+"Allergie aux noix (amande)."
+]
+},
+"grapeseedoil": {
+"nl": [
+"Lichte, droge olie die snel intrekt: ideaal voor de gemengde of vette huid en voor een gezichtsmassage.",
+"Combinatie: als ‘verdunner’ voor zware oliën (avocado, castor, tamanu): 3 delen druivenpit + 1 deel zware olie.",
+"Bij een lange massage (Zweeds, Hot Stone) mengen met amandelolie, anders trekt ze te snel in."
+],
+"en": [
+"Light, dry oil that absorbs fast: ideal for combination/oily skin and facial massage.",
+"Use it to thin heavy oils (avocado, castor, tamanu): 3 parts grapeseed + 1 part heavy oil.",
+"For long massages mix with almond oil, otherwise it absorbs too fast."
+],
+"fr": [
+"Huile légère qui pénètre vite : peaux mixtes/grasses, massage du visage.",
+"Pour alléger les huiles lourdes : 3 parts pépins de raisin + 1 part huile lourde."
+]
+},
+"avocadooil": {
+"nl": [
+"Rijke, voedende olie voor de droge, rijpe of schilferige huid, voeten en handen.",
+"Combinatie: 20–30% in amandel- of druivenpitolie voor een voedende lichaamsmassage; puur op eeltige hielen na de pedicure.",
+"Let op: kruisallergie met latex."
+],
+"en": [
+"Rich, nourishing oil for dry, mature or flaky skin, feet and hands.",
+"20–30% in almond or grapeseed oil for a nourishing body massage; neat on hard heels after a pedicure.",
+"Latex cross-allergy."
+],
+"fr": [
+"Huile riche pour peaux sèches ou matures, pieds et mains.",
+"20–30 % dans l’amande ou les pépins de raisin ; pure sur les talons après la pédicure.",
+"Allergie croisée au latex."
+]
+},
+"castoroil": {
+"nl": [
+"Dikke, plakkerige olie: zelden puur voor een massage, wel 10–20% in een massagemengsel voor meer ‘grip’ (cupping, faciale cupping).",
+"Wimpers en wenkbrauwen: met een schoon mascaraborsteltje 's avonds een dun laagje (niet in de ogen).",
+"Nagelriemen: 1 druppel, inmasseren. In zeep: max. 5–10% van de oliën, geeft romig schuim.",
+"Mengt goed met druivenpitolie (1 deel castor + 3 delen druivenpit)."
+],
+"en": [
+"Thick, sticky oil: rarely neat for massage, but 10–20% in a blend for more grip (cupping).",
+"Lashes and brows: a thin layer at night with a clean spoolie (not in the eyes).",
+"Cuticles: 1 drop. In soap: max. 5–10% of the oils for creamy lather.",
+"Mixes well with grapeseed (1 part castor + 3 parts grapeseed)."
+],
+"fr": [
+"Huile épaisse : 10–20 % dans un mélange pour le cupping.",
+"Cils et sourcils : fine couche le soir avec un goupillon propre.",
+"Savon : max. 5–10 % des huiles."
+]
+},
+"arnicaoil": {
+"nl": [
+"Maceraat (arnica in plantaardige olie): voor vermoeide, stijve spieren en na het sporten; ideaal bij de rug-, nek- en schoudermassage.",
+"Combinatie: 1 deel arnica + 2 delen amandelolie; + 2 druppels rozemarijn of lavendel per 10 ml (niet bij zwangerschap/epilepsie voor rozemarijn).",
+"Niet op open wondjes of beschadigde huid."
+],
+"en": [
+"Macerate for tired, stiff muscles: ideal for back, neck and shoulder massage.",
+"1 part arnica + 2 parts almond oil; + 2 drops rosemary or lavender per 10 ml.",
+"Not on broken skin."
+],
+"fr": [
+"Macérât pour muscles fatigués : dos, nuque, épaules.",
+"1 part arnica + 2 parts amande ; + 2 gouttes de lavande par 10 ml.",
+"Pas sur peau lésée."
+]
+},
+"detuinenapricot": {
+"nl": [
+"Lichte, zachte massageolie (volgens het etiket ‘zeer geschikt als massageolie en voor de babyhuid’): voor droge, schrale en ruwe huid.",
+"Combinatie: puur voor een Zweedse massage, of 50/50 met amandelolie; voor het gezicht 3–5 druppels met 1 druppel tamanu.",
+"Na openen 6 maanden: koel en donker bewaren.",
+"Vraag bij een notenallergie na (pitolie)."
+],
+"en": [
+"Light, soft massage oil (label: ‘very suitable as massage oil and for baby skin’) for dry, rough skin.",
+"Neat for a Swedish massage or 50/50 with almond; for the face 3–5 drops + 1 drop tamanu.",
+"6 months after opening.",
+"Ask about nut allergy."
+],
+"fr": [
+"Huile de massage légère et douce, peaux sèches et rugueuses.",
+"Pure ou 50/50 avec l’amande ; visage : 3–5 gouttes + 1 goutte de tamanu.",
+"6 mois après ouverture."
+]
+},
+"detuinenargan": {
+"nl": [
+"Gezicht: 2–3 druppels na het serum, of 1 druppel door de dagcrème bij een droge huid.",
+"Gelaatsmassage (gua sha, Hot Stone gelaat, faciale cupping): glijdt mooi; meng 1:1 met druivenpitolie als het te rijk is.",
+"Handen en nagels: als nagelriemolie bij de manicure; haarpunten: 1 druppel.",
+"Recept handserum: 20 ml argan + 5 ml squalane + 2 druppels lavendel."
+],
+"en": [
+"Face: 2–3 drops after serum, or 1 drop mixed into day cream for dry skin.",
+"Facial massage (gua sha, hot stone, cupping): mix 1:1 with grapeseed if too rich.",
+"Cuticle oil at the manicure; hair ends: 1 drop.",
+"Hand serum: 20 ml argan + 5 ml squalane + 2 drops lavender."
+],
+"fr": [
+"Visage : 2–3 gouttes après le sérum.",
+"Massage du visage : 1:1 avec pépins de raisin.",
+"Huile cuticules à la manucure."
+]
+},
+"printempsargan": {
+"nl": [
+"Zelfde gebruik als de De Tuinen-arganolie (gezicht, haar, nagels, wenkbrauwen); kleiner flesje, ideaal voor in je manicurekoffer.",
+"Recept haarmasker voor jezelf: 1 el argan + 1 el aloëgel, 20 min op de lengtes, uitwassen."
+],
+"en": [
+"Same use as the De Tuinen argan oil; small bottle, handy for your manicure kit.",
+"Hair mask: 1 tbsp argan + 1 tbsp aloe gel, 20 min on the lengths, rinse."
+],
+"fr": [
+"Même usage que l’huile d’argan De Tuinen ; petit flacon pour la trousse manucure."
+]
+},
+"berivitahemp": {
+"nl": [
+"Droge, gevoelige huid en eczeemgevoelige plekjes: 10–20% in een gezichts- of lichaamsolie.",
+"Combinatie: hennep + jojoba/squalane (lichte, niet-vette gezichtsolie); niet verwarmen.",
+"Wordt snel ranzig: kleine hoeveelheden mengen en binnen een paar weken opgebruiken."
+],
+"en": [
+"Dry, sensitive skin: 10–20% in a face or body oil.",
+"Hemp + squalane = light, non-greasy face oil; do not heat.",
+"Goes rancid fast: mix small amounts."
+],
+"fr": [
+"Peau sèche et sensible : 10–20 % dans une huile.",
+"Chanvre + squalane = huile visage légère.",
+"Rancit vite."
+]
+},
+"nhgreencoffee": {
+"nl": [
+"Oogcontour: 1 druppel groene koffie-olie in 5 ml squalane, licht inkloppen tegen wallen.",
+"Afslankmassage/anti-cellulitis: 10–20% in amandelolie, eventueel + 2 druppels grapefruit (niet in de zon erna).",
+"Koffiescrub voor jezelf: 2 el koffiedik + 1 el suiker + 1 el olie (koffie- of amandelolie)."
+],
+"en": [
+"Eye area: 1 drop in 5 ml squalane, tap in against puffiness.",
+"Slimming massage: 10–20% in almond oil, + 2 drops grapefruit (no sun afterwards).",
+"Coffee scrub: 2 tbsp grounds + 1 tbsp sugar + 1 tbsp oil."
+],
+"fr": [
+"Contour des yeux : 1 goutte dans 5 ml de squalane.",
+"Massage minceur : 10–20 % dans l’amande.",
+"Gommage au café : 2 c. à soupe de marc + 1 de sucre + 1 d’huile."
+]
+},
+"berivitatamanu": {
+"nl": [
+"Littekens, kloofjes, couperose: 1–2 druppels puur op het plekje, of 10% in een gezichtsolie.",
+"Combinatie: 1 deel tamanu + 4 delen abrikozen- of druivenpitolie (zachter van geur en textuur).",
+"Pedicure: 1 druppel op kloven in de hielen, na het eelt verwijderen.",
+"Komt van een noot: niet bij notenallergie."
+],
+"en": [
+"Scars, cracks, couperose: 1–2 drops neat, or 10% in a face oil.",
+"1 part tamanu + 4 parts apricot or grapeseed oil.",
+"Pedicure: 1 drop on heel cracks after callus removal.",
+"Nut-derived."
+],
+"fr": [
+"Cicatrices, crevasses, couperose : 1–2 gouttes pures ou 10 %.",
+"1 part tamanu + 4 parts abricot.",
+"Origine noix."
+]
+},
+"berivitalaurel": {
+"nl": [
+"Vooral voor zeep: Aleppozeep = olijfolie + 10–40% laurierolie (koudproces, 4–6 weken laten rijpen).",
+"Hoofdhuid (voor jezelf): 1 tl door je shampoo bij roos.",
+"Niet in massages bij klanten: laurier is een bekend contactallergeen."
+],
+"en": [
+"Mainly for soap: Aleppo soap = olive oil + 10–40% laurel oil.",
+"Scalp (for yourself): 1 tsp in your shampoo for dandruff.",
+"Not in client massages: known contact allergen."
+],
+"fr": [
+"Surtout pour le savon d’Alep (olive + 10–40 % laurier).",
+"Pas en massage cliente : allergène connu."
+]
+},
+"youmadusea": {
+"nl": [
+"Rijpe of doffe huid: 1 druppel door je crème of gezichtsolie (meer kleurt oranje).",
+"Zelfgemaakte zeep: 1–2% als natuurlijke oranje kleur en vitamines.",
+"Combinatie: met argan of squalane; nooit puur, handschoenen aan."
+],
+"en": [
+"Mature or dull skin: 1 drop in your cream or face oil.",
+"Soap: 1–2% for natural orange colour.",
+"Mix with argan or squalane; never neat, gloves on."
+],
+"fr": [
+"Peau mature : 1 goutte dans la crème.",
+"Savon : 1–2 % pour la couleur orange.",
+"Jamais pure."
+]
+},
+"mmsqualane": {
+"nl": [
+"Lichtste olie die je hebt: ideaal voor de vette/gemengde huid, onder make-up of rond de ogen.",
+"Combinatie: als basis om ‘zware’ oliën lichter te maken (5 ml squalane + 1 druppel duindoorn of groene koffie).",
+"Haar: 1 druppel tegen pluis. Nagelriemen: 1 druppel."
+],
+"en": [
+"Lightest oil you have: ideal for oily skin, under make-up or around the eyes.",
+"Base to lighten heavy oils (5 ml squalane + 1 drop sea buckthorn or green coffee).",
+"Hair: 1 drop against frizz."
+],
+"fr": [
+"L’huile la plus légère : peaux grasses, sous le maquillage, contour des yeux."
+]
+},
+"druplantaren": {
+"nl": [
+"Make-upkwasten wassen: 1 tl in een kom lauw water, kwasten erin draaien, goed spoelen, plat laten drogen.",
+"Milde handzeep/douchegel (met conservering): 25% plantaren + 70% water of hydrolaat + 3% glycerine + 2% conserveermiddel.",
+"Gezichtsreiniger: 10–15% plantaren in aloëgel (met conservering)."
+],
+"en": [
+"Wash make-up brushes: 1 tsp in a bowl of warm water, rinse well, dry flat.",
+"Mild hand wash (with preservative): 25% plantaren + 70% water + 3% glycerine + 2% preservative.",
+"Face cleanser: 10–15% in aloe gel."
+],
+"fr": [
+"Nettoyer les pinceaux : 1 c. à café dans de l’eau tiède.",
+"Savon doux : 25 % plantaren + 70 % eau + 3 % glycérine + conservateur."
+]
+},
+"drupanthenol": {
+"nl": [
+"Kalmerende gezichtsspray: 100 ml hydrolaat of gedestilleerd water + 3 ml panthenol + conservering.",
+"After-sun: aloëgel + 5% panthenol.",
+"In shampoo of conditioner: 1–2% voor glans."
+],
+"en": [
+"Soothing face mist: 100 ml hydrosol + 3 ml panthenol + preservative.",
+"After-sun: aloe gel + 5% panthenol.",
+"Shampoo/conditioner: 1–2% for shine."
+],
+"fr": [
+"Brume apaisante : 100 ml hydrolat + 3 ml panthénol + conservateur.",
+"Après-soleil : gel d’aloé + 5 %."
+]
+},
+"druriceprotein": {
+"nl": [
+"Shampoo/conditioner: 2–3% voor volume. Haarspray: water + 2% rijstproteïne + 0,5% panthenol + conservering."
+],
+"en": [
+"Shampoo/conditioner: 2–3% for volume. Hair mist: water + 2% rice protein + 0.5% panthenol + preservative."
+],
+"fr": [
+"Shampooing : 2–3 % pour le volume."
+]
+},
+"drualoegel": {
+"nl": [
+"Basis voor gels en after-sun; puur als koelend masker (10 min) na de zon of na het epileren.",
+"Combinatie: aloë + 5% panthenol + 1 druppel lavendel per 10 ml (met conservering)."
+],
+"en": [
+"Base for gels and after-sun; neat as a cooling mask after sun or waxing.",
+"Aloe + 5% panthenol + 1 drop lavender per 10 ml."
+],
+"fr": [
+"Base de gels et après-soleil ; masque rafraîchissant."
+]
+},
+"druleucidal": {
+"nl": [
+"Werkt alleen in producten met water (crèmes, gels, sprays): 2–4%, toevoegen onder 70 °C, pH 3–8.",
+"Niet nodig in producten zonder water (olie, balsem, zeep)."
+],
+"en": [
+"Only needed in water-based products: 2–4%, added below 70 °C, pH 3–8.",
+"Not needed in anhydrous products (oils, balms, soap)."
+],
+"fr": [
+"Uniquement dans les produits aqueux : 2–4 %, sous 70 °C."
+]
+},
+"mmbiokons": {
+"nl": [
+"Conserveermiddel voor producten met water; volg de dosering van Marion Maakt. Niet nodig in olie, balsem of zeep."
+],
+"en": [
+"Preservative for water-based products; follow Marion Maakt’s dosage. Not needed in oils, balms or soap."
+],
+"fr": [
+"Conservateur pour produits aqueux ; inutile dans huiles et baumes."
+]
+},
+"mmlecithin": {
+"nl": [
+"Badolie die zich mengt met het badwater: 90 ml amandelolie + 10 ml lecithine + 10 druppels lavendel.",
+"In een balsem of crème 1–3% voor een soepelere textuur."
+],
+"en": [
+"Bath oil that disperses in water: 90 ml almond + 10 ml lecithin + 10 drops lavender.",
+"1–3% in a balm or cream."
+],
+"fr": [
+"Huile de bain dispersible : 90 ml amande + 10 ml lécithine + 10 gouttes de lavande."
+]
+},
+"beeswax": {
+"nl": [
+"Lippenbalsem (voor jezelf): 1 deel bijenwas + 2 delen sheaboter + 2 delen olie (amandel/argan), au bain-marie smelten.",
+"Zalfje voor droge handen/hielen: 1 deel bijenwas + 4 delen olie (avocado + tamanu)."
+],
+"en": [
+"Lip balm (for yourself): 1 part beeswax + 2 parts shea + 2 parts oil, melt in a bain-marie.",
+"Salve for dry hands/heels: 1 part beeswax + 4 parts oil."
+],
+"fr": [
+"Baume à lèvres : 1 part cire + 2 karité + 2 huile.",
+"Onguent mains/talons : 1 part cire + 4 huile."
+]
+},
+"activecharcoal": {
+"nl": [
+"Zuiverend masker: 1 tl kool + 1 tl klei + water of aloëgel tot een pasta, 10 min (niet laten uitdrogen).",
+"In zeep: 1 tl per kg oliën voor een zwarte, zuiverende zeep. Geeft vlekken op textiel."
+],
+"en": [
+"Purifying mask: 1 tsp charcoal + 1 tsp clay + water or aloe gel, 10 min.",
+"Soap: 1 tsp per kg of oils."
+],
+"fr": [
+"Masque purifiant : 1 c. charbon + 1 c. argile + eau.",
+"Savon : 1 c. par kg d’huiles."
+]
+},
+"alcohol96": {
+"nl": [
+"Kamerspray: 20 ml alcohol + 20 druppels etherische olie, aanvullen met 80 ml gedestilleerd water, schudden voor gebruik.",
+"Linnenspray voor de behandeltafel-hoes: zelfde recept met lavendel (eerst testen op de stof)."
+],
+"en": [
+"Room spray: 20 ml alcohol + 20 drops essential oil, top up with 80 ml distilled water.",
+"Linen spray with lavender (test on the fabric first)."
+],
+"fr": [
+"Spray d’ambiance : 20 ml alcool + 20 gouttes d’HE + 80 ml d’eau distillée."
+]
+},
+"geurolievanille": {
+"nl": [
+"Zeep en kaarsen: houd je aan de maximale dosering op het etiket (meestal 1–3%).",
+"Mooi met lavendel of sinaasappel (etherisch) in een eigen zeep; vanille kleurt de zeep bruin."
+],
+"en": [
+"Soap and candles: keep to the label maximum (usually 1–3%).",
+"Nice with lavender or orange; vanilla turns soap brown."
+],
+"fr": [
+"Savons et bougies : max. selon l’étiquette ; la vanille brunit le savon."
+]
+},
+"geurolielavendel": {
+"nl": [
+"Voor eigen zeep, badbommen en kaarsen (max. dosering op het etiket). Niet bij de behandelingen: daar de echte lavendel van Physalis."
+],
+"en": [
+"For your own soap, bath bombs and candles. Not in treatments: use the real Physalis lavender."
+],
+"fr": [
+"Pour savons et bougies maison ; pas en soin."
+]
+},
+"lampoils": {
+"nl": [
+"Een paar druppels in het water van de oliebrander. Seizoen: Winterwereld en Dennen in december, Peperkoek en Kaneel-sinaasappel in de herfst.",
+"Niet tegelijk met een etherisch geurtje in de vapozone (te veel geuren door elkaar)."
+],
+"en": [
+"A few drops in the burner water. Winter world and Pine in December, Gingerbread and Cinnamon orange in autumn.",
+"Not at the same time as an essential oil in the vapozone."
+],
+"fr": [
+"Quelques gouttes dans l’eau du brûleur ; pas en même temps que le vapozone."
+]
+},
+"berivitapatchouli": {
+"nl": [
+"Oliebrander: 2–3 druppels, mooi samen met 2 druppels sinaasappel of lavendel. Geurzakje tegen motten."
+],
+"en": [
+"Burner: 2–3 drops, nice with 2 drops orange or lavender. Sachet against moths."
+],
+"fr": [
+"Brûleur : 2–3 gouttes avec orange ou lavande."
+]
+},
+"vaseline": {
+"nl": [
+"Lippenbalsem: ja, dat mag. Vaseline vormt een beschermend laagje en houdt vocht vast, maar geeft zelf geen vocht: breng het aan op licht vochtige lippen of over een hydraterende balsem.",
+"Bij klanten altijd met een spatel of wattenstaafje uit het potje, nooit met de vinger of rechtstreeks.",
+"Verder: beschermlaagje rond de wenkbrauwen bij het verven, op droge nagelriemen, op ruwe hielen onder een sok ’s nachts."
+],
+"en": [
+"Lip balm: yes. It forms a protective layer and locks in moisture but adds none itself: apply on slightly damp lips or over a hydrating balm.",
+"With clients always use a spatula or cotton bud.",
+"Also: barrier around brows when tinting, dry cuticles, rough heels under a sock overnight."
+],
+"fr": [
+"Baume à lèvres : oui, sur lèvres légèrement humides ou par-dessus un baume hydratant.",
+"Toujours avec une spatule chez les clientes."
+]
+},
+"h2o2ten": {
+"nl": [
+"Witte handdoeken: scheutje (±50 ml) bij het wasmiddel in de trommel.",
+"Bloedvlekjes op wit textiel: verdund 1:2 met water, laten inwerken, uitspoelen (kleuren kunnen bleken: eerst testen).",
+"Altijd met handschoenen; nooit op de huid."
+],
+"en": [
+"White towels: a splash (±50 ml) with the detergent.",
+"Blood stains on white textiles: diluted 1:2, rinse (may bleach colours).",
+"Always gloves; never on skin."
+],
+"fr": [
+"Serviettes blanches : ±50 ml avec la lessive.",
+"Gants ; jamais sur la peau."
+]
+},
+"collodium": {
+"nl": [
+"Klein sneetje of kloofje bij de pedicure: eerst ontsmetten en droog deppen, dan 1 dun laagje, 30 sec laten drogen.",
+"SFX-litteken: 2–4 dunne laagjes op de huid laten opdrogen (trekt de huid samen), daarna afwerken met make-up."
+],
+"en": [
+"Small cut or crack at the pedicure: disinfect, pat dry, 1 thin layer, let dry 30 sec.",
+"SFX scar: 2–4 thin layers, then make-up."
+],
+"fr": [
+"Petite coupure : désinfecter, sécher, 1 fine couche.",
+"Cicatrice SFX : 2–4 couches fines."
+]
+},
+"bathoilvital": {
+"nl": [
+"Voetbad: 1 dopje in 3–4 liter warm water, 5–10 min weken voor de pedicure; daarna gaat het eelt makkelijker los.",
+"Combinatie: met 2 el epsomzout (Anaé) in het water voor vermoeide voeten."
+],
+"en": [
+"Foot bath: 1 capful in 3–4 litres of warm water, soak 5–10 min before the pedicure.",
+"Add 2 tbsp Epsom salt for tired feet."
+],
+"fr": [
+"Bain de pieds : 1 bouchon dans 3–4 l d’eau chaude, 5–10 min.",
+"Avec 2 c. à soupe de sel d’Epsom."
+]
+},
+"epsomsalt": {
+"nl": [
+"Voetbad: 2–3 el per 4 liter warm water, 10 min (ontspant, verzacht eelt). Met 1 dopje Rainpharma voetbadolie.",
+"Badzout voor jezelf: 1 kopje in het bad + 5 druppels lavendel gemengd in 1 el amandelolie."
+],
+"en": [
+"Foot bath: 2–3 tbsp per 4 litres warm water, 10 min. Add a capful of Rainpharma foot bath oil.",
+"Bath salt for yourself: 1 cup + 5 drops lavender in 1 tbsp almond oil."
+],
+"fr": [
+"Bain de pieds : 2–3 c. à soupe pour 4 l, 10 min."
+]
+},
+"nyxglitter": {
+"nl": [
+"Aanbrengen: eerst een dun laagje glitterlijm, vaseline of een balsem op de huid (jukbeen, decolleté, schouders), dan de glitter erop deppen met een plat penseel of de vingertop.",
+"Combinatie: Gold met Bellápierre Cocoa of een bronzer voor een warme kerstlook; Teal met zilver highlight voor een festival; Red over een rode lippenstift-look op de wangen (niet op de lippen).",
+"Verwijderen: met olie (amandel- of druivenpitolie) op een wattenschijfje, daarna reinigen. Niet rond de ogen gebruiken."
+],
+"en": [
+"Apply on a thin layer of glitter glue, petroleum jelly or balm, then press on with a flat brush.",
+"Gold + Bellápierre Cocoa or bronzer for a warm Christmas look; Teal + silver highlight for festivals.",
+"Remove with oil on a cotton pad, then cleanse. Not around the eyes."
+],
+"fr": [
+"Sur une fine couche de colle à paillettes ou de vaseline, appliquer au pinceau plat.",
+"Gold + Cocoa pour un look de Noël ; Teal + highlight argenté pour un festival.",
+"Démaquiller à l’huile. Pas autour des yeux."
+]
+},
+"bellacocoa": {
+"nl": [
+"Droog als warme overgangskleur in de ooglidplooi of als bronzende highlight.",
+"Vochtig (op een vochtig penseel of met wat mixing-medium) als bruine eyeliner.",
+"Vervallen: gebruik hem nog voor een SFX- of workshopdemo op een oefenhoofd, of meng hem met transparante nagellak voor een eigen nagelkleur (voor jezelf)."
+],
+"en": [
+"Dry as a warm crease colour or bronzing highlight.",
+"Wet as a brown eyeliner.",
+"Expired: use for practice heads or mix into clear nail polish (for yourself)."
+],
+"fr": [
+"À sec en couleur de transition ou enlumineur bronzant.",
+"Humide en eye-liner brun.",
+"Périmé : tête d’entraînement ou vernis transparent (pour toi)."
+]
+},
+"qusainegel": {
+"nl": [
+"Aan de inkom of bij de koffiehoek voor klanten, en voor jezelf tussen twee behandelingen.",
+"Niet als vervanger van je biocide-handontsmetting in je hygiëneprotocol."
+],
+"en": [
+"At the entrance or coffee corner for clients, and for yourself between treatments.",
+"Not a replacement for your biocide hand disinfection."
+],
+"fr": [
+"À l’entrée pour les clientes et pour toi entre deux soins.",
+"Ne remplace pas le biocide."
+]
+}
 };
 
 /* PRODUCT_FINDER_SYN (v173): extra words for the product finder in the
@@ -1375,6 +2025,7 @@ const PRODUCT_FINDER_SYN = {
   "gevoelige huid":["sensitive","gevoelige huid","peau sensible","kalmer"], gevoelig:["gevoelige huid","sensitive","kalmer"], roodheid:["couperose","roodheid","rougeur"], couperose:["couperose","roodheid"], rougeurs:["couperose","roodheid"],
   "gemengde huid":["combination skin","peau mixte","gemengde huid"],
   pigment:["pigment","melafadin","egaler"], vlekken:["pigment","melafadin"], dof:["stralend","radiant","glow"],
+  zeep:["zeep","zelf maken","soap","savon"], soap:["zeep","zelf maken","soap"], savon:["zeep","savon"], "zelf maken":["zelf maken","zeep","homemade"], homemade:["zelf maken","homemade","fait maison"], diy:["zelf maken","homemade","zeep"], conserveermiddel:["conserveermiddel","preservative","conservateur"], preservative:["conserveermiddel","preservative"], conservateur:["conservateur","conserveermiddel"], kamerspray:["kamerspray","room spray","geur"], littekens:["litteken","scar","cicatrice"], bleken:["bleken","bleach","blanchir"], kwasten:["kwasten","brushes","pinceaux"],
   wondje:["wond","ehbo"], wond:["wond","ehbo"], eelt:["eelt","callus","callosit"], kloven:["kloven","eelt"]
 };
 
@@ -1419,7 +2070,7 @@ const PRODUCT_ORDER = [
     { label:{ nl:"Daarna: Dr. Renaud en Guinot", en:"Then: Dr. Renaud and Guinot", fr:"Ensuite : Dr. Renaud et Guinot" }, ids:["guinoteyeremover","guinothydrabeaute50","renaudmodelage","guinotmilkhb","guinottonerhb","guinotbiologic","guinotmaskhb","renauddesinc","renaudpeel426","renaudneutral","renaudcamomile","renaudmilkcamo","renaudtonercamo","renaudirisserum","renaudiriscream","renaudiriseye","renaudlimegel","renaudcentella","renaudeyecamo","renaudhydra","renaudiris","guinotliftsummum","guinotliftcream","guinothydrapeel","guinothydrazone","guinothydrabeaute","renaudnightbalm","jainstantlift"] },
     { label:{ nl:"Blijvend: Janssen Cosmetics", en:"To stay: Janssen Cosmetics", fr:"Définitif : Janssen Cosmetics" }, ids:["janssenneck","janssenpurifyinggel","janssenenzymepowder","janssenahabhaexfo","janssenbhaserum","janssenahacream","janssenretinolcream","janssenclearingmask","janssenfruitpeelmask","janssensoftmousse","janssensofttonic","janssencalmingserum","janssencalmingcream","janssensoothingmask","janssencomforteye","janssencleansingpowder","janssentinted","janssenmicrosilver","janssenmattifying","janssenluxuryoil","janssencleansingbalm","janssentricare","janssenperfectlift","janssenskincontour","janssenliftcontourmask","janssenmicellar","janssenenzymepeel","janssenageperfecting","janssenceramide","janssenrichrecovery","janssenrejuvenating","fillmekit","janssenmildcreamy","janssenahabha","janssenradiantfirming","janssenpurifying","janssenmildrub","janssenmoistserum","janssenbalancing","janssensuperhydrating","janssenhydroactive","janssenhyaluron3","janssendeepxpress","janssenhydratingmask","janssenaqualift30","janssenaqualift","janssenmassage","janssenspf","janssenacerola","janssenaloe","janssendeadsea","janssenbiocell","jaradiant","japlatinum","jamarine","jacontour","jawrinkle","jacaviar","jadetox","jastemcell","jahyaluron","jasoothing","jacouperose","jamelafadin","jaretinol","jasuperfruit","jaeyepads","bbsensivital"] } ] },
   { id:"nails", label:{ nl:"Manicure & pedicure", en:"Manicure & pedicure", fr:"Manucure & pédicure" }, phases:[
-    { label:{ nl:"Eerst opgebruiken: Bio Balance (en de rest)", en:"Use up first: Bio Balance (and the rest)", fr:"À finir d’abord : Bio Balance (et le reste)" }, ids:["indulgescrub","ezwaxspray","cutitreat","bbcuticle","criscuticleoff","crisbase","crisultra","crisplump","dermopeel","ahahand","mellowmoist","soothingsuds","juiceup","boostingbalm","detoxclay","calmingmud","cobraremover","cobraprepbond","gelprimer","cobrastaybase","gelbiab","cobrafiberbase","gelcolour","gelcolourhema","gelgalaxy","pgcateye","geltop","essencecuticle","nailoffaceton","glamlacoil","pgcorrector","heromecorrector","nailpolish","yrtopcoat","twoinglatex","pgkids","frenchpolish","gelcleanser","nivea3in1wipes","diadermineeye","biodermah2o","vaseline","labellospf","daralisbalm","kruidvattalc","niveamilkfresh","niveamilksoft","niveatonicfresh","niveatonicsoft","covermark","kryolanhd","kryolandermacolor","mudhighlightpalette","bellaeyepalette","bellalippalette","kryolanillusion","kryolanblend","jicorrective","jigreatshapebrow","jigreatshapecontour","jipurematte","karajabronze","bellashimmer","kryolanholo","kryolanglamour","kryolanlipstick","bellamineralblush","jismoothaffair","jienlighten","jiactivelight1","jimystikol","jipurebrow","jibrowpencil","kryolanhdliner","kryolancreamliner","bobbigelliner","cliniquemascara","bellajewel","bellasmokey","bellabrowneyed","bellablushing","bellaglowing","kryolanv1","kryolanv2","kryolanbrows","kryolanblush","kryolanlipsheer","jibeyondmatte","bellaprimer","provocccc","yrpowder","micapigments","lipdrink","pommisst","lashglueduo","lashglueardell","lashglueeye","kryolanice","kryolanlipfix","kryolanbrowplastic","kryolansealer","activecharcoal","beeswax","kryolancleansing","brushcleaner","wbmousse","wbvolume","wbprotect","wbhairspray","antisepta","dermospray","collagenmilk","paraffinsoft","bbhandmask","bbcallusfoam","footpeeling","footmask","belmasque"] },
+    { label:{ nl:"Eerst opgebruiken: Bio Balance (en de rest)", en:"Use up first: Bio Balance (and the rest)", fr:"À finir d’abord : Bio Balance (et le reste)" }, ids:["indulgescrub","ezwaxspray","cutitreat","bbcuticle","criscuticleoff","crisbase","crisultra","crisplump","dermopeel","ahahand","mellowmoist","soothingsuds","juiceup","boostingbalm","detoxclay","calmingmud","cobraremover","cobraprepbond","gelprimer","cobrastaybase","gelbiab","cobrafiberbase","gelcolour","gelcolourhema","gelgalaxy","pgcateye","geltop","essencecuticle","nailoffaceton","glamlacoil","pgcorrector","heromecorrector","nailpolish","yrtopcoat","twoinglatex","pgkids","frenchpolish","gelcleanser","nivea3in1wipes","diadermineeye","biodermah2o","vaseline","labellospf","daralisbalm","kruidvattalc","niveamilkfresh","niveamilksoft","niveatonicfresh","niveatonicsoft","covermark","kryolanhd","kryolandermacolor","mudhighlightpalette","bellaeyepalette","bellalippalette","kryolanillusion","kryolanblend","jicorrective","jigreatshapebrow","jigreatshapecontour","jipurematte","karajabronze","bellashimmer","bellacocoa","nyxglitter","kryolanholo","kryolanglamour","kryolanlipstick","bellamineralblush","jismoothaffair","jienlighten","jiactivelight1","jimystikol","jipurebrow","jibrowpencil","kryolanhdliner","kryolancreamliner","bobbigelliner","cliniquemascara","bellajewel","bellasmokey","bellabrowneyed","bellablushing","bellaglowing","kryolanv1","kryolanv2","kryolanbrows","kryolanblush","kryolanlipsheer","jibeyondmatte","bellaprimer","provocccc","yrpowder","micapigments","lipdrink","pommisst","lashglueduo","lashglueardell","lashglueeye","kryolanice","kryolanlipfix","kryolanbrowplastic","kryolansealer","activecharcoal","beeswax","kryolancleansing","brushcleaner","wbmousse","wbvolume","wbprotect","wbhairspray","antisepta","dermospray","collagenmilk","paraffinsoft","bbhandmask","bbcallusfoam","footpeeling","footmask","belmasque"] },
     { label:{ nl:"Blijvend: Gehwol en Gerlasan", en:"To stay: Gehwol and Gerlasan", fr:"Définitif : Gehwol et Gerlasan" }, ids:["gehwolblue","gerlasan","podiskin","handgel","podior","podior80","aether","hansaplastalc","h2o2","gehwolnail","flamirins","flaminalhydro","diaseptyl","isobetadine","hirudoid","sorbalgon","daktarinspray","gehwolsoftfeet"] } ] },
   { id:"waxing", label:{ nl:"Ontharen", en:"Waxing", fr:"Épilation" }, phases:[
     { label:{ nl:"Eerst opgebruiken: de harspotten", en:"Use up first: the wax tins", fr:"À finir d’abord : les pots de cire" }, ids:["waxstrip","waxlavender","waxintimate"] },
@@ -1438,7 +2089,7 @@ const PRODUCT_ORDER = [
 const PRODUCTS_OP = [];
 // opening dates (Sandra's tab "Openingsdata"):
 // { productId: { d:"YYYY-MM-DD" opened, m: months after opening, t:"YYYY-MM-DD" best-before (THT) } }
-const PRODUCTS_OPENED = {"daktarinspray":{"t":"2028-01-31"},"hirudoid":{"t":"2029-03-31"},"sorbalgon":{"t":"2028-09-14"},"mhblashlift":{"t":"2027-02-22"},"podiskin":{"t":"2027-06-30"},"podinail":{"t":"2028-06-30"},"bepanthenhydra":{"t":"2028-01-31"},"waxlavender":{"t":"2028-11-30"},"paraffinsoft":{"t":"2029-07-31"},"kamferspiritus":{"t":"2028-12-31"},"thermomask":{"t":"2028-03-31"},"podior":{"t":"2027-01-31"},"podior80":{"t":"2027-03-31"},"hansaplastalc":{"t":"2029-07-31"},"handgel":{"t":"2023-12-31"},"arnicaoil":{"t":"2028-01-31"},"flaminalhydro":{"t":"2027-10-31"},"flamirins":{"t":"2029-01-31"},"isobetadine":{"t":"2029-07-31"}};
+const PRODUCTS_OPENED = {"mmsqualane":{"t":"2026-10-17"},"bellacocoa":{"d":"2019-03-06","m":36},"berivitatamanu":{"t":"2024-02-29"},"mmbiokons":{"t":"2022-11-02"},"mmlecithin":{"t":"2022-03-31"},"nhgreencoffee":{"t":"2025-06-22"},"berivitahemp":{"t":"2024-02-29"},"berivitalaurel":{"t":"2023-04-30"},"druleucidal":{"t":"2023-04-30"},"druriceprotein":{"t":"2023-09-30"},"drualoegel":{"t":"2022-12-31"},"druplantaren":{"t":"2024-12-31"},"berivitapatchouli":{"t":"2024-12-31"},"daktarinspray":{"t":"2028-01-31"},"hirudoid":{"t":"2029-03-31"},"sorbalgon":{"t":"2028-09-14"},"mhblashlift":{"t":"2027-02-22"},"podiskin":{"t":"2027-06-30"},"podinail":{"t":"2028-06-30"},"bepanthenhydra":{"t":"2028-01-31"},"waxlavender":{"t":"2028-11-30"},"paraffinsoft":{"t":"2029-07-31"},"kamferspiritus":{"t":"2028-12-31"},"thermomask":{"t":"2028-03-31"},"podior":{"t":"2027-01-31"},"podior80":{"t":"2027-03-31"},"hansaplastalc":{"t":"2029-07-31"},"handgel":{"t":"2023-12-31"},"arnicaoil":{"t":"2028-01-31"},"flaminalhydro":{"t":"2027-10-31"},"flamirins":{"t":"2029-01-31"},"isobetadine":{"t":"2029-07-31"}};
 // per piece / per pack / powders: only the best-before date (THT) on the pack counts,
 // not a period after opening (masks per sachet, ampoules, samples, kits, powders)
 const PRODUCTS_THT_ONLY = ["algoageing","algorose","blueberry","collagenmask",

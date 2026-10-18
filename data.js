@@ -1956,7 +1956,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v181 · 18/10/2026";
+const APP_VERSION = "v185 · 18/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -2127,7 +2127,7 @@ const ADVENT = {
       product:"Indulge BuffingSeaSalt Oil Scrub + MellowMoist Lotion (daarna Gerlasan handcrème)",
       ingredients:"Scrub: Carthamus Tinctorius Seed Oil, Helianthus Annuus Seed Oil, Vitis Vinifera Seed Oil, Prunus Armeniaca Kernel Oil, Magnesium Sulfate, Sodium Chloride, Dead Sea Salts, Macrocystis Pyrifera Extract, Dextrose Monohydrate, Fragrance. — Lotion: Aloe Barbadensis Leaf Juice, Aqua, Helianthus Annuus Seed Oil, Isopropyl Palmitate, Glyceryl Stearate SE, Cetyl Alcohol, Stearic Acid, Simmondsia Chinensis Seed Oil, Panthenol, Tocopheryl Acetate, Camellia Sinensis Leaf Extract, Glycerin, Butyrospermum Parkii Butter, Xanthan Gum, Phenoxyethanol, Ethylhexylglycerin, Fragrance. (Volledige lijsten: zie Ingrediënten & allergieën.)",
       nl:"Gratis handpeeling & -massage", en:"Free hand peeling & massage", fr:"Gommage & massage des mains offerts" },
-    paraffinmask: { type:"extra", icon:"🕯️", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+    paraffinmask: { type:"extra", photo:"assets/advent/paraffinmask-ill.webp", icon:"🕯️", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Eerst een verjongend serum met marien DNA en co-enzym Q10, daarna een warm paraffinemasker dat alles laat intrekken — voor een diep gehydrateerde, stralende huid. Bevat parfum en colofonium (hars).",
                    en:"First a rejuvenating serum with marine DNA and coenzyme Q10, then a warm paraffin mask that helps it all sink in — for deeply hydrated, radiant skin. Contains fragrance and colophony (rosin).",
                    fr:"D'abord un sérum rajeunissant à l'ADN marin et à la coenzyme Q10, puis un masque chaud à la paraffine qui fait tout pénétrer — pour une peau profondément hydratée et éclatante. Contient du parfum et de la colophane." },
@@ -2148,12 +2148,12 @@ const ADVENT = {
       product:"Bio Balance Algoherbal Sensitive – Rose (poedermasker + Essence Gel) + Hya-Lift+ serum",
       ingredients:"Poeder (Rose): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Rosa Centifolia Flower, Sodium Phosphate, CI 16035, Rosa Rugosa Flower Oil. — Essence Gel (Rose): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Cucumis Sativus Fruit Extract, Hydrolyzed Collagen, Carbomer, Triethanolamine, PEG-40 Hydrogenated Castor Oil, Hyaluronic Acid, Parfum, Disodium EDTA, Phenoxyethanol, Limonene, Linalool, Alpha-Isomethyl Ionone, CI 16035",
       nl:"Gratis rozen peel-off masker voor de gevoelige huid", en:"Free rose peel-off mask for sensitive skin", fr:"Masque peel-off à la rose pour peaux sensibles offert" },
-    collagen: { type:"extra", icon:"🫧", stock:4, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+    collagen: { type:"extra", photo:"assets/advent/collagen-ill.webp", icon:"🫧", stock:4, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met marien collageen en haver — liftend en verstevigend, voor een zichtbaar gladdere huid.", en:"With marine collagen and oat — lifting and firming, for visibly smoother skin.", fr:"Au collagène marin et à l'avoine — liftant et raffermissant, pour une peau visiblement plus lisse." },
       product:"Bio Balance Super Collageen Gelmasker Lifting",
       ingredients:"Aqua, Soluble Collagen, Propanediol, Phenoxyethanol, Avena Sativa (Oat) Kernel Extract, Carbomer, Caprylyl Glycol, Sodium Hydroxide, Disodium EDTA, Sodium Benzoate",
       nl:"Gratis collageenvliesmasker", en:"Free collagen sheet mask", fr:"Masque en tissu au collagène offert" },
-    goldmask: { type:"extra", icon:"👑", stock:1, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+    goldmask: { type:"extra", photo:"assets/advent/goldmask-ill.webp", icon:"👑", stock:1, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met collageen, hyaluronzuur, centella en groene thee — hydrateert en geeft een stralende, frisse look. Volgens de verpakking niet voor de gevoelige huid.", en:"With collagen, hyaluronic acid, centella and green tea — hydrates and gives a radiant, fresh look. According to the pack, not for sensitive skin.", fr:"Au collagène, à l'acide hyaluronique, à la centella et au thé vert — hydrate et donne un teint frais et éclatant. Selon l'emballage, ne convient pas aux peaux sensibles." },
       product:"Gold Bio-Collagen Facial Mask",
       ingredients:"Aqua, Glycerin, Xanthan Gum, Mica, Chondrus Crispus Powder, Titanium Dioxide, Chlorphenesin, Glucomannan, Algin, Methylparaben, Potassium Chloride, Sodium Hyaluronate, Hydrolyzed Collagen, Butylene Glycol, Centella Asiatica Extract, Polygonum Cuspidatum Root Extract, Scutellaria Baicalensis Root Extract, Camellia Sinensis Leaf Extract, Glycyrrhiza Glabra (Licorice) Root Extract, Chamomilla Recutita (Matricaria) Flower Extract, Rosmarinus Officinalis (Rosemary) Leaf Extract, Iron Oxides, Citric Acid, Potassium Citrate, PEG-40 Hydrogenated Castor Oil, Fragrance",
@@ -2228,6 +2228,8 @@ const ADVENT = {
       nl:"15% korting op een Lift Summum gelaatsverzorging", en:"15% off a Lift Summum facial", fr:"15 % de réduction sur un soin du visage Lift Summum",
       treat:{ nl:"Lift Summum gelaatsverzorging", en:"Lift Summum facial", fr:"soin du visage Lift Summum" } }
   },
+  // discount per door day (max. 15%, rising towards Christmas)
+  discountByDay: [ { to:8, v:"5%" }, { to:16, v:"10%" }, { to:25, v:"15%" } ],
   // the massages for empty doors (in this order, then again from the top)
   autoFill: { value:"15%", massages:[
     { id:"hotstone",        nl:"Hot Stone massage",                      en:"Hot Stone massage",                   fr:"massage aux pierres chaudes" },
@@ -2297,6 +2299,20 @@ const ADVENT = {
       treat:{ nl:m.nl, en:m.en, fr:m.fr }, noMin:true };
     ADVENT.doors.push({ day, item:id, stock:null });
   }
+  // discounts grow towards Christmas and never exceed 15% (Sandra, 18/10):
+  // days 1–8: 5%, 9–16: 10%, 17–25: 15%. Each discount door gets its own copy of the item.
+  const steps = ADVENT.discountByDay || [];
+  ADVENT.doors = ADVENT.doors.map(dr => {
+    const it = ADVENT.items[dr.item];
+    const st = steps.find(s => dr.day <= s.to);
+    if (!it || it.type !== "discount" || !st || it.value === st.v) return dr;
+    const id = dr.item + "@" + st.v.replace("%", "");
+    if (!ADVENT.items[id]){
+      const rep = (s, fr) => typeof s === "string" ? s.replace(/\d{1,2}\s?%/g, fr ? st.v.replace("%", " %") : st.v) : s;
+      ADVENT.items[id] = { ...it, value: st.v, nl: rep(it.nl), en: rep(it.en), fr: rep(it.fr, true) };
+    }
+    return { ...dr, item:id };
+  });
 })();
 
 /* There is NO automatic data reset any more (since v154): clients' stamps,
@@ -3259,4 +3275,27 @@ const UPSELL_SUGGESTIONS = {
   lashlift: U("Combineer met Brow Lift voor een complete look", "Combine with a Brow Lift for a complete look", "Combinez avec un Brow Lift pour un look complet", "€75"),
   oksel: U("Combineer met bovenlip-ontharing", "Combine with upper-lip hair removal", "Combinez avec l'épilation de la lèvre supérieure", "+€10"),
   been: U("Voeg een harmoniserende verzorging toe voor een zachtere huid", "Add a harmonising treatment for softer skin", "Ajoutez un soin harmonisant pour une peau plus douce", "€35")
+};
+
+/* GIFT_CARDS (v183): digital gift vouchers (#cadeaubon). Sandra keeps the
+   register on her own phone (salon key); a client sees the balance through
+   a voucher link signed with the salon key (see app.js, "gift cards").
+   iban/bic: fill in to show bank-transfer details to buyers (leave "" to
+   let buyers ask for them via WhatsApp). seed = paper vouchers sold before
+   the app; added once to Sandra's register (amount in euro). */
+const GIFT_CARDS = {
+  validityMonths: 12,
+  amounts: [25, 50, 75, 100, 150],
+  minAmount: 10,
+  iban: "BE10 7310 7473 1704",
+  bic: "",
+  beneficiary: "Beauty & Coffee",
+  // Belgium: vouchers sold from 1/4/2027 must stay valid at least 2 years (approved by the federal government, 08/2026)
+  validityRules: [ { from:"2027-04-01", months:24 } ],
+  // live balance: cadeaubonnen.json in this site's GitHub repo (owner/repo found from the address; token only on Sandra's phone)
+  live: { owner:"", repo:"", file:"cadeaubonnen.json" },
+  seed: [
+    { n:"202601", a:100, issued:"2026-09-19", valid:"2027-09-19", paper:true },
+    { n:"202602", a:100, issued:"2026-10-18", valid:"2027-10-18", paper:true }
+  ]
 };

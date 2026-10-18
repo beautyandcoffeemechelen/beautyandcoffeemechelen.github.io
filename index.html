@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <!-- SECURITY: the browser only runs code from this site (+ statistics and the
      QR reader, pinned to one exact version). Injected scripts are blocked. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://gc.zgo.at/count.js https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://public-api.wordpress.com https://sanmakeupstudio.wordpress.com https://beautycoffee.goatcounter.com https://cdn.jsdelivr.net https://hook.eu1.make.com; media-src 'self' blob:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https: mailto:; frame-src 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://gc.zgo.at/count.js https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://public-api.wordpress.com https://sanmakeupstudio.wordpress.com https://beautycoffee.goatcounter.com https://cdn.jsdelivr.net https://hook.eu1.make.com https://api.github.com; media-src 'self' blob:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https: mailto:; frame-src 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Beauty &amp; Coffee — Your Match</title>
@@ -113,6 +113,7 @@
     <div class="returning-user" id="returningUserBlock" hidden></div>
 
     <button type="button" class="btn btn--outline btn--wide welcome-stampcard" data-action="open-stampcard" data-i18n="stampcard_button">☕ Mijn stempelkaart</button>
+    <button type="button" class="btn btn--outline btn--wide welcome-giftcard" data-action="open-giftcard" data-i18n="gift_button">🎁 Cadeaubon</button>
     <button type="button" class="btn btn--outline btn--wide welcome-photomoment" data-action="open-photomoment" data-i18n="pm_button">📸 Fotomoment</button>
     <button type="button" class="btn btn--outline btn--wide welcome-findme" data-action="open-findme" data-i18n="findme_button">📍 Zo vind je me &amp; parkeren</button>
     <button type="button" class="btn btn--gold-outline btn--wide welcome-pricelist" data-action="open-pricelist" data-i18n="pricelist_button">💶 Bekijk prijslijst</button>
@@ -478,6 +479,18 @@
       <p class="step__hint" data-i18n="stampcard_intro"></p>
     </div>
     <div class="loyalty" id="loyaltyBlockStandalone"></div>
+    <div class="step__nav">
+      <button type="button" class="btn btn--ghost" data-action="back" data-i18n="back_button">Terug</button>
+    </div>
+  </section>
+
+  <!-- GIFT CARDS (v183): my vouchers, buy one, Sandra's register — link: …/#cadeaubon -->
+  <section class="step" data-step="giftcard">
+    <div class="step__head">
+      <h2 class="step__title" data-i18n="gift_title">Cadeaubon</h2>
+      <p class="step__hint" data-i18n="gift_intro"></p>
+    </div>
+    <div id="giftBody"></div>
     <div class="step__nav">
       <button type="button" class="btn btn--ghost" data-action="back" data-i18n="back_button">Terug</button>
     </div>
