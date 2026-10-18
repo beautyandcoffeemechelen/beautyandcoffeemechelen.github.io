@@ -1767,7 +1767,7 @@ function matchTreatment(mood, gender, sunExposed, healthFlags, complaintText, fo
   const phlebitisOk = (item) => !healthFlags.phlebitis || !item.isMassage;
   const dietOk = (item) => !item.requiresDietExercise || healthFlags.dietExercise;
   const menstruationOk = (item) => !healthFlags.menstruation || !item.cuppingRelated;
-  const pregnancyOk = (item) => !healthFlags.pregnant || !item.pregnancyUnsafe;
+  const pregnancyOk = (item) => !healthFlags.pregnant || (!item.pregnancyUnsafe && !(healthFlags.pregStage === "7-9" && item.isMassage));
   const roaccutaneOk = (item) => !healthFlags.roaccutane || !item.waxing;
   const ageOk = (item) => (!item.minAge45 || healthFlags.age45Plus) && (!item.minAge30 || healthFlags.age30Plus);
 
@@ -1956,7 +1956,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v170 · 18/10/2026";
+const APP_VERSION = "v173 · 18/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -2377,7 +2377,7 @@ const SCENT_OPTIONS = [
   { id:"rosemary", product:"eorosemary", icon:"🌱", months:[1,2,3,4,5,6,7,8,9,10,11,12], groups:["face","massage"], boost:{}, notPregnant:true, notKids:true, notEpilepsy:true,
     label:{ nl:"Rozemarijn", en:"Rosemary", fr:"Romarin" },
     text:{ nl:"kruidig en helder, fijn voor het herstel van de huid", en:"herbal and clear, lovely for skin recovery", fr:"herbacé et clair, agréable pour la récupération de la peau" } },
-  { id:"mandarin", product:"eomandarin", icon:"🍊", months:[11,12,1,2], groups:["massage"], boost:{ hotstone:1, swedish:1 }, notPregnant:true,
+  { id:"mandarin", product:"eomandarin", icon:"🍊", months:[11,12,1,2], groups:["massage"], boost:{ hotstone:1, swedish:1 }, notPregnant:true, pregLateOk:true,
     label:{ nl:"Mandarijn", en:"Mandarin", fr:"Mandarine" },
     text:{ nl:"zoet en vrolijk, een gezellig wintergeurtje", en:"sweet and cheerful, a cosy winter scent", fr:"douce et joyeuse, un parfum d’hiver chaleureux" } },
   { id:"teatree", product:"teatree", icon:"🌿", months:[1,2,3,4,5,6,7,8,9,10,11,12], groups:["feet"], boost:{ pedicure:2, pedicureexpress:2 },

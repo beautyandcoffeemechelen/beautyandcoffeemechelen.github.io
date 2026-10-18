@@ -10,7 +10,7 @@
     profile: null,        // 'kind' | 'man' | 'vrouw'
     ageBracket: null,     // '16-24' | '25-34' | '35-44' | '45plus'
     sunExposed: null,     // bool
-    healthFlags: { phlebitis:false, contactLenses:false, menstruation:false, pregnant:false, musclePain:false, roaccutane:false, dietExercise:false, sport:false, diet:false },
+    healthFlags: { phlebitis:false, contactLenses:false, menstruation:false, pregnant:false, pregStage:null, musclePain:false, roaccutane:false, dietExercise:false, sport:false, diet:false },
     kidsDrink: null,      // 'water' | 'chocolate'
     allergies: [],        // allergy ids from ALLERGY_ASK (session only)
     focus: null,          // gerichte match: { cat, ans:{questionId:optionId} } or null
@@ -293,10 +293,20 @@
         chip.innerHTML = `<span class="chip__icon">${icon}</span> ${h ? esc(h.label[state.lang] || h.label.nl) : t(`health_${key}`, state.lang)}`;
         chip.addEventListener("click", () => {
           state.healthFlags[key] = !state.healthFlags[key];
+          if (key === "pregnant" && !state.healthFlags.pregnant) state.healthFlags.pregStage = null;
           renderHealthOptions();
         });
         checkWrap.appendChild(chip);
       });
+      // v172: pregnant → how far along (last 3 months = no ordinary massage)
+      checkWrap.parentElement.querySelectorAll(".preg-stage").forEach(n => n.remove());
+      if (state.healthFlags.pregnant && state.profile === "vrouw"){
+        const ps = document.createElement("div"); ps.className = "preg-stage";
+        const cur = state.healthFlags.pregStage;
+        ps.innerHTML = `<p class="preg-stage__q">🤰 ${t("preg_q", state.lang)}</p><div class="options options--chip">${["1-3","4-6","7-9"].map(k => `<button type="button" class="chip chip--check${cur === k ? " is-selected" : ""}" data-preg="${k}" aria-pressed="${cur === k}">${t("preg_" + k.replace("-", "_"), state.lang)}</button>`).join("")}</div>${cur === "7-9" ? `<div class="sun-notice"><span class="sun-notice__icon">🤰</span><span>${t("preg_note_late", state.lang)}</span></div>` : ""}`;
+        ps.querySelectorAll("[data-preg]").forEach(b => b.addEventListener("click", () => { state.healthFlags.pregStage = state.healthFlags.pregStage === b.dataset.preg ? null : b.dataset.preg; renderHealthOptions(); }));
+        checkWrap.insertAdjacentElement("afterend", ps);
+      }
       // notes for the extra health points
       checkWrap.parentElement.querySelectorAll(".health-extra-notice").forEach(n => n.remove());
       (typeof HEALTH_EXTRA !== "undefined" ? HEALTH_EXTRA : []).filter(h => state.healthFlags[h.key]).reverse().forEach(h => {
@@ -1169,7 +1179,7 @@
     const month = Number(today.slice(5, 7)), tid = m.treatment.id;
     const needs = scentNeedList();
     const rank = id => { let r = 99; needs.forEach(n => { const i = n.oils.indexOf(id); if (i >= 0 && i < r) r = i; }); return r; };
-    const safe = o => o.groups.includes(g) && !(o.notPregnant && hf.pregnant) && !(o.notEpilepsy && hf.epilepsy) && !(o.allergy && al.includes(o.allergy));
+    const safe = o => o.groups.includes(g) && !(o.notPregnant && hf.pregnant && !(o.pregLateOk && hf.pregStage === "7-9")) && !(o.notEpilepsy && hf.epilepsy) && !(o.allergy && al.includes(o.allergy));
     const pool = SCENT_OPTIONS.filter(o => safe(o) && (o.months.includes(month) || rank(o.id) < 99));
     const rec = pool.filter(o => rank(o.id) < 99).sort((a, b) => rank(a.id) - rank(b.id)).slice(0, 3);
     const def = pool.find(o => o.isDefault);
@@ -1479,6 +1489,10 @@
       .join(", ");
   }
 
+  function pregLine(L){
+    const hf = state.healthFlags || {}; if (!hf.pregnant || state.profile !== "vrouw") return "";
+    return t("book_preg_line", L).replace("{s}", hf.pregStage ? t("preg_" + hf.pregStage.replace("-", "_"), L) : t("preg_unknown", L));
+  }
   function updateBookingLink(m, drinkFull){
     if (!m) return;
     const slots = slotsText();
@@ -1488,7 +1502,7 @@
       const body = t("book_email_body", state.lang)
         .replace("{treatment}", trName(m.treatment.name, state.lang))
         .replace("{drink}", drinkFull || "")
-        .replace("{slots}", slots) + (scentLabel(m, state.lang) ? "\n" + t("book_scent_line", state.lang).replace("{s}", scentLabel(m, state.lang)) : "") + (allergyPicked().length ? "\n" + t("book_allergy_line", state.lang).replace("{a}", allergyLabels(state.lang).join(", ")) : "");
+        .replace("{slots}", slots) + (scentLabel(m, state.lang) ? "\n" + t("book_scent_line", state.lang).replace("{s}", scentLabel(m, state.lang)) : "") + (allergyPicked().length ? "\n" + t("book_allergy_line", state.lang).replace("{a}", allergyLabels(state.lang).join(", ")) : "") + (pregLine(state.lang) ? "\n" + pregLine(state.lang) : "");
       emailLink.href = `mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     }
     const onl = $("#bookOnlineCta");
@@ -1499,7 +1513,7 @@
         .replace("{treatment}", trName(m.treatment.name, state.lang))
         .replace("{drink}", drinkFull || "")
         .replace("{slots}", slots)
-        .trim() + (scentLabel(m, state.lang) ? " " + t("book_scent_line", state.lang).replace("{s}", scentLabel(m, state.lang)) : "") + (allergyPicked().length ? " " + t("book_allergy_line", state.lang).replace("{a}", allergyLabels(state.lang).join(", ")) : "");
+        .trim() + (scentLabel(m, state.lang) ? " " + t("book_scent_line", state.lang).replace("{s}", scentLabel(m, state.lang)) : "") + (allergyPicked().length ? " " + t("book_allergy_line", state.lang).replace("{a}", allergyLabels(state.lang).join(", ")) : "") + (pregLine(state.lang) ? " " + pregLine(state.lang) : "");
       waLink.href = `https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(waText)}`;
     }
     renderCopyName();
@@ -2887,7 +2901,7 @@
     stopCamera();
     cameraFacing = "user";
     state.profile = null; state.ageBracket = null; state.sunExposed = null; state.kidsDrink = null;
-    state.healthFlags = { phlebitis:false, contactLenses:false, menstruation:false, pregnant:false, musclePain:false, roaccutane:false, dietExercise:false, sport:false, diet:false };
+    state.healthFlags = { phlebitis:false, contactLenses:false, menstruation:false, pregnant:false, pregStage:null, musclePain:false, roaccutane:false, dietExercise:false, sport:false, diet:false };
     state.mood = null; state.focus = null; state.allergies = []; state.category = null; state.temperature = null; state.caffeine = null; state.complaintText = "";
     const complaintEl = $("#complaintInput"); if (complaintEl) complaintEl.value = "";
     state.milk = "none"; state.extras = []; state.context = null;
@@ -4483,7 +4497,8 @@
 
   function healthSandraHtml(L){
     const hs = (typeof HEALTH_EXTRA !== "undefined" ? HEALTH_EXTRA : []).filter(h => state.healthFlags[h.key] && h.sandraNote);
-    return hs.map(h => `<p class="proto-sandra">🔒 ${esc(h.sandraNote[L] || h.sandraNote.nl)}</p>`).join("");
+    const pg = pregLine(L) ? `<p class="proto-sandra">🔒 ${esc(pregLine(L))} ${esc(t("preg_sandra", L))}</p>` : "";
+    return pg + hs.map(h => `<p class="proto-sandra">🔒 ${esc(h.sandraNote[L] || h.sandraNote.nl)}</p>`).join("");
   }
   function healthExtraExclude(){
     const hs = (typeof HEALTH_EXTRA !== "undefined" ? HEALTH_EXTRA : []).filter(h => state.healthFlags[h.key]);
@@ -4724,6 +4739,11 @@
     String(text || "").split(/(?<!\b(?:[Rr][eé]f|[Nn]r|[Bb]v|[Cc]a|[Nn]o|prod|[Aa]rt|e\.g|p\. ?ex)\.)(?<=[.!?])\s+(?=[A-ZÀ-Ý*0-9“"(])/).forEach(s => { if (s.trim()) (re.test(s) ? priv : pub).push(s.trim()); });
     return { pub: pub.join(" "), priv: priv.join(" ") };
   }
+  function oilUseHtml(id, L){
+    const u = (typeof OIL_USE !== "undefined" ? OIL_USE : {})[id]; if (!u) return "";
+    const lines = [t("oil_steam_" + u.steam, L), t("oil_massage", L).replace("{d}", u.drops) + (u.sun ? " " + t("oil_sun", L) : ""), t("oil_foot_" + u.foot, L), t("oil_diffuser", L)];
+    return `<div class="ingr-card__note ingr-card__note--sandra oil-use"><b>🧴 ${t("oil_use_title", L)}</b><ul>${lines.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>`;
+  }
   function ingrProductCard(id, p, keys){
     const L = state.lang, inci = ingrInci(p);
     const hits = keys ? ingrParts(inci).filter(x => ingrHit(x, keys)) : [];
@@ -4734,6 +4754,7 @@
         ${hits.length ? `<p class="ingr-card__hit">⚠️ ${t("ingr_contains", L)} <b>${esc([...new Set(hits)].join(", "))}</b></p>` : ""}
         ${note.pub ? `<p class="ingr-card__note">${esc(note.pub)}</p>` : ""}
         ${priv && ingrSandra() ? `<p class="ingr-card__note ingr-card__note--sandra">🔒 ${esc(priv)}</p>` : ""}
+        ${ingrSandra() ? oilUseHtml(id, L) : ""}
         <p class="ingr-muted">${t("ingr_used_in", L)} ${esc((p.usedIn || []).map(ingrTreatName).join(", ") || "—")}</p>
         <details class="ingr-inci"><summary>${t("ingr_full_list", L)}</summary><p>${inci ? esc(inci) : t("ingr_inci_missing", L)}</p></details>
       </div>`;
@@ -4764,6 +4785,18 @@
         return `<li><span class="ingr-treat">${esc(ingrTreatName(tid))}</span> — ${t("ingr_skip", L)} ${items.join("; ")}${miss.length ? `<br><span class="ingr-warn">❓ ${t("ingr_check_too", L)} ${esc(miss.join(", "))}</span>` : ""}</li>`;
       }).join("") + `</ul>`;
       html += `<h3 class="ingr-h">${t("ingr_products_found", L).replace("{n}", hit.length)}</h3>` + hit.map(([id, p]) => ingrProductCard(id, p, Q.keys)).join("");
+    }
+    // v173: product finder — skin type or complaint in the name or public note
+    const fq = ingrNorm(ingr.q).trim();
+    if (fq.length >= 3){
+      const syn = (typeof PRODUCT_FINDER_SYN !== "undefined" ? PRODUCT_FINDER_SYN : {});
+      const terms = [...new Set([fq].concat(syn[fq] || [], ...fq.split(/\s+/).filter(w => w.length >= 4 && w !== "huid" && w !== "skin" && w !== "peau").map(w => syn[w] || [])))].map(ingrNorm);
+      const neg = /\b(niet|geen|not|no|pas|sans|vermijd|avoid|zonder|without)\b[^.;]{0,30}$/;
+      const has = (txt) => terms.some(tm => { let k = txt.indexOf(tm); while (k >= 0){ if (!neg.test(txt.slice(Math.max(0, k - 40), k))) return true; k = txt.indexOf(tm, k + 1); } return false; });
+      const txtOf = x => ingrNorm(typeof x === "string" ? x : Object.values(x || {}).join(" | "));
+      const fit = all.filter(([id]) => !hitIds.has(id)).map(([id, p]) => [id, p, has(txtOf(p.name)) ? 2 : (has(txtOf(p.note)) ? 1 : 0)]).filter(x => x[2] > 0).sort((a, b) => b[2] - a[2]);
+      if (fit.length && !hit.length) html = html.replace(`<p class="ingr-ok">✅ ${t("ingr_none_found", L)}</p>`, "");
+      if (fit.length) html += `<h3 class="ingr-h">🔎 ${t("ingr_fit_found", L).replace("{n}", fit.length)}</h3>` + fit.slice(0, 30).map(([id, p]) => ingrProductCard(id, p, null)).join("");
     }
     const noProd = ingrTreatments().filter(id => !ingrProductsFor(id).length).length;
     if (unknown.length || noProd){

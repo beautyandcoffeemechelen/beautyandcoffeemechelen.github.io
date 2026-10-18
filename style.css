@@ -1346,3 +1346,8 @@ p.season-card__shop{ text-decoration:none; margin:2px 0 0; font-style:italic; }
 
 /* v168 second life for expired products */
 .open-row__reuse{ display:block; margin-top:6px; font-size:.86rem; line-height:1.35; }
+
+.oil-use ul{ margin:4px 0 0 18px; padding:0; }
+.oil-use li{ margin:2px 0; }
+.preg-stage{ margin:8px 0 4px; }
+.preg-stage__q{ margin:0 0 6px; font-weight:600; font-size:.92rem; }
