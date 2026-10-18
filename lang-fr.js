@@ -594,6 +594,7 @@
   "copy_name_hint": "Vous réservez en ligne ? Copiez le nom de votre soin et collez-le lors de la réservation : je saurai tout de suite ce que vous avez choisi. Par WhatsApp ou e-mail, le nom est déjà dans votre message.",
   "copy_name_last": "Votre dernier match : copiez le nom et collez-le lors de la réservation en ligne.",
   "copy_name_btn": "📋 Copier",
+  "ingr_open_reuse": "Seconde vie :",
   "scent_title": "Quel parfum souhaitez-vous ?",
   "scent_hint": "J’ajoute une goutte d’huile essentielle au soin. Choisissez celle que vous préférez, de saison.",
   "scent_usual": "mon parfum habituel",

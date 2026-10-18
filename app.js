@@ -4113,7 +4113,9 @@
       if (info && info.incomplete) status = `<span class="ingr-muted">${t("ingr_open_incomplete", L)}</span>`;
       else if (info){
         const how = info.by === "tht" ? t("ingr_open_by_tht", L) : t("ingr_open_by_pao", L);
-        if (info.days < 0){ status = t("ingr_open_expired", L).replace("{d}", advFmt(info.expKey)); cls = " is-expired"; }
+        if (info.days < 0){ status = t("ingr_open_expired", L).replace("{d}", advFmt(info.expKey)); cls = " is-expired";
+          const ru = (typeof EXPIRED_REUSE !== "undefined") ? (EXPIRED_REUSE[p.slot] || EXPIRED_REUSE.default) : null;
+          if (ru) status += `<span class="open-row__reuse">♻️ ${esc(t("ingr_open_reuse", L))} ${esc(ru[L] || ru.nl)}</span>`; }
         else if (info.days <= 7){ status = t("ingr_open_soon", L).replace("{n}", info.days).replace("{d}", advFmt(info.expKey)); cls = " is-soon"; }
         else status = t("ingr_open_left", L).replace("{n}", info.days).replace("{d}", advFmt(info.expKey));
         status += ` <span class="ingr-muted">(${how})</span>`;

@@ -1338,3 +1338,6 @@ p.season-card__shop{ text-decoration:none; margin:2px 0 0; font-style:italic; }
 .scent-chip.is-selected{ border-color:var(--accent, #b08a5a); box-shadow:0 0 0 2px rgba(176,138,90,.25); background:#fffaf2; }
 .scent-chip__name{ display:block; font-weight:600; }
 .scent-chip__text{ display:block; font-size:.82rem; opacity:.8; }
+
+/* v168 second life for expired products */
+.open-row__reuse{ display:block; margin-top:6px; font-size:.86rem; line-height:1.35; }
