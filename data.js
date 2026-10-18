@@ -1956,7 +1956,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v178 · 18/10/2026";
+const APP_VERSION = "v181 · 18/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -2440,7 +2440,10 @@ const APPT_PREP = {
     { nl:"Laat het haar minstens een halve centimeter groeien en smeer de dag zelf geen bodylotion of olie op die plek.", en:"Let the hair grow at least half a centimetre and don’t apply body lotion or oil there on the day.", fr:"Laissez pousser les poils d’au moins un demi-centimètre et n’appliquez pas de lotion ni d’huile le jour même." }
   ],
   feet: [
-    { nl:"Neem gerust open schoenen of slippers mee, dan blijft de nagellak mooi.", en:"Feel free to bring open shoes or flip-flops, so the polish stays perfect.", fr:"Apportez des chaussures ouvertes ou des tongs, le vernis restera impeccable." }
+    { nl:"Kom met sokken aan. Kies je nagellak of gellak? Neem dan teenslippers mee, zodat de lak mooi blijft.", en:"Come wearing socks. Choosing nail polish or gel polish? Bring flip-flops so the polish stays perfect.", fr:"Venez avec des chaussettes. Vous choisissez du vernis ou du vernis gel ? Apportez des tongs pour que le vernis reste impeccable." }
+  ],
+  all: [
+    { nl:"De behandelruimte is op de 1e verdieping: je gaat een trap op. Bij de inkom doe je je schoenen uit, dus doe liefst sokken aan. Stap je liever niet zonder schoenen? Breng dan pantoffels of binnenschoenen mee.", en:"The treatment room is on the 1st floor: you go up a flight of stairs. You take your shoes off at the entrance, so please wear socks. Prefer not to walk without shoes? Bring slippers or indoor shoes.", fr:"La cabine se trouve au 1er étage : il faut monter un escalier. On retire ses chaussures à l’entrée, mettez donc de préférence des chaussettes. Vous préférez ne pas marcher sans chaussures ? Apportez des pantoufles ou des chaussures d’intérieur." }
   ],
   hands: [
     { nl:"Heb je nog gellak van ergens anders? Zeg het bij het boeken, dan plan ik tijd om het te verwijderen.", en:"Still wearing gel polish from elsewhere? Mention it when booking, so I plan time to remove it.", fr:"Encore du vernis gel d’ailleurs ? Signalez-le à la réservation, je prévois le temps pour le retirer." }
@@ -2600,7 +2603,8 @@ const HOUSE_RULES = [
       R("Na 3 keer niet opdagen is het niet meer mogelijk om een afspraak te maken bij Beauty & Coffee.","After 3 no-shows it is no longer possible to make an appointment at Beauty & Coffee."),
       R("Bij ziekte: verwittig zo snel mogelijk. Annuleer je minstens 1 uur vóór de afspraak, dan worden er geen kosten aangerekend. Bij laattijdige annulatie geldt de 50%-regel.","In case of illness: let me know as soon as possible. If you cancel at least 1 hour before the appointment, no costs are charged. For late cancellations the 50% rule applies."),
       R("Kom op tijd. Te laat? Verwittig meteen per telefoon of sms. Bij meer dan 15 minuten vertraging kan de behandeling ingekort of geannuleerd worden tegen de annulatiekost.","Please be on time. Running late? Let me know immediately by phone or text. With more than 15 minutes delay the treatment may be shortened or cancelled, subject to the cancellation fee."),
-      R("Bij wanbetaling is het niet meer mogelijk om een afspraak te maken bij Beauty & Coffee.","In case of non-payment it is no longer possible to make an appointment at Beauty & Coffee.")
+      R("Bij wanbetaling is het niet meer mogelijk om een afspraak te maken bij Beauty & Coffee.","In case of non-payment it is no longer possible to make an appointment at Beauty & Coffee."),
+      R("De behandelruimte is op de 1e verdieping (trap op). Bij de inkom doe je je schoenen uit: doe liefst sokken aan of breng pantoffels of binnenschoenen mee.","The treatment room is on the 1st floor (up a flight of stairs). You take your shoes off at the entrance: please wear socks or bring slippers or indoor shoes.")
     ]}] },
   { id:"parking", icon:"🚗", title:R("Bereikbaarheid en parkeren","Getting here and parking"), intro:null, outro:null,
     groups:[{ title:null, items:[

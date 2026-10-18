@@ -1354,3 +1354,36 @@ p.season-card__shop{ text-decoration:none; margin:2px 0 0; font-style:italic; }
 .appt-prep{ margin:8px 0; padding:8px 10px; border-radius:10px; background:#fffaf2; border:1px solid var(--line, #e3d6c6); font-size:.88rem; line-height:1.4; }
 .appt-prep__title{ margin:0 0 4px; font-weight:700; }
 .appt-prep ul{ margin:0 0 0 18px; padding:0; }
+
+/* ============ v180 · quiet, high-end welcome screen ============
+   One calm column: hairlines instead of boxes, one gold call-to-action,
+   secondary links as a menu list, season card as a cream card with a thin
+   coloured accent line. Scoped to the welcome step only. */
+section[data-step="welcome"] .step__lede{ max-width:32ch; }
+section[data-step="welcome"] .welcome-start{ box-shadow:0 8px 18px -12px rgba(110,76,30,.55); letter-spacing:.08em; text-transform:uppercase; font-size:13px; }
+section[data-step="welcome"] .actions-block--welcome{ margin:22px 0 4px; padding:0; border-top:1px solid var(--espresso-12); }
+.actions-block__label{ margin:14px 0 2px; font:600 11px var(--font-body); letter-spacing:.18em; text-transform:uppercase; color:var(--gold-ink); }
+section[data-step="welcome"] .action-card{ background:none; border:none; border-bottom:1px solid var(--espresso-12); border-radius:0; box-shadow:none; padding:12px 0; margin:0; gap:0; }
+section[data-step="welcome"] .action-card:last-child{ border-bottom:none; }
+section[data-step="welcome"] .action-card__icon{ display:none; }
+section[data-step="welcome"] .action-card__title{ font-size:16px; font-weight:500; color:var(--espresso); margin:0 0 3px; }
+section[data-step="welcome"] .action-card__text{ font-size:13px; line-height:1.5; color:var(--espresso-60); }
+section[data-step="welcome"] .book-hub{ background:none; border:none; border-top:1px solid var(--espresso-12); border-radius:0; padding:18px 0 4px; margin:14px 0 6px; gap:8px; }
+section[data-step="welcome"] .book-hub__title{ font:500 20px var(--font-display); color:var(--espresso); }
+section[data-step="welcome"] .book-hub .btn--primary{ box-shadow:none; }
+section[data-step="welcome"] .book-hub .btn--outline{ border-color:var(--espresso-30); }
+section[data-step="welcome"] .book-hub__hint{ font-size:12px; line-height:1.45; color:var(--espresso-60); opacity:1; }
+section[data-step="welcome"] .season-card{ background:var(--cream); color:var(--espresso); box-shadow:none; border:none; border-top:2px solid var(--s-line); border-radius:0 0 var(--radius-s) var(--radius-s); padding:14px 16px 12px; }
+section[data-step="welcome"] .season-card__hello{ font-size:17px; font-weight:500; }
+section[data-step="welcome"] .season-card__fact b, section[data-step="welcome"] .season-card__shop{ color:var(--gold-ink); }
+section[data-step="welcome"] .season-card .btn--text{ color:var(--espresso); }
+section[data-step="welcome"] .welcome-stampcard, section[data-step="welcome"] .welcome-photomoment, section[data-step="welcome"] .welcome-findme, section[data-step="welcome"] .welcome-pricelist{
+  border:none; border-bottom:1px solid var(--espresso-12); border-radius:0; background:none; box-shadow:none; justify-content:space-between; padding:16px 2px; margin:0; font-weight:500; letter-spacing:.02em; color:var(--espresso); }
+section[data-step="welcome"] .welcome-stampcard{ border-top:1px solid var(--espresso-12); margin-top:18px; }
+section[data-step="welcome"] .welcome-stampcard::after, section[data-step="welcome"] .welcome-photomoment::after, section[data-step="welcome"] .welcome-findme::after, section[data-step="welcome"] .welcome-pricelist::after{ content:"›"; font-size:20px; line-height:1; color:var(--gold); }
+section[data-step="welcome"] .welcome-houserules{ margin-top:10px; font-weight:500; color:var(--espresso-60); }
+section[data-step="welcome"] .book-hub .btn--primary{ background:var(--espresso); color:var(--cream); }
+.reviews-card{ background:transparent !important; box-shadow:none !important; border-radius:0 !important; border-top:1px solid var(--espresso-12); }
+.reviews-card__title, .newsletter-card__title, .news-card__title{ font-family:var(--font-display); font-weight:500 !important; letter-spacing:.01em; }
+.reviews-card .btn--primary, .newsletter-card .btn--primary{ background:var(--espresso); color:var(--cream); box-shadow:none; }
+.reviews-card .review-quote{ background:none !important; border:none; border-left:2px solid var(--gold-light); border-radius:0 !important; padding:4px 0 4px 14px !important; }

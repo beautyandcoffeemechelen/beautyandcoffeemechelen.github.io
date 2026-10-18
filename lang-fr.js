@@ -606,6 +606,7 @@
   "scent_none": "Plutôt sans parfum",
   "scent_fragrance": "Vous avez indiqué une allergie au parfum : je travaille donc sans parfum.",
   "book_scent_line": "Parfum : {s}.",
+  "actions_now_label": "En ce moment au salon",
   "appt_prep_title": "À ne pas oublier pour votre rendez-vous",
   "preg_q": "Où en êtes-vous ? (facultatif)",
   "preg_1_3": "0 à 3 mois",
@@ -1781,8 +1782,9 @@
       "Après 3 rendez-vous manqués, il n'est plus possible de prendre rendez-vous chez Beauty & Coffee.",
       "En cas de maladie : prévenez le plus vite possible. Si vous annulez au moins 1 heure avant le rendez-vous, aucun frais n'est facturé. En cas d'annulation tardive, la règle des 50 % s'applique.",
       "Soyez à l'heure. En retard ? Prévenez immédiatement par téléphone ou SMS. En cas de plus de 15 minutes de retard, le soin peut être raccourci ou annulé aux conditions d'annulation.",
-      "En cas de non-paiement, il n'est plus possible de prendre rendez-vous chez Beauty & Coffee."
-     ]
+      "En cas de non-paiement, il n'est plus possible de prendre rendez-vous chez Beauty & Coffee.",
+        "La cabine se trouve au 1er étage (escalier). On retire ses chaussures à l’entrée : mettez de préférence des chaussettes ou apportez des pantoufles ou des chaussures d’intérieur."
+      ]
     }
    ]
   },

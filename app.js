@@ -71,10 +71,12 @@
   }
 
   /* ---------------- i18n ---------------- */
+  // v180: the welcome screen is kept quiet and high-end: no emoji at the start of its labels
+  function stripLeadEmoji(v){ return String(v).replace(/^(?:[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]+\s*)+/u, ""); }
   function applyI18n(){
     $$("[data-i18n]").forEach(el => {
       const val = t(el.getAttribute("data-i18n"), state.lang);
-      if (val != null) el.innerHTML = val;
+      if (val != null) el.innerHTML = el.closest('section[data-step="welcome"], .reviews-card, .news-card, .newsletter-card') ? stripLeadEmoji(val) : val;
     });
     document.documentElement.lang = state.lang;
     $$(".lang-btn").forEach(b => {
@@ -1882,7 +1884,8 @@
       </div>`;
     let offers = "";
     try { offers = newsActionsCardHtml(); } catch(e){ offers = ""; }
-    wrap.innerHTML = active.filter(a => a.yearly).map(card).join("") + offers + active.filter(a => !a.yearly).map(card).join("");
+    const inner = active.filter(a => a.yearly).map(card).join("") + offers + active.filter(a => !a.yearly).map(card).join("");
+    wrap.innerHTML = inner.trim() ? `<p class="actions-block__label">${t("actions_now_label", lang)}</p>` + inner : "";
     wraps.forEach(w => w.querySelectorAll("[data-offer-link]").forEach(x => x.addEventListener("click", () => trackEvent("offer-open"))));
     wraps.forEach(w => w.querySelectorAll("[data-offer-book]").forEach(x => x.addEventListener("click", () => trackEvent("offer-whatsapp"))));
   }
@@ -3281,8 +3284,7 @@
     const cats = new Set(); if (a.tcat) cats.add(a.tcat);
     const txt = String(a.ttext || "").toLowerCase();
     if (txt) Object.entries(APPT_PREP_WORDS).forEach(([c, ws]) => { if (ws.some(w => txt.includes(w))) cats.add(c); });
-    const tips = [...cats].flatMap(c => APPT_PREP[c] || []);
-    if (!tips.length) return "";
+    const tips = [...cats].flatMap(c => APPT_PREP[c] || []).concat(APPT_PREP.all || []);
     return `<div class="appt-prep"><p class="appt-prep__title">💡 ${t("appt_prep_title", L)}</p><ul>${tips.map(x => `<li>${esc(x[L] || x.nl)}</li>`).join("")}</ul></div>`;
   }
   function renderApptCard(){
