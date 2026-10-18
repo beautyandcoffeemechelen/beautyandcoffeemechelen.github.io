@@ -1956,7 +1956,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v185 · 18/10/2026";
+const APP_VERSION = "v186 · 18/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -3284,7 +3284,7 @@ const UPSELL_SUGGESTIONS = {
    let buyers ask for them via WhatsApp). seed = paper vouchers sold before
    the app; added once to Sandra's register (amount in euro). */
 const GIFT_CARDS = {
-  validityMonths: 12,
+  validityMonths: 24,   // Sandra (18/10/2026): always 2 years, the voucher is paid anyway
   amounts: [25, 50, 75, 100, 150],
   minAmount: 10,
   iban: "BE10 7310 7473 1704",
@@ -3294,8 +3294,9 @@ const GIFT_CARDS = {
   validityRules: [ { from:"2027-04-01", months:24 } ],
   // live balance: cadeaubonnen.json in this site's GitHub repo (owner/repo found from the address; token only on Sandra's phone)
   live: { owner:"", repo:"", file:"cadeaubonnen.json" },
+  seedRev: 2,           // raise when the seed list below changes (updates Sandra's register once)
   seed: [
-    { n:"202601", a:100, issued:"2026-09-19", valid:"2027-09-19", paper:true },
-    { n:"202602", a:100, issued:"2026-10-18", valid:"2027-10-18", paper:true }
+    { n:"202601", a:100, issued:"2026-09-19", valid:"2028-09-19", paper:true },
+    { n:"202602", a:100, issued:"2026-10-18", valid:"2028-10-18", paper:true }
   ]
 };

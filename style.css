@@ -1429,3 +1429,12 @@ section[data-step="welcome"] .book-hub .btn--primary{ background:var(--espresso)
 .gift-live-status{ margin:0; font-size:13px; width:100%; }
 .gift-live-status.is-bad{ color:#B4534A; }
 .advent-voucher__online{ width:100%; margin:6px 0 0; font-size:12.5px; opacity:.8; text-align:center; }
+/* v186 own products */
+.own-form{ display:flex; flex-direction:column; gap:4px; background:#fff; border:1px solid var(--gold-light); border-radius:var(--radius-m); padding:14px; margin:8px 0 14px; }
+.own-inci{ font-size:13px; min-height:90px; resize:vertical; }
+.own-treats{ min-height:120px; }
+.own-dates{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+@media (max-width:420px){ .own-dates{ grid-template-columns:1fr; } }
+.own-list{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px; }
+.own-list li{ position:relative; padding:10px 70px 10px 12px; border:1px solid var(--espresso-12); border-radius:var(--radius-s); background:var(--cream); font-size:14px; }
+.own-acts{ position:absolute; right:6px; top:6px; display:flex; }

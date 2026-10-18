@@ -4028,6 +4028,10 @@
       (GIFT.seed || []).forEach(s => { if (!r.v[s.n]) r.v[s.n] = { a: Math.round(s.a * 100), issued: s.issued, valid: s.valid, paper: !!s.paper, buyer:"", to:"", pay: s.pay || "", note:"", rev:1, uses:[] }; });
       r.seeded = 1; ch = true;
     }
+    if ((r.seedRev || 1) < (GIFT.seedRev || 1)){   // data.js changed the paper vouchers (e.g. validity 1 → 2 years)
+      (GIFT.seed || []).forEach(s => { const v = r.v[s.n]; if (v && s.valid > v.valid){ v.valid = s.valid; v.rev = (v.rev || 1) + 1; } });
+      r.seedRev = GIFT.seedRev; ch = true;
+    }
     Object.values(r.v).forEach(v => { if (!v.s){ v.s = giftSecret(); ch = true; } });
     if (ch) giftSave(GIFT_REG_KEY, r);
     return r;
@@ -4423,6 +4427,150 @@
     });
   }
 
+  /* ---------------- own products (v186) ----------------
+     Sandra adds a product she bought in the app itself (name, INCI,
+     treatments, best-before, months after opening, date of first use).
+     Kept on her phone (bc_own_products_v1) and — with the GitHub key of the
+     gift vouchers — published as producten-eigen.json in the site repo, so
+     every visitor's allergy search includes it. Merged into SALON_PRODUCTS. */
+  const OWN_KEY = "bc_own_products_v1", OWN_FILE = "producten-eigen.json";
+  const own = { edit:"", publishing:false };
+  function ownLocal(){ try { const v = JSON.parse(localStorage.getItem(OWN_KEY) || "{}"); return v && typeof v === "object" ? v : {}; } catch(e){ return {}; } }
+  function ownSaveLocal(v){ try { localStorage.setItem(OWN_KEY, JSON.stringify(v)); } catch(e){ /* ignore */ } }
+  function ownClean(p){
+    const s = x => String(x == null ? "" : x).slice(0, 4000);
+    const nm = s(p.name && (p.name.nl || p.name) || "").slice(0, 120);
+    return { name:{ nl:nm, en:nm, fr:nm }, usedIn: (Array.isArray(p.usedIn) ? p.usedIn : []).filter(x => /^[a-z0-9-]{2,40}$/.test(x)).slice(0, 80),
+      slot: /^[a-z]{2,30}$/.test(p.slot || "") ? p.slot : "own", inci: s(p.inci),
+      note:{ nl:s(p.note && p.note.nl), en:s(p.note && p.note.nl), fr:s(p.note && p.note.nl) },
+      sandraNote: p.sandraNote && p.sandraNote.nl ? { nl:s(p.sandraNote.nl), en:s(p.sandraNote.nl), fr:s(p.sandraNote.nl) } : undefined,
+      own:true, u: s(p.u).slice(0, 30) };
+  }
+  function ownMerge(list){
+    if (typeof SALON_PRODUCTS !== "object") return;
+    Object.entries(list || {}).forEach(([id, p]) => {
+      if (!/^own_[a-z0-9_]{2,60}$/.test(id)) return;
+      if (p === null){ delete SALON_PRODUCTS[id]; return; }
+      SALON_PRODUCTS[id] = ownClean(p);
+    });
+  }
+  // public list first, then this phone's own edits on top
+  ownMerge(ownLocal());
+  (async function ownLoadPublic(){
+    try {
+      const res = await fetch(OWN_FILE + "?t=" + Date.now(), { cache:"no-store" });
+      if (!res.ok) return;
+      const j = await res.json();
+      if (!j || !j.p) return;
+      const loc = ownLocal();
+      ownMerge(Object.fromEntries(Object.entries(j.p).filter(([id]) => !(id in loc))));
+      const sec = $('section.step[data-step="ingredients"]');
+      if (sec && sec.classList.contains("is-active")) renderIngredients();
+    } catch(e){ /* offline or no file yet */ }
+  })();
+  async function ownPublish(silent){
+    const L = state.lang, tok = (() => { try { return localStorage.getItem(GIFT_GH_KEY) || ""; } catch(e){ return ""; } })();
+    if (!tok){ if (!silent) showToast(t("own_pub_nokey", L)); return false; }
+    const { owner, repo } = giftRepo();
+    if (!owner || !repo){ if (!silent) showToast(t("gift_live_norepo", L)); return false; }
+    if (own.publishing) return false;
+    own.publishing = true;
+    const all = {};
+    Object.entries(SALON_PRODUCTS).forEach(([id, p]) => { if (p && p.own) all[id] = ownClean(p); });
+    Object.entries(ownLocal()).forEach(([id, p]) => { if (p === null) delete all[id]; });
+    const out = { v:1, u: new Date().toISOString(), p: all };
+    const api = `https://api.github.com/repos/${owner}/${repo}/contents/${OWN_FILE}`;
+    const H = { Authorization: "Bearer " + tok, Accept: "application/vnd.github+json" };
+    let ok = false, err = "";
+    for (let attempt = 0; attempt < 2 && !ok; attempt++){
+      try {
+        let sha;
+        const g = await fetch(api, { headers: H, cache:"no-store" });
+        if (g.ok) sha = (await g.json()).sha; else if (g.status !== 404){ err = "GET " + g.status; continue; }
+        const p = await fetch(api, { method:"PUT", headers: { ...H, "Content-Type":"application/json" },
+          body: JSON.stringify({ message: "Eigen producten bijgewerkt (app)", content: giftToken64(JSON.stringify(out, null, 1)), ...(sha ? { sha } : {}) }) });
+        if (p.ok) ok = true; else err = "PUT " + p.status;
+      } catch(e){ err = String(e && e.message || e); }
+    }
+    own.publishing = false;
+    if (!silent || !ok) showToast(t(ok ? "own_pub_ok" : "own_pub_fail", L).replace("{e}", err));
+    return ok;
+  }
+  function ownSlots(){ return [...new Set(Object.values(SALON_PRODUCTS).map(p => p && p.slot).filter(Boolean))].sort(); }
+  function ownHtml(){
+    const L = state.lang, cats = openCats();
+    const p = own.edit ? SALON_PRODUCTS[own.edit] : null;
+    const rec = own.edit ? (openAll()[own.edit] || {}) : {};
+    const used = new Set(p ? p.usedIn || [] : []);
+    const groups = Object.keys(cats).map(g => {
+      const on = cats[g].length && cats[g].every(x => used.has(x));
+      return `<label class="chip chip--check"><input type="checkbox" data-own-group="${g}"${on ? " checked" : ""}> ${AVOID_ICONS[g] || ""} ${t("avoid." + g, L)}</label>`;
+    }).join("");
+    const treats = ingrTreatments().filter(id => !ingrIsAdventUse(id)).map(id => [id, ingrTreatName(id)]).sort((a, b) => a[1].localeCompare(b[1]));
+    const mine = Object.entries(SALON_PRODUCTS).filter(([, x]) => x && x.own).sort((a, b) => ingrName(a[1]).localeCompare(ingrName(b[1])));
+    return `<p class="ingr-note">${t("own_intro", L)}</p>
+      <div class="own-form">
+        <p class="gift-block__title">${own.edit ? "✏️ " + t("own_edit_title", L) : "➕ " + t("own_new_title", L)}</p>
+        <label class="pm-label" for="ownName">${t("own_name", L)}</label>
+        <input type="text" id="ownName" class="pm-input" maxlength="120" placeholder="${t("own_name_ph", L)}" value="${esc(p ? ingrName(p) : "")}">
+        <label class="pm-label" for="ownInci">${t("own_inci", L)}</label>
+        <textarea id="ownInci" class="pm-input own-inci" rows="5" placeholder="${t("own_inci_ph", L)}">${esc(p ? p.inci || "" : "")}</textarea>
+        <p class="pm-label">${t("own_groups", L)}</p>
+        <div class="ingr-chips">${groups}</div>
+        <label class="pm-label" for="ownTreats">${t("own_treats", L)}</label>
+        <select id="ownTreats" class="pm-input own-treats" multiple size="6">${treats.map(([id, n]) => `<option value="${esc(id)}"${used.has(id) ? " selected" : ""}>${esc(n)}</option>`).join("")}</select>
+        <label class="pm-label" for="ownSlot">${t("own_slot", L)}</label>
+        <select id="ownSlot" class="pm-input"><option value="own">—</option>${ownSlots().filter(s => s !== "own").map(s => `<option value="${s}"${p && p.slot === s ? " selected" : ""}>${s}</option>`).join("")}</select>
+        <div class="own-dates">
+          <label class="pm-label">${t("own_tht", L)}<input type="date" id="ownTht" class="pm-input" value="${esc(rec.t || "")}"></label>
+          <label class="pm-label">${t("own_pao", L)}<input type="number" id="ownPao" class="pm-input" min="0" max="60" step="1" placeholder="12" value="${rec.m != null && rec.m !== "" ? esc(rec.m) : ""}"></label>
+          <label class="pm-label">${t("own_opened", L)}<input type="date" id="ownOpened" class="pm-input" value="${esc(rec.d || "")}"></label>
+        </div>
+        <label class="pm-label" for="ownNote">${t("own_note", L)}</label>
+        <input type="text" id="ownNote" class="pm-input" maxlength="300" placeholder="${t("own_note_ph", L)}" value="${esc(p && p.note ? p.note.nl || "" : "")}">
+        <label class="pm-label" for="ownPriv">🔒 ${t("own_priv", L)}</label>
+        <input type="text" id="ownPriv" class="pm-input" maxlength="300" value="${esc(p && p.sandraNote ? p.sandraNote.nl || "" : "")}">
+        <button type="button" class="btn btn--primary btn--sm" data-own="save">💾 ${t("own_save", L)}</button>
+        ${own.edit ? `<button type="button" class="btn btn--text btn--sm" data-own="cancel">${t("own_cancel", L)}</button>` : ""}
+        <p class="ingr-muted">${t(giftHasToken() ? "own_pub_auto" : "own_pub_local", L)}</p>
+      </div>
+      <h3 class="ingr-h">${t("own_list", L)} (${mine.length})</h3>
+      <ul class="own-list">${mine.map(([id, x]) => `<li><b>${esc(ingrName(x))}</b><br><span class="ingr-muted">${esc((x.usedIn || []).map(ingrTreatName).slice(0, 6).join(", ") || "—")}</span>
+        <span class="own-acts"><button type="button" class="btn btn--text btn--sm" data-own="edit" data-id="${id}">✏️</button><button type="button" class="btn btn--text btn--sm" data-own="del" data-id="${id}">🗑</button></span></li>`).join("") || `<li class="ingr-muted">${t("own_none", L)}</li>`}</ul>
+      ${mine.length && giftHasToken() ? `<button type="button" class="btn btn--outline btn--sm" data-own="publish">🔄 ${t("own_publish", L)}</button>` : ""}`;
+  }
+  function ownBind(){
+    const body = $("#ingrBody") || document;
+    $$("[data-own-group]").forEach(cb => cb.addEventListener("change", () => {
+      const ids = openCats()[cb.dataset.ownGroup] || [], sel = $("#ownTreats");
+      if (sel) [...sel.options].forEach(o => { if (ids.includes(o.value)) o.selected = cb.checked; });
+    }));
+    $$("[data-own]").forEach(b => b.addEventListener("click", () => {
+      const L = state.lang, a = b.dataset.own;
+      if (a === "cancel"){ own.edit = ""; renderIngredients(); return; }
+      if (a === "edit"){ own.edit = b.dataset.id; renderIngredients(); window.scrollTo(0, 0); return; }
+      if (a === "publish"){ ownPublish(false); return; }
+      if (a === "del"){
+        if (!confirm(t("own_del_confirm", L).replace("{p}", ingrName(SALON_PRODUCTS[b.dataset.id] || { name:"" })))) return;
+        const loc = ownLocal(); loc[b.dataset.id] = null; ownSaveLocal(loc); delete SALON_PRODUCTS[b.dataset.id];
+        openSave(b.dataset.id, null); own.edit = ""; renderIngredients(); ownPublish(true); return;
+      }
+      if (a === "save"){
+        const name = ($("#ownName").value || "").trim();
+        if (name.length < 2){ showToast(t("own_err_name", L)); return; }
+        const usedIn = [...$("#ownTreats").selectedOptions].map(o => o.value);
+        const inci = ($("#ownInci").value || "").replace(/\s+/g, " ").replace(/^\s*(ingredi[eë]nts?|inci)\s*:\s*/i, "").trim();
+        const id = own.edit || ("own_" + name.toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 30) + "_" + Math.random().toString(36).slice(2, 6));
+        const p = { name:{ nl:name }, usedIn, slot: $("#ownSlot").value, inci, note:{ nl:($("#ownNote").value || "").trim() },
+          sandraNote: ($("#ownPriv").value || "").trim() ? { nl: "Alleen voor jou: " + $("#ownPriv").value.trim().replace(/^Alleen voor jou:\s*/i, "") } : undefined, u: todayKey() };
+        const loc = ownLocal(); loc[id] = ownClean(p); ownSaveLocal(loc); SALON_PRODUCTS[id] = ownClean(p);
+        const tht = $("#ownTht").value, m = $("#ownPao").value, d = $("#ownOpened").value;
+        if (tht || m || d) openSave(id, { t: tht || "", m: m === "" ? "" : Number(m), d: d || "" });
+        own.edit = ""; showToast(t("own_saved", L).replace("{p}", name)); renderIngredients(); ownPublish(true);
+      }
+    }));
+  }
+
   /* ---------------- ingredients & allergies (ingredients.js) ----------------
      Search an allergy → which products contain it, in which treatments,
      what to skip or swap. Also: full lists per treatment, and what is still
@@ -4519,8 +4667,8 @@
     if (!ingrHasConfig()){ body.innerHTML = `<p class="ingr-note">${t("ingr_none_config", L)}</p>`; return; }
     if (!ingrAllowed()){ body.innerHTML = `<p class="ingr-note">${t("ingr_not_yet", L)}</p>`; return; }
     const sandra = ingrSandra();
-    if (!sandra && (ingr.tab === "todo" || ingr.tab === "order" || ingr.tab === "open" || ingr.tab === "useup" || ingr.tab === "stock" || ingr.tab === "protocol")) ingr.tab = "search";
-    const tabs = (sandra ? ["search", "treat", "stock", "protocol", "order", "open", "useup", "todo"] : ["search", "treat"]).map(k => `<button type="button" class="chip${ingr.tab === k ? " is-selected" : ""}" data-action="ingr-tab" data-tab="${k}" aria-pressed="${ingr.tab === k}">${t("ingr_tab_" + k, L)}</button>`).join("");
+    if (!sandra && (ingr.tab === "todo" || ingr.tab === "order" || ingr.tab === "open" || ingr.tab === "useup" || ingr.tab === "stock" || ingr.tab === "protocol" || ingr.tab === "own")) ingr.tab = "search";
+    const tabs = (sandra ? ["search", "treat", "own", "stock", "protocol", "order", "open", "useup", "todo"] : ["search", "treat"]).map(k => `<button type="button" class="chip${ingr.tab === k ? " is-selected" : ""}" data-action="ingr-tab" data-tab="${k}" aria-pressed="${ingr.tab === k}">${t("ingr_tab_" + k, L)}</button>`).join("");
     let html = ingrIsLive() ? "" : `<div class="advent-preview ingr-preview"><p>🧪 <b>${t("ingr_pv_title", L)}</b> — ${t("ingr_pv_text", L).replace("{d}", advFmt(INGREDIENTS_LIVE.liveFrom))}</p></div>`;
     html += `<div class="ingr-tabs" role="tablist">${tabs}</div>`;
     if (ingr.tab === "search"){
@@ -4541,6 +4689,8 @@
       html += invHtml();
     } else if (ingr.tab === "protocol"){
       html += protoHtml();
+    } else if (ingr.tab === "own"){
+      html += ownHtml();
     } else if (ingr.tab === "useup"){
       html += useupHtml();
     } else {
@@ -4564,6 +4714,7 @@
     if (ingr.tab === "open") ingrOpenBind();
     if (ingr.tab === "stock") invBind();
     if (ingr.tab === "protocol") protoBind();
+    if (ingr.tab === "own") ownBind();
     if (ingr.tab === "treat"){
       const sel = $("#ingrTreat");
       sel.addEventListener("change", () => { ingr.treat = sel.value; renderIngrTreat(); });
