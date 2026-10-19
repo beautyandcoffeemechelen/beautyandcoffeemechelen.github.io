@@ -1,0 +1,27 @@
+{
+ "v": 1,
+ "u": "2026-10-19T19:18:21.783Z",
+ "p": {
+  "own_rainpharma_charcoal_detox_foot_ee22": {
+   "name": {
+    "nl": "RainPharma Charcoal Detox Foot Scrub",
+    "en": "RainPharma Charcoal Detox Foot Scrub",
+    "fr": "RainPharma Charcoal Detox Foot Scrub"
+   },
+   "usedIn": [
+    "pedicureexpress",
+    "manipedispa",
+    "pedicure"
+   ],
+   "slot": "own",
+   "inci": "Aqua, Coco-Glucoside, Prunus Armeniaca Seed Powder, Glycerin, Menthol, CI 77266, Cedrus Deodara Wood Oil, Caprylyl/Capryl Glucoside, Phenylpropanol, Lactic Acid, Sodium Cocoyl Glutamate, Xanthan Gum, Citrus Aurantium Dulcis Oil, Lavandula Hybrida Abrial Herb Oil, Propanediol, Caprylyl Glycol, Citric Acid, Rosmarinus Officinalis Leaf Oil, Mentha Piperita Oil, Eucalyptus Globulus Leaf Oil, Limonene*, Linalool*, Geraniol*, Citral*. * From natural essential oils.",
+   "note": {
+    "nl": "Zuiverend en gladmakend",
+    "en": "Zuiverend en gladmakend",
+    "fr": "Zuiverend en gladmakend"
+   },
+   "own": true,
+   "u": "2026-10-19"
+  }
+ }
+}
