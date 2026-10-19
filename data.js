@@ -975,8 +975,8 @@ const TREATMENTS_CATALOG = [
 
   { id:"cupping", name:"Cuppingmassage", moods:["focus","relax"], genders:["vrouw","man"], sunSensitive:false, isMassage:true, pregnancyUnsafe:true, cuppingRelated:true, promoted:true, price:"€60 (60')",
     homecare:{ category:"body" },
-    benefits:{ nl:"Een intensieve massage waarbij cups lokaal worden ingezet in combinatie met manuele massagetechnieken, bijvoorbeeld op rug, schouders, armen of benen.",
-               en:"An intensive massage where cups are used locally in combination with manual massage techniques, for example on the back, shoulders, arms or legs." },
+    benefits:{ nl:"Een intensieve massage waarbij cups lokaal worden ingezet in combinatie met manuele massagetechnieken, bijvoorbeeld op rug, schouders, armen of benen. Ook fijn bij een lichte of beginnende griep of verkoudheid (zonder koorts): cupping op de bovenrug en borst ondersteunt de ademhaling en geeft een warm, vrij gevoel.",
+               en:"An intensive massage where cups are used locally in combination with manual massage techniques, for example on the back, shoulders, arms or legs. Also lovely with a mild or starting flu or cold (no fever): cupping on the upper back and chest supports breathing and gives a warm, open feeling." },
     funfact:{ nl:"De bekende 'cupping-plekken' ontstaan door de zuigkracht van de cups op de huid — hoe donkerder de plek, hoe intenser de lokale reactie was. We behandelen daarom altijd gericht specifieke zones en nooit het hele lichaam in één keer.",
               en:"The well-known 'cupping marks' come from the suction the cups create on the skin — the darker the mark, the more intense the local reaction was. That's why we always target specific zones and never treat the entire body at once." },
     caution:{ nl:"Cupping is niet geschikt bij koorts, besmettelijke huidziekten, maag- of darmzweren, hartaandoeningen of een te laag lichaamsgewicht — laat het ons vooraf weten als dit op jou van toepassing is. De zon in mag gewoon na een lokale cupping massage.",
@@ -1484,6 +1484,7 @@ const COMPLAINT_KEYWORDS = [
   { words:["rug","rugpijn","rugklachten","nek","schouder","schouders"], ids:["backwrap","detoxback","harmonizingbody","harmonizingback","swedishbackneck","cupping","cuppingpeeling"] },
   { words:["stress","gestrest","ontspanning","ontspannen","moe","vermoeid","uitgeput"], ids:["swedish","swedishbackneck","hotstone","cupping"] },
   { words:["spierpijn","spieren","stijf","gespannen"], ids:["cupping","cuppingpeeling","slimmassage","swedish"] },
+  { words:["griep","griepje","verkouden","verkoudheid","snotneus","neus verstopt","flu","a cold","grippe","rhume"], ids:["cupping","swedishbackneck"] },
   { words:["rimpels","veroudering","verouderen","huidveroudering","stevigheid"], ids:["antiagefacial","liftsummere"] },
   { words:["pigmentatie","pigmentvlekken","oneffen","dof","vale huid","vaal"], ids:["hydrapeel","fruitacid"] },
   { words:["onzuiverheden","puistjes","acne","vette huid"], ids:["signaturefacial","expressfacial","fruitacid"] },
@@ -1956,7 +1957,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v191 · 18/10/2026";
+const APP_VERSION = "v193 · 19/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -2424,7 +2425,7 @@ const SCENT_NEEDS = [
   { id:"circulation", icon:"🩸", oils:["lavender"], words:["bloedsomloop","doorbloeding","circulatie","koude handen","koude voeten","zware benen","circulation","cold hands","cold feet","heavy legs","jambes lourdes","mains froides","pieds froids"],
     label:{ nl:"Bloedcirculatie (koude handen of voeten, zware benen)", en:"Blood circulation (cold hands or feet, heavy legs)", fr:"Circulation (mains ou pieds froids, jambes lourdes)" } },
   { id:"flu", icon:"🤧", oils:["peppermint","eucalyptus"], words:["griep","verkouden","verkoudheid","snotneus","neus verstopt","flu","a cold","blocked nose","grippe","rhume","nez bouché"],
-    label:{ nl:"Griep of verkoudheid", en:"Flu or a cold", fr:"Grippe ou rhume" } },
+    label:{ nl:"Lichte of beginnende griep of verkoudheid (zonder koorts)", en:"Mild or starting flu or cold (no fever)", fr:"Grippe ou rhume léger ou débutant (sans fièvre)" } },
   { id:"breathing", icon:"🌬️", oils:["chamomile"], words:["ademhaling","ademen","benauwd","kortademig","breathing","breathe","short of breath","respiration","respirer","essoufflé"],
     label:{ nl:"Ademhaling", en:"Breathing", fr:"Respiration" } },
   { id:"healing", icon:"🩹", oils:["rosemary","lemongrass"], words:["wonde","wondje","wondjes","wonden","genezing","genezen","litteken","herstel","wound","healing","scar","plaie","cicatrice","cicatrisation"],
