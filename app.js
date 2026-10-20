@@ -1866,6 +1866,95 @@
     if (mail) mail.href = `mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent(t("pricelist_mail_subject", lang))}&body=${encodeURIComponent(t("pricelist_mail_body", lang))}`;
   }
 
+  /* ---------------- ACTIES BEHEREN (v194) ----------------
+     Sandra can hide an action card (or a WordPress offer line) herself, in
+     the app: salon mode (key or preview link) shows "⚙️ Acties beheren" under
+     the action cards. The hidden list is published as acties-beheer.json in
+     the site repo (same GitHub key as the gift vouchers), so every visitor
+     sees the change. Keys: "a:<action id>" and "p:<WordPress post url>".
+     Extra: an action with dupWith (data.js) disappears by itself when a
+     WordPress offer line already says the same (no double €50 action). */
+  var ACT_ST = { pub:null, loc:null, open:false, busy:false };   // var: safe if renderActions runs before this line
+  const ACT_FILE = "acties-beheer.json", ACT_KEY = "bc_act_hide_v1";
+  function actCleanList(v){ return (Array.isArray(v) ? v : []).filter(k => typeof k === "string" && /^[ap]:/.test(k) && k.length <= 400).slice(0, 60); }
+  function actLocal(){ try { const v = JSON.parse(localStorage.getItem(ACT_KEY) || "null"); return v ? actCleanList(v) : null; } catch(e){ return null; } }
+  function actSaveLocal(){ try { if (ACT_ST.loc) localStorage.setItem(ACT_KEY, JSON.stringify(ACT_ST.loc)); else localStorage.removeItem(ACT_KEY); } catch(e){ /* ignore */ } }
+  function actHiddenList(){ try { return (ACT_ST && (ACT_ST.loc || ACT_ST.pub)) || []; } catch(e){ return []; } }
+  function actHiddenSet(){ return new Set(actHiddenList()); }
+  function actSalon(){ try { return !!(hasSalonKey() || ingrSandra()); } catch(e){ return false; } }
+  (async function actLoadPublic(){
+    try {
+      ACT_ST.loc = actLocal();
+      const res = await fetch(ACT_FILE + "?t=" + Date.now(), { cache:"no-store" });
+      if (!res.ok) return;
+      const j = await res.json();
+      ACT_ST.pub = actCleanList(j && j.hide);
+      renderActions();
+    } catch(e){ /* offline or no file yet */ }
+  })();
+  async function actPublish(silent){
+    const L = state.lang, tok = (() => { try { return localStorage.getItem(GIFT_GH_KEY) || ""; } catch(e){ return ""; } })();
+    if (!tok){ showToast(t("act_pub_nokey", L)); return false; }
+    const { owner, repo } = giftRepo();
+    if (!owner || !repo){ if (!silent) showToast(t("gift_live_norepo", L)); return false; }
+    if (ACT_ST.busy) return false;
+    ACT_ST.busy = true;
+    const list = actHiddenList().slice(), out = { v:1, u: new Date().toISOString(), hide: list };
+    const api = `https://api.github.com/repos/${owner}/${repo}/contents/${ACT_FILE}`;
+    const H = { Authorization: "Bearer " + tok, Accept: "application/vnd.github+json" };
+    let ok = false, err = "";
+    for (let attempt = 0; attempt < 2 && !ok; attempt++){
+      try {
+        let sha;
+        const g = await fetch(api, { headers: H, cache:"no-store" });
+        if (g.ok) sha = (await g.json()).sha; else if (g.status !== 404){ err = "GET " + g.status; continue; }
+        const p = await fetch(api, { method:"PUT", headers: { ...H, "Content-Type":"application/json" },
+          body: JSON.stringify({ message: "Acties beheerd (app)", content: giftToken64(JSON.stringify(out, null, 1)), ...(sha ? { sha } : {}) }) });
+        if (p.ok) ok = true; else err = "PUT " + p.status;
+      } catch(e){ err = String(e && e.message || e); }
+    }
+    ACT_ST.busy = false;
+    if (ok){ ACT_ST.pub = list; ACT_ST.loc = null; actSaveLocal(); renderActions(); }
+    showToast(t(ok ? "act_pub_ok" : "act_pub_fail", L).replace("{e}", err));
+    return ok;
+  }
+  function actClick(e){
+    const b = e.currentTarget, a = b.dataset.act;
+    if (a === "panel"){ ACT_ST.open = !ACT_ST.open; renderActions(); return; }
+    if (a === "toggle"){
+      const key = b.dataset.key || ""; if (!/^[ap]:/.test(key)) return;
+      const cur = new Set(actHiddenList());
+      if (cur.has(key)) cur.delete(key); else cur.add(key);
+      ACT_ST.loc = actCleanList([...cur]); actSaveLocal(); renderActions(); actPublish(true);
+    }
+  }
+  // plain text of the WordPress offer lines that are visible now (to spot an action that is shown twice)
+  function actOfferText(hid){
+    try {
+      if (typeof news === "undefined" || !news.posts) return "";
+      return newsSplit().specials.filter(p => !hid.has("p:" + p.url)).map(p => newsPlainTitle(p.title) + " " + JSON.stringify(p.offer || {}) + " " + JSON.stringify(p.facts || {})).join(" ");
+    } catch(e){ return ""; }
+  }
+  function actManageHtml(today){
+    const L = state.lang, hid = actHiddenSet(), open = ACT_ST && ACT_ST.open;
+    let html = `<div class="act-manage"><button type="button" class="btn btn--sm btn--outline" data-act="panel">⚙️ ${t("act_manage", L)}</button>`;
+    if (open){
+      const rows = [];
+      (typeof CURRENT_ACTIONS === "undefined" ? [] : CURRENT_ACTIONS).filter(a => !a.soldOut).forEach(a => {
+        const w = actionWindow(a, today), on = !!(w && (!w.from || today >= w.from) && (!w.until || today <= w.until));
+        const name = String(((a.title && (a.title[L] || a.title.nl)) || a.id)).replace(/\{value\}|\{treat2?\}/g, "…");
+        rows.push({ key:"a:" + a.id, name, sub: on ? "" : t("act_off_season", L) });
+      });
+      try { newsSplit().specials.forEach(p => rows.push({ key:"p:" + p.url, name:"🍂 " + newsPlainTitle(p.title), sub:"" })); } catch(e){ /* no news yet */ }
+      html += `<p class="ingr-muted">${t("act_manage_intro", L)}</p><ul class="act-list">` + rows.map(r => {
+        const h = hid.has(r.key);
+        return `<li class="act-row${h ? " is-hidden" : ""}"><span class="act-row__name">${esc(r.name)}${r.sub ? ` <em>(${esc(r.sub)})</em>` : ""}${h ? ` <b>— ${t("act_hidden", L)}</b>` : ""}</span>
+          <button type="button" class="btn btn--sm ${h ? "btn--primary" : "btn--outline"}" data-act="toggle" data-key="${esc(r.key)}">${h ? t("act_show", L) : t("act_hide", L)}</button></li>`;
+      }).join("") + `</ul>`;
+    }
+    return html + `</div>`;
+  }
+
   /* Current actions (data.js → CURRENT_ACTIONS): date-windowed, bilingual */
   // Shown on the welcome screen (so everyone sees the promo before
   // starting) and again on the result screen, right before booking.
@@ -1876,7 +1965,9 @@
     let today;
     try { today = seasonTodayKey(); } catch(e){ today = todayKey(); }   // preview: follows the chosen date
     const lang = state.lang;
-    const active = activeActionsNow(today);
+    const hid = actHiddenSet();
+    const offerTxt = actOfferText(hid);
+    const active = activeActionsNow(today).filter(a => !hid.has("a:" + a.id) && !(a.dupWith && offerTxt && a.dupWith.test(offerTxt)));
     const fill = (txt, a) => actionFill(txt, a, lang);
     const card = a => `
       <div class="action-card${a.yearly ? " action-card--" + esc(a.id) : ""}">
@@ -1889,7 +1980,9 @@
     let offers = "";
     try { offers = newsActionsCardHtml(); } catch(e){ offers = ""; }
     const inner = active.filter(a => a.yearly).map(card).join("") + offers + active.filter(a => !a.yearly).map(card).join("");
-    wrap.innerHTML = inner.trim() ? `<p class="actions-block__label">${t("actions_now_label", lang)}</p>` + inner : "";
+    const manage = actSalon() ? actManageHtml(today) : "";
+    wrap.innerHTML = (inner.trim() || manage) ? `<p class="actions-block__label">${t("actions_now_label", lang)}</p>` + inner + manage : "";
+    wraps.forEach(w => w.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", actClick)));
     wraps.forEach(w => w.querySelectorAll("[data-offer-link]").forEach(x => x.addEventListener("click", () => trackEvent("offer-open"))));
     wraps.forEach(w => w.querySelectorAll("[data-offer-book]").forEach(x => x.addEventListener("click", () => trackEvent("offer-whatsapp"))));
   }
@@ -2700,7 +2793,8 @@
   // the card itself (HTML), shown with the other action cards (welcome + result)
   function newsActionsCardHtml(){
     if (typeof news === "undefined" || !news.posts) return "";
-    const { specials } = newsSplit();
+    const hidP = actHiddenSet();
+    const specials = newsSplit().specials.filter(p => !hidP.has("p:" + p.url));
     if (!specials.length) return "";
     const L = state.lang;
     const rows = specials.map(p => {
@@ -4964,8 +5058,8 @@
         ${order.length ? `<ul class="inv-list">${order.map(r => `<li>${nm(r.id)}</li>`).join("")}</ul>` : `<p class="ingr-muted">✓ ${t("inv_nothing", L)}</p>`}
         <p class="inv-summary__title">⚠️ ${t("inv_low_title", L)} (${low.length})</p>
         ${low.length ? `<ul class="inv-list">${low.map(r => `<li>${nm(r.id)} — ${t("inv_left_short", L).replace("{n}", r.r.left).replace("{u}", r.r.n || 0)}</li>`).join("")}</ul>` : `<p class="ingr-muted">✓ ${t("inv_nothing", L)}</p>`}
-        <p class="inv-summary__title">💶 ${t("inv_sales_title", L)}</p>
-        <p>${t("inv_sales_line", L).replace("{n}", sales.length).replace("{e}", total.toFixed(2).replace(".", ","))}</p>
+        ${sales.length ? `<p class="inv-summary__title">💶 ${t("inv_sales_title", L)}</p>
+        <p>${t("inv_sales_line", L).replace("{n}", sales.length).replace("{e}", total.toFixed(2).replace(".", ","))}</p>` : ""}
         ${sales.length ? `<ul class="inv-list">${sales.slice(-10).reverse().map(l => `<li>${advFmt(l.d)} · ${nm(l.id)}${l.p ? " · €" + l.p.toFixed(2).replace(".", ",") : ""}</li>`).join("")}</ul>` : ""}
       </div>
       <div class="inv-quick">
@@ -4983,12 +5077,13 @@
       const status = !r || !r.per ? `<span class="ingr-muted">${t("inv_untracked", L)}</span>`
         : t("inv_status", L).replace("{u}", r.n || 0).replace("{l}", r.left == null ? "—" : r.left).replace("{p}", r.per) + (r.sold ? ` · ${t("inv_sold_n", L).replace("{n}", r.sold)}` : "");
       const cls = st === "order" ? " is-expired" : st === "low" ? " is-soon" : "";
+      const sellOn = !!(r && (r.sell || r.sold || r.price));   // v194: cabine products have no sale button or price
       html += `<li class="open-row inv-row${cls}" data-cats="${catsOf(p).join(" ")}" data-tracked="${r && r.per ? 1 : 0}" data-name="${esc(ingrNorm(ingrName(p) + " " + id))}">
           <p class="open-row__name">${esc(ingrName(p))}</p>
           <p class="open-row__status">${status}</p>
           <div class="open-row__btns">
             <button type="button" class="btn btn--sm btn--primary" data-inv="use" data-id="${esc(id)}">−1 ${t("inv_use", L)}</button>
-            <button type="button" class="btn btn--sm btn--outline" data-inv="sale" data-id="${esc(id)}">💶 ${t("inv_sale", L)}</button>
+            ${sellOn ? `<button type="button" class="btn btn--sm btn--outline" data-inv="sale" data-id="${esc(id)}">💶 ${t("inv_sale", L)}</button>` : ""}
             <button type="button" class="btn btn--sm btn--outline" data-inv="in" data-id="${esc(id)}">＋1 ${t("inv_in", L)}</button>
           </div>
           <details class="inv-edit"${ingr.invOpen === id ? " open" : ""}><summary>⚙️ ${t("inv_edit", L)}</summary>
@@ -4996,8 +5091,9 @@
               <label>${t("inv_n", L)} <input type="number" min="0" step="1" class="pm-input inv-f" data-f="n" data-id="${esc(id)}" value="${r ? (r.n || 0) : 0}"></label>
               <label>${t("inv_per", L)} <input type="number" min="1" step="1" class="pm-input inv-f" data-f="per" data-id="${esc(id)}" value="${r && r.per ? r.per : (g.per || "")}"></label>
               <label>${t("inv_left", L)} <input type="number" min="0" step="1" class="pm-input inv-f" data-f="left" data-id="${esc(id)}" value="${r && r.left != null ? r.left : ""}" placeholder="—"></label>
-              <label>${t("inv_price", L)} <input type="text" inputmode="decimal" class="pm-input inv-f" data-f="price" data-id="${esc(id)}" value="${r && r.price ? String(r.price).replace(".", ",") : ""}" placeholder="€"></label>
+              ${sellOn ? `<label>${t("inv_price", L)} <input type="text" inputmode="decimal" class="pm-input inv-f" data-f="price" data-id="${esc(id)}" value="${r && r.price ? String(r.price).replace(".", ",") : ""}" placeholder="€"></label>` : ""}
             </div>
+            <label class="chip chip--check"><input type="checkbox" class="inv-f" data-f="sell" data-id="${esc(id)}"${sellOn ? " checked" : ""}> ${t("inv_sell_flag", L)}</label>
             ${g.guess && g.per && !(r && r.per) ? `<p class="ingr-muted">${t("inv_guess", L).replace("{n}", g.per).replace("{d}", String(g.dose).replace(".", ",") + " " + (g.unit || "ml"))}</p>` : ""}
             <button type="button" class="btn btn--sm btn--primary" data-inv="save" data-id="${esc(id)}">${t("inv_save", L)}</button>
           </details>
@@ -5070,7 +5166,8 @@
       r.n = Math.max(0, parseInt(v("n"), 10) || 0);
       r.per = Math.max(1, parseInt(v("per"), 10) || 1);
       r.left = v("left") === "" ? null : Math.max(0, parseInt(v("left"), 10) || 0);
-      r.price = invPrice(v("price"));
+      const pe = $(`.inv-f[data-f="price"][data-id="${id}"]`); if (pe) r.price = invPrice(v("price"));
+      const se = $(`.inv-f[data-f="sell"][data-id="${id}"]`); if (se) r.sell = !!se.checked;
       invSave(x); ingr.invOpen = null; showToast(t("inv_toast_saved", state.lang)); renderIngredients(); return;
     }
     if (a === "quick"){

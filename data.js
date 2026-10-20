@@ -1867,7 +1867,7 @@ const CURRENT_ACTIONS = [
      match). until:"2027-03-31" = stops by itself on that date. products =
      what is being used up: in salon mode the stock tab warns when they are all
      finished, so you know it is time to set soldOut:true. */
-  { id:"expressuseup", icon:"🌿", from:null, until:null, soldOut:false, priceItem:"Express gelaatsverzorging – opgebruikactie", treatment:"expressuseup",
+  { id:"expressuseup", icon:"🌿", from:null, until:null, soldOut:false, dupWith:/express[\s\S]*\b50\b|\b50\b[\s\S]*express/i, priceItem:"Express gelaatsverzorging – opgebruikactie", treatment:"expressuseup",
     products:"usedIn:expressuseup",
     title:{ nl:"Express gelaatsverzorging voor €50", en:"Express facial for €50", fr:"Soin du visage express à 50 €" },
     text:{ nl:"Een frisse huid in 30 minuten, voor €50 in plaats van €60, met kwaliteitsproducten uit mijn vorige assortiment (Bio Balance, Guinot, Dr. Renaud en Safety4You). Vermeld “opgebruikactie” als je boekt. Zolang de voorraad strekt.",
@@ -1957,7 +1957,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v193 · 19/10/2026";
+const APP_VERSION = "v194 · 19/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
