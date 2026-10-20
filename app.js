@@ -1942,7 +1942,8 @@
       const rows = [];
       (typeof CURRENT_ACTIONS === "undefined" ? [] : CURRENT_ACTIONS).filter(a => !a.soldOut).forEach(a => {
         const w = actionWindow(a, today), on = !!(w && (!w.from || today >= w.from) && (!w.until || today <= w.until));
-        const name = String(((a.title && (a.title[L] || a.title.nl)) || a.id)).replace(/\{value\}|\{treat2?\}/g, "…");
+        const raw = String((a.title && (a.title[L] || a.title.nl)) || a.id);
+        const name = /\{(value|treat2?)\}/.test(raw) ? raw.split(":")[0].trim() : raw;   // e.g. "Vaderdagactie" instead of "Vaderdagactie: … korting op een … of …"
         rows.push({ key:"a:" + a.id, name, sub: on ? "" : t("act_off_season", L) });
       });
       try { newsSplit().specials.forEach(p => rows.push({ key:"p:" + p.url, name:"🍂 " + newsPlainTitle(p.title), sub:"" })); } catch(e){ /* no news yet */ }
