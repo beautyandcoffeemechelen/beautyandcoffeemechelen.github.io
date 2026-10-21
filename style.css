@@ -1454,3 +1454,28 @@ section[data-step="welcome"] .book-hub .btn--primary{ background:var(--espresso)
 .bh-wide{flex:1 1 200px;min-width:0}
 .bh-off{margin:4px 0 0 18px;padding:0;font-size:.85rem;color:#6b5d4f}
 .price-item .bh-row{padding-top:8px;border-top:1px dashed rgba(120,100,80,.25)}
+
+/* v197 · allergy answer, accordions, "niet meer beschikbaar" */
+.ingr-answer{padding:12px 14px;border-radius:12px;margin:10px 0;border:1px solid rgba(120,100,80,.25)}
+.ingr-answer--warn{background:#fff4e5;border-color:#e6b566}
+.ingr-answer--ok{background:#eef8ee;border-color:#9cc99c}
+.ingr-answer--unk{background:#f3f1ee}
+.ingr-answer__title{font-weight:700;margin:0 0 4px;font-size:1.02rem}
+.ingr-answer__sum{margin:0 0 4px;font-size:.92rem}
+.ingr-warn--small{font-size:.82rem;margin:4px 0}
+.ingr-row{border:1px solid rgba(120,100,80,.22);border-radius:10px;margin:6px 0;background:rgba(255,252,246,.7)}
+.ingr-row>summary{cursor:pointer;padding:9px 12px;list-style:none;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ingr-row>summary::-webkit-details-marker{display:none}
+.ingr-row[open]>summary{border-bottom:1px solid rgba(120,100,80,.18)}
+.ingr-row>.ingr-list,.ingr-row>.ingr-card,.ingr-row>p{margin:8px 12px}
+.ingr-row__name{font-weight:600}
+.ingr-verdict{font-size:.74rem;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.ingr-verdict--no{background:#fbd5d5;color:#7a1f1f}
+.ingr-verdict--skip{background:#ffe9b8;color:#6b4a00}
+.ingr-verdict--swap{background:#dff0ff;color:#14456b}
+.ingr-more{margin:10px 0}
+.ingr-more>summary{cursor:pointer;font-weight:600;padding:6px 0}
+.ingr-x{margin-left:auto;font-size:.74rem}
+.fav-item--gone{opacity:.7}
+.fav-item__gone,.repeat-last--gone{color:#7a1f1f;font-weight:600;font-size:.85rem;display:block}
+.repeat-last--gone{padding:10px 12px;border:1px dashed #c98a8a;border-radius:10px;margin:8px 0}

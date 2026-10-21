@@ -222,7 +222,7 @@
   function renderProfileOptions(){
     const wrap = $("#profileOptions");
     wrap.innerHTML = "";
-    PROFILES.forEach(id => {
+    PROFILES.filter(id => !(id === "kind" && BC_UNAVAILABLE.has("kindermanicure"))).forEach(id => {
       const data = t(`profiles.${id}`, state.lang);
       const card = document.createElement("button");
       card.type = "button";
@@ -1872,10 +1872,12 @@
      vouchers; file is made by the app, NOT in the zip, never delete it when uploading).
      Without key: the change stays on this phone only (and the app says so). */
   var BH = { pub:null, loc:null, edit:false, busy:false };
+  const BH_CACHE = "bc_beheer_pub_v1";   // last published beheer.json: hides deleted treatments at once, also offline
+  try { const c0 = localStorage.getItem(BH_CACHE); if (c0) BH.pub = bhClean(JSON.parse(c0)); } catch(e){ /* ignore */ }
   const BH_FILE = "beheer.json", BH_KEY = "bc_beheer_v1";
   const bhStr = (x, n) => String(x == null ? "" : x).replace(/[<>]/g, "").trim().slice(0, n);
   function bhClean(v){
-    const o = { prices:{}, hide:[], add:[], acts:[], op:[] };
+    const o = { prices:{}, hide:[], add:[], acts:[], op:[], unused:{} };
     if (!v || typeof v !== "object") return o;
     if (v.prices && typeof v.prices === "object") Object.keys(v.prices).slice(0, 200).forEach(k => {
       const p = v.prices[k]; if (!p || typeof p !== "object") return;
@@ -1886,6 +1888,10 @@
     o.add = (Array.isArray(v.add) ? v.add : []).slice(0, 100).map(a => a && typeof a === "object" ? { id:bhStr(a.id, 30).replace(/[^a-z0-9_-]/gi, ""), sec:bhStr(a.sec, 30), nl:bhStr(a.nl, 120), en:bhStr(a.en, 120), fr:bhStr(a.fr, 120), time:bhStr(a.time, 30), price:bhStr(a.price, 40), d:bhStr(a.d, 240) } : null).filter(a => a && a.id && a.sec && a.nl && a.price);
     o.acts = (Array.isArray(v.acts) ? v.acts : []).slice(0, 30).map(a => a && typeof a === "object" ? { id:bhStr(a.id, 30).replace(/[^a-z0-9_-]/gi, ""), title:bhStr(a.title, 120), text:bhStr(a.text, 500), until:/^\d{4}-\d{2}-\d{2}$/.test(a.until || "") ? a.until : "" } : null).filter(a => a && a.id && a.title);
     o.op = (Array.isArray(v.op) ? v.op : []).map(x => bhStr(x, 60)).filter(Boolean).slice(0, 400);
+    if (v.unused && typeof v.unused === "object") Object.keys(v.unused).slice(0, 120).forEach(k => {   // treatment id → products Sandra does NOT use there
+      const l = (Array.isArray(v.unused[k]) ? v.unused[k] : []).map(x => bhStr(x, 60)).filter(Boolean).slice(0, 200);
+      if (l.length) o.unused[bhStr(k, 60)] = l;
+    });
     return o;
   }
   function bhLocal(){ try { const v = localStorage.getItem(BH_KEY); return v ? bhClean(JSON.parse(v)) : null; } catch(e){ return null; } }
@@ -1898,6 +1904,10 @@
     try {
       if (typeof PRICE_LINKS === "undefined" || typeof TREATMENTS_CATALOG === "undefined") return;
       const e = bhEff();
+      // what is no longer on the price list is no longer offered (match, actions, repeat-last)
+      const hid = new Set(e.hide), un = new Set();
+      new Set(Object.keys(PRICE_LINKS).concat(Object.keys(PRICE_AVAIL_EXTRA))).forEach(id => { const nm = priceAvailNames(id); if (nm && nm.length && nm.every(n => hid.has(n))) un.add(id); });
+      BC_UNAVAILABLE.clear(); un.forEach(x => BC_UNAVAILABLE.add(x));
       TREATMENTS_CATALOG.forEach(tr => {
         const link = PRICE_LINKS[tr.id]; if (!link) return;
         if (tr._basePrice == null) tr._basePrice = tr.price;
@@ -1981,7 +1991,7 @@
       } catch(e){ err = String(e && e.message || e); }
     }
     BH.busy = false;
-    if (ok){ BH.pub = snap; if (!BH.again) { BH.loc = null; bhSaveLocal(); } }
+    if (ok){ BH.pub = snap; try { localStorage.setItem(BH_CACHE, JSON.stringify(snap)); } catch(e){ /* ignore */ } if (!BH.again) { BH.loc = null; bhSaveLocal(); } }
     showToast(t(ok ? "act_pub_ok" : "act_pub_fail", L).replace("{e}", err));
     if (BH.again){ BH.again = false; return bhPublish(true); }
     return ok;
@@ -1990,12 +2000,30 @@
     bhApplyTreatPrices();
     try { renderPriceList(); } catch(e){}
     try { renderActions(); } catch(e){}
+    try { renderProfileOptions(); } catch(e){}      // no kid profile when Kindermanicure is gone
+    try { renderReturningUserBlock(); } catch(e){}  // favourites / last moment: "niet meer beschikbaar"
+    try { renderCopyName(); } catch(e){}
     try { if (typeof renderIngredients === "function" && document.querySelector("#ingrBody")) renderIngredients(); } catch(e){}
   }
   function bhCommit(e2){ BH.loc = bhClean(e2); bhSaveLocal(); bhRefresh(); bhPublish(true); }
   function bhClick(ev){
-    const b = ev.target.closest && ev.target.closest("[data-bh]"); if (!b || !actSalon()) return;
+    const b = ev.target.closest && ev.target.closest("[data-bh]"); if (!b) return;
+    if (b.dataset.bh === "openall"){   // open / close every row of the list (everybody)
+      ev.preventDefault();
+      const ds = [...(b.closest("#ingrBody") || document).querySelectorAll("details.ingr-row")];
+      const open = ds.some(d => !d.open); ds.forEach(d => { d.open = open; }); return;
+    }
+    if (!(actSalon() || ingrSandra())) return;
     const a = b.dataset.bh, L = state.lang, key = b.dataset.key || "", e2 = bhCopy();
+    if (a === "unused" || a === "used"){   // "gebruik ik hier niet": product is not counted for that treatment
+      ev.preventDefault(); ev.stopPropagation();
+      const tid = b.dataset.treat, pid = b.dataset.prod; if (!tid || !pid) return;
+      const l = e2.unused[tid] || (e2.unused[tid] = []), i = l.indexOf(pid);
+      if (a === "unused" && i < 0) l.push(pid); if (a === "used" && i >= 0) l.splice(i, 1);
+      if (!l.length) delete e2.unused[tid];
+      return bhCommit(e2);
+    }
+    if (!actSalon()) return;
     if (a === "toggle"){ BH.edit = !BH.edit; bhRefresh(); return; }
     if (a === "del"){
       if (!confirm(t("bh_confirm_del", L).replace("{p}", key.replace(/^add:/, "")))) return;
@@ -2029,9 +2057,9 @@
   document.addEventListener("change", bhChange);
   (async function bhLoadPublic(){
     try {
-      BH.loc = bhLocal();
+      BH.loc = bhLocal(); bhApplyTreatPrices();
       const res = await fetch(BH_FILE + "?t=" + Date.now(), { cache:"no-store" });
-      if (res.ok){ BH.pub = bhClean(await res.json()); }
+      if (res.ok){ const j = await res.json(); BH.pub = bhClean(j); try { localStorage.setItem(BH_CACHE, JSON.stringify(BH.pub)); } catch(e){ /* ignore */ } }
     } catch(e){ /* offline or no file yet */ }
     bhRefresh();
   })();
@@ -2231,7 +2259,8 @@
   // the one massage of this action for this year (changes every year by itself)
   function actionMassage(a, year){
     if (!a.massage || typeof ADVENT !== "object" || !ADVENT.autoFill) return null;
-    const list = ADVENT.autoFill.massages;
+    const list = ADVENT.autoFill.massages.filter(x => !BC_UNAVAILABLE.has(x.id));
+    if (!list.length) return null;
     const own = a.massage.byYear && a.massage.byYear[year];
     const m = (own && list.find(x => x.id === own)) || list[((year + (a.massage.offset || 0)) % list.length + list.length) % list.length];
     return m ? { nl:m.nl, en:m.en, fr:m.fr, id:m.id } : null;
@@ -2239,7 +2268,8 @@
   // the one other (non-massage) treatment of this action for this year
   function actionExtra(a, year){
     if (!a.extra || typeof ACTION_EXTRA_TREATMENTS === "undefined" || !ACTION_EXTRA_TREATMENTS.length) return null;
-    const list = ACTION_EXTRA_TREATMENTS;
+    const list = ACTION_EXTRA_TREATMENTS.filter(x => !BC_UNAVAILABLE.has(x.id));
+    if (!list.length) return null;
     const own = a.extra.byYear && a.extra.byYear[year];
     const x = (own && list.find(e => e.id === own)) || list[((year + (a.extra.offset || 0)) % list.length + list.length) % list.length];
     return x ? { nl:x.nl, en:x.en, fr:x.fr, id:x.id } : null;
@@ -3425,6 +3455,7 @@
     if (!lm) return "";
     const tr = TREATMENTS_CATALOG.find(x => x.id === lm.treatmentId);
     if (!tr || !lm.drink) return "";
+    if (BC_UNAVAILABLE.has(tr.id)) return `<p class="repeat-last repeat-last--gone">⛔ ${trName(tr.name, state.lang)}: ${t("bh_gone", state.lang)}<span class="repeat-last__sub">${t("bh_gone_hint", state.lang)}</span></p>`;
     const drink = lm.drink.origin ? trName(lm.drink.name, state.lang) : trName(lm.drink.name, state.lang);
     return `<button type="button" class="btn btn--primary btn--wide repeat-last" data-action="repeat-last">
         🔁 ${t("repeat_last_button", state.lang)}
@@ -3435,6 +3466,7 @@
     const lm = localData.lastMoment;
     const tr = lm && TREATMENTS_CATALOG.find(x => x.id === lm.treatmentId);
     if (!tr) return;
+    if (BC_UNAVAILABLE.has(tr.id)){ showToast(t("bh_gone", state.lang)); return; }
     state.match = { isKid:false, treatment: tr, drink: lm.drink, milkId: lm.milkId || "none", extrasIds: lm.extrasIds || [],
       homecarePick: lm.homecarePick || pickHomecareProduct(tr.homecare.category, tr.homecare.soapHint, state.profile),
       soapPick: lm.soapPick || null, why: lm.why || null };
@@ -3502,7 +3534,7 @@
     const lm = localData.lastMoment, at = localData.lastMatchAt;
     if (!lm || !lm.treatmentId || !at || (Date.now() - new Date(at).getTime()) > 60 * 86400000) return "";
     const tr = TREATMENTS_CATALOG.find(x => x.id === lm.treatmentId);
-    return tr ? trName(tr.name, state.lang) : "";
+    return tr && !BC_UNAVAILABLE.has(tr.id) ? trName(tr.name, state.lang) : "";
   }
   function renderCopyName(){
     document.querySelectorAll(".copy-name").forEach(b => {
@@ -3718,7 +3750,7 @@
     const showReview = shouldShowReviewPrompt();
     block.hidden = !hasHistory && !showReview;
     if (!hasHistory && !showReview) return;
-    const totalTreatments = TREATMENTS_CATALOG.length;
+    const totalTreatments = TREATMENTS_CATALOG.filter(x => !BC_UNAVAILABLE.has(x.id)).length;
     const totalDrinks = getAllDrinkNames().size;
     const reviewHtml = showReview ? `
       <div class="review-prompt">
@@ -3730,20 +3762,20 @@
       <p class="returning-user__title">${t("welcome_back_title", state.lang)}</p>
       <div class="returning-user__stats">
         <span>☕ ${Math.min(localData.stamps,10)}/10 ${t("stamps_label", state.lang)}</span>
-        <span>✨ ${localData.discoveredTreatments.length}/${totalTreatments} ${t("treatments_discovered_label", state.lang)}</span>
+        <span>✨ ${localData.discoveredTreatments.filter(i => !BC_UNAVAILABLE.has(i)).length}/${totalTreatments} ${t("treatments_discovered_label", state.lang)}</span>
         <span>🍵 ${localData.discoveredDrinks.length}/${totalDrinks} ${t("drinks_discovered_label", state.lang)}</span>
       </div>
       ${lastMomentButtonHtml()}
       ${favs.length ? `
       <p class="returning-user__title returning-user__title--fav">${t("fav_title", state.lang)}</p>
       <ul class="fav-list">
-        ${favs.map((f, i) => `<li class="fav-item">
-          <div class="fav-item__text"><strong>${esc(trName(f.tname, state.lang))}</strong><span>☕ ${esc(f.drink)}</span></div>
+        ${favs.map((f, i) => { const gone = BC_UNAVAILABLE.has(String(f.key || "").split("|")[0]); return `<li class="fav-item${gone ? " fav-item--gone" : ""}">
+          <div class="fav-item__text"><strong>${esc(trName(f.tname, state.lang))}</strong><span>☕ ${esc(f.drink)}</span>${gone ? `<span class="fav-item__gone">⛔ ${t("bh_gone", state.lang)}</span>` : ""}</div>
           <div class="fav-item__actions">
-            <a class="fav-item__book" href="${favBookHref(f)}" target="_blank" rel="noopener noreferrer">${t("fav_book", state.lang)}</a>
+            ${gone ? "" : `<a class="fav-item__book" href="${favBookHref(f)}" target="_blank" rel="noopener noreferrer">${t("fav_book", state.lang)}</a>`}
             <button type="button" class="fav-item__remove" data-action="remove-fav" data-fav-index="${i}">${t("fav_remove", state.lang)}</button>
           </div>
-        </li>`).join("")}
+        </li>`; }).join("")}
       </ul>` : ""}` : "");
   }
 
@@ -3754,7 +3786,7 @@
     const blocks = [$("#loyaltyBlock"), $("#loyaltyBlockStandalone")].filter(Boolean);
     if (!blocks.length) return;
     const block = { set innerHTML(html){ blocks.forEach(b => { b.innerHTML = html; }); } };
-    const totalTreatments = TREATMENTS_CATALOG.length;
+    const totalTreatments = TREATMENTS_CATALOG.filter(x => !BC_UNAVAILABLE.has(x.id)).length;
     const totalDrinks = getAllDrinkNames().size;
     const stampsCapped = Math.min(localData.stamps, 10);
     const tPct = Math.round(localData.discoveredTreatments.length / totalTreatments * 100);
@@ -3772,7 +3804,7 @@
       </div>
       <div class="collection-card">
         <p class="collection-card__title">✨ ${t("collection_title", state.lang)}</p>
-        <div class="collection-card__row"><span>${t("treatments_discovered_label", state.lang)}</span><span>${localData.discoveredTreatments.length}/${totalTreatments}</span></div>
+        <div class="collection-card__row"><span>${t("treatments_discovered_label", state.lang)}</span><span>${localData.discoveredTreatments.filter(i => !BC_UNAVAILABLE.has(i)).length}/${totalTreatments}</span></div>
         <div class="collection-card__bar"><div class="collection-card__fill" style="width:${tPct}%"></div></div>
         ${discoveryListHtml(discoveredTreatmentNames())}
         <div class="collection-card__row"><span>${t("drinks_discovered_label", state.lang)}</span><span>${localData.discoveredDrinks.length}/${totalDrinks}</span></div>
@@ -4909,7 +4941,7 @@
   function ingrHit(part, keys){
     const n = " " + ingrNorm(part) + " ";
     // "=word" = the whole ingredient must be that word (e.g. "=alcohol", not "Cetyl Alcohol")
-    return keys.some(k => { if (k[0] === "=") return n.trim() === ingrNorm(k.slice(1)); const kk = ingrNorm(k); const i = n.indexOf(kk); return i > 0 && !/[a-z0-9]/.test(n[i - 1]); });
+    return keys.some(k => { if (k[0] === "=") return n.trim() === ingrNorm(k.slice(1)); if (k[0] === "*") return n.includes(ingrNorm(k.slice(1))); const kk = ingrNorm(k); const i = n.indexOf(kk); return i > 0 && !/[a-z0-9]/.test(n[i - 1]); });
   }
   function ingrTreatName(id){
     const L = state.lang;
@@ -4946,21 +4978,48 @@
   function ingrIsAdventUse(u){ return u === "advent" || /^extra-/.test(u) || !!(typeof ADVENT === "object" && ADVENT.items && ADVENT.items[u]); }
   // the products this phone may see: without finished ones; clients without advent usages
   function ingrCatalog(){
-    const op = ingrOpSet(), sandra = ingrSandra();
-    return Object.entries(SALON_PRODUCTS).filter(([id]) => !op.has(id)).map(([id, p]) => {
+    const op = ingrOpSet(), sandra = ingrSandra(), un = bhEff().unused || {};
+    return Object.entries(SALON_PRODUCTS).filter(([id]) => !op.has(id)).map(([id, p0]) => {
+      // v197: "gebruik ik hier niet" → the product is not counted for that treatment
+      let p = p0;
+      if ((p0.usedIn || []).some(u => un[u] && un[u].includes(id))) p = Object.assign({}, p0, { usedIn: p0.usedIn.filter(u => !(un[u] && un[u].includes(id))), _unusedSome: true });
       if (sandra) return [id, p];
       const used = (p.usedIn || []).filter(u => !ingrIsAdventUse(u));
       return used.length ? [id, Object.assign({}, p, { usedIn: used })] : null;   // not linked yet → only Sandra sees it
     }).filter(Boolean);
   }
   // which allergy groups does the query point to? → INCI keys to look for
+  function ingrLev(x, y){
+    const m = x.length, n = y.length; if (!m) return n; if (!n) return m;
+    let prev = Array.from({ length: n + 1 }, (_, j) => j);
+    for (let i = 1; i <= m; i++){
+      const cur = [i];
+      for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (x[i - 1] === y[j - 1] ? 0 : 1));
+      prev = cur;
+    }
+    return prev[n];
+  }
+  // typo / singular-plural tolerant: "parabeen" → Parabenen
+  function ingrFuzzyGroups(nq){
+    if (nq.length < 5) return [];
+    let best = 9, out = [];
+    ALLERGEN_GROUPS.forEach(g => {
+      let dist = 9;
+      [g.id].concat(g.terms, Object.values(g.label)).map(ingrNorm).forEach(w => { if (Math.abs(w.length - nq.length) <= 2) dist = Math.min(dist, ingrLev(w, nq)); });
+      if (dist < best){ best = dist; out = [g]; } else if (dist === best) out.push(g);
+    });
+    return best <= (nq.length >= 8 ? 2 : 1) ? out : [];
+  }
+  // which allergy groups does the query point to? → INCI keys to look for
   function ingrQuery(q){
     const nq = ingrNorm(q).trim();
     if (nq.length < 2) return null;
     const byLabel = ALLERGEN_GROUPS.filter(g => Object.values(g.label).some(l => ingrNorm(l) === nq));
-    const groups = byLabel.length ? byLabel : ALLERGEN_GROUPS.filter(g => g.id === nq || g.terms.some(tm => { const nt = ingrNorm(tm); return nt === nq || (nq.length >= 3 && (nt.startsWith(nq) || nq.startsWith(nt) && nt.length >= 4)); }));
-    const keys = groups.length ? [...new Set(groups.flatMap(g => g.match))] : [nq];
-    return { groups, keys };
+    let groups = byLabel.length ? byLabel : ALLERGEN_GROUPS.filter(g => g.id === nq || g.terms.some(tm => { const nt = ingrNorm(tm); return nt === nq || (nq.length >= 3 && (nt.startsWith(nq) || nq.startsWith(nt) && nt.length >= 4)); }));
+    let fuzzy = false;
+    if (!groups.length){ groups = ingrFuzzyGroups(nq); fuzzy = groups.length > 0; }
+    const keys = groups.length ? [...new Set(groups.flatMap(g => g.match))] : (nq.length >= 3 ? ["*" + nq] : [nq]);
+    return { groups, keys, fuzzy };
   }
   function renderIngredients(){
     const body = $("#ingrBody");
@@ -4976,10 +5035,11 @@
     if (ingr.tab === "search"){
       html += `<label class="ingr-label" for="ingrSearch">${t("ingr_search_label", L)}</label>
         <input type="search" id="ingrSearch" class="price-search" autocomplete="off" value="${esc(ingr.q)}" placeholder="${esc(t("ingr_search_ph", L))}">
-        <div class="ingr-chips">${ALLERGEN_GROUPS.map(g => `<button type="button" class="chip chip--sm" data-action="ingr-chip" data-group="${esc(g.id)}">${esc(g.label[L] || g.label.nl)}</button>`).join("")}</div>
-        <div id="ingrResults" aria-live="polite"></div>`;
+        <div id="ingrResults" aria-live="polite"></div>
+        <details class="ingr-more ingr-chipsbox"${ingr.q.trim() ? "" : " open"}><summary>${t("ingr_pick_list", L).replace("{n}", ALLERGEN_GROUPS.length)}</summary>
+          <div class="ingr-chips">${ALLERGEN_GROUPS.map(g => `<button type="button" class="chip chip--sm" data-action="ingr-chip" data-group="${esc(g.id)}">${esc(g.label[L] || g.label.nl)}</button>`).join("")}</div></details>`;
     } else if (ingr.tab === "treat"){
-      const opts = ingrTreatments().map(id => [id, ingrTreatName(id)]).sort((a, b) => a[1].localeCompare(b[1]));
+      const opts = ingrTreatments().filter(id => !BC_UNAVAILABLE.has(id)).map(id => [id, ingrTreatName(id)]).sort((a, b) => a[1].localeCompare(b[1]));
       html += `<label class="ingr-label" for="ingrTreat">${t("ingr_choose_treat", L)}</label>
         <select id="ingrTreat" class="ingr-select"><option value="">—</option>${opts.map(o => `<option value="${esc(o[0])}"${o[0] === ingr.treat ? " selected" : ""}>${esc(o[1])}</option>`).join("")}</select>
         <div id="ingrTreatBody"></div>`;
@@ -4998,7 +5058,7 @@
     } else {
       const noInci = ingrCatalog().map(([, p]) => p).filter(p => !ingrInci(p));
       const noProd = ingrTreatments().filter(id => !ingrProductsFor(id).length);
-      const unlinked = ingrCatalog().map(([, p]) => p).filter(p => !(p.usedIn || []).length);
+      const unlinked = ingrCatalog().filter(([, p]) => !(p.usedIn || []).length && !p._unusedSome).map(([, p]) => p);
       html += `<p class="ingr-note">${t("ingr_todo_intro", L)}</p>
         ${unlinked.length ? `<h3 class="ingr-h">${t("ingr_todo_unlinked", L)} (${unlinked.length})</h3><ul class="ingr-list">${unlinked.map(p => `<li>${esc(ingrName(p))}</li>`).join("")}</ul>` : ""}
         <h3 class="ingr-h">${t("ingr_todo_noinci", L)} (${noInci.length})</h3>
@@ -5697,37 +5757,14 @@
         ${ingrSandra() ? oilUseHtml(id, L) : ""}
         ${ingrSandra() ? tipsHtml(id, L) : ""}
         <p class="ingr-muted">${t("ingr_used_in", L)} ${esc((p.usedIn || []).map(ingrTreatName).join(", ") || "—")}</p>
-        <details class="ingr-inci"><summary>${t("ingr_full_list", L)}</summary><p>${inci ? esc(inci) : t("ingr_inci_missing", L)}</p></details>
+        <details class="ingr-inci"><summary>${t("ingr_full_list", L)}</summary><p>${inci ? esc(inci) : t("ingr_inci_missing", L)}</p>${p.inciSrc && ingrSandra() ? `<p class="ingr-muted">${t("ingr_src", L)} ${esc(p.inciSrc)}</p>` : ""}</details>
       </div>`;
   }
-  function renderIngrResults(){
-    const box = $("#ingrResults");
-    if (!box) return;
-    const L = state.lang, Q = ingrQuery(ingr.q);
-    if (!Q){ box.innerHTML = `<p class="ingr-muted">${t("ingr_search_hint", L)}</p>`; return; }
-    const all = ingrCatalog();
-    const hit = all.filter(([, p]) => ingrParts(ingrInci(p)).some(x => ingrHit(x, Q.keys)));
-    const hitIds = new Set(hit.map(([id]) => id));
-    const unknown = all.filter(([, p]) => !ingrInci(p));
-    let html = Q.groups.length ? `<p class="ingr-muted">${t("ingr_search_groups", L)} <b>${esc(Q.groups.map(g => g.label[L] || g.label.nl).join(", "))}</b></p>` : "";
-    if (!hit.length){
-      html += `<p class="ingr-ok">✅ ${t("ingr_none_found", L)}</p>`;
-    } else {
-      // per treatment: what to skip or swap
-      const treat = {};
-      hit.forEach(([id, p]) => (p.usedIn || []).forEach(tid => { (treat[tid] = treat[tid] || []).push(id); }));
-      html += `<h3 class="ingr-h">${t("ingr_per_treat", L)}</h3><ul class="ingr-list">` + Object.entries(treat).map(([tid, pids]) => {
-        const items = pids.map(pid => {
-          const p = all.find(([x]) => x === pid)[1];
-          const alts = p.slot ? all.filter(([aid, a]) => a.slot === p.slot && !hitIds.has(aid) && ingrInci(a) && (a.usedIn || []).some(u => (p.usedIn || []).includes(u))).map(([, a]) => ingrName(a)) : [];
-          return `<b>${esc(ingrName(p))}</b>${alts.length ? ` <span class="ingr-alt">→ ${t("ingr_alt", L)} ${esc(alts.join(" / "))}</span>` : ""}`;
-        });
-        const miss = ingrProductsFor(tid).filter(([, a]) => !ingrInci(a)).map(([, a]) => ingrName(a));
-        return `<li><span class="ingr-treat">${esc(ingrTreatName(tid))}</span> — ${t("ingr_skip", L)} ${items.join("; ")}${miss.length ? `<br><span class="ingr-warn">❓ ${t("ingr_check_too", L)} ${esc(miss.join(", "))}</span>` : ""}</li>`;
-      }).join("") + `</ul>`;
-      html += `<h3 class="ingr-h">${t("ingr_products_found", L).replace("{n}", hit.length)}</h3>` + hit.map(([id, p]) => ingrProductCard(id, p, Q.keys)).join("");
-    }
+  // product finder (skin type / complaint in name or public note) — only when the query is NOT an allergy group
+  function ingrFinderHtml(all, hitIds){
+    const L = state.lang;
     // v173: product finder — skin type or complaint in the name or public note
+    let out = "";
     const fq = ingrNorm(ingr.q).trim();
     if (fq.length >= 3){
       const syn = (typeof PRODUCT_FINDER_SYN !== "undefined" ? PRODUCT_FINDER_SYN : {});
@@ -5736,23 +5773,72 @@
       const has = (txt) => terms.some(tm => { let k = txt.indexOf(tm); while (k >= 0){ if ((k === 0 || !/[a-z0-9à-ÿ]/.test(txt[k - 1])) && !neg.test(txt.slice(Math.max(0, k - 40), k))) return true; k = txt.indexOf(tm, k + 1); } return false; });
       const txtOf = x => ingrNorm(typeof x === "string" ? x : Object.values(x || {}).join(" | "));
       const fit = all.filter(([id]) => !hitIds.has(id)).map(([id, p]) => [id, p, has(txtOf(p.name)) ? 2 : ((has(txtOf(p.note)) || (ingrSandra() && typeof PRODUCT_TIPS !== "undefined" && PRODUCT_TIPS[id] && has(txtOf(PRODUCT_TIPS[id].nl.concat(PRODUCT_TIPS[id].en || []))))) ? 1 : 0)]).filter(x => x[2] > 0).sort((a, b) => b[2] - a[2]);
-      if (fit.length && !hit.length) html = html.replace(`<p class="ingr-ok">✅ ${t("ingr_none_found", L)}</p>`, "");
-      if (fit.length) html += `<h3 class="ingr-h">🔎 ${t("ingr_fit_found", L).replace("{n}", fit.length)}</h3>` + fit.slice(0, 30).map(([id, p]) => ingrProductCard(id, p, null)).join("");
+      if (fit.length) out += `<h3 class="ingr-h">🔎 ${t("ingr_fit_found", L).replace("{n}", fit.length)}</h3>` + fit.slice(0, 30).map(([id, p]) => ingrProductCard(id, p, null)).join("");
     }
-    const noProd = ingrTreatments().filter(id => !ingrProductsFor(id).length).length;
-    if (unknown.length || noProd){
-      html += `<p class="ingr-warn">❓ ${t("ingr_incomplete", L).replace("{p}", unknown.length).replace("{t}", noProd)}</p>`;
+    return out;
+  }
+  function ingrCoreSlot(p){ return typeof ALLERGY_CORE_SLOTS !== "undefined" && ALLERGY_CORE_SLOTS.includes(p.slot); }
+  const ingrUnusedBtn = (tid, pid) => ingrSandra() ? ` <button type="button" class="btn btn--text btn--sm ingr-x" data-bh="unused" data-treat="${esc(tid)}" data-prod="${esc(pid)}">✕ ${t("bh_unused", state.lang)}</button>` : "";
+  function renderIngrResults(){
+    const box = $("#ingrResults");
+    if (!box) return;
+    const L = state.lang, Q = ingrQuery(ingr.q);
+    if (!Q){ box.innerHTML = `<p class="ingr-muted">${t("ingr_search_hint", L)}</p>`; return; }
+    const all = ingrCatalog();
+    const hit = all.filter(([, p]) => ingrParts(ingrInci(p)).some(x => ingrHit(x, Q.keys)));
+    const hitIds = new Set(hit.map(([id]) => id));
+    const withList = all.filter(([, p]) => ingrInci(p));
+    const unknown = all.filter(([, p]) => !ingrInci(p));
+    const gname = Q.groups.length ? Q.groups.map(g => g.label[L] || g.label.nl).join(", ") : "“" + ingr.q.trim() + "”";
+    let html = Q.fuzzy ? `<p class="ingr-muted">${t("ingr_did_you_mean", L).replace("{g}", `<b>${esc(gname)}</b>`)}</p>` : "";
+    const unkTxt = unknown.length ? `<p class="ingr-warn ingr-warn--small">❓ ${t("ingr_ans_unknown", L).replace("{n}", unknown.length)}</p>` : "";
+    if (!hit.length){
+      const fit = !Q.groups.length ? ingrFinderHtml(all, hitIds) : "";
+      if (fit) html += fit;
+      else if (!Q.groups.length) html += `<div class="ingr-answer ingr-answer--unk"><p class="ingr-answer__title">❔ ${t("ingr_unknown_term", L).replace("{q}", esc(ingr.q.trim()))}</p></div>`;
+      else html += `<div class="ingr-answer ingr-answer--ok"><p class="ingr-answer__title">✅ ${t("ingr_ans_none", L).replace("{g}", esc(gname)).replace("{n}", withList.length)}</p>${unkTxt}</div>`;
+      box.innerHTML = html + (fit ? unkTxt : ""); return;
     }
+    // per treatment: no / skip a step / swap a product (treatments that are no longer offered are left out)
+    const treat = {};
+    hit.forEach(([id, p]) => (p.usedIn || []).forEach(tid => { if (!BC_UNAVAILABLE.has(tid)) (treat[tid] = treat[tid] || []).push(id); }));
+    const rows = Object.entries(treat).map(([tid, pids]) => {
+      const steps = pids.map(pid => {
+        const p = all.find(([x]) => x === pid)[1];
+        const alts = p.slot ? all.filter(([aid, a]) => a.slot === p.slot && !hitIds.has(aid) && ingrInci(a) && (a.usedIn || []).includes(tid)).map(([, a]) => ingrName(a)) : [];
+        const hits = [...new Set(ingrParts(ingrInci(p)).filter(x => ingrHit(x, Q.keys)))];
+        return { pid, p, alts, hits, core: ingrCoreSlot(p) };
+      });
+      const verdict = steps.some(s => !s.alts.length && s.core) ? "no" : steps.some(s => !s.alts.length) ? "skip" : "swap";
+      const miss = ingrProductsFor(tid).filter(([, a]) => !ingrInci(a)).map(([, a]) => ingrName(a));
+      return { tid, steps, verdict, miss };
+    }).sort((x, y) => ["no", "skip", "swap"].indexOf(x.verdict) - ["no", "skip", "swap"].indexOf(y.verdict) || ingrTreatName(x.tid).localeCompare(ingrTreatName(y.tid)));
+    const cnt = v => rows.filter(r => r.verdict === v).length;
+    html += `<div class="ingr-answer ingr-answer--warn">
+        <p class="ingr-answer__title">⚠️ ${t("ingr_ans_found", L).replace("{g}", esc(gname)).replace("{n}", hit.length)}</p>
+        <p class="ingr-answer__sum">${[["no", "⛔"], ["skip", "⏭️"], ["swap", "🔁"]].filter(([v]) => cnt(v)).map(([v, ic]) => `${ic} ${t("ingr_sum_" + v, L).replace("{n}", cnt(v))}`).join(" · ") || "—"}</p>
+        ${unkTxt}
+        <button type="button" class="btn btn--text btn--sm" data-bh="openall">${t("ingr_open_all", L)} / ${t("ingr_close_all", L)}</button>
+      </div>`;
+    html += rows.map(r => `<details class="ingr-row ingr-row--${r.verdict}"><summary><span class="ingr-verdict ingr-verdict--${r.verdict}">${{ no: "⛔", skip: "⏭️", swap: "🔁" }[r.verdict]} ${t("ingr_verdict_" + r.verdict, L)}</span> <span class="ingr-row__name">${esc(ingrTreatName(r.tid))}</span></summary>
+        <ul class="ingr-list">${r.steps.map(s => `<li><b>${esc(ingrName(s.p))}</b> <span class="ingr-muted">⚠️ ${esc(s.hits.join(", "))}</span><br>${s.alts.length ? `<span class="ingr-alt">🔁 ${t("ingr_replace", L)} ${esc(s.alts.join(" / "))}</span>` : `<span class="ingr-warn">${s.core ? "⛔ " + t("ingr_core_hint", L) : "⏭️ " + t("ingr_skip_step", L)}</span>`}${ingrUnusedBtn(r.tid, s.pid)}</li>`).join("")}</ul>
+        ${r.miss.length ? `<p class="ingr-warn ingr-warn--small">❓ ${t("ingr_check_too", L)} ${esc(r.miss.join(", "))}</p>` : ""}
+      </details>`).join("");
+    html += `<details class="ingr-more"><summary>${t("ingr_all_products", L).replace("{n}", hit.length)}</summary>${hit.map(([id, p]) => ingrProductCard(id, p, Q.keys)).join("")}</details>`;
     box.innerHTML = html;
   }
   function renderIngrTreat(){
     const box = $("#ingrTreatBody");
     if (!box) return;
-    const L = state.lang;
+    const L = state.lang, sandra = ingrSandra();
     if (!ingr.treat){ box.innerHTML = ""; return; }
-    const prods = ingrProductsFor(ingr.treat);
-    box.innerHTML = prods.length ? prods.map(([id, p]) => ingrProductCard(id, p, null)).join("") : `<p class="ingr-warn">❓ ${t("ingr_no_products", L)}</p>`;
-    box.querySelectorAll("details.ingr-inci").forEach(d => { d.open = true; });
+    const prods = ingrProductsFor(ingr.treat).sort((x, y) => ingrName(x[1]).localeCompare(ingrName(y[1])));
+    const un = (bhEff().unused || {})[ingr.treat] || [];
+    let html = prods.length ? `<p class="ingr-muted">${t("ingr_treat_count", L).replace("{n}", prods.length)} <button type="button" class="btn btn--text btn--sm" data-bh="openall">${t("ingr_open_all", L)} / ${t("ingr_close_all", L)}</button></p>`
+      + prods.map(([id, p]) => `<details class="ingr-row"><summary><span class="ingr-row__name">${esc(ingrName(p))}</span>${ingrUnusedBtn(ingr.treat, id)}</summary>${ingrProductCard(id, p, null)}</details>`).join("")
+      : `<p class="ingr-warn">❓ ${t("ingr_no_products", L)}</p>`;
+    if (sandra && un.length) html += `<details class="ingr-more"><summary>${t("bh_unused_list", L).replace("{n}", un.length)}</summary><ul class="act-list">${un.map(pid => `<li class="act-row"><span class="act-row__name">${esc(SALON_PRODUCTS[pid] ? ingrName(SALON_PRODUCTS[pid]) : pid)}</span><button type="button" class="btn btn--sm btn--outline" data-bh="used" data-treat="${esc(ingr.treat)}" data-prod="${esc(pid)}">↺ ${t("bh_unused_back", L)}</button></li>`).join("")}</ul></details>`;
+    box.innerHTML = html;
   }
 
   /* ---------------- advent calendar (1–25 December) ----------------

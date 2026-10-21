@@ -1783,7 +1783,8 @@ function matchTreatment(mood, gender, sunExposed, healthFlags, complaintText, fo
   const avoid = Array.isArray(healthFlags.avoid) ? healthFlags.avoid : [];
   const avoidOk = (item) => !avoid.some(g => (AVOID_GROUPS[g] || []).includes(item.id)) && !(healthFlags.allergyExclude || []).includes(item.id);
   const actionOk = (item) => !item.stockAction || actionIsOn(item.id);
-  const allOk = (item) => actionOk(item) && avoidOk(item) && genderOk(item) && sunOk(item) && timeOk(item) && phlebitisOk(item) && dietOk(item) && menstruationOk(item) && pregnancyOk(item) && roaccutaneOk(item) && ageOk(item) && seasonOk(item) && monthRangeOk(item);
+  const availOk = (item) => !BC_UNAVAILABLE.has(item.id);   // only what is on the price list (v197)
+  const allOk = (item) => availOk(item) && actionOk(item) && avoidOk(item) && genderOk(item) && sunOk(item) && timeOk(item) && phlebitisOk(item) && dietOk(item) && menstruationOk(item) && pregnancyOk(item) && roaccutaneOk(item) && ageOk(item) && seasonOk(item) && monthRangeOk(item);
 
   // Gerichte match: highest score among the treatments that pass every rule
   if (focusScores && typeof focusScores === "object"){
@@ -1823,10 +1824,10 @@ function matchTreatment(mood, gender, sunExposed, healthFlags, complaintText, fo
     pool = TREATMENTS_CATALOG.filter(item => allOk(item) && SAFE_FALLBACK_IDS.includes(item.id));
   }
   if (!pool.length){
-    pool = TREATMENTS_CATALOG.filter(item => avoidOk(item) && genderOk(item) && !item.sunSensitive && !item.isMassage);
+    pool = TREATMENTS_CATALOG.filter(item => availOk(item) && avoidOk(item) && genderOk(item) && !item.sunSensitive && !item.isMassage);
   }
   if (!pool.length){
-    pool = TREATMENTS_CATALOG.filter(item => genderOk(item) && !item.sunSensitive && !item.isMassage);
+    pool = TREATMENTS_CATALOG.filter(item => availOk(item) && genderOk(item) && !item.sunSensitive && !item.isMassage);
   }
   return pickRandom(pool);
 }
@@ -1957,7 +1958,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v196 · 21/10/2026";
+const APP_VERSION = "v197 · 21/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -2532,6 +2533,23 @@ const PRICE_LINKS = {
   cateye:"Cat Eye & Magnetische Gellak Manicure Workshop"
 };
 
+/* AVAILABILITY (v197): the match only proposes what is on the price list.
+   When Sandra deletes a line in Prijslijst → Beheren, the treatment linked to it
+   (PRICE_LINKS, or the extra links below) goes into BC_UNAVAILABLE: the match,
+   the actions and "repeat last moment" no longer offer it, and saved matches
+   say "niet meer beschikbaar". A treatment with several lines is unavailable
+   when ALL its lines are deleted. */
+var BC_UNAVAILABLE = new Set();
+const PRICE_AVAIL_EXTRA = {
+  manipedispa:["Supplement SPA manicure","Supplement SPA pedicure"],
+  been:["Onderbenen","Onderbenen & knieën"],
+  tastingbasic:["Koffieproeverij Basis"], tastingadvanced:["Koffieproeverij Verdiepend"],
+  kindermanicure:["Kindermanicure"]
+};
+function priceAvailNames(id){
+  if (typeof PRICE_AVAIL_EXTRA === "object" && PRICE_AVAIL_EXTRA[id]) return PRICE_AVAIL_EXTRA[id];
+  return (typeof PRICE_LINKS === "object" && PRICE_LINKS[id]) ? [PRICE_LINKS[id]] : null;
+}
 const PRICE_LIST = [
   { id:"facial", icon:"🌿", title:{ nl:"Gelaatsverzorging", en:"Facials" }, items:[
     PI("Express gelaatsverzorging","Express facial","30′","€60","Reiniging, dieptereiniging, crèmemasker & dagcrème.","Cleansing, deep cleansing, cream mask & day cream."),
