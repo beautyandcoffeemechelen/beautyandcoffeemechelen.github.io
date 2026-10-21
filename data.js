@@ -1889,7 +1889,7 @@ const CURRENT_ACTIONS = [
      ADVENT.autoFill.massages, starting at "offset"); to choose it yourself
      for a year: byYear:{ 2027:"hotstone" }.
      Mother's Day / Father's Day in Belgium: 2nd Sunday of May / of June.
-     Preview: …/?voorproef=BC-XMAS-7Q4K&datum=2027-01-20 (or 2027-05-01, 2027-06-01) */
+     Preview: …/?voorproef=<your key>&datum=2027-01-20 (or 2027-05-01, 2027-06-01) */
   { id:"valentijn", icon:"💕", value:"10%", massage:{ offset:3, byYear:{} }, extra:{ offset:0, byYear:{} },
     yearly:{ anchorMD:"02-14", weekendsBefore:3, weekendsAfter:2, showDaysBefore:12 },
     title:{ nl:"Valentijnsactie: {value} korting op een {treat} of {treat2}",
@@ -1957,7 +1957,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v195 · 20/10/2026";
+const APP_VERSION = "v196 · 21/10/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -2069,11 +2069,38 @@ const SALON_MODE_PIN = "";
      The printed label/card with the product is what the law requires;
      the app only repeats it.
    ============================================================ */
-/* PRIVATE PREVIEW for the whole app, all year round (only Sandra knows it):
-     https://beautyandcoffeemechelen.github.io/?voorproef=BC-XMAS-7Q4K
+/* SHA-256 (synchronous, tiny) — used so the private preview key itself is NOT in this public file */
+function bcSha256Hex(msg){
+  const K=[],H=[];let p=0;
+  const isP=n=>{for(let i=2;i*i<=n;i++)if(n%i===0)return false;return true};
+  for(let c=2;p<64;c++)if(isP(c)){K[p]=(Math.cbrt(c)%1*4294967296)|0;if(p<8)H[p]=(Math.sqrt(c)%1*4294967296)|0;p++;}
+  const b=unescape(encodeURIComponent(String(msg))),l=b.length*8,w=[];
+  for(let i=0;i<(((l+64)>>9)<<4)+16;i++)w[i]=0;
+  for(let i=0;i<b.length;i++)w[i>>2]|=b.charCodeAt(i)<<(24-(i%4)*8);
+  w[l>>5]|=0x80<<(24-l%32);w[(((l+64)>>9)<<4)+15]=l;
+  const rr=(x,n)=>(x>>>n)|(x<<(32-n));
+  for(let o=0;o<w.length;o+=16){
+    const x=w.slice(o,o+16),v=H.slice(0);
+    for(let i=0;i<64;i++){
+      if(i>=16){const s0=rr(x[i-15],7)^rr(x[i-15],18)^(x[i-15]>>>3),s1=rr(x[i-2],17)^rr(x[i-2],19)^(x[i-2]>>>10);x[i]=(x[i-16]+s0+x[i-7]+s1)|0;}
+      const t1=(v[7]+(rr(v[4],6)^rr(v[4],11)^rr(v[4],25))+((v[4]&v[5])^(~v[4]&v[6]))+K[i]+x[i])|0;
+      const t2=((rr(v[0],2)^rr(v[0],13)^rr(v[0],22))+((v[0]&v[1])^(v[0]&v[2])^(v[1]&v[2])))|0;
+      v.pop();v.unshift((t1+t2)|0);v[4]=(v[4]+t1)|0;
+    }
+    for(let i=0;i<8;i++)H[i]=(H[i]+v[i])|0;
+  }
+  return H.map(n=>(n>>>0).toString(16).padStart(8,"0")).join("");
+}
+/* PRIVATE PREVIEW for the whole app, all year round (only Sandra knows the key):
+     https://beautyandcoffeemechelen.github.io/?voorproef=<your key>
    add &datum=2027-06-01 to see the app as on that day (seasonal looks,
-   advent, …); a yellow bar at the top lets you pick another date. */
-const PREVIEW_KEY = "BC-XMAS-7Q4K";
+   advent, …); a yellow bar at the top lets you pick another date.
+   Since v196 this PUBLIC file only holds a fingerprint (SHA-256) of the key,
+   not the key itself. Want a new key? Ask Claude: it gives you a new key
+   and the new fingerprint to put here. */
+const PREVIEW_KEY_HASH = "2640ee55d235adb3ee52b367ff487017d24a11f42152ec737bc7fe70f283a995";
+function previewMatch(k, h){ try { return !!k && !!(h || PREVIEW_KEY_HASH) && bcSha256Hex(String(k)) === (h || PREVIEW_KEY_HASH); } catch(e){ return false; } }
+const PREVIEW_KEY = PREVIEW_KEY_HASH;   // kept as a name for the places that pass it on; it is a fingerprint, never the key
 
 /* EVERY YEAR AGAIN: the calendar comes back by itself each year on the same
    dates (announcement 15/11, doors 1–25/12). What is behind the doors is set
@@ -2281,7 +2308,7 @@ const ADVENT = {
   let d = new Date();
   try {
     const q = new URLSearchParams(location.search), dt = q.get("datum");
-    if (q.get("voorproef") === PREVIEW_KEY && dt && /^\d{4}-\d{2}-\d{2}$/.test(dt)) d = new Date(dt + "T12:00:00");
+    if (previewMatch(q.get("voorproef")) && dt && /^\d{4}-\d{2}-\d{2}$/.test(dt)) d = new Date(dt + "T12:00:00");
   } catch(e){ /* ignore */ }
   const y = d.getMonth() + 1 >= 3 ? d.getFullYear() : d.getFullYear() - 1;
   ADVENT.year = y;
@@ -2481,6 +2508,30 @@ function actionIsOn(id, today){
   if (!today){ const d = new Date(); today = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
   return (!a.from || today >= a.from) && (!a.until || today <= a.until);
 }
+/* PRICE_LINKS (v196): which price-list line sets the price of which treatment
+   in the match result. When Sandra changes a price in the app (Prijslijst →
+   Beheren), the linked treatment follows. Treatments with several prices
+   (Extended Manicure/Pedicure with SPA, Beenontharing, koffieproeverijen) are
+   not linked: their text stays as written in TREATMENTS_CATALOG. */
+const PRICE_LINKS = {
+  hotstone:"Hot Stone Massage", cupping:"Cuppingmassage", cuppingpeeling:"Cupping Body Renewal",
+  swedish:"Zweedse full body massage", swedishbackneck:"Zweedse rug-nek-schouder massage", swedishlegs:"Zweedse benen-voeten massage",
+  backwrap:"Energetische rugpakking", browlift:"Brow Lift", hennabrows:"Henna Brows", lashlift:"Lash Lift met kleuring",
+  glammakeup:"Avondmake-up / Party / Glam", hydrapeel:"Huidvernieuwende Hydra Peeling pH", signaturefacial:"Signature gelaatsverzorging",
+  fillme:"Fill Me Micro Infusie Treatment", fruitacid:"Fruitzurenpeeling 4/26 Dr. Renaud", liftsummere:"Lift Summum",
+  detoxback:"Zuiverende rugbehandeling", antiagefacial:"Botanische Anti-Age", harmonizingbody:"Harmoniserende verzorging full body",
+  fullbodywrap:"Energetische lichaamspakking full body", makeupworkshop:"Beauty & Skincare Workshop", facialworkshop:"Beauty & Skincare Workshop",
+  baristaworkshop:"Barista Privéworkshop", manicure:"Uitgebreide manicure", pedicureexpress:"Express pedicure", pedicure:"Uitgebreide pedicure",
+  slimmassage:"Afslankingsmassage", oksel:"Oksels", rug:"Rug", buik:"Buik", borst:"Borst",
+  expressuseup:"Express gelaatsverzorging – opgebruikactie", expressfacial:"Express gelaatsverzorging",
+  bridaltrial:"Bridal proefmake-up", bridalpackage:"Bridal proefmake-up & bruidsmake-up", weddingguest:"Huwelijksdag make-up, per persoon",
+  browtint:"Brow Tinting (kleuren haar)", browshaping:"Shaping (mappen en ontharen)", lashtint:"Lash Tinting (kleuren wimpers)",
+  manicureexpress:"Express manicure", kin:"Kin", bovenlip:"Bovenlip", wenkbrauwontharing:"Wenkbrauwen (zonder mapping / opschonen)",
+  schouders:"Schouders", borstbuik:"Borst & buik", volledigebenen:"Volledige benen", harmonizingback:"Harmoniserende verzorging rug",
+  teambeauty:"Teambuilding Beauty & Pamper Experience", teamcoffee:"Teambuilding Specialty Coffee Experience",
+  cateye:"Cat Eye & Magnetische Gellak Manicure Workshop"
+};
+
 const PRICE_LIST = [
   { id:"facial", icon:"🌿", title:{ nl:"Gelaatsverzorging", en:"Facials" }, items:[
     PI("Express gelaatsverzorging","Express facial","30′","€60","Reiniging, dieptereiniging, crèmemasker & dagcrème.","Cleansing, deep cleansing, cream mask & day cream."),

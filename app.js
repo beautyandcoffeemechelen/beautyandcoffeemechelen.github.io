@@ -1827,16 +1827,10 @@
     let html = "";
     let today; try { today = seasonTodayKey(); } catch(e){ today = todayKey(); }
     const offItems = new Set((typeof CURRENT_ACTIONS !== "undefined" ? CURRENT_ACTIONS : []).filter(a => a.priceItem && !actionIsOn(a.id, today)).map(a => a.priceItem));
-    if (!state.priceCat && !q){
-      const acts = activeActionsNow(today);
-      if (acts.length) html += `<details class="price-section price-section--actions" data-sec="_actions" open>
-        <summary><span class="price-section__icon" aria-hidden="true"></span><span class="price-section__title">${t("pricelist_actions", lang)}</span><span class="price-section__count">${acts.length}</span></summary>
-        <ul class="price-items">${acts.map(a => `<li class="price-item"><div class="price-item__main"><span class="price-item__name">${a.icon || "🎁"} ${actionFill(a.title[lang] || a.title.nl, a, lang)}</span></div><div class="price-item__note">${actionFill(a.text[lang] || a.text.nl, a, lang)}</div></li>`).join("")}</ul>
-      </details>`;
-    }
+    if (!state.priceCat && !q) html += priceActionsHtml(today);
     PRICE_LIST.forEach(sec => {
       if (state.priceCat && sec.id !== state.priceCat) return;
-      const items = sec.items.filter(it => {
+      const items = bhItemsFor(sec).filter(it => {
         if (offItems.has(it.n.nl)) return false;
         if (!q) return true;
         const hay = [it.n.nl, it.n.en, it.n.fr, it.d && it.d.nl, it.d && it.d.en, it.d && it.d.fr, sec.title.nl, sec.title.en, sec.title.fr].join(" ").toLowerCase();
@@ -1852,11 +1846,12 @@
             <div class="price-item__main"><span class="price-item__name">${it.n[lang]}</span><span class="price-item__price">${it.price}</span></div>
             <div class="price-item__meta">${[it.time, it.d && it.d[lang]].filter(Boolean).join(" · ")}</div>
             ${it.note ? `<div class="price-item__note">${it.note[lang]}</div>` : ""}
+            ${bhEditRow(it)}
           </li>`).join("")}
         </ul>
       </details>`;
     });
-    body.innerHTML = html || `<p class="price-empty">${t("pricelist_empty", lang)}</p>`;
+    body.innerHTML = bhPanelHtml() + (html || `<p class="price-empty">${t("pricelist_empty", lang)}</p>`);
 
     const onl = $("#priceOnline");
     if (onl){ const u = (typeof ONLINE_BOOKING_URL !== "undefined" && ONLINE_BOOKING_URL) || ""; onl.hidden = !u; if (u) onl.href = u; }
@@ -1864,6 +1859,216 @@
     if (wa) wa.href = `https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(t("pricelist_wa_text", lang))}`;
     const mail = $("#priceMail");
     if (mail) mail.href = `mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent(t("pricelist_mail_subject", lang))}&body=${encodeURIComponent(t("pricelist_mail_body", lang))}`;
+  }
+
+  /* ---------------- BEHEER (v196): prijslijst, eigen acties en producten "op" ----------------
+     Sandra changes things herself in the app (salon mode: key or preview link):
+     - Prijslijst → "Prijslijst en acties beheren": change price / duration / description of
+       a line, delete a line (restore it later), add a new line to a section.
+       A linked treatment (PRICE_LINKS in data.js) follows the new price in the match result.
+     - Eigen acties: add an action with title, text and optional end date; delete it again.
+     - Ingrediënten → Gebruiksvolgorde: tap "Op" → the product disappears for everyone.
+     Everything is published as beheer.json in the site repo (same GitHub key as the gift
+     vouchers; file is made by the app, NOT in the zip, never delete it when uploading).
+     Without key: the change stays on this phone only (and the app says so). */
+  var BH = { pub:null, loc:null, edit:false, busy:false };
+  const BH_FILE = "beheer.json", BH_KEY = "bc_beheer_v1";
+  const bhStr = (x, n) => String(x == null ? "" : x).replace(/[<>]/g, "").trim().slice(0, n);
+  function bhClean(v){
+    const o = { prices:{}, hide:[], add:[], acts:[], op:[] };
+    if (!v || typeof v !== "object") return o;
+    if (v.prices && typeof v.prices === "object") Object.keys(v.prices).slice(0, 200).forEach(k => {
+      const p = v.prices[k]; if (!p || typeof p !== "object") return;
+      const e = {}; if (p.price) e.price = bhStr(p.price, 40); if (p.time) e.time = bhStr(p.time, 30); if (p.d) e.d = bhStr(p.d, 240);
+      if (Object.keys(e).length) o.prices[bhStr(k, 140)] = e;
+    });
+    o.hide = (Array.isArray(v.hide) ? v.hide : []).map(x => bhStr(x, 140)).filter(Boolean).slice(0, 200);
+    o.add = (Array.isArray(v.add) ? v.add : []).slice(0, 100).map(a => a && typeof a === "object" ? { id:bhStr(a.id, 30).replace(/[^a-z0-9_-]/gi, ""), sec:bhStr(a.sec, 30), nl:bhStr(a.nl, 120), en:bhStr(a.en, 120), fr:bhStr(a.fr, 120), time:bhStr(a.time, 30), price:bhStr(a.price, 40), d:bhStr(a.d, 240) } : null).filter(a => a && a.id && a.sec && a.nl && a.price);
+    o.acts = (Array.isArray(v.acts) ? v.acts : []).slice(0, 30).map(a => a && typeof a === "object" ? { id:bhStr(a.id, 30).replace(/[^a-z0-9_-]/gi, ""), title:bhStr(a.title, 120), text:bhStr(a.text, 500), until:/^\d{4}-\d{2}-\d{2}$/.test(a.until || "") ? a.until : "" } : null).filter(a => a && a.id && a.title);
+    o.op = (Array.isArray(v.op) ? v.op : []).map(x => bhStr(x, 60)).filter(Boolean).slice(0, 400);
+    return o;
+  }
+  function bhLocal(){ try { const v = localStorage.getItem(BH_KEY); return v ? bhClean(JSON.parse(v)) : null; } catch(e){ return null; } }
+  function bhSaveLocal(){ try { if (BH.loc) localStorage.setItem(BH_KEY, JSON.stringify(BH.loc)); else localStorage.removeItem(BH_KEY); } catch(e){ /* ignore */ } }
+  function bhEff(){ return (BH && (BH.loc || BH.pub)) || bhClean(null); }
+  function bhCopy(){ return bhClean(JSON.parse(JSON.stringify(bhEff()))); }
+  function bhPrice(v){ v = bhStr(v, 40); return /^\d+([.,]\d{1,2})?$/.test(v) ? "€" + v.replace(".", ",") : v; }
+  // linked treatments follow the price list (first euro amount in their price text)
+  function bhApplyTreatPrices(){
+    try {
+      if (typeof PRICE_LINKS === "undefined" || typeof TREATMENTS_CATALOG === "undefined") return;
+      const e = bhEff();
+      TREATMENTS_CATALOG.forEach(tr => {
+        const link = PRICE_LINKS[tr.id]; if (!link) return;
+        if (tr._basePrice == null) tr._basePrice = tr.price;
+        const ov = e.prices[link], add = ov && ov.price;
+        tr.price = add && /€\s?\d/.test(tr._basePrice) && /^€\d+([.,]\d{1,2})?$/.test(bhPrice(add)) ? tr._basePrice.replace(/€\s?\d+(?:[.,]\d+)?/, bhPrice(add)) : tr._basePrice;
+      });
+    } catch(err){ /* ignore */ }
+  }
+  function bhItemsFor(sec){
+    const e = bhEff(), hid = new Set(e.hide);
+    const base = sec.items.filter(it => !hid.has(it.n.nl)).map(it => {
+      const o = Object.assign({}, it, { _key: it.n.nl }), ov = e.prices[it.n.nl];
+      if (ov){ if (ov.price) o.price = bhPrice(ov.price); if (ov.time) o.time = ov.time; if (ov.d) o.d = { nl:ov.d, en:ov.d, fr:ov.d }; o._edited = true; }
+      return o;
+    });
+    const add = e.add.filter(a => a.sec === sec.id).map(a => ({ n:{ nl:a.nl, en:a.en || a.nl, fr:a.fr || a.nl }, price:bhPrice(a.price), time:a.time, d:a.d ? { nl:a.d, en:a.d, fr:a.d } : null, note:null, _key:"add:" + a.id, _added:true }));
+    return base.concat(add);
+  }
+  function bhActsActive(today){
+    return bhEff().acts.filter(a => !a.until || today <= a.until).map(a => ({ icon:"✨", id:a.id, title:{ nl:esc(a.title) }, text:{ nl:esc(a.text) } }));
+  }
+  function bhEditRow(it){
+    if (!(BH && BH.edit) || !actSalon()) return "";
+    const L = state.lang, k = esc(it._key);
+    return `<div class="bh-row">
+      <label class="bh-lab">${t("bh_price", L)} <input type="text" class="pm-input bh-f" data-key="${k}" data-f="price" value="${esc(it.price)}" maxlength="40" size="9"></label>
+      <label class="bh-lab">${t("bh_time", L)} <input type="text" class="pm-input bh-f" data-key="${k}" data-f="time" value="${esc(it.time || "")}" maxlength="30" size="8"></label>
+      <label class="bh-lab bh-wide">${t("bh_desc", L)} <input type="text" class="pm-input bh-f" data-key="${k}" data-f="d" value="${esc((it.d && it.d.nl) || "")}" maxlength="240"></label>
+      <button type="button" class="btn btn--sm btn--outline" data-bh="del" data-key="${k}">🗑 ${t("bh_delete", L)}</button>
+      ${it._edited ? `<button type="button" class="btn btn--sm btn--text" data-bh="reset" data-key="${k}">↺ ${t("bh_reset", L)}</button>` : ""}
+    </div>`;
+  }
+  function bhActsHtml(){
+    const L = state.lang, e = bhEff();
+    return `<p class="gift-block__title">${t("bh_acts_title", L)}</p>
+      <ul class="act-list">${e.acts.map(a => `<li class="act-row"><span class="act-row__name">✨ ${esc(a.title)}${a.until ? ` <em>(${esc(a.until)})</em>` : ""}</span>
+        <button type="button" class="btn btn--sm btn--outline" data-bh="actdel" data-id="${esc(a.id)}">🗑 ${t("bh_delete", L)}</button></li>`).join("")}</ul>
+      <div class="bh-row"><input type="text" id="bhActTitle" class="pm-input bh-wide" maxlength="120" placeholder="${t("bh_act_title", L)}">
+      <input type="text" id="bhActText" class="pm-input bh-wide" maxlength="500" placeholder="${t("bh_act_text", L)}">
+      <label class="bh-lab">${t("bh_act_until", L)} <input type="date" id="bhActUntil" class="pm-input"></label>
+      <button type="button" class="btn btn--sm btn--primary" data-bh="actadd">➕ ${t("bh_act_add", L)}</button></div>`;
+  }
+  function bhPanelHtml(){
+    if (!actSalon() || typeof PRICE_LIST === "undefined") return "";
+    const L = state.lang, e = bhEff();
+    let h = `<div class="bh-panel"><button type="button" class="btn btn--sm ${BH && BH.edit ? "btn--primary" : "btn--outline"}" data-bh="toggle">⚙️ ${t(BH && BH.edit ? "bh_done" : "bh_manage", L)}</button>`;
+    if (BH && BH.edit){
+      const hidden = e.hide.map(k => `<li class="act-row"><span class="act-row__name">${esc(k)}</span><button type="button" class="btn btn--sm btn--outline" data-bh="restore" data-key="${esc(k)}">↺ ${t("bh_restore", L)}</button></li>`).join("");
+      h += `<p class="ingr-muted">${t("bh_intro", L)}</p>
+        <p class="gift-block__title">➕ ${t("bh_new_title", L)}</p>
+        <div class="bh-row"><select id="bhSec" class="pm-input">${PRICE_LIST.map(s => `<option value="${esc(s.id)}">${esc(s.title[L] || s.title.nl)}</option>`).join("")}</select>
+        <input type="text" id="bhName" class="pm-input bh-wide" maxlength="120" placeholder="${t("bh_name", L)}">
+        <input type="text" id="bhPrice" class="pm-input" maxlength="40" size="8" placeholder="${t("bh_price", L)}">
+        <input type="text" id="bhTime" class="pm-input" maxlength="30" size="8" placeholder="${t("bh_time", L)}">
+        <input type="text" id="bhDesc" class="pm-input bh-wide" maxlength="240" placeholder="${t("bh_desc", L)}">
+        <button type="button" class="btn btn--sm btn--primary" data-bh="add">➕ ${t("bh_add", L)}</button></div>
+        ${hidden ? `<p class="gift-block__title">${t("bh_hidden_title", L)}</p><ul class="act-list">${hidden}</ul>` : ""}
+        ${bhActsHtml()}`;
+    }
+    return h + `</div>`;
+  }
+  async function bhPublish(silent){
+    const L = state.lang, tok = (() => { try { return localStorage.getItem(GIFT_GH_KEY) || ""; } catch(e){ return ""; } })();
+    if (!tok){ showToast(t("bh_pub_nokey", L)); return false; }
+    const { owner, repo } = giftRepo();
+    if (!owner || !repo){ if (!silent) showToast(t("gift_live_norepo", L)); return false; }
+    if (BH.busy){ BH.again = true; return false; }
+    BH.busy = true;
+    const snap = bhCopy(), out = Object.assign({ v:1, u:new Date().toISOString() }, snap);
+    const api = `https://api.github.com/repos/${owner}/${repo}/contents/${BH_FILE}`;
+    const H = { Authorization: "Bearer " + tok, Accept: "application/vnd.github+json" };
+    let ok = false, err = "";
+    for (let attempt = 0; attempt < 2 && !ok; attempt++){
+      try {
+        let sha;
+        const g = await fetch(api, { headers: H, cache:"no-store" });
+        if (g.ok) sha = (await g.json()).sha; else if (g.status !== 404){ err = "GET " + g.status; continue; }
+        const p = await fetch(api, { method:"PUT", headers: { ...H, "Content-Type":"application/json" },
+          body: JSON.stringify({ message: "Beheer bijgewerkt (app)", content: giftToken64(JSON.stringify(out, null, 1)), ...(sha ? { sha } : {}) }) });
+        if (p.ok) ok = true; else err = "PUT " + p.status;
+      } catch(e){ err = String(e && e.message || e); }
+    }
+    BH.busy = false;
+    if (ok){ BH.pub = snap; if (!BH.again) { BH.loc = null; bhSaveLocal(); } }
+    showToast(t(ok ? "act_pub_ok" : "act_pub_fail", L).replace("{e}", err));
+    if (BH.again){ BH.again = false; return bhPublish(true); }
+    return ok;
+  }
+  function bhRefresh(){
+    bhApplyTreatPrices();
+    try { renderPriceList(); } catch(e){}
+    try { renderActions(); } catch(e){}
+    try { if (typeof renderIngredients === "function" && document.querySelector("#ingrBody")) renderIngredients(); } catch(e){}
+  }
+  function bhCommit(e2){ BH.loc = bhClean(e2); bhSaveLocal(); bhRefresh(); bhPublish(true); }
+  function bhClick(ev){
+    const b = ev.target.closest && ev.target.closest("[data-bh]"); if (!b || !actSalon()) return;
+    const a = b.dataset.bh, L = state.lang, key = b.dataset.key || "", e2 = bhCopy();
+    if (a === "toggle"){ BH.edit = !BH.edit; bhRefresh(); return; }
+    if (a === "del"){
+      if (!confirm(t("bh_confirm_del", L).replace("{p}", key.replace(/^add:/, "")))) return;
+      if (key.startsWith("add:")) e2.add = e2.add.filter(x => "add:" + x.id !== key);
+      else if (!e2.hide.includes(key)) e2.hide.push(key);
+      return bhCommit(e2);
+    }
+    if (a === "restore"){ e2.hide = e2.hide.filter(x => x !== key); return bhCommit(e2); }
+    if (a === "reset"){ delete e2.prices[key]; return bhCommit(e2); }
+    if (a === "add"){
+      const nm = bhStr(($("#bhName") || {}).value, 120), pr = bhStr(($("#bhPrice") || {}).value, 40);
+      if (!nm || !pr){ showToast(t("bh_err", L)); return; }
+      e2.add.push({ id:"n" + Date.now().toString(36), sec:($("#bhSec") || {}).value, nl:nm, en:"", fr:"", time:bhStr(($("#bhTime") || {}).value, 30), price:pr, d:bhStr(($("#bhDesc") || {}).value, 240) });
+      return bhCommit(e2);
+    }
+    if (a === "actadd"){
+      const ti = bhStr(($("#bhActTitle") || {}).value, 120); if (!ti){ showToast(t("bh_err", L)); return; }
+      e2.acts.push({ id:"a" + Date.now().toString(36), title:ti, text:bhStr(($("#bhActText") || {}).value, 500), until:($("#bhActUntil") || {}).value || "" });
+      return bhCommit(e2);
+    }
+    if (a === "actdel"){ e2.acts = e2.acts.filter(x => x.id !== b.dataset.id); return bhCommit(e2); }
+  }
+  function bhChange(ev){
+    const el = ev.target; if (!el.classList || !el.classList.contains("bh-f") || !actSalon()) return;
+    const key = el.dataset.key, f = el.dataset.f, val = bhStr(el.value, f === "d" ? 240 : 40), e2 = bhCopy();
+    if (key.startsWith("add:")){ const x = e2.add.find(y => "add:" + y.id === key); if (!x) return; x[f] = val; if (f === "price" && !val) return; }
+    else { const o = e2.prices[key] || (e2.prices[key] = {}); if (val) o[f] = val; else delete o[f]; if (!Object.keys(o).length) delete e2.prices[key]; }
+    bhCommit(e2);
+  }
+  document.addEventListener("click", bhClick);
+  document.addEventListener("change", bhChange);
+  (async function bhLoadPublic(){
+    try {
+      BH.loc = bhLocal();
+      const res = await fetch(BH_FILE + "?t=" + Date.now(), { cache:"no-store" });
+      if (res.ok){ BH.pub = bhClean(await res.json()); }
+    } catch(e){ /* offline or no file yet */ }
+    bhRefresh();
+  })();
+
+  /* the actions as ONE list (price list = home screen + the ones that are not active now, for Sandra) */
+  function priceActionsHtml(today){
+    const L = state.lang, hid = actHiddenSet();
+    let offerTxt = ""; try { offerTxt = actOfferText(hid); } catch(e){}
+    const row = (icon, name, text) => `<li class="price-item"><div class="price-item__main"><span class="price-item__name">${icon} ${name}</span></div>${text ? `<div class="price-item__note">${text}</div>` : ""}</li>`;
+    const act = activeActionsNow(today).filter(a => !hid.has("a:" + a.id) && !(a.dupWith && offerTxt && a.dupWith.test(offerTxt)));
+    const on = new Set(act.map(a => a.id)), rows = [];
+    act.filter(a => a.yearly).forEach(a => rows.push(row(a.icon || "🎁", actionFill(a.title[L] || a.title.nl, a, L), actionFill(a.text[L] || a.text.nl, a, L))));
+    try {
+      newsSplit().specials.filter(p => !hid.has("p:" + p.url)).forEach(p => {
+        const safe = newsSafeUrl(p.url); if (!safe) return;
+        const ln = newsOfferLine(p);
+        rows.push(row("🍂", esc(newsShortTitle(p.title)), (ln.html ? ln.rest : esc(ln.rest)) + ` <a class="offer-line__more" href="${esc(safe)}" target="_blank" rel="noopener noreferrer">${t("specials_more", L)}</a>`));
+      });
+    } catch(e){ /* no news yet */ }
+    act.filter(a => !a.yearly).forEach(a => rows.push(row(a.icon || "🎁", actionFill(a.title[L] || a.title.nl, a, L), actionFill(a.text[L] || a.text.nl, a, L))));
+    bhActsActive(today).forEach(a => rows.push(row(a.icon, a.title.nl, a.text.nl)));
+    let off = "";
+    if (actSalon()){
+      const names = [];
+      (typeof CURRENT_ACTIONS === "undefined" ? [] : CURRENT_ACTIONS).filter(a => !a.soldOut && !on.has(a.id)).forEach(a => {
+        const raw = String((a.title && (a.title[L] || a.title.nl)) || a.id), nm = /\{(value|treat2?)\}/.test(raw) ? raw.split(":")[0].trim() : raw;
+        const w = actionWindow(a, today), why = hid.has("a:" + a.id) ? t("act_hidden", L) : (w && w.dealFrom ? t("bh_from", L) + " " + actionFmt(w.dealFrom, L) : t("act_off_season", L));
+        names.push(`<li>${esc(nm)} <em>(${esc(why)})</em></li>`);
+      });
+      try { newsSplit().specials.filter(p => hid.has("p:" + p.url)).forEach(p => names.push(`<li>🍂 ${esc(newsPlainTitle(p.title))} <em>(${esc(t("act_hidden", L))})</em></li>`)); } catch(e){}
+      if (names.length) off = `<p class="price-section__note">${t("bh_inactive", L)}</p><ul class="bh-off">${names.join("")}</ul>`;
+    }
+    if (!rows.length && !off) return "";
+    return `<details class="price-section price-section--actions" data-sec="_actions" open>
+        <summary><span class="price-section__icon" aria-hidden="true"></span><span class="price-section__title">${t("pricelist_actions", L)}</span><span class="price-section__count">${rows.length}</span></summary>
+        <ul class="price-items">${rows.join("")}</ul>${off}
+      </details>`;
   }
 
   /* ---------------- ACTIES BEHEREN (v194) ----------------
@@ -1980,7 +2185,7 @@
       </div>`;
     let offers = "";
     try { offers = newsActionsCardHtml(); } catch(e){ offers = ""; }
-    const inner = active.filter(a => a.yearly).map(card).join("") + offers + active.filter(a => !a.yearly).map(card).join("");
+    const inner = active.filter(a => a.yearly).map(card).join("") + offers + active.filter(a => !a.yearly).map(card).join("") + bhActsActive(today).map(card).join("");
     const manage = actSalon() ? actManageHtml(today) : "";
     wrap.innerHTML = (inner.trim() || manage) ? `<p class="actions-block__label">${t("actions_now_label", lang)}</p>` + inner + manage : "";
     wraps.forEach(w => w.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", actClick)));
@@ -2820,6 +3025,7 @@
   function renderNewsCard(){
     const { blog } = newsSplit();
     renderActions();   // the short "Lopende acties" summary lives with the other action cards
+    try { if (typeof renderPriceList === "function" && document.querySelector("#priceListBody")) renderPriceList(); } catch(e){}   // price list shows the same offers (v196)
     const card = $("#newsCard"), list = $("#newsList");
     if (!card || !list) return;
     if (!blog.length){ card.hidden = true; return; }
@@ -2994,7 +3200,7 @@
     const v = $("#appVersion");
     if (v){
       let own = false;
-      try { const k = new URLSearchParams(location.search).get("voorproef"); own = hasSalonKey() || (!!k && ((typeof ADVENT === "object" && k === ADVENT.previewKey) || (typeof INGREDIENTS_LIVE === "object" && k === INGREDIENTS_LIVE.previewKey))); } catch(e){ own = false; }
+      try { const k = new URLSearchParams(location.search).get("voorproef"); own = hasSalonKey() || (!!k && ((typeof ADVENT === "object" && previewMatch(k, ADVENT.previewKey)) || (typeof INGREDIENTS_LIVE === "object" && previewMatch(k, INGREDIENTS_LIVE.previewKey)))); } catch(e){ own = false; }
       v.hidden = !own; v.textContent = own ? `${t("app_version_label", state.lang)} ${APP_VERSION}` : "";
     }
   }
@@ -4680,7 +4886,7 @@
   const ingrPreview = (() => {
     try {
       const k = new URLSearchParams(location.search).get("voorproef");
-      return !!(k && typeof INGREDIENTS_LIVE === "object" && INGREDIENTS_LIVE.previewKey && k === INGREDIENTS_LIVE.previewKey);
+      return !!(k && typeof INGREDIENTS_LIVE === "object" && INGREDIENTS_LIVE.previewKey && previewMatch(k, INGREDIENTS_LIVE.previewKey));
     } catch(e){ return false; }
   })();
   // may this phone see the screen? (live, private link, or opened from salon mode)
@@ -4727,13 +4933,14 @@
   /* finished products ("op"): PRODUCTS_OP in ingredients.js + marked on this phone */
   const PROD_OP_KEY = "bc_prod_op_v1";
   function ingrOpLocal(){ try { return JSON.parse(localStorage.getItem(PROD_OP_KEY) || "[]") || []; } catch(e){ return []; } }
-  function ingrOpSet(){ return new Set([...(typeof PRODUCTS_OP !== "undefined" ? PRODUCTS_OP : []), ...ingrOpLocal()]); }
+  function ingrOpSet(){ return new Set([...(typeof PRODUCTS_OP !== "undefined" ? PRODUCTS_OP : []), ...ingrOpLocal(), ...bhEff().op]); }
   function ingrToggleOp(id){
     if (typeof PRODUCTS_OP !== "undefined" && PRODUCTS_OP.includes(id)){ showToast(t("ingr_op_in_file", state.lang)); return; }
-    const l = ingrOpLocal(), i = l.indexOf(id);
-    if (i >= 0) l.splice(i, 1); else l.push(id);
+    const l = ingrOpLocal(), i = l.indexOf(id), e2 = bhCopy(), bi = e2.op.indexOf(id);
+    if (i >= 0 || bi >= 0){ if (i >= 0) l.splice(i, 1); if (bi >= 0) e2.op.splice(bi, 1); }
+    else e2.op.push(id);
     try { localStorage.setItem(PROD_OP_KEY, JSON.stringify(l)); } catch(e){ /* ignore */ }
-    renderIngredients();
+    bhCommit(e2);   // saves, re-renders and publishes (beheer.json) so the product is gone for everyone
   }
   // advent usages stay hidden for clients (otherwise the surprise is gone)
   function ingrIsAdventUse(u){ return u === "advent" || /^extra-/.test(u) || !!(typeof ADVENT === "object" && ADVENT.items && ADVENT.items[u]); }
@@ -5559,7 +5766,7 @@
      or lapsed (appointment moved/cancelled). Each code works only once,
      and stock / "1 gift per client" are counted on that phone.
      Private preview: ADVENT.live = false hides everything from the public.
-     Sandra opens ?voorproef=<ADVENT.previewKey> : a bar lets her choose
+     Sandra opens ?voorproef=<your key> : a bar lets her choose
      the day, nothing is saved, codes start with T and only work on a
      salon phone that is in preview mode too. */
   const ADV_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   // 32 signs, no 0/O/1/I
@@ -5570,7 +5777,7 @@
   const advPreview = (() => {
     try {
       const k = new URLSearchParams(location.search).get("voorproef");
-      return !!(k && typeof ADVENT === "object" && ADVENT.previewKey && k === ADVENT.previewKey);
+      return !!(k && typeof ADVENT === "object" && ADVENT.previewKey && previewMatch(k, ADVENT.previewKey));
     } catch(e){ return false; }
   })();
   let advTest = null;                          // the simulated day in preview mode
@@ -6605,7 +6812,7 @@
           const q = String(args && args.category || "").toLowerCase(), lang = L();
           const secs = PRICE_LIST.filter(sec => !q || sec.id.includes(q) || strip(sec.title[lang]).toLowerCase().includes(q) || strip(sec.title.nl).toLowerCase().includes(q));
           return txt((secs.length ? secs : PRICE_LIST).map(sec => "## " + strip(sec.title[lang]) + "\n" +
-            sec.items.map(it => "- " + strip(it.n[lang]) + " — " + it.price + (it.time ? " — " + it.time : "") + (it.d ? " — " + strip(it.d[lang]) : "")).join("\n")).join("\n\n"));
+            bhItemsFor(sec).map(it => "- " + strip(it.n[lang]) + " — " + it.price + (it.time ? " — " + it.time : "") + (it.d ? " — " + strip(it.d[lang]) : "")).join("\n")).join("\n\n"));
         } },
       { name:"beauty_coffee_prepare_booking",
         description:"Prepares an appointment request for Beauty & Coffee. Returns a WhatsApp link and an email link with the message filled in. It does NOT book or send anything: show the text to the person, and only open the link after they agree. Sandra confirms the appointment herself.",
