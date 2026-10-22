@@ -1479,3 +1479,15 @@ section[data-step="welcome"] .book-hub .btn--primary{ background:var(--espresso)
 .fav-item--gone{opacity:.7}
 .fav-item__gone,.repeat-last--gone{color:#7a1f1f;font-weight:600;font-size:.85rem;display:block}
 .repeat-last--gone{padding:10px 12px;border:1px dashed #c98a8a;border-radius:10px;margin:8px 0}
+
+/* v198 · populariteit */
+.bh-row--top{margin-top:0}
+.pop-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.pop-chips .chip.is-on{background:#3b2f26;color:#fff}
+.pop-list{list-style:none;margin:8px 0;padding:0}
+.pop-row{padding:8px 0;border-bottom:1px solid rgba(120,100,80,.15)}
+.pop-row__top{display:flex;justify-content:space-between;gap:8px}
+.pop-row__name{font-weight:600}
+.pop-bar{height:6px;border-radius:4px;background:rgba(120,100,80,.15);margin:5px 0}
+.pop-bar i{display:block;height:100%;border-radius:4px;background:#b48a3c}
+.pop-row__btns{display:flex;gap:6px}

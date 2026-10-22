@@ -1851,7 +1851,7 @@
         </ul>
       </details>`;
     });
-    body.innerHTML = bhPanelHtml() + (html || `<p class="price-empty">${t("pricelist_empty", lang)}</p>`);
+    body.innerHTML = (BH && BH.view === "pop" && actSalon()) ? bhPanelHtml() : bhPanelHtml() + (html || `<p class="price-empty">${t("pricelist_empty", lang)}</p>`);
 
     const onl = $("#priceOnline");
     if (onl){ const u = (typeof ONLINE_BOOKING_URL !== "undefined" && ONLINE_BOOKING_URL) || ""; onl.hidden = !u; if (u) onl.href = u; }
@@ -1953,7 +1953,10 @@
   function bhPanelHtml(){
     if (!actSalon() || typeof PRICE_LIST === "undefined") return "";
     const L = state.lang, e = bhEff();
-    let h = `<div class="bh-panel"><button type="button" class="btn btn--sm ${BH && BH.edit ? "btn--primary" : "btn--outline"}" data-bh="toggle">⚙️ ${t(BH && BH.edit ? "bh_done" : "bh_manage", L)}</button>`;
+    const popOn = !!(BH && BH.view === "pop");
+    let h = `<div class="bh-panel"><div class="bh-row bh-row--top"><button type="button" class="btn btn--sm ${BH && BH.edit && !popOn ? "btn--primary" : "btn--outline"}" data-bh="toggle">⚙️ ${t(BH && BH.edit && !popOn ? "bh_done" : "bh_manage", L)}</button>
+      <button type="button" class="btn btn--sm ${popOn ? "btn--primary" : "btn--outline"}" data-bh="pop">📊 ${t("pop_title", L)}</button></div>`;
+    if (popOn) return h + popHtml() + `</div>`;
     if (BH && BH.edit){
       const hidden = e.hide.map(k => `<li class="act-row"><span class="act-row__name">${esc(k)}</span><button type="button" class="btn btn--sm btn--outline" data-bh="restore" data-key="${esc(k)}">↺ ${t("bh_restore", L)}</button></li>`).join("");
       h += `<p class="ingr-muted">${t("bh_intro", L)}</p>
@@ -2024,7 +2027,8 @@
       return bhCommit(e2);
     }
     if (!actSalon()) return;
-    if (a === "toggle"){ BH.edit = !BH.edit; bhRefresh(); return; }
+    if (a === "toggle"){ BH.view = ""; BH.edit = !BH.edit; bhRefresh(); return; }
+    if (a === "pop"){ BH.view = BH.view === "pop" ? "" : "pop"; BH.edit = false; renderPriceList(); return; }
     if (a === "del"){
       if (!confirm(t("bh_confirm_del", L).replace("{p}", key.replace(/^add:/, "")))) return;
       if (key.startsWith("add:")) e2.add = e2.add.filter(x => "add:" + x.id !== key);
@@ -2054,6 +2058,127 @@
     bhCommit(e2);
   }
   document.addEventListener("click", bhClick);
+
+  /* ---------------- POPULARITEIT (v198): jouw teller, alleen op deze gsm ----------------
+     Salonmodus → Prijslijst → "📊 Populariteit". You log what was done / chosen (treatments, massages,
+     gel colours, drinks, other); the app ranks them. Stored ONLY in this phone's localStorage
+     (bc_pop_v1): the repo is public, so it is deliberately NOT published. Use "Back-up kopiëren".
+     Entry = {d:"YYYY-MM-DD", c:"beh"|"gel"|"drink"|"ov", k:name, n:count}. Massages are a filtered
+     view of "beh". Gel colours and "overig" items are added by Sandra herself. */
+  const POP_KEY = "bc_pop_v1";
+  var POP = { data:null, cat:"beh", period:"all", mas:false };
+  const popToday = () => new Date().toISOString().slice(0, 10);
+  function popLoad(){
+    if (POP.data) return POP.data;
+    let d = null; try { d = JSON.parse(localStorage.getItem(POP_KEY) || "null"); } catch(e){ d = null; }
+    POP.data = popClean(d); return POP.data;
+  }
+  function popClean(d){
+    const o = { v:1, e:[], custom:{ gel:[], drink:[], ov:[] } };
+    if (!d || typeof d !== "object") return o;
+    (Array.isArray(d.e) ? d.e : []).slice(0, 20000).forEach(x => { if (x && /^\d{4}-\d{2}-\d{2}$/.test(x.d || "") && ["beh", "gel", "drink", "ov"].includes(x.c) && x.k && Number.isFinite(+x.n) && +x.n !== 0) o.e.push({ d:x.d, c:x.c, k:bhStr(x.k, 120), n:Math.round(+x.n) }); });
+    ["gel", "drink", "ov"].forEach(c => { o.custom[c] = ((d.custom && Array.isArray(d.custom[c])) ? d.custom[c] : []).map(x => bhStr(x, 120)).filter(Boolean).slice(0, 300); });
+    return o;
+  }
+  function popSave(){ try { localStorage.setItem(POP_KEY, JSON.stringify(popLoad())); } catch(e){ showToast(t("pop_save_fail", state.lang)); } }
+  function popDrinkNames(){
+    const out = new Set(), walk = v => { if (!v || typeof v !== "object") return; if (typeof v.name === "string") out.add(v.name); else if (v.name && v.name.nl) out.add(v.name.nl); Object.values(v).forEach(x => { if (x && typeof x === "object") walk(x); }); };
+    try { walk(BEVERAGES); walk(TEAS_DECAF); walk(TEAS_CAFF); } catch(e){ /* ignore */ }
+    return [...out];
+  }
+  function popItems(cat){
+    const d = popLoad(), names = [];
+    if (cat === "beh"){
+      const e = bhEff(); PRICE_LIST.forEach(s => { s.items.forEach(it => names.push(it.n.nl)); e.add.filter(x => x.sec === s.id).forEach(x => names.push(x.nl)); });
+    } else if (cat === "drink") popDrinkNames().forEach(n => names.push(n));
+    (d.custom[cat] || []).forEach(n => names.push(n));
+    d.e.filter(x => x.c === cat).forEach(x => names.push(x.k));   // keep history of things no longer on the list
+    return [...new Set(names)];
+  }
+  const popIsMassage = n => /massage|cupping|hot stone/i.test(n);
+  function popFrom(){
+    const p = POP.period, now = new Date();
+    if (p === "year") return now.getFullYear() + "-01-01";
+    if (p === "month") return now.toISOString().slice(0, 7) + "-01";
+    if (p === "90") return new Date(now.getTime() - 90 * 864e5).toISOString().slice(0, 10);
+    return "0000-00-00";
+  }
+  function popCounts(cat){
+    const from = popFrom(), m = {};
+    popLoad().e.forEach(x => { if (x.c === cat && x.d >= from) m[x.k] = (m[x.k] || 0) + x.n; });
+    return m;
+  }
+  function popAdd(c, k, n, d){
+    const data = popLoad(); d = d || popToday();
+    const ex = data.e.find(x => x.c === c && x.k === k && x.d === d);
+    if (ex){ ex.n += n; if (ex.n === 0) data.e.splice(data.e.indexOf(ex), 1); } else data.e.push({ d, c, k, n });
+    popSave();
+  }
+  function popDec(c, k){
+    const data = popLoad(), mine = data.e.filter(x => x.c === c && x.k === k && x.n > 0).sort((p, q) => q.d.localeCompare(p.d));
+    if (!mine.length) return;
+    mine[0].n -= 1; if (mine[0].n <= 0) data.e.splice(data.e.indexOf(mine[0]), 1);
+    popSave();
+  }
+  function popText(){
+    const L = state.lang, cats = [["beh", false], ["beh", true], ["gel"], ["drink"], ["ov"]];
+    return cats.map(([c, mas]) => { const cn = popCounts(c), rows = Object.entries(cn).filter(([k, v]) => v > 0 && (!mas || popIsMassage(k))).sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0])).slice(0, 15);
+      return rows.length ? t("pop_cat_" + (mas ? "mas" : c), L) + ":\n" + rows.map(([k, v], i) => (i + 1) + ". " + k + " — " + v + "×").join("\n") : ""; }).filter(Boolean).join("\n\n") || t("pop_empty", L);
+  }
+  function popHtml(){
+    const L = state.lang, cat = POP.cat, isMas = cat === "mas", store = isMas ? "beh" : cat, cn = popCounts(store);
+    let items = popItems(store); if (isMas) items = items.filter(popIsMassage);
+    const rows = items.map(k => ({ k, n:cn[k] || 0 })).sort((x, y) => y.n - x.n || x.k.localeCompare(y.k));
+    const max = Math.max(1, ...rows.map(r => r.n)), total = rows.reduce((s, r) => s + r.n, 0);
+    const row = r => `<li class="pop-row"><div class="pop-row__top"><span class="pop-row__name">${esc(r.k)}</span><b class="pop-row__n">${r.n}×</b></div>
+        <div class="pop-bar"><i style="width:${Math.round(r.n / max * 100)}%"></i></div>
+        <div class="pop-row__btns"><button type="button" class="btn btn--sm btn--primary" data-pop="inc" data-c="${store}" data-k="${esc(r.k)}">＋1</button>
+        <button type="button" class="btn btn--sm btn--outline" data-pop="dec" data-c="${store}" data-k="${esc(r.k)}">−1</button></div></li>`;
+    const top = rows.filter(r => r.n > 0), zero = rows.filter(r => r.n === 0);
+    const chip = (id, label, on, attr) => `<button type="button" class="chip chip--sm${on ? " is-on" : ""}" data-pop="${attr}" data-v="${id}">${label}</button>`;
+    return `<div class="pop-box">
+      <div class="pop-chips">${["beh", "mas", "gel", "drink", "ov"].map(c => chip(c, t("pop_cat_" + c, L), POP.cat === c, "cat")).join("")}</div>
+      <div class="pop-chips">${[["all", "pop_p_all"], ["year", "pop_p_year"], ["90", "pop_p_90"], ["month", "pop_p_month"]].map(([id, k]) => chip(id, t(k, L), POP.period === id, "period")).join("")}</div>
+      <p class="ingr-muted">${t("pop_total", L).replace("{n}", total)}</p>
+      ${top.length ? `<ol class="pop-list">${top.slice(0, 10).map(row).join("")}</ol>` : `<p class="ingr-muted">${t("pop_none", L)}</p>`}
+      ${top.length > 10 ? `<details class="ingr-more"><summary>${t("pop_more", L).replace("{n}", top.length - 10)}</summary><ol class="pop-list">${top.slice(10).map(row).join("")}</ol></details>` : ""}
+      <details class="ingr-more"><summary>${t("pop_log_title", L).replace("{n}", zero.length)}</summary><ol class="pop-list">${zero.map(row).join("") || `<li class="ingr-muted">—</li>`}</ol></details>
+      <details class="ingr-more"><summary>${t("pop_backfill", L)}</summary>
+        <div class="bh-row"><select id="popSel" class="pm-input bh-wide">${items.map(k => `<option>${esc(k)}</option>`).join("")}</select>
+        <input type="number" id="popN" class="pm-input" min="1" max="999" value="1" size="4">
+        <input type="date" id="popD" class="pm-input" value="${popToday()}" max="${popToday()}">
+        <button type="button" class="btn btn--sm btn--primary" data-pop="addn" data-c="${store}">${t("pop_add", L)}</button></div></details>
+      ${["gel", "drink", "ov"].includes(store) ? `<div class="bh-row"><input type="text" id="popNew" class="pm-input bh-wide" maxlength="120" placeholder="${t("pop_new_" + store, L)}"><button type="button" class="btn btn--sm btn--outline" data-pop="newitem" data-c="${store}">＋ ${t("pop_new_btn", L)}</button></div>` : ""}
+      <div class="bh-row"><button type="button" class="btn btn--sm btn--outline" data-pop="copy">${t("pop_copy", L)}</button>
+        <button type="button" class="btn btn--sm btn--outline" data-pop="backup">${t("pop_backup", L)}</button>
+        <button type="button" class="btn btn--sm btn--text" data-pop="restore">${t("pop_restore", L)}</button></div>
+      <p class="ingr-muted">${t("pop_note", L)}</p></div>`;
+  }
+  async function popClip(txt){ try { await navigator.clipboard.writeText(txt); showToast(t("pop_copied", state.lang)); } catch(e){ window.prompt(t("pop_copy_manual", state.lang), txt); } }
+  function popClick(ev){
+    const b = ev.target.closest && ev.target.closest("[data-pop]"); if (!b || !actSalon()) return;
+    const a = b.dataset.pop, c = b.dataset.c, k = b.dataset.k, L = state.lang;
+    if (a === "cat"){ POP.cat = b.dataset.v; return renderPriceList(); }
+    if (a === "period"){ POP.period = b.dataset.v; return renderPriceList(); }
+    if (a === "inc"){ popAdd(c, k, 1); return renderPriceList(); }
+    if (a === "dec"){ popDec(c, k); return renderPriceList(); }
+    if (a === "addn"){
+      const kk = ($("#popSel") || {}).value, n = Math.max(1, Math.min(999, parseInt(($("#popN") || {}).value, 10) || 1)), d = ($("#popD") || {}).value || popToday();
+      if (!kk) return; popAdd(c, kk, n, d > popToday() ? popToday() : d); return renderPriceList();
+    }
+    if (a === "newitem"){
+      const v = bhStr(($("#popNew") || {}).value, 120); if (!v){ showToast(t("bh_err", L)); return; }
+      const d = popLoad(); if (!d.custom[c].includes(v)) d.custom[c].push(v); popSave(); return renderPriceList();
+    }
+    if (a === "copy") return popClip(popText());
+    if (a === "backup") return popClip(JSON.stringify(popLoad()));
+    if (a === "restore"){
+      const s = window.prompt(t("pop_restore_ask", L)); if (!s) return;
+      try { const d = JSON.parse(s); if (!d || !Array.isArray(d.e)) throw new Error("x"); POP.data = popClean(d); popSave(); renderPriceList(); showToast(t("pop_restored", L)); }
+      catch(e){ showToast(t("pop_restore_bad", L)); }
+    }
+  }
+  document.addEventListener("click", popClick);
   document.addEventListener("change", bhChange);
   (async function bhLoadPublic(){
     try {
