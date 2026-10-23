@@ -114,6 +114,7 @@
 
     <button type="button" class="btn btn--outline btn--wide welcome-stampcard" data-action="open-stampcard" data-i18n="stampcard_button">☕ Mijn stempelkaart</button>
     <button type="button" class="btn btn--outline btn--wide welcome-giftcard" data-action="open-giftcard" data-i18n="gift_button">🎁 Cadeaubon</button>
+    <div class="welcome-shop" data-shop-slot></div>
     <button type="button" class="btn btn--outline btn--wide welcome-photomoment" data-action="open-photomoment" data-i18n="pm_button">📸 Fotomoment</button>
     <button type="button" class="btn btn--outline btn--wide welcome-findme" data-action="open-findme" data-i18n="findme_button">📍 Zo vind je me &amp; parkeren</button>
     <button type="button" class="btn btn--gold-outline btn--wide welcome-pricelist" data-action="open-pricelist" data-i18n="pricelist_button">💶 Bekijk prijslijst</button>
@@ -485,10 +486,24 @@
   </section>
 
   <!-- GIFT CARDS (v183): my vouchers, buy one, Sandra's register — link: …/#cadeaubon -->
+  <!-- VERKOOPHOEKJE (v201): products for sale, managed in the app by the salon -->
+  <section class="step" data-step="shop">
+    <div class="step__head">
+      <h2 class="step__title" id="shopTitle">Verkoophoekje</h2>
+      <p class="step__hint" id="shopIntro"></p>
+    </div>
+    <div id="shopBody"></div>
+    <input type="file" id="shPhoto" accept="image/*" hidden>
+    <div class="step__nav">
+      <button type="button" class="btn btn--ghost" data-action="back" data-i18n="back_button">Terug</button>
+    </div>
+  </section>
+
   <section class="step" data-step="giftcard">
     <div class="step__head">
       <h2 class="step__title" data-i18n="gift_title">Cadeaubon</h2>
       <p class="step__hint" data-i18n="gift_intro"></p>
+      <div class="shop-linkrow" data-shop-slot></div>
     </div>
     <div id="giftBody"></div>
     <div class="step__nav">
@@ -599,6 +614,7 @@
     <div class="step__head">
       <h2 class="step__title" data-i18n="pricelist_title">Prijslijst</h2>
       <p class="step__hint" data-i18n="pricelist_intro">Prijzen vanaf 1/06/2026. Behandelingen enkel op afspraak.</p>
+      <div class="shop-linkrow" data-shop-slot></div>
     </div>
     <input type="search" id="priceSearch" class="price-search" autocomplete="off" aria-label="Search">
     <div class="price-cats" id="priceCats" role="tablist"></div>

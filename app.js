@@ -133,7 +133,7 @@
   function updateProgress(name){
     const w = STEP_WEIGHTS[name] ?? 0;
     $("#progressFill").style.width = w + "%";
-    $(".progress").style.visibility = (name==="welcome" || name==="giftcard" || name==="pricelist" || name==="houserules" || name==="stampcard" || name==="findme" || name==="myappt" || name==="photopick" || name==="photoshare" || name==="advent" || name==="ingredients" || (name==="photo" && state.quickPhoto)) ? "hidden" : "visible";
+    $(".progress").style.visibility = (name==="welcome" || name==="giftcard" || name==="shop" || name==="pricelist" || name==="houserules" || name==="stampcard" || name==="findme" || name==="myappt" || name==="photopick" || name==="photoshare" || name==="advent" || name==="ingredients" || (name==="photo" && state.quickPhoto)) ? "hidden" : "visible";
   }
 
   function showStep(name){
@@ -145,6 +145,8 @@
     if (name === "pricelist") {
       renderPriceList();
     }
+    if (name === "shop") renderShop();
+    try { shopSyncLinks(); } catch(e){ /* shop module not ready yet */ }
     if (name === "focus") renderFocusOptions();
     if (name === "focuswish") renderFocusWish();
     if (name === "houserules") {
@@ -2179,6 +2181,178 @@
       catch(e){ showToast(t("pop_restore_bad", L)); }
     }
   }
+
+  /* ===== v201: Verkoophoekje (shop corner) ===== */
+  const SHOP_FILE = "verkoop.json", SHOP_DRAFT = "bc_shop_draft_v1", SHOP_CACHE = "bc_shop_cache_v1";
+  const shop = { pub: null, draft: null, filter: "all", edit: "", busy: false, photoFor: "" };
+  const SHT = {
+    nl:{ title:"Verkoophoekje", link:"Verkoophoekje", intro:"Handgemaakte zepen en verzorging, zolang de voorraad strekt.", how:"Bestellen: stuur me een WhatsApp-bericht met wat je wil, dan laat ik weten of het er nog is. Afhalen kan op een avond in overleg, in de Barbarastraat 25 in Mechelen. Betalen kan enkel ter plaatse.", wa:"Bestel via WhatsApp", gift:"Liever iets cadeau doen? Bekijk de cadeaubon.", soldout:"Uitverkocht", last:"Laatste stuk", left:"Nog {n} beschikbaar", empty:"Er is op dit moment niets te koop.", all:"Alles", zeep:"Zepen", janssen:"Verzorging", overig:"Overig", comp:"Samenstelling", msg:"Dag Sandra, ik wil graag bestellen: {p}. Wanneer kan ik het komen afhalen?", msgAll:"Dag Sandra, ik wil graag iets bestellen uit het verkoophoekje. Wanneer kan ik het komen afhalen?",
+      add:"+ Product toevoegen", pub:"Publiceren", discard:"Wijzigingen weggooien", unsaved:"Er zijn wijzigingen die nog niet gepubliceerd zijn.", saved:"Alles is gepubliceerd.", edit:"Bewerken", save:"Bewaren", cancel:"Annuleren", del:"Verwijderen", delq:"Dit product verwijderen?", photo:"Foto wijzigen", sold:"Uitverkocht zetten", avail:"Weer beschikbaar", concept:"Concept (verborgen)", name:"Naam", price:"Prijs in euro", qty:"Aantal (leeg = onbekend)", status:"Status", cat:"Categorie", desc:"Uitleg", ingr:"Samenstelling (optioneel)", hidden:"Verborgen voor klanten", err:"Corrigeer eerst:", e_name:"naam ontbreekt", e_desc:"uitleg ontbreekt", e_price:"prijs ontbreekt of is 0", e_qty:"aantal moet een geheel getal zijn", e_qty0:"aantal is 0: zet op uitverkocht of vul een aantal in", pub_ok:"Gepubliceerd. Klanten zien het binnen een minuut.", pub_fail:"Publiceren mislukt ({e}). Je wijzigingen blijven bewaard.", nokey:"Geen GitHub-sleutel op dit toestel.", discq:"Alle niet-gepubliceerde wijzigingen weggooien?", newp:"Nieuw product", nophoto:"Geen foto", photo_err:"Foto kon niet gelezen worden." },
+    en:{ title:"Shop corner", link:"Shop corner", intro:"Handmade soaps and skincare, while stocks last.", how:"To order: send me a WhatsApp message with what you'd like and I'll let you know if it's still available. Pick-up is possible on an evening by arrangement, at Barbarastraat 25 in Mechelen. Payment on the spot only.", wa:"Order via WhatsApp", gift:"Rather give a gift? See the gift card.", soldout:"Sold out", last:"Last one", left:"{n} left", empty:"Nothing is for sale right now.", all:"All", zeep:"Soaps", janssen:"Skincare", overig:"Other", comp:"Ingredients", msg:"Hi Sandra, I'd like to order: {p}. When can I pick it up?", msgAll:"Hi Sandra, I'd like to order something from the shop corner. When can I pick it up?" },
+    fr:{ title:"Coin boutique", link:"Coin boutique", intro:"Savons faits main et soins, dans la limite des stocks.", how:"Pour commander : envoyez-moi un message WhatsApp avec ce que vous souhaitez et je vous dirai si c'est encore disponible. Le retrait est possible un soir sur rendez-vous, Barbarastraat 25 à Malines. Paiement uniquement sur place.", wa:"Commander via WhatsApp", gift:"Plutôt offrir un cadeau ? Voir le bon cadeau.", soldout:"Épuisé", last:"Dernier exemplaire", left:"Encore {n} disponible(s)", empty:"Rien n'est en vente pour le moment.", all:"Tout", zeep:"Savons", janssen:"Soins", overig:"Autre", comp:"Composition", msg:"Bonjour Sandra, je voudrais commander : {p}. Quand puis-je venir le chercher ?", msgAll:"Bonjour Sandra, je voudrais commander quelque chose dans le coin boutique. Quand puis-je venir le chercher ?" }
+  };
+  const sh = k => ((SHT[state.lang] || {})[k]) || SHT.nl[k] || k;
+  const SHOP_PHOTO_OK = /^(https:\/\/static\.wixstatic\.com\/|assets\/verkoop\/|data:image\/jpeg;base64,)/;
+  function shopClean(arr){
+    return (Array.isArray(arr) ? arr : []).slice(0, 300).map(i => {
+      i = i || {};
+      const price = Number(i.price), qty = (i.qty === null || i.qty === undefined || i.qty === "") ? null : Number(i.qty);
+      return {
+        id: String(i.id || "").replace(/[^a-z0-9-]/gi, "-").slice(0, 60),
+        name: String(i.name || "").slice(0, 140), desc: String(i.desc || "").slice(0, 2000), ingr: String(i.ingr || "").slice(0, 1500),
+        cat: ["zeep", "janssen", "overig"].includes(i.cat) ? i.cat : "overig",
+        status: ["beschikbaar", "uitverkocht", "concept"].includes(i.status) ? i.status : "concept",
+        price: (i.price === null || i.price === "" || i.price === undefined || !isFinite(price) || price < 0 || price > 9999) ? null : Math.round(price * 100) / 100,
+        qty: (qty !== null && isFinite(qty) && qty >= 0 && qty <= 9999) ? Math.floor(qty) : null,
+        photo: (typeof i.photo === "string" && SHOP_PHOTO_OK.test(i.photo) && i.photo.length < 400000) ? i.photo : ""
+      };
+    }).filter(i => i.id && i.name);
+  }
+  const shopSalon = () => { try { return actSalon(); } catch(e){ return false; } };
+  function shopList(){ return (shopSalon() && shop.draft) ? shop.draft : (shop.pub || []); }
+  function shopDraft(){ if (!shop.draft) shop.draft = JSON.parse(JSON.stringify(shop.pub || [])); return shop.draft; }
+  function shopSaveDraft(){ try { localStorage.setItem(SHOP_DRAFT, JSON.stringify(shop.draft)); } catch(e){ showToast("⚠️ " + sh("photo_err")); } }
+  const shopHasStock = () => (shop.pub || []).some(i => i.status === "beschikbaar");
+  const shopMoney = n => "€ " + n.toFixed(2).replace(".", ",");
+  function shopLinkBtn(){ const on = shopHasStock() || shopSalon(); return `<button type="button" class="btn btn--outline btn--sm" data-action="open-shop"${on ? "" : " hidden"}>🛍️ ${esc(sh("link"))}</button>`; }
+  function shopSyncLinks(){ $$("[data-shop-slot]").forEach(el => { el.innerHTML = shopLinkBtn(); }); }
+  async function shopLoad(force){
+    if (shop.pub && !force) return;
+    const { owner, repo } = giftRepo(), tries = [];
+    if (owner && repo) tries.push([`https://api.github.com/repos/${owner}/${repo}/contents/${SHOP_FILE}`, { headers:{ Accept:"application/vnd.github.raw+json" }, cache:"no-store" }]);
+    tries.push([`${SHOP_FILE}?t=${Date.now()}`, { cache:"no-store" }]);
+    for (const [u, o] of tries){
+      try { const r = await fetch(u, o); if (!r.ok) continue; const j = JSON.parse(await r.text()); if (j && Array.isArray(j.items)){ shop.pub = shopClean(j.items); try { localStorage.setItem(SHOP_CACHE, JSON.stringify(shop.pub)); } catch(e){} break; } } catch(e){ /* next */ }
+    }
+    if (!shop.pub){ try { shop.pub = shopClean(JSON.parse(localStorage.getItem(SHOP_CACHE) || "[]")); } catch(e){ shop.pub = []; } }
+    try { shop.draft = shopSalon() ? shopClean(JSON.parse(localStorage.getItem(SHOP_DRAFT) || "null")) : null; if (shop.draft && !shop.draft.length && !localStorage.getItem(SHOP_DRAFT)) shop.draft = null; } catch(e){ shop.draft = null; }
+    shopSyncLinks();
+    if (document.body.dataset.step === "shop") renderShop();
+  }
+  function shopWa(text){ return `https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(text)}`; }
+  function shopCard(i, salon){
+    const stockTxt = i.status === "uitverkocht" ? sh("soldout") : (i.qty === 1 ? sh("last") : (i.qty > 1 ? sh("left").replace("{n}", i.qty) : ""));
+    const priceTxt = i.price ? shopMoney(i.price) : "";
+    const img = i.photo ? `<img src="${esc(i.photo)}" alt="${esc(i.name)}" loading="lazy" referrerpolicy="no-referrer">` : `<span class="shop-card__nophoto">${esc(sh("nophoto"))}</span>`;
+    const order = (i.status === "beschikbaar") ? `<a class="btn btn--primary btn--sm" href="${esc(shopWa(sh("msg").replace("{p}", i.name + (priceTxt ? " (" + priceTxt + ")" : ""))))}" target="_blank" rel="noopener noreferrer">${esc(sh("wa"))}</a>` : "";
+    let admin = "";
+    if (salon){
+      admin = shop.edit === i.id ? `<div class="shop-edit">
+        <label>${esc(sh("name"))}<input id="shE_name" value="${esc(i.name)}"></label>
+        <label>${esc(sh("price"))}<input id="shE_price" inputmode="decimal" value="${i.price === null ? "" : esc(String(i.price).replace(".", ","))}"></label>
+        <label>${esc(sh("qty"))}<input id="shE_qty" inputmode="numeric" value="${i.qty === null ? "" : i.qty}"></label>
+        <label>${esc(sh("status"))}<select id="shE_status">${["beschikbaar", "uitverkocht", "concept"].map(s => `<option value="${s}"${i.status === s ? " selected" : ""}>${esc(s === "concept" ? sh("concept") : s === "uitverkocht" ? sh("soldout") : sh("avail").replace("Weer b", "B"))}</option>`).join("")}</select></label>
+        <label>${esc(sh("cat"))}<select id="shE_cat">${["zeep", "janssen", "overig"].map(c => `<option value="${c}"${i.cat === c ? " selected" : ""}>${esc(sh(c))}</option>`).join("")}</select></label>
+        <label>${esc(sh("desc"))}<textarea id="shE_desc" rows="4">${esc(i.desc)}</textarea></label>
+        <label>${esc(sh("ingr"))}<textarea id="shE_ingr" rows="3">${esc(i.ingr)}</textarea></label>
+        <div class="shop-actions"><button type="button" class="btn btn--primary btn--sm" data-sh="save" data-id="${esc(i.id)}">${esc(sh("save"))}</button><button type="button" class="btn btn--outline btn--sm" data-sh="cancel">${esc(sh("cancel"))}</button></div></div>`
+        : `<div class="shop-actions"><button type="button" class="btn btn--outline btn--sm" data-sh="edit" data-id="${esc(i.id)}">${esc(sh("edit"))}</button><button type="button" class="btn btn--outline btn--sm" data-sh="photo" data-id="${esc(i.id)}">${esc(sh("photo"))}</button><button type="button" class="btn btn--outline btn--sm" data-sh="dec" data-id="${esc(i.id)}">−1</button><button type="button" class="btn btn--outline btn--sm" data-sh="inc" data-id="${esc(i.id)}">+1</button><button type="button" class="btn btn--outline btn--sm" data-sh="sold" data-id="${esc(i.id)}">${esc(i.status === "uitverkocht" ? sh("avail") : sh("sold"))}</button><button type="button" class="btn btn--outline btn--sm" data-sh="del" data-id="${esc(i.id)}">${esc(sh("del"))}</button></div>`;
+    }
+    return `<article class="shop-card${i.status === "uitverkocht" ? " is-sold" : ""}${i.status === "concept" ? " is-concept" : ""}">
+      <div class="shop-card__img">${img}</div>
+      <div class="shop-card__main"><h3>${esc(i.name)}</h3>
+      ${salon && i.status === "concept" ? `<p class="shop-card__badge">${esc(sh("hidden"))}</p>` : ""}
+      <p class="shop-card__price">${esc(priceTxt)}${stockTxt ? ` <span class="shop-card__stock">${esc(stockTxt)}</span>` : ""}</p>
+      ${i.desc ? `<p>${esc(i.desc)}</p>` : ""}
+      ${i.ingr ? `<details><summary>${esc(sh("comp"))}</summary><p>${esc(i.ingr)}</p></details>` : ""}
+      ${order}${admin}</div></article>`;
+  }
+  function renderShop(){
+    const box = $("#shopBody"); if (!box) return;
+    const salon = shopSalon(), all = shopList(), vis = all.filter(i => salon || i.status !== "concept");
+    const tt = $("#shopTitle"), ti = $("#shopIntro"); if (tt) tt.textContent = sh("title"); if (ti) ti.textContent = sh("intro");
+    const f = shop.filter, shown = vis.filter(i => f === "all" || i.cat === f);
+    const dirty = salon && shop.draft && JSON.stringify(shop.draft) !== JSON.stringify(shop.pub || []);
+    const chips = ["all", "zeep", "janssen", "overig"].filter(c => c === "all" || vis.some(i => i.cat === c)).map(c => `<button type="button" class="chip${f === c ? " is-active" : ""}" data-sh="filter" data-id="${c}">${esc(sh(c))}</button>`).join("");
+    box.innerHTML = `
+      <div class="shop-info"><p>${esc(sh("how"))}</p>
+        <p><a class="btn btn--primary btn--sm" href="${esc(shopWa(sh("msgAll")))}" target="_blank" rel="noopener noreferrer">${esc(sh("wa"))}</a>
+        <button type="button" class="btn btn--outline btn--sm" data-action="open-giftcard">🎁 ${esc(sh("gift"))}</button></p></div>
+      ${salon ? `<div class="shop-admin"><p>${esc(dirty ? sh("unsaved") : sh("saved"))}</p><div class="shop-actions"><button type="button" class="btn btn--outline btn--sm" data-sh="add">${esc(sh("add"))}</button><button type="button" class="btn btn--primary btn--sm" data-sh="publish"${shop.busy ? " disabled" : ""}>${esc(sh("pub"))}</button>${dirty ? `<button type="button" class="btn btn--outline btn--sm" data-sh="discard">${esc(sh("discard"))}</button>` : ""}</div></div>` : ""}
+      <div class="pop-chips">${chips}</div>
+      ${shown.length ? shown.map(i => shopCard(i, salon)).join("") : `<p class="step__hint">${esc(sh("empty"))}</p>`}`;
+  }
+  function shopErrors(items){
+    const e = [];
+    items.forEach(i => {
+      if (i.status === "concept") return;
+      const w = [];
+      if (!i.name) w.push(sh("e_name")); if (!i.desc) w.push(sh("e_desc"));
+      if (i.status === "beschikbaar" && !(i.price > 0)) w.push(sh("e_price"));
+      if (i.status === "beschikbaar" && i.qty === 0) w.push(sh("e_qty0"));
+      if (w.length) e.push((i.name || i.id) + ": " + w.join(", "));
+    });
+    return e;
+  }
+  async function shopPublish(){
+    const L = state.lang; let tok = ""; try { tok = localStorage.getItem(GIFT_GH_KEY) || ""; } catch(e){}
+    if (!tok){ showToast(sh("nokey")); return; }
+    const { owner, repo } = giftRepo(); if (!owner || !repo){ showToast(t("gift_live_norepo", L)); return; }
+    if (shop.busy) return;
+    const items = JSON.parse(JSON.stringify(shopList())), errs = shopErrors(items);
+    if (errs.length){ window.alert(sh("err") + "\n• " + errs.slice(0, 10).join("\n• ")); return; }
+    shop.busy = true; renderShop();
+    const H = { Authorization: "Bearer " + tok, Accept: "application/vnd.github+json" };
+    const put = async (path, b64, msg) => {
+      const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`; let sha;
+      const g = await fetch(api, { headers: H, cache:"no-store" });
+      if (g.ok) sha = (await g.json()).sha; else if (g.status !== 404) throw new Error("GET " + g.status);
+      const p = await fetch(api, { method:"PUT", headers: { ...H, "Content-Type":"application/json" }, body: JSON.stringify({ message: msg, content: b64, ...(sha ? { sha } : {}) }) });
+      if (!p.ok) throw new Error("PUT " + p.status);
+    };
+    try {
+      for (const it of items){
+        if (/^data:image\/jpeg;base64,/.test(it.photo)){ const path = `assets/verkoop/${it.id}-${Date.now().toString(36)}.jpg`; await put(path, it.photo.split(",")[1], "Productfoto (app)"); it.photo = path; }
+      }
+      const out = { v:1, u: new Date().toISOString(), items };
+      await put(SHOP_FILE, giftToken64(JSON.stringify(out, null, 1)), "Verkoophoekje bijgewerkt (app)");
+      shop.pub = shopClean(items); shop.draft = null;
+      try { localStorage.removeItem(SHOP_DRAFT); localStorage.setItem(SHOP_CACHE, JSON.stringify(shop.pub)); } catch(e){}
+      showToast(sh("pub_ok"));
+    } catch(e){ showToast(sh("pub_fail").replace("{e}", String(e && e.message || e))); }
+    shop.busy = false; renderShop(); shopSyncLinks();
+  }
+  function shopFromForm(i){
+    const v = id => { const el = $("#" + id); return el ? el.value : ""; };
+    const pr = v("shE_price").trim().replace(",", "."), q = v("shE_qty").trim();
+    i.name = v("shE_name").trim(); i.desc = v("shE_desc").trim(); i.ingr = v("shE_ingr").trim();
+    i.price = pr === "" ? null : Number(pr); i.qty = q === "" ? null : Number(q);
+    i.status = v("shE_status"); i.cat = v("shE_cat");
+    const c = shopClean([i])[0]; if (c) Object.assign(i, c);
+  }
+  document.addEventListener("click", ev => {
+    const b = ev.target.closest && ev.target.closest("[data-sh]"); if (!b || !shopSalon() && b.dataset.sh !== "filter") return;
+    const a = b.dataset.sh, id = b.dataset.id, L = state.lang;
+    if (a === "filter"){ shop.filter = id; return renderShop(); }
+    if (a === "publish") return void shopPublish();
+    if (a === "discard"){ if (window.confirm(sh("discq"))){ shop.draft = null; try { localStorage.removeItem(SHOP_DRAFT); } catch(e){} shop.edit = ""; renderShop(); } return; }
+    if (a === "add"){ const d = shopDraft(), nid = "nieuw-" + Date.now().toString(36); d.unshift({ id: nid, name: sh("newp"), desc: "", ingr: "", cat: shop.filter === "all" ? "zeep" : shop.filter, status: "concept", price: null, qty: null, photo: "" }); shop.edit = nid; shopSaveDraft(); return renderShop(); }
+    const d = shopDraft(), it = d.find(x => x.id === id);
+    if (a === "cancel"){ shop.edit = ""; return renderShop(); }
+    if (!it) return;
+    if (a === "edit"){ shop.edit = id; return renderShop(); }
+    if (a === "save"){ shopFromForm(it); shop.edit = ""; shopSaveDraft(); return renderShop(); }
+    if (a === "inc"){ it.qty = (it.qty || 0) + 1; if (it.status === "uitverkocht") it.status = "beschikbaar"; }
+    if (a === "dec"){ it.qty = Math.max(0, (it.qty || 0) - 1); if (it.qty === 0) it.status = "uitverkocht"; }
+    if (a === "sold"){ it.status = it.status === "uitverkocht" ? "beschikbaar" : "uitverkocht"; if (it.status === "beschikbaar" && it.qty === 0) it.qty = null; }
+    if (a === "del"){ if (!window.confirm(sh("delq") + "\n" + it.name)) return; d.splice(d.indexOf(it), 1); }
+    if (a === "photo"){ shop.photoFor = id; const fi = $("#shPhoto"); if (fi) fi.click(); return; }
+    shopSaveDraft(); renderShop();
+  });
+  document.addEventListener("change", ev => {
+    const fi = ev.target; if (!fi || fi.id !== "shPhoto" || !shopSalon() || !fi.files || !fi.files[0]) return;
+    const f0 = fi.files[0], rd = new FileReader();
+    rd.onload = () => { const im = new Image(); im.onload = () => {
+      try {
+        const sc = Math.min(1, 900 / Math.max(im.width, im.height)), c = document.createElement("canvas");
+        c.width = Math.round(im.width * sc); c.height = Math.round(im.height * sc); c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+        const it = shopDraft().find(x => x.id === shop.photoFor); if (it){ it.photo = c.toDataURL("image/jpeg", 0.82); shopSaveDraft(); renderShop(); }
+      } catch(e){ showToast(sh("photo_err")); } fi.value = "";
+    }; im.onerror = () => { showToast(sh("photo_err")); fi.value = ""; }; im.src = String(rd.result); };
+    rd.readAsDataURL(f0);
+  });
+  setTimeout(() => { shopLoad(); }, 0);
+
   document.addEventListener("click", popClick);
   document.addEventListener("change", ev => {   // v199: restore from a .txt/.json file (long backups are awkward to paste on a phone)
     const fi = ev.target; if (!fi || fi.id !== "popFile" || !actSalon() || !fi.files || !fi.files[0]) return;
@@ -2476,7 +2650,7 @@
       </div>
       <div class="result-block${m.homecare ? "" : " result-block--muted"}">
         <div class="result-block__head"><span class="result-block__icon">🛍️</span><span class="result-block__title">${t("block_homecare", lang)}</span></div>
-        <div class="result-block__body">${homecareBody}</div>
+        <div class="result-block__body">${homecareBody}${m.homecare ? `<p>${shopLinkBtn()}</p>` : ""}</div>
       </div>
       ${priceRow}`;
   }
@@ -7171,6 +7345,7 @@
       if (action === "ingr-chip"){ const g = ALLERGEN_GROUPS.find(x => x.id === el.dataset.group); ingr.q = g ? (g.label[state.lang] || g.label.nl) : ""; const inp = $("#ingrSearch"); if (inp) inp.value = ingr.q; renderIngrResults(); }
       if (action === "open-stampcard") goTo("stampcard");
       if (action === "open-giftcard") goTo("giftcard");
+      if (action === "open-shop") goTo("shop");
       if (action === "open-advent") goTo("advent");
       if (action === "season-fact") nextSeasonFact();
       if (action === "season-shop") trackEvent("season-shop");
