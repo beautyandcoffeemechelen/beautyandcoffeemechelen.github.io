@@ -1382,10 +1382,8 @@ section[data-step="welcome"] .welcome-stampcard, section[data-step="welcome"] .w
 section[data-step="welcome"] .welcome-stampcard{ border-top:1px solid var(--espresso-12); margin-top:18px; }
 section[data-step="welcome"] .welcome-stampcard::after, section[data-step="welcome"] .welcome-giftcard::after, section[data-step="welcome"] .welcome-photomoment::after, section[data-step="welcome"] .welcome-findme::after, section[data-step="welcome"] .welcome-pricelist::after{ content:"›"; font-size:20px; line-height:1; color:var(--gold); }
 section[data-step="welcome"] .welcome-houserules{ margin-top:10px; font-weight:500; color:var(--espresso-60); }
-section[data-step="welcome"] .book-hub .btn--primary{ background:var(--espresso); color:var(--cream); }
 .reviews-card{ background:transparent !important; box-shadow:none !important; border-radius:0 !important; border-top:1px solid var(--espresso-12); }
 .reviews-card__title, .newsletter-card__title, .news-card__title{ font-family:var(--font-display); font-weight:500 !important; letter-spacing:.01em; }
-.reviews-card .btn--primary, .newsletter-card .btn--primary{ background:var(--espresso); color:var(--cream); box-shadow:none; }
 .reviews-card .review-quote{ background:none !important; border:none; border-left:2px solid var(--gold-light); border-radius:0 !important; padding:4px 0 4px 14px !important; }
 
 /* ---- v183 gift vouchers ---- */
@@ -1491,3 +1489,16 @@ section[data-step="welcome"] .book-hub .btn--primary{ background:var(--espresso)
 .pop-bar{height:6px;border-radius:4px;background:rgba(120,100,80,.15);margin:5px 0}
 .pop-bar i{display:block;height:100%;border-radius:4px;background:#b48a3c}
 .pop-row__btns{display:flex;gap:6px}
+
+/* ---- v199: ONE button look everywhere = the gold of "Begin je match" ----
+   Same gold fill, dark-brown text, shadow, height and radius for every action button
+   (start, online boeken, afspraak noteren, kopieer, reviews, nieuwsbrief). Small buttons
+   keep their smaller size; plain text links (.btn--text/.btn--ghost) stay text links. */
+.btn--primary, .btn--outline, .btn--gold-outline,
+section[data-step="welcome"] .book-hub .btn--primary, section[data-step="welcome"] .book-hub .btn--outline,
+.reviews-card .btn--primary, .newsletter-card .btn--primary{
+  background: linear-gradient(180deg, var(--gold-light), var(--gold)); color:#2A1B08; border-color:transparent;
+  box-shadow:0 8px 18px -12px rgba(110,76,30,.55);
+}
+.btn--sm{ min-height:40px; }
+.copy-name__btn{ min-height:44px; }

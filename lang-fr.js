@@ -884,6 +884,8 @@
   "pop_copy": "Copier le classement",
   "pop_backup": "Copier la sauvegarde",
   "pop_restore": "Restaurer la sauvegarde",
+  "pop_restore_file": "Sauvegarde depuis un fichier",
+  "pop_restore_ask2": "Cela remplace vos compteurs actuels par le contenu du fichier. Continuer ?",
   "pop_note": "Ces compteurs ne sont que sur ce téléphone et ne sont pas publiés. Faites une sauvegarde de temps en temps.",
   "pop_copied": "Copié",
   "pop_copy_manual": "Copiez ce texte :",

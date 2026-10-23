@@ -2035,6 +2035,7 @@
       else if (!e2.hide.includes(key)) e2.hide.push(key);
       return bhCommit(e2);
     }
+    if (a === "restorefile"){ const fi = $("#popFile"); if (fi) fi.click(); return; }
     if (a === "restore"){ e2.hide = e2.hide.filter(x => x !== key); return bhCommit(e2); }
     if (a === "reset"){ delete e2.prices[key]; return bhCommit(e2); }
     if (a === "add"){
@@ -2151,7 +2152,7 @@
       ${["gel", "drink", "ov"].includes(store) ? `<div class="bh-row"><input type="text" id="popNew" class="pm-input bh-wide" maxlength="120" placeholder="${t("pop_new_" + store, L)}"><button type="button" class="btn btn--sm btn--outline" data-pop="newitem" data-c="${store}">＋ ${t("pop_new_btn", L)}</button></div>` : ""}
       <div class="bh-row"><button type="button" class="btn btn--sm btn--outline" data-pop="copy">${t("pop_copy", L)}</button>
         <button type="button" class="btn btn--sm btn--outline" data-pop="backup">${t("pop_backup", L)}</button>
-        <button type="button" class="btn btn--sm btn--text" data-pop="restore">${t("pop_restore", L)}</button></div>
+        <button type="button" class="btn btn--sm btn--text" data-pop="restore">${t("pop_restore", L)}</button><button type="button" class="btn btn--sm btn--text" data-pop="restorefile">${t("pop_restore_file", L)}</button><input type="file" id="popFile" accept=".txt,.json,text/plain,application/json" hidden></div>
       <p class="ingr-muted">${t("pop_note", L)}</p></div>`;
   }
   async function popClip(txt){ try { await navigator.clipboard.writeText(txt); showToast(t("pop_copied", state.lang)); } catch(e){ window.prompt(t("pop_copy_manual", state.lang), txt); } }
@@ -2179,6 +2180,13 @@
     }
   }
   document.addEventListener("click", popClick);
+  document.addEventListener("change", ev => {   // v199: restore from a .txt/.json file (long backups are awkward to paste on a phone)
+    const fi = ev.target; if (!fi || fi.id !== "popFile" || !actSalon() || !fi.files || !fi.files[0]) return;
+    const rd = new FileReader(), L = state.lang, f0 = fi.files[0];
+    if (f0.size > 2 * 1024 * 1024){ fi.value = ""; showToast(t("pop_restore_bad", L)); return; }   // v200: a backup is a few KB; refuse huge files
+    rd.onload = () => { fi.value = "";   /* v200: allow picking the same file again */ try { const d = JSON.parse(String(rd.result || "")); if (!d || !Array.isArray(d.e)) throw new Error("x"); if (!window.confirm(t("pop_restore_ask2", L))) return; POP.data = popClean(d); popSave(); renderPriceList(); showToast(t("pop_restored", L)); } catch(e){ showToast(t("pop_restore_bad", L)); } };
+    rd.readAsText(fi.files[0]);
+  });
   document.addEventListener("change", bhChange);
   (async function bhLoadPublic(){
     try {
@@ -3634,6 +3642,8 @@
     if (src === "result" && state.match && state.match.treatment && !state.match.isKid){
       tid = state.match.treatment.id; ttext = trName(state.match.treatment.name, state.lang);
     } else if (src === "result" && state.match && state.match.isKid){ tid = "kindermanicure"; ttext = trName(state.match.treatment.name, state.lang); }
+    if (!tid && src === "welcome"){ const lm = localData.lastMoment, at = localData.lastMatchAt; if (lm && lm.treatmentId && at && Date.now() - new Date(at).getTime() < 60 * 86400000) tid = lm.treatmentId; }   // v199: last match from the start screen
+    if (tid) trackEvent("boek-" + String(tid).replace(/[^a-z0-9-]/gi, "-").slice(0, 60));   // anonymous: only the treatment id, no person
     let tcat = tid ? (Object.keys(AVOID_GROUPS).find(g => AVOID_GROUPS[g].includes(tid)) || null) : null;
     if (!tcat && tid === "kindermanicure") tcat = "hands";
     localData.pendingOnline = { at: Date.now(), tcat, ttext: String(ttext || "").slice(0, 40) };
@@ -7228,6 +7238,7 @@
     renderLoyaltyBlock();
     goTo("result");
     trackEvent("match-generated");
+    try { const mt = state.match && state.match.treatment; if (mt && mt.id) trackEvent("match-" + String(mt.id).replace(/[^a-z0-9-]/gi, "-").slice(0, 60)); } catch(e){ /* analytics only */ }
     if (isNewDiscovery) trackEvent("new-discovery");
     if (state.context === "thuis") showToast(t("toast_saved_home", state.lang));
   }
