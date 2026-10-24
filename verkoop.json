@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-10-23T16:43:01.719Z",
+ "u": "2026-10-24T04:29:54.222Z",
  "items": [
   {
    "id": "amandelmelkzeep",
@@ -165,17 +165,6 @@
    "status": "uitverkocht",
    "price": 6,
    "qty": 0,
-   "photo": ""
-  },
-  {
-   "id": "syndet-beer-liggend",
-   "name": "Beer liggend syndet zeep, zeepvrij (ca. 8 g)",
-   "desc": "Zeepvrije, ongeparfumeerde variant, speciaal voor de gevoelige huid.",
-   "ingr": "",
-   "cat": "zeep",
-   "status": "uitverkocht",
-   "price": 4,
-   "qty": null,
    "photo": ""
   },
   {
