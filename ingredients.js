@@ -18,7 +18,7 @@
    - usedIn may also hold "advent" (gift to take home) or "extra-facial"
      (free extra with a facial, advent calendar).
 
-   TEST PHASE (INGREDIENTS_LIVE): until liveFrom NOBODY sees the screen,
+   PUBLIC SINCE 24/10/2026 (INGREDIENTS_LIVE.liveFrom is empty). Test phase, only if you ever fill in a date: until liveFrom NOBODY sees the screen,
    except Sandra:
      - with the private link  …/?voorproef=<previewKey>#ingredienten
      - or with the button in her salon mode (#salon, only on her phone).
@@ -29,7 +29,7 @@
    the test phase only keeps clients from relying on an unfinished screen.
    ============================================================ */
 const INGREDIENTS_LIVE = {
-  liveFrom: "2026-12-01",        // public from this day
+  liveFrom: "",                  // v203: public NOW (Sandra, 24/10/2026). A date here (YYYY-MM-DD) would hide the screen from clients again until that day.
   previewKey: PREVIEW_KEY          // the same private preview key as the rest of the app (data.js)
 };
 
@@ -1477,12 +1477,20 @@ const ALLERGEN_GROUPS = [
   { id:"fragrance", label:{ nl:"Parfum & geurstoffen", en:"Fragrance", fr:"Parfum" },
     terms:["parfum","geur","fragrance","perfume","geurstof","allergeen"],
     match:["parfum","fragrance","linalool","limonene","citronellol","geraniol","citral","hexyl cinnamal","benzyl salicylate","alpha-isomethyl ionone","eugenol","coumarin","benzyl benzoate","benzyl alcohol","farnesol","cinnamal","hydroxycitronellal","isoeugenol","amyl cinnamal","hydroxyisohexyl 3-cyclohexene carboxaldehyde","litsea cubeba","butylphenyl methylpropional","anise alcohol"] },
+  { id:"peru", label:{ nl:"Perubalsem (Myroxylon pereirae)", en:"Balsam of Peru (Myroxylon pereirae)", fr:"Baume du Pérou (Myroxylon pereirae)" },
+    terms:["perubalsem","peru balsem","peru","balsam peru","peru balsam","balsam of peru","myroxylon","perubalsam","baume du perou","baume du pérou"],
+    match:["myroxylon","balsam peru","peru balsam","balsam of peru","perubalsam"], also:["fragrance","rosin","essential"],
+    info:{ nl:"Perubalsem staat zelden bij naam op een etiket: het zit vaak verborgen in ‘parfum’ of in geurstoffen zoals benzylbenzoaat, kaneel-, vanille- en kruidnagelcomponenten. Wie reageert op perubalsem reageert vaak ook op parfum, kaneel, vanille, benzoë/storax, colofonium en sommige etherische oliën. Bekijk daarom ook die groepen en meld het altijd vooraf.", en:"Balsam of Peru is rarely listed by name: it is often hidden in ‘fragrance’ or in scent components such as benzyl benzoate and cinnamon, vanilla and clove components. People who react to it often also react to fragrance, cinnamon, vanilla, benzoin/storax, colophony and some essential oils. Check those groups too and always tell me beforehand.", fr:"Le baume du Pérou figure rarement sous son nom : il se cache souvent dans le « parfum » ou dans des composants comme le benzoate de benzyle, la cannelle, la vanille et le clou de girofle. Qui y réagit réagit souvent aussi au parfum, à la cannelle, à la vanille, au benjoin/storax, à la colophane et à certaines huiles essentielles. Consultez aussi ces groupes et prévenez-moi toujours à l’avance." } },
   { id:"essential", label:{ nl:"Etherische oliën", en:"Essential oils", fr:"Huiles essentielles" },
     terms:["etherisch","essentieel","essential","essentielle","aromatherapie"],
     match:["peel oil","leaf oil","flower oil","lavandula angustifolia (lavender) oil","lavandula angustifolia oil","ormenis multicaulis oil","rosa rugosa flower oil","cymbopogon","lavandula hybrida oil","thymus vulgaris","salvia sclarea","citrus nobilis","mentha piperita","eucalyptus globulus","cupressus sempervirens oil","piper nigrum","pogostemon","illicium verum","bergamia","cananga","cedrus atlantica","jasminum","pinus sylvestris","rosa damascena flower oil"] },
   { id:"citrus", label:{ nl:"Citrus (sinaasappel, mandarijn, citroen)", en:"Citrus", fr:"Agrumes" },
     terms:["citrus","sinaasappel","appelsien","mandarijn","citroen","limoen","orange","mandarin","lemon","agrume","mandarine","citron"],
     match:["citrus","limonene","citral"] },
+  { id:"fruit", label:{ nl:"Fruit & fructose (fruitallergie)", en:"Fruit & fructose (fruit allergy)", fr:"Fruits & fructose (allergie aux fruits)" },
+    terms:["fruit","fruitallergie","fruitallergieën","fructose","vruchten","vrucht","fruitsuiker","vruchtensuiker","fruits","fruit allergy","allergie aux fruits","banaan","kiwi","appel","aardbei","mango","ananas","perzik","kers","peer","druif","framboos","bosbes","meloen","granaatappel","papaja","avocado","latex-fruit","kruisallergie"],
+    match:["fructose","fruit juice","fruit water","fruit pulp","fruit powder","fruit vinegar","fruit cell","musa ","banana","actinidia","kiwi","pyrus","malus","apple","fragaria","strawberry","mangifera","mango","ananas","pineapple","prunus persica","peach","prunus avium","cherry","prunus domestica","plum","apricot fruit","grape fruit","vitis vinifera fruit","punica","pomegranate","rubus","raspberry","vaccinium","blueberry","cranberry","cucumis melo","melon","citrullus","carica","papaya","papain","persea","avocado","citrus"], also:["latex","citrus","papain"],
+    info:{ nl:"Fructose (vruchtensuiker) in een crème geeft bij fructose-intolerantie meestal geen klachten: dat gaat over de vertering van eten. Bij een echte fruitallergie gaat het om eiwitten in fruit, sappen, extracten en oliën: die tonen we hier, inclusief citrus, avocado en papaja. Heb je een latex-fruitallergie (banaan, kiwi, avocado, kastanje), bekijk dan ook ‘Latex’. Meld het altijd vooraf.", en:"Fructose (fruit sugar) in a cream usually causes no problems with fructose intolerance, which is about digesting food. A true fruit allergy is about proteins in fruit, juices, extracts and oils: those are shown here, including citrus, avocado and papaya. With a latex-fruit allergy (banana, kiwi, avocado, chestnut) also check ‘Latex’. Always tell me beforehand.", fr:"Le fructose (sucre de fruit) dans une crème ne pose en général pas de problème en cas d’intolérance au fructose, qui concerne la digestion. Une vraie allergie aux fruits concerne les protéines des fruits, jus, extraits et huiles : nous les montrons ici, y compris agrumes, avocat et papaye. En cas d’allergie latex-fruits (banane, kiwi, avocat, châtaigne), consultez aussi « Latex ». Prévenez-moi toujours à l’avance." } },
   { id:"lavender", label:{ nl:"Lavendel", en:"Lavender", fr:"Lavande" }, terms:["lavendel","lavender","lavande"], match:["lavandula"] },
   { id:"lemongrass", label:{ nl:"Citroengras", en:"Lemongrass", fr:"Citronnelle (lemongrass)" }, terms:["citroengras","lemongrass","citronnelle","verveine des indes"], match:["cymbopogon"] },
   { id:"latex", label:{ nl:"Latex (natuurrubber) en avocado (kruisallergie)", en:"Latex (natural rubber) and avocado (cross-allergy)", fr:"Latex (caoutchouc naturel) et avocat (allergie croisée)" }, terms:["latex","rubber","natuurrubber","caoutchouc"], match:["latex","persea"] },
@@ -1501,6 +1509,9 @@ const ALLERGEN_GROUPS = [
     terms:["sulfaat","sulfaten","sls","sles","sulfate","sulphate","laureth"], match:["lauryl sulfate","laureth sulfate","cetearyl sulfate"] },
   { id:"acrylates", label:{ nl:"Acrylaten & HEMA (gellak)", en:"Acrylates & HEMA (gel polish)", fr:"Acrylates & HEMA (vernis gel)" },
     terms:["acrylaat","acrylaten","hema","methacrylaat","gellak","acrylate","acrylates","methacrylate","gel polish","biab","vernis gel"], match:["hema","isobornyl methacrylate","hydroxypropyl methacrylate","hydroxyethyl methacrylate","ethyl methacrylate","methyl methacrylate","di-hema","tpo"] },
+  { id:"nickel", label:{ nl:"Nikkel & cobalt (metaal)", en:"Nickel & cobalt (metal)", fr:"Nickel & cobalt (métal)" },
+    terms:["nikkel","nickel","cobalt","kobalt","metaal","metaalallergie","metal","métal","juwelen","piercing"], match:[], onlyInfo:true,
+    info:{ nl:"Nikkel en cobalt staan bijna nooit op een productetiket, dus hier valt niets in de producten te zoeken. Nikkel zit in metalen voorwerpen (pincetten, schaartjes, nagelknippers, stalen instrumenten, juwelen) en kan in sporen in sommige pigmenten zitten. Meld je nikkelallergie vooraf aan mij, dan kijk ik samen met jou wat ik anders aanpak.", en:"Nickel and cobalt are almost never listed on a product label, so there is nothing to search for in the products. Nickel is found in metal objects (tweezers, scissors, nail clippers, steel instruments, jewellery) and can be present in traces in some pigments. Tell me about your nickel allergy beforehand and we will look together at what I can do differently.", fr:"Le nickel et le cobalt ne figurent presque jamais sur une étiquette de produit : il n’y a donc rien à chercher dans les produits. Le nickel se trouve dans les objets métalliques (pincettes, ciseaux, coupe-ongles, instruments en acier, bijoux) et peut être présent à l’état de traces dans certains pigments. Prévenez-moi à l’avance de votre allergie au nickel et nous verrons ensemble ce que je peux faire autrement." } },
   { id:"chlorhexidine", label:{ nl:"Chloorhexidine (desinfectie)", en:"Chlorhexidine (disinfectant)", fr:"Chlorhexidine (désinfectant)" },
     terms:["chloorhexidine","chlorhexidine","desinfectie","ontsmetting","disinfectant","désinfectant"], match:["chlorhexidine"] },
   { id:"selftan", label:{ nl:"Zelfbruiner (DHA)", en:"Self-tanner (DHA)", fr:"Autobronzant (DHA)" },

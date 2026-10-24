@@ -885,6 +885,7 @@
   "pop_backup": "Copier la sauvegarde",
   "pop_restore": "Restaurer la sauvegarde",
   "pop_restore_file": "Sauvegarde depuis un fichier",
+  "pop_seeded": "Chiffres de départ chargés : vos rendez-vous de novembre 2024 à octobre 2026 depuis votre agenda.",
   "pop_restore_ask2": "Cela remplace vos compteurs actuels par le contenu du fichier. Continuer ?",
   "pop_note": "Ces compteurs ne sont que sur ce téléphone et ne sont pas publiés. Faites une sauvegarde de temps en temps.",
   "pop_copied": "Copié",

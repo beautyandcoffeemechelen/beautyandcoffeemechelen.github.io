@@ -2030,7 +2030,7 @@
     }
     if (!actSalon()) return;
     if (a === "toggle"){ BH.view = ""; BH.edit = !BH.edit; bhRefresh(); return; }
-    if (a === "pop"){ BH.view = BH.view === "pop" ? "" : "pop"; BH.edit = false; renderPriceList(); return; }
+    if (a === "pop"){ BH.view = BH.view === "pop" ? "" : "pop"; BH.edit = false; renderPriceList(); if (BH.view === "pop") popSeed(); return; }
     if (a === "del"){
       if (!confirm(t("bh_confirm_del", L).replace("{p}", key.replace(/^add:/, "")))) return;
       if (key.startsWith("add:")) e2.add = e2.add.filter(x => "add:" + x.id !== key);
@@ -2083,14 +2083,43 @@
     ["gel", "drink", "ov"].forEach(c => { o.custom[c] = ((d.custom && Array.isArray(d.custom[c])) ? d.custom[c] : []).map(x => bhStr(x, 120)).filter(Boolean).slice(0, 300); });
     return o;
   }
+  /* v204: first time the screen opens with empty counters: load the start figures from the agenda
+     (populariteit-start.json: monthly totals, no names). Only once (bc_pop_seeded_v1). */
+  async function popSeed(){
+    try { if (localStorage.getItem("bc_pop_seeded_v1")) return; } catch(e){ return; }
+    if (popLoad().e.length) return;
+    try {
+      const r = await fetch("populariteit-start.json?t=" + Date.now(), { cache:"no-store" }); if (!r.ok) return;
+      const j = JSON.parse(await r.text()), c = popClean({ e: j.e });
+      if (!c.e.length || popLoad().e.length) return;
+      POP.data.e = c.e; popSave();
+      try { localStorage.setItem("bc_pop_seeded_v1", "1"); } catch(e){ /* ignore */ }
+      showToast(t("pop_seeded", state.lang)); renderPriceList();
+    } catch(e){ /* offline: try again next time */ }
+  }
   function popSave(){ try { localStorage.setItem(POP_KEY, JSON.stringify(popLoad())); } catch(e){ showToast(t("pop_save_fail", state.lang)); } }
   function popDrinkNames(){
     const out = new Set(), walk = v => { if (!v || typeof v !== "object") return; if (typeof v.name === "string") out.add(v.name); else if (v.name && v.name.nl) out.add(v.name.nl); Object.values(v).forEach(x => { if (x && typeof x === "object") walk(x); }); };
     try { walk(BEVERAGES); walk(TEAS_DECAF); walk(TEAS_CAFF); } catch(e){ /* ignore */ }
     return [...out];
   }
+  /* v204: all gel/peel-off colours already known from the product notes (single source: ingredients.js) */
+  function popGelDefaults(){
+    const S = (typeof SALON_PRODUCTS === "object" && SALON_PRODUCTS) || {}, out = [];
+    const note = id => (S[id] && S[id].note) ? (S[id].note.nl || "") : "", nm = id => (S[id] && S[id].name) ? (S[id].name.nl || "") : "";
+    const after = (txt, key) => { const i = txt.indexOf(key); return i < 0 ? [] : txt.slice(i + key.length).replace(/\.\s*$/, "").split(/,\s*/).map(x => x.trim()).filter(Boolean); };
+    const par = txt => { const m = txt.match(/\(([^)]*)\)/); return m ? m[1].replace(/^[^:]*:\s*/, "").split(/,\s*/).map(x => x.trim()).filter(Boolean) : []; };
+    after(note("gelcolour"), "HEMA-vrij: ").forEach(n => out.push(n + " (Cobra)"));
+    after(note("gelcolourhema"), "uitgehard: ").forEach(n => out.push(n + " (Cobra)"));
+    par(nm("gelgalaxy")).forEach(n => out.push(n + " (Cobra Galaxy)"));
+    par(nm("pgcateye")).forEach(n => out.push(n + " (Pink Gellac Cat Eye)"));
+    const kids = note("pgkids"), ki = kids.indexOf("zoals ");
+    if (ki >= 0) kids.slice(ki + 6).replace(/\.\s*$/, "").split(/,\s*|\s+en\s+/).map(x => x.trim()).filter(Boolean).forEach(n => out.push(n + " (Pink Gellac kids, peel-off)"));
+    return out.map(x => bhStr(x, 120)).filter(Boolean);
+  }
   function popItems(cat){
     const d = popLoad(), names = [];
+    if (cat === "gel") popGelDefaults().forEach(n => names.push(n));
     if (cat === "beh"){
       const e = bhEff(); PRICE_LIST.forEach(s => { s.items.forEach(it => names.push(it.n.nl)); e.add.filter(x => x.sec === s.id).forEach(x => names.push(x.nl)); });
     } else if (cat === "drink") popDrinkNames().forEach(n => names.push(n));
@@ -6120,8 +6149,11 @@
     const withList = all.filter(([, p]) => ingrInci(p));
     const unknown = all.filter(([, p]) => !ingrInci(p));
     const gname = Q.groups.length ? Q.groups.map(g => g.label[L] || g.label.nl).join(", ") : "“" + ingr.q.trim() + "”";
-    let html = Q.fuzzy ? `<p class="ingr-muted">${t("ingr_did_you_mean", L).replace("{g}", `<b>${esc(gname)}</b>`)}</p>` : "";
+    const infoG = Q.groups.filter(g => g.info);
+    const infoHtml = infoG.map(g => `<div class="ingr-answer ingr-answer--info"><p class="ingr-answer__title">ℹ️ ${esc(g.label[L] || g.label.nl)}</p><p>${esc(g.info[L] || g.info.nl)}</p>${(g.also || []).length ? `<p class="ingr-chips">${g.also.map(id => ALLERGEN_GROUPS.find(x => x.id === id)).filter(Boolean).map(x => `<button type="button" class="chip chip--sm" data-action="ingr-chip" data-group="${esc(x.id)}">${esc(x.label[L] || x.label.nl)}</button>`).join("")}</p>` : ""}</div>`).join("");
+    let html = infoHtml + (Q.fuzzy ? `<p class="ingr-muted">${t("ingr_did_you_mean", L).replace("{g}", `<b>${esc(gname)}</b>`)}</p>` : "");
     const unkTxt = unknown.length ? `<p class="ingr-warn ingr-warn--small">❓ ${t("ingr_ans_unknown", L).replace("{n}", unknown.length)}</p>` : "";
+    if (!hit.length && Q.groups.length && Q.groups.every(g => g.onlyInfo)){ box.innerHTML = html + unkTxt; return; }   // v203: nickel/cobalt: explained, not searched
     if (!hit.length){
       const fit = !Q.groups.length ? ingrFinderHtml(all, hitIds) : "";
       if (fit) html += fit;
