@@ -2184,7 +2184,9 @@
 
   /* ===== v201: Verkoophoekje (shop corner) ===== */
   const SHOP_FILE = "verkoop.json", SHOP_DRAFT = "bc_shop_draft_v1", SHOP_CACHE = "bc_shop_cache_v1";
-  const shop = { pub: null, draft: null, filter: "all", edit: "", busy: false, photoFor: "" };
+  const shop = { pub: null, draft: null, filter: "all", edit: "", busy: false, photoFor: "", ver: "" };
+  const SHOP_PHOTOS = "bc_shop_photos_v1";
+  const shopPhotoMap = () => { try { return JSON.parse(localStorage.getItem(SHOP_PHOTOS) || "{}") || {}; } catch(e){ return {}; } };
   const SHT = {
     nl:{ title:"Verkoophoekje", link:"Verkoophoekje", intro:"Handgemaakte zepen en verzorging, zolang de voorraad strekt.", how:"Bestellen: stuur me een WhatsApp-bericht met wat je wil, dan laat ik weten of het er nog is. Afhalen kan op een avond in overleg, in de Barbarastraat 25 in Mechelen. Betalen kan enkel ter plaatse.", wa:"Bestel via WhatsApp", gift:"Liever iets cadeau doen? Bekijk de cadeaubon.", soldout:"Uitverkocht", last:"Laatste stuk", left:"Nog {n} beschikbaar", empty:"Er is op dit moment niets te koop.", all:"Alles", zeep:"Zepen", janssen:"Verzorging", overig:"Overig", comp:"Samenstelling", msg:"Dag Sandra, ik wil graag bestellen: {p}. Wanneer kan ik het komen afhalen?", msgAll:"Dag Sandra, ik wil graag iets bestellen uit het verkoophoekje. Wanneer kan ik het komen afhalen?",
       add:"+ Product toevoegen", pub:"Publiceren", discard:"Wijzigingen weggooien", unsaved:"Er zijn wijzigingen die nog niet gepubliceerd zijn.", saved:"Alles is gepubliceerd.", edit:"Bewerken", save:"Bewaren", cancel:"Annuleren", del:"Verwijderen", delq:"Dit product verwijderen?", photo:"Foto wijzigen", sold:"Uitverkocht zetten", avail:"Weer beschikbaar", concept:"Concept (verborgen)", name:"Naam", price:"Prijs in euro", qty:"Aantal (leeg = onbekend)", status:"Status", cat:"Categorie", desc:"Uitleg", ingr:"Samenstelling (optioneel)", hidden:"Verborgen voor klanten", err:"Corrigeer eerst:", e_name:"naam ontbreekt", e_desc:"uitleg ontbreekt", e_price:"prijs ontbreekt of is 0", e_qty:"aantal moet een geheel getal zijn", e_qty0:"aantal is 0: zet op uitverkocht of vul een aantal in", pub_ok:"Gepubliceerd. Klanten zien het binnen een minuut.", pub_fail:"Publiceren mislukt ({e}). Je wijzigingen blijven bewaard.", nokey:"Geen GitHub-sleutel op dit toestel.", discq:"Alle niet-gepubliceerde wijzigingen weggooien?", newp:"Nieuw product", nophoto:"Geen foto", photo_err:"Foto kon niet gelezen worden." },
@@ -2204,7 +2206,7 @@
         status: ["beschikbaar", "uitverkocht", "concept"].includes(i.status) ? i.status : "concept",
         price: (i.price === null || i.price === "" || i.price === undefined || !isFinite(price) || price < 0 || price > 9999) ? null : Math.round(price * 100) / 100,
         qty: (qty !== null && isFinite(qty) && qty >= 0 && qty <= 9999) ? Math.floor(qty) : null,
-        photo: (typeof i.photo === "string" && SHOP_PHOTO_OK.test(i.photo) && i.photo.length < 400000) ? i.photo : ""
+        photo: (typeof i.photo === "string" && SHOP_PHOTO_OK.test(i.photo) && i.photo.length < 700000) ? i.photo : ""
       };
     }).filter(i => i.id && i.name);
   }
@@ -2214,15 +2216,15 @@
   function shopSaveDraft(){ try { localStorage.setItem(SHOP_DRAFT, JSON.stringify(shop.draft)); } catch(e){ showToast("⚠️ " + sh("photo_err")); } }
   const shopHasStock = () => (shop.pub || []).some(i => i.status === "beschikbaar");
   const shopMoney = n => "€ " + n.toFixed(2).replace(".", ",");
-  function shopLinkBtn(){ const on = shopHasStock() || shopSalon(); return `<button type="button" class="btn btn--outline btn--sm" data-action="open-shop"${on ? "" : " hidden"}>🛍️ ${esc(sh("link"))}</button>`; }
-  function shopSyncLinks(){ $$("[data-shop-slot]").forEach(el => { el.innerHTML = shopLinkBtn(); }); }
+  function shopLinkBtn(row){ const on = shopHasStock() || shopSalon(); return row ? `<button type="button" class="btn btn--outline btn--wide welcome-shopbtn" data-action="open-shop"${on ? "" : " hidden"}>${esc(sh("link"))}</button>` : `<button type="button" class="btn btn--outline btn--sm" data-action="open-shop"${on ? "" : " hidden"}>🛍️ ${esc(sh("link"))}</button>`; }
+  function shopSyncLinks(){ $$("[data-shop-slot]").forEach(el => { el.innerHTML = shopLinkBtn(el.dataset.shopSlot === "welcome"); }); }
   async function shopLoad(force){
     if (shop.pub && !force) return;
     const { owner, repo } = giftRepo(), tries = [];
     if (owner && repo) tries.push([`https://api.github.com/repos/${owner}/${repo}/contents/${SHOP_FILE}`, { headers:{ Accept:"application/vnd.github.raw+json" }, cache:"no-store" }]);
     tries.push([`${SHOP_FILE}?t=${Date.now()}`, { cache:"no-store" }]);
     for (const [u, o] of tries){
-      try { const r = await fetch(u, o); if (!r.ok) continue; const j = JSON.parse(await r.text()); if (j && Array.isArray(j.items)){ shop.pub = shopClean(j.items); try { localStorage.setItem(SHOP_CACHE, JSON.stringify(shop.pub)); } catch(e){} break; } } catch(e){ /* next */ }
+      try { const r = await fetch(u, o); if (!r.ok) continue; const j = JSON.parse(await r.text()); if (j && Array.isArray(j.items)){ shop.pub = shopClean(j.items); shop.ver = String(j.u || "").replace(/[^0-9]/g, "").slice(0, 14); try { localStorage.setItem(SHOP_CACHE, JSON.stringify(shop.pub)); } catch(e){} break; } } catch(e){ /* next */ }
     }
     if (!shop.pub){ try { shop.pub = shopClean(JSON.parse(localStorage.getItem(SHOP_CACHE) || "[]")); } catch(e){ shop.pub = []; } }
     try { shop.draft = shopSalon() ? shopClean(JSON.parse(localStorage.getItem(SHOP_DRAFT) || "null")) : null; if (shop.draft && !shop.draft.length && !localStorage.getItem(SHOP_DRAFT)) shop.draft = null; } catch(e){ shop.draft = null; }
@@ -2233,7 +2235,8 @@
   function shopCard(i, salon){
     const stockTxt = i.status === "uitverkocht" ? sh("soldout") : (i.qty === 1 ? sh("last") : (i.qty > 1 ? sh("left").replace("{n}", i.qty) : ""));
     const priceTxt = i.price ? shopMoney(i.price) : "";
-    const img = i.photo ? `<img src="${esc(i.photo)}" alt="${esc(i.name)}" loading="lazy" referrerpolicy="no-referrer">` : `<span class="shop-card__nophoto">${esc(sh("nophoto"))}</span>`;
+    const src = (i.photo && i.photo.indexOf("assets/") === 0 && shop.ver) ? i.photo + "?v=" + shop.ver : i.photo;   // new URL after every publish: no stale cached 404 from GitHub Pages
+    const img = i.photo ? `<img src="${esc(src)}" data-p="${esc(i.photo)}" alt="${esc(i.name)}" loading="lazy" referrerpolicy="no-referrer">` : `<span class="shop-card__nophoto">${esc(sh("nophoto"))}</span>`;
     const order = (i.status === "beschikbaar") ? `<a class="btn btn--primary btn--sm" href="${esc(shopWa(sh("msg").replace("{p}", i.name + (priceTxt ? " (" + priceTxt + ")" : ""))))}" target="_blank" rel="noopener noreferrer">${esc(sh("wa"))}</a>` : "";
     let admin = "";
     if (salon){
@@ -2267,7 +2270,7 @@
     box.innerHTML = `
       <div class="shop-info"><p>${esc(sh("how"))}</p>
         <p><a class="btn btn--primary btn--sm" href="${esc(shopWa(sh("msgAll")))}" target="_blank" rel="noopener noreferrer">${esc(sh("wa"))}</a>
-        <button type="button" class="btn btn--outline btn--sm" data-action="open-giftcard">🎁 ${esc(sh("gift"))}</button></p></div>
+        <button type="button" class="btn btn--text btn--sm" data-action="open-giftcard">${esc(sh("gift"))}</button></p></div>
       ${salon ? `<div class="shop-admin"><p>${esc(dirty ? sh("unsaved") : sh("saved"))}</p><div class="shop-actions"><button type="button" class="btn btn--outline btn--sm" data-sh="add">${esc(sh("add"))}</button><button type="button" class="btn btn--primary btn--sm" data-sh="publish"${shop.busy ? " disabled" : ""}>${esc(sh("pub"))}</button>${dirty ? `<button type="button" class="btn btn--outline btn--sm" data-sh="discard">${esc(sh("discard"))}</button>` : ""}</div></div>` : ""}
       <div class="pop-chips">${chips}</div>
       ${shown.length ? shown.map(i => shopCard(i, salon)).join("") : `<p class="step__hint">${esc(sh("empty"))}</p>`}`;
@@ -2302,11 +2305,11 @@
     };
     try {
       for (const it of items){
-        if (/^data:image\/jpeg;base64,/.test(it.photo)){ const path = `assets/verkoop/${it.id}-${Date.now().toString(36)}.jpg`; await put(path, it.photo.split(",")[1], "Productfoto (app)"); it.photo = path; }
+        if (/^data:image\/jpeg;base64,/.test(it.photo)){ const path = `assets/verkoop/${it.id}-${Date.now().toString(36)}.jpg`; await put(path, it.photo.split(",")[1], "Productfoto (app)"); try { const m = shopPhotoMap(); m[path] = it.photo; const ks = Object.keys(m); while (ks.length > 12) delete m[ks.shift()]; localStorage.setItem(SHOP_PHOTOS, JSON.stringify(m)); } catch(e){ /* optional */ } it.photo = path; }
       }
       const out = { v:1, u: new Date().toISOString(), items };
       await put(SHOP_FILE, giftToken64(JSON.stringify(out, null, 1)), "Verkoophoekje bijgewerkt (app)");
-      shop.pub = shopClean(items); shop.draft = null;
+      shop.pub = shopClean(items); shop.ver = out.u.replace(/[^0-9]/g, "").slice(0, 14); shop.draft = null;
       try { localStorage.removeItem(SHOP_DRAFT); localStorage.setItem(SHOP_CACHE, JSON.stringify(shop.pub)); } catch(e){}
       showToast(sh("pub_ok"));
     } catch(e){ showToast(sh("pub_fail").replace("{e}", String(e && e.message || e))); }
@@ -2346,11 +2349,29 @@
       try {
         const sc = Math.min(1, 900 / Math.max(im.width, im.height)), c = document.createElement("canvas");
         c.width = Math.round(im.width * sc); c.height = Math.round(im.height * sc); c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
-        const it = shopDraft().find(x => x.id === shop.photoFor); if (it){ it.photo = c.toDataURL("image/jpeg", 0.82); shopSaveDraft(); renderShop(); }
+        let q = 0.82, du = c.toDataURL("image/jpeg", q); while (du.length > 330000 && q > 0.45){ q -= 0.1; du = c.toDataURL("image/jpeg", q); }   // keep each photo small
+        if (!/^data:image\/jpeg/.test(du)) throw new Error("jpeg");
+        const it = shopDraft().find(x => x.id === shop.photoFor); if (it){ it.photo = du; shopSaveDraft(); renderShop(); }
       } catch(e){ showToast(sh("photo_err")); } fi.value = "";
     }; im.onerror = () => { showToast(sh("photo_err")); fi.value = ""; }; im.src = String(rd.result); };
     rd.readAsDataURL(f0);
   });
+  function shopPhotoProbe(sp, p, n){   // retry a repo photo a few times (GitHub Pages needs a minute to publish it)
+    if (n >= 4){ sp.textContent = sh("nophoto"); return; }
+    setTimeout(() => {
+      const pr = new Image();
+      pr.onload = () => { if (!sp.isConnected) return; const im = document.createElement("img"); im.src = pr.src; im.dataset.p = p; im.dataset.n = "9"; im.alt = ""; im.referrerPolicy = "no-referrer"; sp.replaceWith(im); };
+      pr.onerror = () => shopPhotoProbe(sp, p, n + 1);
+      pr.src = p + "?r=" + Date.now();
+    }, n === 0 ? 3000 : 15000 * n);
+  }
+  document.addEventListener("error", ev => {   // v201b: a photo that does not load never shows a broken icon
+    const im = ev.target; if (!im || im.tagName !== "IMG" || !im.closest || !im.closest("#shopBody")) return;
+    const p = im.getAttribute("data-p") || "", local = p && shopPhotoMap()[p];
+    if (local && im.src !== local){ im.src = local; return; }
+    const sp = document.createElement("span"); sp.className = "shop-card__nophoto"; sp.textContent = p.indexOf("assets/") === 0 ? "…" : sh("nophoto");
+    im.replaceWith(sp); if (p.indexOf("assets/") === 0) shopPhotoProbe(sp, p, 0);
+  }, true);
   setTimeout(() => { shopLoad(); }, 0);
 
   document.addEventListener("click", popClick);

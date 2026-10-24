@@ -1377,10 +1377,10 @@ section[data-step="welcome"] .season-card{ background:var(--cream); color:var(--
 section[data-step="welcome"] .season-card__hello{ font-size:17px; font-weight:500; }
 section[data-step="welcome"] .season-card__fact b, section[data-step="welcome"] .season-card__shop{ color:var(--gold-ink); }
 section[data-step="welcome"] .season-card .btn--text{ color:var(--espresso); }
-section[data-step="welcome"] .welcome-stampcard, section[data-step="welcome"] .welcome-giftcard, section[data-step="welcome"] .welcome-photomoment, section[data-step="welcome"] .welcome-findme, section[data-step="welcome"] .welcome-pricelist{
+section[data-step="welcome"] .welcome-stampcard, section[data-step="welcome"] .welcome-giftcard, section[data-step="welcome"] .welcome-photomoment, section[data-step="welcome"] .welcome-findme, section[data-step="welcome"] .welcome-pricelist, section[data-step="welcome"] .welcome-shopbtn{
   border:none; border-bottom:1px solid var(--espresso-12); border-radius:0; background:none; box-shadow:none; justify-content:space-between; padding:16px 2px; margin:0; font-weight:500; letter-spacing:.02em; color:var(--espresso); }
 section[data-step="welcome"] .welcome-stampcard{ border-top:1px solid var(--espresso-12); margin-top:18px; }
-section[data-step="welcome"] .welcome-stampcard::after, section[data-step="welcome"] .welcome-giftcard::after, section[data-step="welcome"] .welcome-photomoment::after, section[data-step="welcome"] .welcome-findme::after, section[data-step="welcome"] .welcome-pricelist::after{ content:"›"; font-size:20px; line-height:1; color:var(--gold); }
+section[data-step="welcome"] .welcome-stampcard::after, section[data-step="welcome"] .welcome-giftcard::after, section[data-step="welcome"] .welcome-photomoment::after, section[data-step="welcome"] .welcome-findme::after, section[data-step="welcome"] .welcome-pricelist::after, section[data-step="welcome"] .welcome-shopbtn::after{ content:"›"; font-size:20px; line-height:1; color:var(--gold); }
 section[data-step="welcome"] .welcome-houserules{ margin-top:10px; font-weight:500; color:var(--espresso-60); }
 .reviews-card{ background:transparent !important; box-shadow:none !important; border-radius:0 !important; border-top:1px solid var(--espresso-12); }
 .reviews-card__title, .newsletter-card__title, .news-card__title{ font-family:var(--font-display); font-weight:500 !important; letter-spacing:.01em; }
@@ -1523,4 +1523,10 @@ section[data-step="welcome"] .book-hub .btn--primary, section[data-step="welcome
 .shop-edit label{ display:grid; gap:2px; font-size:.82rem; }
 .shop-edit input, .shop-edit select, .shop-edit textarea{ font:inherit; padding:8px 10px; border:1px solid var(--line,#CBBFAE); border-radius:10px; background:#fff; }
 .shop-linkrow:empty, .welcome-shop:empty{ display:none; }
-.shop-linkrow{ margin:8px 0; } .welcome-shop .btn{ width:100%; }
+.shop-card__nophoto{ font-style:italic; }
+.shop-linkrow{ margin:8px 0; } section[data-step="welcome"] .welcome-shop .welcome-shopbtn{ width:100%; display:flex; align-items:center; }
+
+.shop-info p{ font-size:.92rem; line-height:1.5; }
+.shop-card p{ font-size:.93rem; line-height:1.45; }
+.shop-card h3{ font-family:var(--font-display); font-weight:500; letter-spacing:.01em; }
+.shop-info .btn--text{ padding-left:0; text-align:left; white-space:normal; }
