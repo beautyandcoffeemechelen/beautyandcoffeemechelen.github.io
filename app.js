@@ -2094,8 +2094,9 @@
     return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name:"AES-GCM", iv:b64(blob.iv) }, key, b64(blob.ct))));
   }
   async function popSeed(){
-    try { if (localStorage.getItem("bc_pop_seeded_v2")) return; } catch(e){ return; }
+    let done = 0; try { done = Number(localStorage.getItem("bc_pop_seeded_v2") || 0); } catch(e){ return; }
     let blob; try { const r = await fetch("populariteit-start.enc?t=" + Date.now(), { cache:"no-store" }); if (!r.ok) return; blob = JSON.parse(await r.text()); } catch(e){ return; }
+    const rev = Number(blob && blob.r) || 2; if (done >= rev) return;   // v207: a higher revision in the file (new agenda data) is loaded once, replacing only the old start rows
     let secret = new URLSearchParams(location.search).get("voorproef") || ""; try { secret = secret || sessionStorage.getItem("bc_pop_pk") || ""; } catch(e){ /* ignore */ }
     if (!secret) secret = window.prompt(t("pop_seed_prompt", state.lang)) || "";
     if (!secret) return;
@@ -2105,7 +2106,7 @@
     const d = popLoad();
     d.e = d.e.filter(x => !x.s && !(x.c === "beh" && /-15$/.test(x.d) && x.d <= "2026-10-15"));   // old seed rows only, never Sandra's own counts
     c.e.forEach(x => d.e.push(x)); popSave();
-    try { localStorage.setItem("bc_pop_seeded_v2", "1"); } catch(e){ /* ignore */ }
+    try { localStorage.setItem("bc_pop_seeded_v2", String(rev)); } catch(e){ /* ignore */ }
     showToast(t("pop_seeded", state.lang)); renderPriceList();
   }
   function popSave(){ try { localStorage.setItem(POP_KEY, JSON.stringify(popLoad())); } catch(e){ showToast(t("pop_save_fail", state.lang)); } }
@@ -2140,7 +2141,7 @@
     const m = popSecMap()[k];
     if (m){ const g = [...new Set([...m].map(s => POP_SECGRP[s] || "other"))]; if (g.length === 1) return g[0]; if (g.includes("mani") && g.includes("pedi")) return "supp"; return g[0]; }
     const n = String(k).toLowerCase();
-    if (/pedicure/.test(n)) return "pedi"; if (/supplement|gellak|nagellak|biab/.test(n)) return "supp"; if (/manicure/.test(n)) return "mani";
+    if (/pedicure|eelt|likdoorn|ingegroeid|voetverzorging/.test(n)) return "pedi"; if (/supplement|gellak|nagellak|biab/.test(n)) return "supp"; if (/manicure/.test(n)) return "mani";
     if (/make-?up/.test(n)) return "makeup"; if (/lash|wimper/.test(n)) return "lashes"; if (/shaping|brow|wenkbrauw|henna/.test(n)) return "brows";
     if (/wax|onthar|bovenlip|oksel|bikini|onderbenen|benen/.test(n)) return "wax";
     if (/massage|cupping|lymfe|pakking|body|hot stone/.test(n)) return "body";
