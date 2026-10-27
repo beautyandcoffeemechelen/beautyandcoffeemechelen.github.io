@@ -1536,3 +1536,9 @@ section[data-step="welcome"] .book-hub .btn--primary, section[data-step="welcome
 .shop-card details{ margin:4px 0 12px; }
 .shop-card .shop-actions .chip{ min-height:34px; }
 .pop-h{ font-family:var(--font-display); font-size:1rem; font-weight:600; margin:16px 0 4px; }
+
+/* ---- v208: boekhouding (enkel salon) ---- */
+.acc-banner{ background:#FFF6E0; border:1px dashed var(--gold,#B8893F); border-radius:14px; padding:10px 14px; margin:12px 0; font-size:.92rem; }
+.acc-banner ul{ margin:4px 0 6px; padding-left:18px; } .acc-banner__title{ margin:0; font-weight:600; }
+
+.chip.is-on{ background:#3b2f26; color:#fff; border-color:#3b2f26; }   /* v208: active chip also outside .pop-chips (shop filter, accounting) */
