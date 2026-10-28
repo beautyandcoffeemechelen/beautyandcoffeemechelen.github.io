@@ -1,7 +1,18 @@
 {
  "v": 1,
- "u": "2026-10-24T04:29:54.222Z",
+ "u": "2026-10-28T14:03:25.137Z",
  "items": [
+  {
+   "id": "nieuw-mvs6n65d",
+   "name": "Autumn Spice",
+   "desc": "Breng de warme sfeer van de herfst in huis met dit handgemaakte droogbloemenboeket. Gevuld met sfeervolle oranje en bronskleurige accenten, robuuste granen en fijne pluimpjes. Prachtig om neer te zetten of op te hangen. Duurzaam, uniek en direct klaar voor een mooi plekje! ✨",
+   "ingr": "100% duurzame, handgemaakte droogbloemen",
+   "cat": "overig",
+   "status": "beschikbaar",
+   "price": 20,
+   "qty": 1,
+   "photo": "assets/verkoop/nieuw-mvs6n65d-mvs6px3l.jpg"
+  },
   {
    "id": "amandelmelkzeep",
    "name": "Amandelmelkzeep – Duurzaam Genieten met een Knipoog, rozemarijn (ca. 70 g)",
