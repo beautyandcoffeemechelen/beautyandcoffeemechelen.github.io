@@ -1542,3 +1542,10 @@ section[data-step="welcome"] .book-hub .btn--primary, section[data-step="welcome
 .acc-banner ul{ margin:4px 0 6px; padding-left:18px; } .acc-banner__title{ margin:0; font-weight:600; }
 
 .chip.is-on{ background:#3b2f26; color:#fff; border-color:#3b2f26; }   /* v208: active chip also outside .pop-chips (shop filter, accounting) */
+
+/* ---- v209: gauges ---- */
+.gauges{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:10px 0; }
+.gauge{ text-align:center; background:var(--cream-2,#F3ECE2); border-radius:14px; padding:8px 6px; }
+.gauge svg{ width:100%; max-width:170px; height:auto; } .gauge__t{ margin:0; font-weight:600; font-size:.92rem; } .gauge__s{ margin:2px 0 0; font-size:.78rem; opacity:.75; }
+
+#accAddr{ font:inherit; padding:8px 10px; border:1px solid var(--line,#CBBFAE); border-radius:10px; background:#fff; width:100%; box-sizing:border-box; margin:4px 0; }

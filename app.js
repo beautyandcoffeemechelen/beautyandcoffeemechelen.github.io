@@ -2290,7 +2290,8 @@
   const accFmtD = s => accIsDate(s) ? s.slice(8, 10) + "/" + s.slice(5, 7) + "/" + s.slice(0, 4) : "";
   const accDays = (a, b) => Math.round((new Date(b + "T12:00:00") - new Date(a + "T12:00:00")) / 864e5);
   function accClean(d){
-    d = d || {}; const o = { v:1, lead:[7, 14, 30].includes(+d.lead) ? +d.lead : 14, items:[], dates:[], done:{}, vatIncl:d.vatIncl ? 1 : 0, incl:{ verkoop:1, cabine:1, grondstof:1, ander:1 } };
+    d = d || {}; const o = { v:1, lead:[7, 14, 30].includes(+d.lead) ? +d.lead : 14, items:[], dates:[], done:{}, vatIncl:d.vatIncl ? 1 : 0, incl:{ verkoop:1, cabine:1, grondstof:1, ander:1 }, health:{ target:60, fixed:0, cost:{} } };
+    { const hh = d.health || {}, tg = accNum(hh.target), fx = accNum(hh.fixed); if (tg > 0 && tg <= 1000) o.health.target = tg; if (fx >= 0 && fx <= 1e6) o.health.fixed = fx; Object.keys(hh.cost || {}).slice(0, 300).forEach(k => { const n = accNum(hh.cost[k]); if (n >= 0 && n <= 1e5) o.health.cost[String(k).slice(0, 140)] = n; }); }
     if (d.incl && typeof d.incl === "object") Object.keys(o.incl).forEach(k => { if (d.incl[k] === 0 || d.incl[k] === false) o.incl[k] = 0; });
     (Array.isArray(d.items) ? d.items : []).slice(0, 3000).forEach(i => {
       if (!i || !i.name) return;
@@ -2355,7 +2356,7 @@
   function accZip(files, mime){
     const enc = new TextEncoder(), loc = [], cen = []; let off = 0;
     files.forEach(f => {
-      const nm = enc.encode(f.name), data = enc.encode(f.text), crc = accCrc(data), sz = data.length;
+      const nm = enc.encode(f.name), data = f.bytes || enc.encode(f.text), crc = accCrc(data), sz = data.length;
       const lh = new DataView(new ArrayBuffer(30)); lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(12, 0x21, true); lh.setUint32(14, crc, true); lh.setUint32(18, sz, true); lh.setUint32(22, sz, true); lh.setUint16(26, nm.length, true);
       loc.push(new Uint8Array(lh.buffer), nm, data);
       const ch = new DataView(new ArrayBuffer(46)); ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(14, 0x21, true); ch.setUint32(16, crc, true); ch.setUint32(20, sz, true); ch.setUint32(24, sz, true); ch.setUint16(28, nm.length, true); ch.setUint32(42, off, true);
@@ -2399,8 +2400,10 @@
     const x = accLoad(), t0 = accToday(), cy = Number(t0.slice(0, 4)); if (!ACC.year) ACC.year = cy;
     const ys = x.items.map(i => Number((i.date || "").slice(0, 4))).filter(Boolean).concat([cy - 1, cy]), y0 = Math.min(...ys), years = []; for (let k = y0; k <= cy; k++) years.push(k);
     const chip = (v, lb, on, a) => `<button type="button" class="chip chip--sm${on ? " is-on" : ""}" data-acc="${a}" data-v="${esc(v)}">${lb}</button>`;
-    const head = `<div class="pop-chips">${chip("stock", "📦 Voorraad", ACC.tab === "stock", "tab")}${chip("dates", "🗓️ Data", ACC.tab === "dates", "tab")}</div>`;
+    const head = `<div class="pop-chips">${chip("stock", "📦 Voorraad", ACC.tab === "stock", "tab")}${chip("docs", "🧾 Facturen", ACC.tab === "docs", "tab")}${chip("health", "🩺 Gezondheid", ACC.tab === "health", "tab")}${chip("dates", "🗓️ Data", ACC.tab === "dates", "tab")}</div>`;
     const note = `<p class="ingr-muted">Enkel voor jou en enkel op dit toestel: dit gaat nooit naar GitHub. Maak af en toe een back-up (knoppen onderaan).</p>`;
+    if (ACC.tab === "docs") return head + note + accDocsSkeleton();
+    if (ACC.tab === "health") return head + note + accHealthHtml();
     if (ACC.tab === "dates"){
       const t = accAllDates().filter(e => e.d >= accIso(new Date(Date.now() - 30 * 864e5))).slice(0, 14);
       return head + note + `<p class="ingr-muted">Waarschuwing op het startscherm: ${[7, 14, 30].map(n => chip(String(n), n + " dagen vooraf", x.lead === n, "lead")).join("")}</p>
@@ -2487,6 +2490,170 @@
     const f0 = fi.files[0]; if (f0.size > 5 * 1024 * 1024){ fi.value = ""; showToast("Bestand te groot."); return; }
     const rd = new FileReader(); rd.onload = () => { try { const d = accClean(JSON.parse(String(rd.result || ""))); if (!window.confirm("Dit vervangt je huidige boekhoudgegevens door het bestand (" + d.items.length + " producten). Doorgaan?")) { fi.value = ""; return; } ACC.data = d; accSave(); accRender(); showToast("Hersteld."); } catch(e){ showToast("Dat bestand is geen geldige back-up."); } fi.value = ""; };
     rd.readAsText(f0);
+  });
+
+
+  /* ===== v209: Signature per line, invoices zone (+ share to Dexxter), business health ===== */
+  const SIG_LINES = [
+    { id:"blauw", e:"🔵", nl:"Blauw – droge huid (hydrateren)", prot:["droog"] },
+    { id:"roze", e:"🌸", nl:"Roze – gevoelige huid", prot:["gevoelig"] },
+    { id:"roze-onco", e:"🌸", nl:"Roze – oncologische huid", prot:["oncologisch"] },
+    { id:"goud", e:"🟡", nl:"Goud – anti-aging (rijpe huid)", prot:["rijp"] },
+    { id:"paars", e:"🟣", nl:"Paars – vette huid, zonder acne", prot:["vet"] },
+    { id:"paars-acne", e:"🟣", nl:"Paars – vette huid, met acne (nog aan te vullen)", prot:[] },
+    { id:"groen", e:"🟢", nl:"Groen + paars – gecombineerde huid", prot:["gemengd"] },
+    { id:"vetterijp", e:"▫️", nl:"Vette, rijpe huid", prot:["vetterijp"] },
+    { id:"heren", e:"▫️", nl:"Herenverzorging", prot:["heren"] }
+  ];
+  const SIG_ALIAS = { "soft cleaning mousse":"janssensoftmousse", "gentle cleaning powder":"janssencleansingpowder", "hyaluron replenisch cream":"janssenhyaluron3", "peel off mask aloe de stress":"janssenaloe", "peel off dead sea black mask":"janssendeadsea" };
+  const sigNorm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+  const sigTokens = cell => String(cell || "").split(/\n|\s\/\s|\s\+\s|\//).map(x => x.replace(/\(.*?\)/g, "").replace(/^[^:]*:\s*/, "").replace(/\d+\s*m[lL]\s*water/i, "").trim()).filter(x => sigNorm(x).length >= 5);
+  function sigProducts(lineId){
+    const line = SIG_LINES.find(l => l.id === lineId); if (!line) return [];
+    const cat = ingrCatalog(), out = new Map();
+    line.prot.forEach(pid => { const pr = (typeof PROTOCOLS !== "undefined" ? PROTOCOLS : []).find(p => p.id === pid); if (!pr) return;
+      pr.rows.forEach(r => sigTokens(r[1]).forEach(tk => { const n = sigNorm(tk), hit = (SIG_ALIAS[n] ? cat.filter(([id]) => id === SIG_ALIAS[n]) : cat.filter(([, p]) => sigNorm(ingrName(p)).includes(n))).filter(([, p]) => !/staaltje|tester|proefje/i.test(ingrName(p))), j = hit.filter(([, p]) => /janssen/i.test(ingrName(p))); (j.length ? j : hit).slice(0, 2).forEach(h => out.set(h[0], h)); })); });
+    return [...out.values()];
+  }
+  /* ---------- invoices & receipts (IndexedDB, only on this phone) ---------- */
+  const ACC_ADDR = "bc_dexxter_addr";
+  const accDB = () => new Promise((res, rej) => { const r = indexedDB.open("bc_acc_docs", 1); r.onupgradeneeded = () => r.result.createObjectStore("docs", { keyPath:"id" }); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+  async function accTx(mode, fn){ const db = await accDB(); return new Promise((res, rej) => { const tx = db.transaction("docs", mode); let rq; try { rq = fn(tx.objectStore("docs")); } catch(e){ db.close(); rej(e); return; } tx.oncomplete = () => { db.close(); res(rq && rq.result); }; tx.onerror = tx.onabort = () => { db.close(); rej(tx.error); }; }); }
+  const docAll = () => accTx("readonly", s => s.getAll()).then(a => a || []);
+  const docGet = id => accTx("readonly", s => s.get(id));
+  const docPut = rec => accTx("readwrite", s => s.put(rec));
+  const docDel = id => accTx("readwrite", s => s.delete(id));
+  const docMeta = d => ({ id:d.id, dir:d.dir === "out" ? "out" : "in", date:accIsDate(d.date) ? d.date : accToday(), party:String(d.party || "").slice(0, 100), nr:String(d.nr || "").slice(0, 40), excl:Math.max(0, accNum(d.excl) || 0), vat:Math.min(100, Math.max(0, accNum(d.vat) || 0)), cat:String(d.cat || "").slice(0, 60), note:String(d.note || "").slice(0, 300) });
+  const accSlug = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "document";
+  const accExt = d => { const m = String(d.name || "").match(/\.([A-Za-z0-9]{2,5})$/); return m ? m[1].toLowerCase() : (d.type === "application/pdf" ? "pdf" : "jpg"); };
+  async function accShrink(file){
+    if (!/^image\//.test(file.type) || file.size < 400000) return file;
+    try {
+      const bm = await createImageBitmap(file), sc = Math.min(1, 2200 / Math.max(bm.width, bm.height)), c = document.createElement("canvas"); c.width = Math.round(bm.width * sc); c.height = Math.round(bm.height * sc); c.getContext("2d").drawImage(bm, 0, 0, c.width, c.height);
+      const bl = await new Promise(r => c.toBlob(r, "image/jpeg", 0.85)); return bl ? new File([bl], file.name.replace(/\.[^.]+$/, "") + ".jpg", { type:"image/jpeg" }) : file;
+    } catch(e){ return file; }
+  }
+  function accDocsSkeleton(){ setTimeout(accDocsRender, 0); return `<div id="accDocs"><p class="ingr-muted">Laden…</p></div>`; }
+  async function accDocsRender(){
+    const box = $("#accDocs"); if (!box) return;
+    let all; try { all = await docAll(); } catch(e){ box.innerHTML = `<p class="ingr-muted">⚠️ Opslag op dit toestel is niet beschikbaar (privénavigatie of geblokkeerd). Facturen kunnen hier niet bewaard worden.</p>`; return; }
+    const cy = Number(accToday().slice(0, 4)), ys = [...new Set(all.map(d => Number(String(d.date).slice(0, 4))).concat([cy]))].sort(), y = ACC.docYear || (ACC.docYear = cy), dirF = ACC.docDir || "all", onlyOpen = !!ACC.docOpen;
+    const addr = (() => { try { return localStorage.getItem(ACC_ADDR) || ""; } catch(e){ return ""; } })();
+    const list = all.filter(d => String(d.date).slice(0, 4) === String(y) && (dirF === "all" || d.dir === dirF) && (!onlyOpen || !d.sent)).sort((a, b) => b.date.localeCompare(a.date));
+    const sum = k => all.filter(d => String(d.date).slice(0, 4) === String(y) && d.dir === k).reduce((s, d) => s + d.excl, 0);
+    const ch = (v, lb, on, a) => `<button type="button" class="chip chip--sm${on ? " is-on" : ""}" data-acc="${a}" data-v="${esc(v)}">${lb}</button>`;
+    const fld = (id, lb, v, ex) => `<label>${lb}<input id="accD_${id}" ${ex || ""} value="${esc(v)}"></label>`;
+    const P = ACC.docForm;
+    const form = !P ? "" : `<div class="shop-edit"><p class="ingr-muted">${esc(P.fileName)}</p>
+      <label>Soort<select id="accD_dir"><option value="in"${P.dir === "in" ? " selected" : ""}>Inkomende factuur of bon (aankoop)</option><option value="out"${P.dir === "out" ? " selected" : ""}>Uitgaande factuur (naar klant)</option></select></label>
+      ${fld("date", "Datum", P.date, 'type="date"')}${fld("party", "Leverancier of klant", P.party, 'maxlength="100"')}${fld("nr", "Factuurnummer", P.nr, 'maxlength="40"')}
+      ${fld("excl", "Bedrag zonder btw (€)", String(P.excl || "").replace(".", ","), 'inputmode="decimal"')}${fld("vat", "Btw % (0 als vrijgesteld)", String(P.vat || 0).replace(".", ","), 'inputmode="decimal"')}
+      ${fld("cat", "Categorie in Dexxter (optioneel)", P.cat, 'maxlength="60"')}${fld("note", "Opmerking", P.note, 'maxlength="300"')}
+      <div class="shop-actions"><button type="button" class="btn btn--primary btn--sm" data-acc="docsave">Bewaren</button><button type="button" class="btn btn--outline btn--sm" data-acc="doccancel">Annuleren</button></div></div>`;
+    box.innerHTML = `<div class="shop-info"><p><b>Digitale bonnen en facturen</b></p>
+      <p class="ingr-muted">Bewaar hier je inkomende facturen en bonnetjes (leveranciers, salonproducten, apparatuur) en je uitgaande facturen. Ze blijven op dit toestel en gaan nooit naar GitHub.</p><details class="ingr-more"><summary>Waarom en hoe lang bewaren?</summary><p class="ingr-muted">Het bewaren hoort bij de btw-plicht of de vrijstellingsregeling: maak daarom af en toe een back-up (zip), en beveilig je e-mail en cloudopslag goed. De wettelijke bewaartermijn is volgens mijn algemene kennis meestal 7 jaar voor de boekhouding en tot 10 jaar voor btw-stukken: vraag het bevestigen aan Dexxter of je boekhouder.</p></details>
+      <p>Dexxter-adres voor facturen: <input id="accAddr" type="email" autocomplete="off" placeholder="het adres dat Dexxter je gaf" value="${esc(addr)}" style="min-width:70%"> <button type="button" class="chip chip--sm" data-acc="docaddr">Bewaren</button></p>
+      <p class="ingr-muted">Dit adres is persoonlijk: ik zet het nooit in de app-code of de openbare repo. Het blijft alleen op dit toestel.</p></div>
+      ${form}
+      <div class="shop-actions"><label class="btn btn--primary btn--sm">📷 Foto nemen<input type="file" id="accDocCam" accept="image/*" capture="environment" hidden></label><label class="btn btn--outline btn--sm">📎 Bestand kiezen<input type="file" id="accDocFile" accept="image/*,application/pdf" hidden></label></div>
+      <div class="pop-chips">${ys.map(k => ch(String(k), String(k), k === y, "docyear")).join("")}</div>
+      <div class="pop-chips">${ch("all", "Alles", dirF === "all", "docdir")}${ch("in", "Inkomend", dirF === "in", "docdir")}${ch("out", "Uitgaand", dirF === "out", "docdir")}${ch("open", onlyOpen ? "✓ Nog niet doorgestuurd" : "Nog niet doorgestuurd", onlyOpen, "docopen")}</div>
+      <p class="ingr-muted">${y}: inkomend ${esc(accEur(sum("in")))} · uitgaand ${esc(accEur(sum("out")))} (zonder btw) · ${all.filter(d => String(d.date).slice(0, 4) === String(y)).length} stukken</p>
+      ${list.length ? `<ol class="pop-list">${list.map(d => `<li class="pop-row"><div class="pop-row__top"><span class="pop-row__name">${esc(d.party || "(zonder naam)")}</span><b class="pop-row__n">${esc(accEur(d.excl))}</b></div>
+        <div class="ingr-muted">${esc(accFmtD(d.date))} · ${d.dir === "out" ? "uitgaand" : "inkomend"}${d.nr ? " · " + esc(d.nr) : ""}${d.vat ? " · btw " + esc(String(d.vat).replace(".", ",")) + "%" : ""}${d.cat ? " · " + esc(d.cat) : ""} · ${d.sent ? "✅ gedeeld met Dexxter op " + esc(accFmtD(d.sentAt)) : "nog niet doorgestuurd"}</div>
+        <div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="docview" data-id="${esc(d.id)}">Bekijk</button><button type="button" class="chip chip--sm" data-acc="docsend" data-id="${esc(d.id)}">→ Dexxter</button><button type="button" class="chip chip--sm" data-acc="docsent" data-id="${esc(d.id)}">${d.sent ? "↺ Niet doorgestuurd" : "✓ Doorgestuurd"}</button><button type="button" class="chip chip--sm" data-acc="docedit" data-id="${esc(d.id)}">Bewerken</button><button type="button" class="chip chip--sm" data-acc="docdel" data-id="${esc(d.id)}">Verwijderen</button></div></li>`).join("")}</ol>` : `<p class="ingr-muted">Nog geen stukken voor ${y}.</p>`}
+      <div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="doczip">⬇ Alles van ${y} (zip + overzicht)</button></div>
+      <p class="ingr-muted">“→ Dexxter” opent het deelmenu van je telefoon met de factuur als bijlage en kopieert het adres; kies je mailapp en plak het adres bij Aan. De app kan zelf geen e-mail versturen, en kan niet controleren of de mail effectief is aangekomen: kijk dat na in Dexxter.</p>`;
+    const onFile = async ev => { const f = ev.target.files && ev.target.files[0]; ev.target.value = ""; if (!f) return; if (f.size > 25 * 1024 * 1024){ showToast("Bestand te groot (max. 25 MB)."); return; } const g = await accShrink(f); ACC.docForm = { id:"new", file:g, fileName:g.name + " (" + Math.round(g.size / 1024) + " KB)", dir:"in", date:accToday(), party:"", nr:"", excl:"", vat:0, cat:"", note:"" }; accDocsRender(); };
+    const c1 = $("#accDocCam"), c2 = $("#accDocFile"); if (c1) c1.onchange = onFile; if (c2) c2.onchange = onFile;
+  }
+  async function accDocSend(id){
+    let addr = ""; try { addr = (localStorage.getItem(ACC_ADDR) || "").trim(); } catch(e){ /* ignore */ }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(addr)){ showToast("Vul eerst het Dexxter-adres in en tik op Bewaren."); return; }
+    const d = await docGet(id); if (!d) return; const file = new File([d.blob], d.name || ("factuur." + accExt(d)), { type:d.type || "application/octet-stream" }), subj = "Factuur " + (d.party || "") + (d.nr ? " " + d.nr : "") + " " + d.date;
+    try { await navigator.clipboard.writeText(addr); } catch(e){ /* ignore */ }
+    if (navigator.canShare && navigator.canShare({ files:[file] })){
+      try { await navigator.share({ files:[file], title:subj, text:subj }); d.sent = 1; d.sentAt = accToday(); await docPut(d); showToast("Gedeeld. Adres gekopieerd: plak het bij Aan. Controleer later in Dexxter."); accDocsRender(); return; }
+      catch(e){ if (e && e.name === "AbortError") return; }
+    }
+    accDownload(d.blob, file.name); window.location.href = "mailto:" + addr + "?subject=" + encodeURIComponent(subj) + "&body=" + encodeURIComponent("Bijlage: " + file.name + " (staat in je downloads).");
+    showToast("Deelmenu niet beschikbaar: het bestand is gedownload en je mailapp opent. Voeg het bestand toe als bijlage.");
+  }
+  async function accDocZip(y){
+    const all = (await docAll()).filter(d => String(d.date).slice(0, 4) === String(y)); if (!all.length){ showToast("Geen stukken in " + y + "."); return; }
+    const files = [], rows = [["Datum", "Soort", "Leverancier of klant", "Factuurnummer", "Zonder btw", "Btw %", "Categorie", "Opmerking", "Bestand", "Met Dexxter gedeeld"]];
+    for (const d of all.sort((a, b) => a.date.localeCompare(b.date))){ const nm = String(y) + "/" + (d.dir === "out" ? "uitgaand" : "inkomend") + "/" + d.date + "_" + accSlug(d.party) + (d.nr ? "_" + accSlug(d.nr) : "") + "_" + d.id.slice(-4) + "." + accExt(d); files.push({ name:nm, bytes:new Uint8Array(await d.blob.arrayBuffer()) }); rows.push([d.date, d.dir === "out" ? "uitgaand" : "inkomend", d.party, d.nr, String(d.excl).replace(".", ","), String(d.vat).replace(".", ","), d.cat, d.note, nm, d.sent ? d.sentAt : ""]); }
+    const csv = "\uFEFF" + rows.map(r => r.map(c => '"' + String(c === undefined || c === null ? "" : c).replace(/"/g, '""') + '"').join(";")).join("\r\n");
+    files.push({ name:"overzicht-" + y + ".csv", text:csv });
+    accDownload(accZip(files, "application/zip"), "facturen-" + y + ".zip"); showToast("Zip gemaakt: facturen-" + y + ".zip");
+  }
+  /* ---------- business health: colour gauges per treatment and overall ---------- */
+  const RAYG = ["#4CA64C", "#E8C547", "#EE8B2B", "#D8442F"], RAYG_NL = ["groen", "geel", "oranje", "rood"];
+  const hNum = s => { const m = String(s || "").replace(",", ".").match(/\d+(\.\d+)?/); return m ? parseFloat(m[0]) : 0; };
+  const hMin = s => { const m = String(s || "").match(/(\d+)(?:\s*[–-]\s*(\d+))?/); return m ? (m[2] ? (+m[1] + +m[2]) / 2 : +m[1]) : 0; };
+  function hLevelDemand(n, prev){ let l = n >= 6 ? 0 : n >= 3 ? 1 : n >= 1 ? 2 : 3; if (prev >= 4 && n < prev * 0.5 && l < 3) l++; return l; }
+  const hLevelHour = (eh, tg) => eh >= tg ? 0 : eh >= tg * 0.8 ? 1 : eh >= tg * 0.6 ? 2 : 3;
+  const hLevelMargin = m => m >= 70 ? 0 : m >= 50 ? 1 : m >= 30 ? 2 : 3;
+  function accGauge(level, title, sub){
+    const cx = 70, cy = 68, r = 52, pt = (a, rr) => [cx + rr * Math.cos(a * Math.PI / 180), cy - rr * Math.sin(a * Math.PI / 180)];
+    const arcs = [0, 1, 2, 3].map(i => { const a1 = 180 - i * 45, a2 = 180 - (i + 1) * 45, p1 = pt(a1, r), p2 = pt(a2, r); return `<path d="M${p1[0].toFixed(1)} ${p1[1].toFixed(1)} A${r} ${r} 0 0 1 ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}" fill="none" stroke="${RAYG[i]}" stroke-width="14"${level === i ? "" : ' opacity=".45"'}/>`; }).join("");
+    const nd = level === null ? "" : (() => { const a = 180 - (level * 45 + 22.5), p = pt(a, 40); return `<line x1="${cx}" y1="${cy}" x2="${p[0].toFixed(1)}" y2="${p[1].toFixed(1)}" stroke="#3b2f26" stroke-width="3" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="5" fill="#3b2f26"/>`; })();
+    return `<div class="gauge"><svg viewBox="0 0 140 80" role="img" aria-label="${esc(title)}: ${level === null ? "geen gegevens" : RAYG_NL[level]}">${arcs}${nd}</svg><p class="gauge__t">${esc(title)}</p><p class="gauge__s">${esc(sub)}</p></div>`;
+  }
+  function accHealth(){
+    const x = accLoad(), h = x.health, pop = popLoad().e.filter(e => e.c === "beh"), t0 = accToday(), d12 = new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10), d24 = new Date(Date.now() - 730 * 864e5).toISOString().slice(0, 10);
+    const cnt = {}, prv = {}; pop.forEach(e => { if (e.d >= d12) cnt[e.k] = (cnt[e.k] || 0) + e.n; else if (e.d >= d24) prv[e.k] = (prv[e.k] || 0) + e.n; });
+    const items = []; try { PRICE_LIST.forEach(s => s.items.forEach(i => { const p = hNum(i.price), nm = i.n.nl; if (p > 0) items.push({ k:nm, price:p, min:hMin(i.time), n:cnt[nm] || 0, prev:prv[nm] || 0 }); })); } catch(e){ /* ignore */ }
+    const seen = new Set(items.map(i => i.k)); Object.keys(cnt).forEach(k => { if (!seen.has(k)) items.push({ k, price:0, min:0, n:cnt[k], prev:prv[k] || 0, generic:true }); });
+    items.forEach(i => { i.rev = i.n * i.price; i.eh = i.min > 0 && i.price > 0 ? i.price / i.min * 60 : null; i.cost = h.cost[i.k]; i.mg = (i.cost !== undefined && i.price > 0) ? (i.price - i.cost) / i.price * 100 : null;
+      i.lv = { d:hLevelDemand(i.n, i.prev), h:i.eh === null ? null : hLevelHour(i.eh, h.target), m:i.mg === null ? null : hLevelMargin(i.mg) }; i.worst = Math.max(...Object.values(i.lv).filter(v => v !== null)); });
+    const tot12 = items.reduce((s, i) => s + i.n, 0), totP = items.reduce((s, i) => s + i.prev, 0), rev12 = items.reduce((s, i) => s + i.rev, 0), noPrice = items.filter(i => !i.price).reduce((s, i) => s + i.n, 0), firstD = pop.reduce((m, e) => (!m || e.d < m) ? e.d : m, ""), partial = !firstD || firstD > d24;
+    const wh = items.filter(i => i.eh !== null && i.n > 0), hrs = wh.reduce((s, i) => s + i.n * i.min / 60, 0), rv = wh.reduce((s, i) => s + i.n * i.price, 0), avgEh = hrs > 0 ? rv / hrs : null;
+    const li = x.items, buy12 = li.filter(i => i.date >= d12).reduce((s, i) => s + accBase(i), 0), exp12 = li.reduce((s, i) => s + i.mv.filter(m => m.r === "vervallen" && m.d >= d12).reduce((a, m) => a + accUnit(i) * m.q, 0), 0);
+    const trend = totP >= 8 ? (tot12 - totP) / totP * 100 : null, lossPct = buy12 > 0 ? exp12 / buy12 * 100 : null, margin = (rev12 > 0 && buy12 > 0) ? (rev12 - buy12 - h.fixed) / rev12 * 100 : null;
+    const g = [
+      { t:"Vraag", lv:trend === null ? null : (trend >= -5 ? 0 : trend >= -20 ? 1 : trend >= -40 ? 2 : 3), s:trend === null ? "te weinig geschiedenis" : (trend >= 0 ? "+" : "") + Math.round(trend) + "% t.o.v. vorige 12 mnd" + (partial ? " (vorig jaar onvolledig)" : "") },
+      { t:"Omzet per uur", lv:avgEh === null ? null : hLevelHour(avgEh, h.target), s:avgEh === null ? "geen data" : accEur(avgEh) + " (doel " + accEur(h.target) + ")" },
+      { t:"Voorraadverlies", lv:lossPct === null ? null : (lossPct <= 5 ? 0 : lossPct <= 10 ? 1 : lossPct <= 20 ? 2 : 3), s:lossPct === null ? "geen aankopen ingegeven" : Math.round(lossPct) + "% van de aankopen vervallen" },
+      { t:"Marge (schatting)", lv:margin === null ? null : (margin >= 50 ? 0 : margin >= 30 ? 1 : margin >= 10 ? 2 : 3), s:margin === null ? "vul aankopen in" : Math.round(margin) + "% na aankopen en vaste kosten" }
+    ];
+    const known = g.filter(q => q.lv !== null).map(q => q.lv); return { items, g, overall: known.length ? Math.max(...known) : null, rev12, tot12, noPrice, h };
+  }
+  function accHealthHtml(){
+    const H = accHealth(), x = accLoad(), h = x.health, lvl = l => l === null ? "⚪" : ["🟢", "🟡", "🟠", "🔴"][l];
+    const rows = H.items.filter(i => i.n > 0 || i.prev > 0 || i.lv.h !== null).sort((a, b) => b.worst - a.worst || a.n - b.n || a.k.localeCompare(b.k));
+    const row = i => `<li class="pop-row"><div class="pop-row__top"><span class="pop-row__name">${lvl(i.worst)} ${esc(popLabel(i.k))}</span><b class="pop-row__n">${i.n}×</b></div>
+      <div class="ingr-muted">Vraag ${lvl(i.lv.d)} ${i.n}× in 12 mnd${i.prev ? " (vorig jaar " + i.prev + "×)" : ""} · €/uur ${lvl(i.lv.h)} ${i.eh === null ? "onbekend" : esc(accEur(i.eh))} · marge ${lvl(i.lv.m)} ${i.mg === null ? "kost niet ingevuld" : Math.round(i.mg) + "%"}${i.rev ? " · omzet ± " + esc(accEur(i.rev)) : ""}</div>
+      ${i.price ? `<div class="shop-actions"><label class="ingr-muted">Materiaalkost per behandeling (€) <input data-hc="${esc(i.k)}" inputmode="decimal" size="6" value="${i.cost === undefined ? "" : esc(String(i.cost).replace(".", ","))}"></label><button type="button" class="chip chip--sm" data-acc="hcost" data-k="${esc(i.k)}">Bewaren</button></div>` : ""}</li>`;
+    return `<p class="ingr-muted">Zoals een kleurmeter (groen, geel, oranje, rood) voor je hele zaak en per behandeling. De cijfers zijn een <b>schatting</b>: de omzet is aantal × de prijs uit je prijslijst, niet je echte kassa of bank. Het is een hulpmiddel om na te denken, geen oordeel.</p>
+      <div class="gauges">${accGauge(H.overall, "Algemeen", H.overall === null ? "nog te weinig gegevens" : "slechtste van de vier: " + RAYG_NL[H.overall])}${H.g.map(q => accGauge(q.lv, q.t, q.s)).join("")}</div>
+      <p class="ingr-muted">Omzet laatste 12 maanden (schatting): <b>${esc(accEur(H.rev12))}</b> uit ${H.tot12} behandelingen${H.noPrice ? ", waarvan " + H.noPrice + " “niet nader omschreven” (zonder prijs, dus niet meegeteld: de echte omzet ligt hoger)" : ""}.</p>
+      <div class="shop-info"><p><b>Jouw doelen</b></p><label>Doel omzet per uur (€)<input id="accH_t" inputmode="decimal" value="${esc(String(h.target).replace(".", ","))}"></label> <label>Vaste kosten per jaar (€, bv. verzekering, software)<input id="accH_f" inputmode="decimal" value="${esc(String(h.fixed).replace(".", ","))}"></label> <button type="button" class="chip chip--sm" data-acc="hgoal">Bewaren</button></div>
+      <p class="ingr-muted"><b>Regels</b> · Vraag: 6× of meer in 12 maanden groen, 3–5 geel, 1–2 oranje, 0 rood (een stap slechter als het minder dan de helft van vorig jaar is). Omzet per uur t.o.v. je doel: vanaf 100% groen, 80% geel, 60% oranje, daaronder rood. Marge: 70% of meer groen, 50% geel, 30% oranje. Voorraadverlies: tot 5% groen, 10% geel, 20% oranje. Algemeen = de slechtste meter.</p>
+      <h4 class="pop-h">Per behandeling (slechtste eerst)</h4>${rows.length ? `<ol class="pop-list">${rows.slice(0, 15).map(row).join("")}</ol>${rows.length > 15 ? `<details class="ingr-more"><summary>Nog ${rows.length - 15} andere</summary><ol class="pop-list">${rows.slice(15).map(row).join("")}</ol></details>` : ""}` : `<p class="ingr-muted">Nog geen telgegevens. Open eerst Populariteit.</p>`}`;
+  }
+  document.addEventListener("click", ev => {
+    const b = ev.target.closest && ev.target.closest("[data-acc]"); if (!b || !actSalon()) return; const a = b.dataset.acc, id = b.dataset.id, v = b.dataset.v;
+    const rd = () => { if (ACC.tab === "docs") accDocsRender(); else accRender(); };
+    if (a === "docyear"){ ACC.docYear = Number(v); return accDocsRender(); }
+    if (a === "docdir"){ ACC.docDir = v; return accDocsRender(); }
+    if (a === "docopen"){ ACC.docOpen = !ACC.docOpen; return accDocsRender(); }
+    if (a === "docaddr"){ const el = $("#accAddr"), val = ((el || {}).value || "").trim(); if (val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){ showToast("Dat is geen geldig e-mailadres."); return; } try { if (val) localStorage.setItem(ACC_ADDR, val); else localStorage.removeItem(ACC_ADDR); showToast(val ? "Adres bewaard (enkel op dit toestel)." : "Adres gewist."); } catch(e){ showToast("Bewaren mislukt."); } return; }
+    if (a === "doccancel"){ ACC.docForm = null; return accDocsRender(); }
+    if (a === "docsave"){
+      const P = ACC.docForm; if (!P) return; const g = k => (($("#accD_" + k) || {}).value || "").trim();
+      const m = docMeta({ id:P.id === "new" ? "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5) : P.id, dir:g("dir"), date:g("date"), party:g("party"), nr:g("nr"), excl:g("excl"), vat:g("vat"), cat:g("cat"), note:g("note") });
+      if (!m.party){ showToast("Vul de leverancier of klant in."); return; }
+      (async () => { try { if (P.id === "new"){ const f = P.file; await docPut(Object.assign(m, { name:f.name, type:f.type || "application/octet-stream", size:f.size, blob:f, sent:0, sentAt:"", added:accToday() })); } else { const old = await docGet(P.id); await docPut(Object.assign({}, old, m)); } ACC.docForm = null; showToast("Bewaard."); accDocsRender(); } catch(e){ showToast("Bewaren mislukt: opslagruimte vol of geblokkeerd."); } })(); return;
+    }
+    if (a === "docview"){ docGet(id).then(d => { if (d){ const u = URL.createObjectURL(d.blob); window.open(u, "_blank", "noopener"); setTimeout(() => URL.revokeObjectURL(u), 60000); } }); return; }
+    if (a === "docsend"){ accDocSend(id); return; }
+    if (a === "docsent"){ docGet(id).then(async d => { if (!d) return; d.sent = d.sent ? 0 : 1; d.sentAt = d.sent ? accToday() : ""; await docPut(d); accDocsRender(); }); return; }
+    if (a === "docedit"){ docGet(id).then(d => { if (!d) return; ACC.docForm = { id:d.id, fileName:d.name, dir:d.dir, date:d.date, party:d.party, nr:d.nr, excl:d.excl, vat:d.vat, cat:d.cat, note:d.note }; accDocsRender(); }); return; }
+    if (a === "docdel"){ docGet(id).then(d => { if (d && window.confirm("Dit stuk definitief verwijderen?\n" + d.party + " " + d.date)) docDel(id).then(accDocsRender); }); return; }
+    if (a === "doczip"){ accDocZip(ACC.docYear || Number(accToday().slice(0, 4))); return; }
+    if (a === "hcost"){ const el = $(`[data-hc="${CSS.escape(b.dataset.k)}"]`), val = ((el || {}).value || "").trim(), x = accLoad(); if (val === "") delete x.health.cost[b.dataset.k]; else { const n = accNum(val); if (!(n >= 0)){ showToast("Vul een bedrag in."); return; } x.health.cost[b.dataset.k] = n; } accSave(); return accRender(); }
+    if (a === "hgoal"){ const x = accLoad(), t = accNum(($("#accH_t") || {}).value), f = accNum(($("#accH_f") || {}).value); if (t > 0 && t <= 1000) x.health.target = t; if (f >= 0 && f <= 1e6) x.health.fixed = f; accSave(); return accRender(); }
   });
 
   /* ===== v201: Verkoophoekje (shop corner) ===== */
@@ -5584,6 +5751,7 @@
     const L = state.lang;
     if (id === "advent") return t("ingr_use_advent", L);
     if (id === "extra-facial") return t("ingr_use_extra_facial", L);
+    if (String(id).startsWith("signaturefacial:")){ const ln = SIG_LINES.find(l => l.id === String(id).slice(16)); const bt = (typeof TREATMENTS_CATALOG !== "undefined") && TREATMENTS_CATALOG.find(x => x.id === "signaturefacial"); return (bt ? bt.name : "Signature") + " · " + (ln ? ln.e + " " + ln.nl : id); }
     const tr = (typeof TREATMENTS_CATALOG !== "undefined") && TREATMENTS_CATALOG.find(x => x.id === id);
     if (tr) return tr.name;
     const a = typeof ADVENT === "object" && ADVENT.items && ADVENT.items[id];
@@ -5596,7 +5764,7 @@
     ingrCatalog().forEach(([, p]) => (p.usedIn || []).forEach(id => { if (!ids.includes(id)) ids.push(id); }));
     return ids;
   }
-  const ingrProductsFor = id => ingrCatalog().filter(([, p]) => (p.usedIn || []).includes(id));
+  const ingrProductsFor = id => String(id).startsWith("signaturefacial:") ? sigProducts(String(id).slice(16)) : ingrCatalog().filter(([, p]) => (p.usedIn || []).includes(id));
   /* Sandra = private link, opened from salon mode, or a phone with the salon key */
   function ingrSandra(){ try { return ingrPreview || ingr.unlocked || hasSalonKey(); } catch(e){ return ingrPreview || ingr.unlocked; } }
   /* finished products ("op"): PRODUCTS_OP in ingredients.js + marked on this phone */
@@ -5946,7 +6114,7 @@
     const cats = openCats();
     const catsOf = p => { if (DIY_SLOTS.includes(p.slot)) return ["diy"]; const u = p.usedIn || []; const c = Object.keys(cats).filter(g => u.some(v => cats[g].includes(v))); return c.length ? c : ["other"]; };
     const chips = ["all"].concat(Object.keys(cats), ["diy", "other", "tracked"]).map(g => `<button type="button" class="chip${(ingr.invCat || "all") === g ? " is-selected" : ""}" data-inv-cat="${g}">${g === "all" ? t("tht_all", L) : g === "other" ? t("tht_other", L) : g === "diy" ? "🧼 " + t("tht_diy", L) : g === "tracked" ? t("inv_tracked", L) : t("avoid." + g, L)}</button>`).join("");
-    const treats = ingrTreatments().filter(id => !ingrIsAdventUse(id)).map(id => [id, ingrTreatName(id)]).sort((a, b) => a[1].localeCompare(b[1]));
+    const treats = ingrTreatments().filter(id => !ingrIsAdventUse(id)).flatMap(id => id === "signaturefacial" ? SIG_LINES.map(l => ["signaturefacial:" + l.id, ingrTreatName("signaturefacial:" + l.id)]) : [[id, ingrTreatName(id)]]).sort((a, b) => a[1].localeCompare(b[1]));   // v209: Signature split per colour line
     // use-up actions: are their products finished? (then switch the action off)
     const actWarn = (typeof CURRENT_ACTIONS !== "undefined" ? CURRENT_ACTIONS : []).filter(a => a.products && !a.soldOut).map(a => {
       const tag = String(a.products).replace(/^usedIn:/, "");
@@ -6018,6 +6186,7 @@
     if (!tid){ wrap.innerHTML = ""; return; }
     const x = invData(), prev = x.sets[tid] || [];
     const list = ingrProductsFor(tid).sort((a, b) => ingrName(a[1]).localeCompare(ingrName(b[1])));
+    if (!list.length){ wrap.innerHTML = `<p class="ingr-muted">Voor deze lijn zijn nog geen producten gekoppeld. Geef me de producten door, dan vul ik ze aan.</p>`; return; }
     wrap.innerHTML = `<p class="ingr-muted">${t("inv_quick_hint", L)}</p>
       <div class="inv-checks">${list.map(([id, p]) => `<label class="inv-check"><input type="checkbox" value="${esc(id)}"${prev.includes(id) ? " checked" : ""}> ${esc(ingrName(p))}${x.p[id] && x.p[id].per ? "" : ` <span class="ingr-muted">(${t("inv_untracked_short", L)})</span>`}</label>`).join("")}</div>
       <button type="button" class="btn btn--sm btn--primary" data-inv="quick">${t("inv_quick_btn", L)}</button>`;
