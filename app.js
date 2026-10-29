@@ -2345,9 +2345,11 @@
   function accBanner(){
     const el = $("#accBanner"); if (!el) return;
     let due = []; try { due = actSalon() ? accDue() : []; } catch(e){ due = []; }
-    if (!due.length){ el.hidden = true; el.innerHTML = ""; return; }
+    let drs = []; try { drs = actSalon() ? accDrafts() : []; } catch(e){ drs = []; }
+    if (!due.length && !drs.length){ el.hidden = true; el.innerHTML = ""; return; }
     const t0 = accToday();
-    el.innerHTML = `<p class="acc-banner__title">📒 Boekhouding: nog te doen</p><ul>${due.slice(0, 4).map(e => { const n = accDays(t0, e.d); return `<li><b>${esc(e.t)}</b> · ${esc(accFmtD(e.d))} <span class="ingr-muted">(${n === 0 ? "vandaag" : n > 0 ? "over " + n + " dagen" : Math.abs(n) + " dagen geleden"})</span></li>`; }).join("")}</ul><button type="button" class="btn btn--text btn--sm" data-action="open-acc">Open boekhouding</button>`;
+    el.innerHTML = (due.length ? `<p class="acc-banner__title">📒 Boekhouding: nog te doen</p><ul>${due.slice(0, 4).map(e => { const n = accDays(t0, e.d); return `<li><b>${esc(e.t)}</b> · ${esc(accFmtD(e.d))} <span class="ingr-muted">(${n === 0 ? "vandaag" : n > 0 ? "over " + n + " dagen" : Math.abs(n) + " dagen geleden"})</span></li>`; }).join("")}</ul><button type="button" class="btn btn--text btn--sm" data-action="open-acc">Open boekhouding</button>` : "")
+      + (drs.length ? `<p class="acc-banner__title">✏️ Niet-bewaard concept</p><ul>${drs.slice(0, 3).map(d => `<li>${esc(d.label)} <button type="button" class="chip chip--sm" data-action="resume-draft" data-key="${esc(d.key)}">Hervat</button></li>`).join("")}</ul>` : "");
     el.hidden = false;
   }
   /* ---------- Excel (.xlsx) without any library: a tiny zip (stored) + SpreadsheetML ---------- */
@@ -2401,7 +2403,7 @@
     const ys = x.items.map(i => Number((i.date || "").slice(0, 4))).filter(Boolean).concat([cy - 1, cy]), y0 = Math.min(...ys), years = []; for (let k = y0; k <= cy; k++) years.push(k);
     const chip = (v, lb, on, a) => `<button type="button" class="chip chip--sm${on ? " is-on" : ""}" data-acc="${a}" data-v="${esc(v)}">${lb}</button>`;
     const head = `<div class="pop-chips">${chip("stock", "📦 Voorraad", ACC.tab === "stock", "tab")}${chip("docs", "🧾 Facturen", ACC.tab === "docs", "tab")}${chip("health", "🩺 Gezondheid", ACC.tab === "health", "tab")}${chip("dates", "🗓️ Data", ACC.tab === "dates", "tab")}</div>`;
-    const note = `<p class="ingr-muted">Enkel voor jou en enkel op dit toestel: dit gaat nooit naar GitHub. Maak af en toe een back-up (knoppen onderaan).</p>`;
+    const note = `<p class="ingr-muted">Enkel voor jou en enkel op dit toestel: dit gaat nooit naar GitHub. Wat je typt wordt onderweg bewaard als concept. Maak af en toe een back-up. Tel je producten per stuk? Dat staat bij <button type="button" class="btn btn--text btn--sm" data-action="open-inv">Voorraad per product</button>.</p>`;
     if (ACC.tab === "docs") return head + note + accDocsSkeleton();
     if (ACC.tab === "health") return head + note + accHealthHtml();
     if (ACC.tab === "dates"){
@@ -2415,7 +2417,7 @@
     const val = n => String(Math.round(n * 100) / 100).replace(".", ",");
     const sorted = x.items.slice().sort((a, b) => (b.date || "").localeCompare(a.date || "") || a.name.localeCompare(b.name));
     const shown = sorted.filter(i => ACC.filter === "all" || (ACC.filter === "open" ? accLeft(i, t0) > 0 : accLeft(i, t0) === 0));
-    const form = i => `<div class="shop-edit">
+    const form = i => `<div class="shop-edit" data-draft="acc-edit:${esc(i.id)}" data-label="Aankoop: ${esc(i.name || "nieuw")}">
         <label>Product<input id="accE_name" maxlength="140" value="${esc(i.name)}"></label>
         <label>Soort<select id="accE_cat">${Object.entries(ACC_CATS).map(([k, v]) => `<option value="${k}"${i.cat === k ? " selected" : ""}>${esc(v)}</option>`).join("")}</select></label>
         <label>Leverancier<input id="accE_supplier" maxlength="80" value="${esc(i.supplier)}"></label>
@@ -2429,7 +2431,7 @@
         <label>Verkoopprijs per stuk (€, optioneel)<input id="accE_price" inputmode="decimal" value="${i.price === null ? "" : esc(String(i.price).replace(".", ","))}"></label>
         <label>Opmerking<input id="accE_note" maxlength="300" value="${esc(i.note)}"></label>
         <div class="shop-actions"><button type="button" class="btn btn--primary btn--sm" data-acc="save" data-id="${esc(i.id)}">Bewaren</button><button type="button" class="btn btn--outline btn--sm" data-acc="cancel">Annuleren</button></div></div>`;
-    const mvForm = i => `<div class="shop-edit"><p class="ingr-muted">Afboeken van “${esc(i.name)}” (nog ${accLeft(i, "9999-12-31")} op voorraad)</p>
+    const mvForm = i => `<div class="shop-edit" data-draft="acc-mv:${esc(i.id)}" data-label="Afboeken: ${esc(i.name)}"><p class="ingr-muted">Afboeken van “${esc(i.name)}” (nog ${accLeft(i, "9999-12-31")} op voorraad)</p>
         <label>Aantal<input id="accM_q" inputmode="decimal" value="1"></label><label>Datum<input id="accM_d" type="date" value="${t0}"></label>
         <label>Reden<select id="accM_r">${Object.entries(ACC_REASONS).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join("")}</select></label>
         <label>Verkoopprijs per stuk (€, enkel bij verkocht)<input id="accM_p" inputmode="decimal" value="${i.price === null ? "" : esc(String(i.price).replace(".", ","))}"></label>
@@ -2464,7 +2466,7 @@
     if (a === "adddate"){ const d = ($("#accNewD") || {}).value, t = (($("#accNewT") || {}).value || "").trim(); if (!accIsDate(d) || !t){ showToast("Vul een datum en een omschrijving in."); return; } x.dates.push({ d, t: t.slice(0, 120) }); accSave(); accBanner(); return accRender(); }
     if (a === "copy"){ try { navigator.clipboard.writeText(v); showToast("Gekopieerd: " + v); } catch(e){ window.prompt("Kopieer dit bedrag:", v); } return; }
     if (a === "add"){ ACC.edit = "new"; ACC.mv = ""; return accRender(); }
-    if (a === "cancel"){ ACC.edit = ""; ACC.mv = ""; return accRender(); }
+    if (a === "cancel"){ drClear(ACC.edit ? "acc-edit:" + ACC.edit : ""); drClear(ACC.mv ? "acc-mv:" + ACC.mv : ""); ACC.edit = ""; ACC.mv = ""; return accRender(); }
     if (a === "edit"){ ACC.edit = id; ACC.mv = ""; return accRender(); }
     if (a === "mv"){ ACC.mv = id; ACC.edit = ""; return accRender(); }
     if (a === "del"){ const i = x.items.find(q => q.id === id); if (i && window.confirm("Dit product verwijderen?\n" + i.name)){ x.items.splice(x.items.indexOf(i), 1); accSave(); accRender(); } return; }
@@ -2473,13 +2475,13 @@
       if (!name || !(qty > 0) || !(cost >= 0) || !(vat >= 0 && vat <= 100) || (pr !== null && !(pr >= 0))){ showToast("Controleer naam, aantal, prijs en btw."); return; }
       const rec = { name, cat:g("cat"), supplier:g("supplier"), inv:g("inv"), date:g("date"), qty, unit:g("unit"), cost, vat, exp:g("exp"), price:pr, note:g("note") };
       if (id === "new"){ x.items.push(accClean({ items:[Object.assign({ id:"a" + Date.now().toString(36), mv:[] }, rec)] }).items[0]); } else { const i = x.items.find(q => q.id === id); if (!i) return; Object.assign(i, accClean({ items:[Object.assign({}, i, rec)] }).items[0]); }
-      ACC.edit = ""; accSave(); return accRender();
+      drClear("acc-edit:" + id); ACC.edit = ""; accSave(); return accRender();
     }
     if (a === "savemv"){
       const i = x.items.find(q => q.id === id); if (!i) return; const q = accNum(($("#accM_q") || {}).value), d = ($("#accM_d") || {}).value, r = ($("#accM_r") || {}).value, pv = (($("#accM_p") || {}).value || "").trim();
       if (!(q > 0) || !accIsDate(d)){ showToast("Vul een aantal en een datum in."); return; }
       const left = accLeft(i, "9999-12-31"); if (q > left + 1e-9){ showToast("Er zijn maar " + String(left).replace(".", ",") + " op voorraad."); return; }
-      i.mv.push({ d, q, r, p: (r === "verkocht" && pv !== "" && accNum(pv) >= 0) ? accNum(pv) : null }); ACC.mv = ""; accSave(); return accRender();
+      i.mv.push({ d, q, r, p: (r === "verkocht" && pv !== "" && accNum(pv) >= 0) ? accNum(pv) : null }); drClear("acc-mv:" + id); ACC.mv = ""; accSave(); return accRender();
     }
     if (a === "xlsx"){ try { accDownload(accXlsx(ACC.year), "voorraad-" + ACC.year + ".xlsx"); showToast("Excel gedownload: voorraad-" + ACC.year + ".xlsx"); } catch(e){ showToast("Excel maken mislukt."); } return; }
     if (a === "backup"){ accDownload(new Blob([JSON.stringify(x, null, 1)], { type:"application/json" }), "boekhouding-back-up-" + accToday() + ".json"); return; }
@@ -2519,7 +2521,7 @@
   const ACC_ADDR = "bc_dexxter_addr";
   const accDB = () => new Promise((res, rej) => { const r = indexedDB.open("bc_acc_docs", 1); r.onupgradeneeded = () => r.result.createObjectStore("docs", { keyPath:"id" }); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
   async function accTx(mode, fn){ const db = await accDB(); return new Promise((res, rej) => { const tx = db.transaction("docs", mode); let rq; try { rq = fn(tx.objectStore("docs")); } catch(e){ db.close(); rej(e); return; } tx.oncomplete = () => { db.close(); res(rq && rq.result); }; tx.onerror = tx.onabort = () => { db.close(); rej(tx.error); }; }); }
-  const docAll = () => accTx("readonly", s => s.getAll()).then(a => a || []);
+  const docAll = () => accTx("readonly", s => s.getAll()).then(a => (a || []).filter(d => !String(d.id).startsWith("draft-")));
   const docGet = id => accTx("readonly", s => s.get(id));
   const docPut = rec => accTx("readwrite", s => s.put(rec));
   const docDel = id => accTx("readwrite", s => s.delete(id));
@@ -2544,7 +2546,7 @@
     const ch = (v, lb, on, a) => `<button type="button" class="chip chip--sm${on ? " is-on" : ""}" data-acc="${a}" data-v="${esc(v)}">${lb}</button>`;
     const fld = (id, lb, v, ex) => `<label>${lb}<input id="accD_${id}" ${ex || ""} value="${esc(v)}"></label>`;
     const P = ACC.docForm;
-    const form = !P ? "" : `<div class="shop-edit"><p class="ingr-muted">${esc(P.fileName)}</p>
+    const form = !P ? "" : `<div class="shop-edit" data-draft="doc:${esc(P.id)}" data-label="Factuur: ${esc(P.fileName)}"><p class="ingr-muted">${esc(P.fileName)}</p>
       <label>Soort<select id="accD_dir"><option value="in"${P.dir === "in" ? " selected" : ""}>Inkomende factuur of bon (aankoop)</option><option value="out"${P.dir === "out" ? " selected" : ""}>Uitgaande factuur (naar klant)</option></select></label>
       ${fld("date", "Datum", P.date, 'type="date"')}${fld("party", "Leverancier of klant", P.party, 'maxlength="100"')}${fld("nr", "Factuurnummer", P.nr, 'maxlength="40"')}
       ${fld("excl", "Bedrag zonder btw (€)", String(P.excl || "").replace(".", ","), 'inputmode="decimal"')}${fld("vat", "Btw % (0 als vrijgesteld)", String(P.vat || 0).replace(".", ","), 'inputmode="decimal"')}
@@ -2564,7 +2566,7 @@
         <div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="docview" data-id="${esc(d.id)}">Bekijk</button><button type="button" class="chip chip--sm" data-acc="docsend" data-id="${esc(d.id)}">→ Dexxter</button><button type="button" class="chip chip--sm" data-acc="docsent" data-id="${esc(d.id)}">${d.sent ? "↺ Niet doorgestuurd" : "✓ Doorgestuurd"}</button><button type="button" class="chip chip--sm" data-acc="docedit" data-id="${esc(d.id)}">Bewerken</button><button type="button" class="chip chip--sm" data-acc="docdel" data-id="${esc(d.id)}">Verwijderen</button></div></li>`).join("")}</ol>` : `<p class="ingr-muted">Nog geen stukken voor ${y}.</p>`}
       <div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="doczip">⬇ Alles van ${y} (zip + overzicht)</button></div>
       <p class="ingr-muted">“→ Dexxter” opent het deelmenu van je telefoon met de factuur als bijlage en kopieert het adres; kies je mailapp en plak het adres bij Aan. De app kan zelf geen e-mail versturen, en kan niet controleren of de mail effectief is aangekomen: kijk dat na in Dexxter.</p>`;
-    const onFile = async ev => { const f = ev.target.files && ev.target.files[0]; ev.target.value = ""; if (!f) return; if (f.size > 25 * 1024 * 1024){ showToast("Bestand te groot (max. 25 MB)."); return; } const g = await accShrink(f); ACC.docForm = { id:"new", file:g, fileName:g.name + " (" + Math.round(g.size / 1024) + " KB)", dir:"in", date:accToday(), party:"", nr:"", excl:"", vat:0, cat:"", note:"" }; accDocsRender(); };
+    const onFile = async ev => { const f = ev.target.files && ev.target.files[0]; ev.target.value = ""; if (!f) return; if (f.size > 25 * 1024 * 1024){ showToast("Bestand te groot (max. 25 MB)."); return; } const g = await accShrink(f); try { await docPut({ id:"draft-new", name:g.name, type:g.type || "application/octet-stream", size:g.size, blob:g, draftFile:true }); } catch(e){ /* storage full: continue without a saved copy */ } ACC.docForm = { id:"new", file:g, fileName:g.name + " (" + Math.round(g.size / 1024) + " KB)", dir:"in", date:accToday(), party:"", nr:"", excl:"", vat:0, cat:"", note:"" }; accDocsRender(); };
     const c1 = $("#accDocCam"), c2 = $("#accDocFile"); if (c1) c1.onchange = onFile; if (c2) c2.onchange = onFile;
   }
   async function accDocSend(id){
@@ -2639,12 +2641,12 @@
     if (a === "docdir"){ ACC.docDir = v; return accDocsRender(); }
     if (a === "docopen"){ ACC.docOpen = !ACC.docOpen; return accDocsRender(); }
     if (a === "docaddr"){ const el = $("#accAddr"), val = ((el || {}).value || "").trim(); if (val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){ showToast("Dat is geen geldig e-mailadres."); return; } try { if (val) localStorage.setItem(ACC_ADDR, val); else localStorage.removeItem(ACC_ADDR); showToast(val ? "Adres bewaard (enkel op dit toestel)." : "Adres gewist."); } catch(e){ showToast("Bewaren mislukt."); } return; }
-    if (a === "doccancel"){ ACC.docForm = null; return accDocsRender(); }
+    if (a === "doccancel"){ if (ACC.docForm){ drClear("doc:" + ACC.docForm.id); if (ACC.docForm.id === "new") docDel("draft-new").catch(() => {}); } ACC.docForm = null; return accDocsRender(); }
     if (a === "docsave"){
       const P = ACC.docForm; if (!P) return; const g = k => (($("#accD_" + k) || {}).value || "").trim();
       const m = docMeta({ id:P.id === "new" ? "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5) : P.id, dir:g("dir"), date:g("date"), party:g("party"), nr:g("nr"), excl:g("excl"), vat:g("vat"), cat:g("cat"), note:g("note") });
       if (!m.party){ showToast("Vul de leverancier of klant in."); return; }
-      (async () => { try { if (P.id === "new"){ const f = P.file; await docPut(Object.assign(m, { name:f.name, type:f.type || "application/octet-stream", size:f.size, blob:f, sent:0, sentAt:"", added:accToday() })); } else { const old = await docGet(P.id); await docPut(Object.assign({}, old, m)); } ACC.docForm = null; showToast("Bewaard."); accDocsRender(); } catch(e){ showToast("Bewaren mislukt: opslagruimte vol of geblokkeerd."); } })(); return;
+      (async () => { try { if (P.id === "new"){ const f = P.file; await docPut(Object.assign(m, { name:f.name, type:f.type || "application/octet-stream", size:f.size, blob:f, sent:0, sentAt:"", added:accToday() })); } else { const old = await docGet(P.id); await docPut(Object.assign({}, old, m)); } drClear("doc:" + P.id); if (P.id === "new") docDel("draft-new").catch(() => {}); ACC.docForm = null; showToast("Bewaard."); accDocsRender(); } catch(e){ showToast("Bewaren mislukt: opslagruimte vol of geblokkeerd."); } })(); return;
     }
     if (a === "docview"){ docGet(id).then(d => { if (d){ const u = URL.createObjectURL(d.blob); window.open(u, "_blank", "noopener"); setTimeout(() => URL.revokeObjectURL(u), 60000); } }); return; }
     if (a === "docsend"){ accDocSend(id); return; }
@@ -2655,6 +2657,36 @@
     if (a === "hcost"){ const el = $(`[data-hc="${CSS.escape(b.dataset.k)}"]`), val = ((el || {}).value || "").trim(), x = accLoad(); if (val === "") delete x.health.cost[b.dataset.k]; else { const n = accNum(val); if (!(n >= 0)){ showToast("Vul een bedrag in."); return; } x.health.cost[b.dataset.k] = n; } accSave(); return accRender(); }
     if (a === "hgoal"){ const x = accLoad(), t = accNum(($("#accH_t") || {}).value), f = accNum(($("#accH_f") || {}).value); if (t > 0 && t <= 1000) x.health.target = t; if (f >= 0 && f <= 1e6) x.health.fixed = f; accSave(); return accRender(); }
   });
+
+
+  /* ===== v210: autosave of half-finished forms (so an interruption never loses what was typed) ===== */
+  const DR_KEY = "bc_drafts_v1";
+  const drLoad = () => { try { return JSON.parse(localStorage.getItem(DR_KEY) || "{}") || {}; } catch(e){ return {}; } };
+  const drSave = d => { try { localStorage.setItem(DR_KEY, JSON.stringify(d)); } catch(e){ /* storage full: ignore */ } };
+  const drClear = key => { if (!key) return; const d = drLoad(); if (d[key]){ delete d[key]; drSave(d); } };
+  const drStore = ev => {
+    const el = ev.target, f = el && el.closest && el.closest("[data-draft]"); if (!f || !el.id) return; let ok = false; try { ok = actSalon(); } catch(e){ ok = false; } if (!ok) return;
+    const d = drLoad(), k = f.dataset.draft, e = d[k] || (d[k] = { v:{}, t:"", label:f.dataset.label || k }); e.v[el.id] = String(el.value).slice(0, 2000); e.t = new Date().toISOString(); drSave(d);
+  };
+  document.addEventListener("input", drStore, true); document.addEventListener("change", drStore, true);
+  function drRestoreAll(){
+    const d = drLoad(); $$("[data-draft]:not([data-dr])").forEach(f => { f.dataset.dr = "1"; const e = d[f.dataset.draft]; if (!e) return; Object.keys(e.v).forEach(id => { const el = f.querySelector("#" + CSS.escape(id)); if (el && el.value !== e.v[id]) el.value = e.v[id]; }); });
+  }
+  try { new MutationObserver(drRestoreAll).observe(document.body, { childList:true, subtree:true }); } catch(e){ /* very old browser: no restore */ }
+  function accDrafts(){
+    const d = drLoad(), lim = Date.now() - 14 * 864e5; let ch = false; const out = [];
+    Object.keys(d).forEach(k => { if (!d[k] || !d[k].t || new Date(d[k].t).getTime() < lim){ delete d[k]; ch = true; return; } if (Object.keys(d[k].v).some(i => String(d[k].v[i]).trim() !== "" && !/^(qty|vat|accM_q)$/.test(i))) out.push(Object.assign({ key:k }, d[k])); });
+    if (ch) drSave(d); return out;
+  }
+  async function accResume(key){
+    const m = String(key).match(/^([a-z-]+):(.*)$/); if (!m) return; const k = m[1], id = m[2];
+    if (k === "shop-edit"){ shop.edit = id; goTo("shop"); return; }
+    BH.view = "acc"; BH.edit = false;
+    if (k === "acc-edit"){ ACC.tab = "stock"; ACC.edit = id; ACC.mv = ""; }
+    else if (k === "acc-mv"){ ACC.tab = "stock"; ACC.mv = id; ACC.edit = ""; }
+    else if (k === "doc"){ ACC.tab = "docs"; try { if (id === "new"){ const r = await docGet("draft-new"); if (!r){ drClear(key); showToast("De foto of het bestand van dit concept staat niet meer klaar."); } else ACC.docForm = { id:"new", file:new File([r.blob], r.name, { type:r.type }), fileName:r.name + " (" + Math.round(r.size / 1024) + " KB)", dir:"in", date:accToday(), party:"", nr:"", excl:"", vat:0, cat:"", note:"" }; } else { const r = await docGet(id); if (r) ACC.docForm = { id:r.id, fileName:r.name, dir:r.dir, date:r.date, party:r.party, nr:r.nr, excl:r.excl, vat:r.vat, cat:r.cat, note:r.note }; } } catch(e){ /* ignore */ } }
+    goTo("pricelist");
+  }
 
   /* ===== v201: Verkoophoekje (shop corner) ===== */
   const SHOP_FILE = "verkoop.json", SHOP_DRAFT = "bc_shop_draft_v1", SHOP_CACHE = "bc_shop_cache_v1";
@@ -2714,7 +2746,7 @@
     const order = (i.status === "beschikbaar") ? `<a class="btn btn--primary btn--sm" href="${esc(shopWa(sh("msg").replace("{p}", i.name + (priceTxt ? " (" + priceTxt + ")" : ""))))}" target="_blank" rel="noopener noreferrer">${esc(sh("wa"))}</a>` : "";
     let admin = "";
     if (salon){
-      admin = shop.edit === i.id ? `<div class="shop-edit">
+      admin = shop.edit === i.id ? `<div class="shop-edit" data-draft="shop-edit:${esc(i.id)}" data-label="Verkoophoekje: ${esc(i.name)}">
         <label>${esc(sh("name"))}<input id="shE_name" value="${esc(i.name)}"></label>
         <label>${esc(sh("price"))}<input id="shE_price" inputmode="decimal" value="${i.price === null ? "" : esc(String(i.price).replace(".", ","))}"></label>
         <label>${esc(sh("qty"))}<input id="shE_qty" inputmode="numeric" value="${i.qty === null ? "" : i.qty}"></label>
@@ -2805,10 +2837,10 @@
     if (a === "discard"){ if (window.confirm(sh("discq"))){ shop.draft = null; try { localStorage.removeItem(SHOP_DRAFT); } catch(e){} shop.edit = ""; renderShop(); } return; }
     if (a === "add"){ const d = shopDraft(), nid = "nieuw-" + Date.now().toString(36); d.unshift({ id: nid, name: sh("newp"), desc: "", ingr: "", cat: shop.filter === "all" ? "zeep" : shop.filter, status: "concept", price: null, qty: null, photo: "" }); shop.edit = nid; shopSaveDraft(); return renderShop(); }
     const d = shopDraft(), it = d.find(x => x.id === id);
-    if (a === "cancel"){ shop.edit = ""; return renderShop(); }
+    if (a === "cancel"){ drClear("shop-edit:" + shop.edit); shop.edit = ""; return renderShop(); }
     if (!it) return;
     if (a === "edit"){ shop.edit = id; return renderShop(); }
-    if (a === "save"){ shopFromForm(it); shop.edit = ""; shopSaveDraft(); return renderShop(); }
+    if (a === "save"){ shopFromForm(it); drClear("shop-edit:" + id); shop.edit = ""; shopSaveDraft(); return renderShop(); }
     if (a === "inc"){ it.qty = (it.qty || 0) + 1; if (it.status === "uitverkocht") it.status = "beschikbaar"; }
     if (a === "dec"){ it.qty = Math.max(0, (it.qty || 0) - 1); if (it.qty === 0) it.status = "uitverkocht"; }
     if (a === "sold"){ it.status = it.status === "uitverkocht" ? "beschikbaar" : "uitverkocht"; if (it.status === "beschikbaar" && it.qty === 0) it.qty = null; }
@@ -6176,6 +6208,7 @@
       <div class="inv-backup">
         <p class="ingr-muted">${t("inv_backup_hint", L)}</p>
         <button type="button" class="btn btn--sm btn--outline" data-inv="backup">💾 ${t("inv_backup", L)}</button>
+        ${actSalon() ? `<button type="button" class="btn btn--sm btn--outline" data-action="open-acc">📒 Naar boekhouding</button>` : ""}
         <label class="btn btn--sm btn--ghost inv-restore">↩️ ${t("inv_restore", L)}<input type="file" accept="application/json,.json" id="invRestore" hidden></label>
       </div>`;
     return html;
@@ -7847,6 +7880,8 @@
       if (action === "open-giftcard") goTo("giftcard");
       if (action === "open-shop") goTo("shop");
       if (action === "open-acc"){ BH.view = "acc"; BH.edit = false; goTo("pricelist"); }
+      if (action === "resume-draft") accResume(el.dataset.key);
+      if (action === "open-inv"){ ingrOpen(); ingr.tab = "stock"; renderIngredients(); }
       if (action === "open-advent") goTo("advent");
       if (action === "season-fact") nextSeasonFact();
       if (action === "season-shop") trackEvent("season-shop");
