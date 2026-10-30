@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-10-30T14:15:35.709Z",
+ "u": "2026-10-30T14:21:46.257Z",
  "items": [
   {
    "id": "nieuw-mvv0lfbn",
@@ -148,8 +148,8 @@
   {
    "id": "geitenmelkzeep-daisy",
    "name": "Daisy geitenmelkzeep, lavendel (ca. 18 g)",
-   "desc": "Voedende zeep voor de droge huid: dagelijks te gebruiken bij het douchen of wassen.",
-   "ingr": "",
+   "desc": "Natuurlijke, voedende verzorging voor je huid. Dankzij de unieke eigenschappen van geitenmelk is deze zeep bijzonder mild, rijk aan voedingsstoffen en ideaal voor alle huidtypes, inclusief de gevoelige huid.",
+   "ingr": "Verzeepte natuurlijke oliën (Olijf-, palm-, kokos-, cacaoboter, avocado-, castorolie), geitenmelk, etherische olie (lavendel), zuiver bronwater.",
    "cat": "zeep",
    "status": "beschikbaar",
    "price": 2,
@@ -159,8 +159,8 @@
   {
    "id": "geitenmelkzeep-reisbar",
    "name": "Reisbars geitenmelkzeep, lavendel (ca. 23 g)",
-   "desc": "Voedende zeep voor de droge huid: dagelijks te gebruiken bij het douchen of wassen.",
-   "ingr": "",
+   "desc": "Natuurlijke, voedende verzorging voor je huid. Dankzij de unieke eigenschappen van geitenmelk is deze zeep bijzonder mild, rijk aan voedingsstoffen en ideaal voor alle huidtypes, inclusief de gevoelige huid.",
+   "ingr": "Verzeepte natuurlijke oliën (Olijf-, palm-, kokos-, cacaoboter, avocado-, castorolie), geitenmelk, etherische olie (lavendel), zuiver bronwater.",
    "cat": "zeep",
    "status": "beschikbaar",
    "price": 2,
@@ -170,8 +170,8 @@
   {
    "id": "geitenmelkzeep-bonbon",
    "name": "Bonbons geitenmelkzeep, lavendel (ca. 14 g)",
-   "desc": "Voedende zeep voor de droge huid: dagelijks te gebruiken bij het douchen of wassen.",
-   "ingr": "",
+   "desc": "Natuurlijke, voedende verzorging voor je huid. Dankzij de unieke eigenschappen van geitenmelk is deze zeep bijzonder mild, rijk aan voedingsstoffen en ideaal voor alle huidtypes, inclusief de gevoelige huid.",
+   "ingr": "Verzeepte natuurlijke oliën (Olijf-, palm-, kokos-, cacaoboter, avocado-, castorolie), geitenmelk, etherische olie (lavendel), zuiver bronwater.",
    "cat": "zeep",
    "status": "beschikbaar",
    "price": 1,
