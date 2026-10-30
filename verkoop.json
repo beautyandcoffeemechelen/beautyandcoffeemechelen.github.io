@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-10-30T13:37:06.638Z",
+ "u": "2026-10-30T13:56:25.943Z",
  "items": [
   {
    "id": "nieuw-mvv0lfbn",
@@ -116,7 +116,7 @@
    "id": "geitenmelkzeep-180",
    "name": "Geitenmelkzeep, lavendel (ca. 180 g)",
    "desc": "Voedende zeep voor de droge huid: dagelijks te gebruiken bij het douchen of wassen.",
-   "ingr": "",
+   "ingr": "Verzeepte natuurlijke oliën (Olijf-, palm-, kokos-, rijstzemelolie, cacaoboter, avocado-, castor-, amandelolie), geitenmelk, ijzer roodoxide, titaniumdioxide, etherische olie (lavendel), zuiver bronwater.",
    "cat": "zeep",
    "status": "beschikbaar",
    "price": 11,
@@ -132,13 +132,13 @@
    "status": "beschikbaar",
    "price": 7,
    "qty": 1,
-   "photo": "assets/verkoop/geitenmelkzeep-bloem-groot-mvl76u68.jpg"
+   "photo": "assets/verkoop/geitenmelkzeep-bloem-groot-mvv1ce04.jpg"
   },
   {
    "id": "geitenmelkzeep-honinggraat",
    "name": "Honinggraat geitenmelkzeep, lavendel (ca. 60 g)",
    "desc": "Voedende zeep voor de droge huid: dagelijks te gebruiken bij het douchen of wassen.",
-   "ingr": "",
+   "ingr": "Verzeepte natuurlijke oliën (Olijf-, palm-, kokos-, cacaoboter, avocado-, castorolie), geitenmelk, etherische olie (lavendel), zuiver bronwater.",
    "cat": "zeep",
    "status": "beschikbaar",
    "price": 4,
@@ -154,7 +154,7 @@
    "status": "beschikbaar",
    "price": 2,
    "qty": 2,
-   "photo": "assets/verkoop/geitenmelkzeep-daisy-mvl76xq2.jpg"
+   "photo": "assets/verkoop/geitenmelkzeep-daisy-mvv1cg1i.jpg"
   },
   {
    "id": "geitenmelkzeep-reisbar",
@@ -198,7 +198,7 @@
    "status": "beschikbaar",
    "price": 6,
    "qty": 1,
-   "photo": "assets/verkoop/syndet-bloem-groot-mvl774r8.jpg"
+   "photo": "assets/verkoop/syndet-bloem-groot-mvv1ci16.jpg"
   },
   {
    "id": "baby-geitenmelkzeep",
@@ -206,7 +206,7 @@
    "desc": "Voedende zeep voor de droge huid: dagelijks te gebruiken bij het douchen of wassen.",
    "ingr": "",
    "cat": "zeep",
-   "status": "uitverkocht",
+   "status": "concept",
    "price": null,
    "qty": null,
    "photo": ""
@@ -214,8 +214,8 @@
   {
    "id": "paardenbloemenzeep",
    "name": "Paardenbloemenzeep, citroen-limoen en munt (ca. 40 g)",
-   "desc": "Handgemaakte zeep met natuurlijke ingrediënten.",
-   "ingr": "",
+   "desc": "Helend, voedend, verzorgend en verfrissende zeep met natuurlijke ingrediënten.",
+   "ingr": "Natuurlijke oliën (Olijf-, kokos-, zonnebloem-, rijstzemel-, abrikozenpitolie), paardenbloem, ultramarineblauw oxide, geeloxide, titaniumdioxide, etherische oliën (citroen x limoen, pepermunt), soda as, zuiver bronwater.",
    "cat": "zeep",
    "status": "beschikbaar",
    "price": 5,
@@ -226,7 +226,7 @@
    "id": "olijf-laurier-aleppozeep",
    "name": "Olijf-laurier/Aleppozeep (ca. 30 g)",
    "desc": "Handgemaakte zeep op basis van olijf- en laurierolie, naar het voorbeeld van Aleppozeep.",
-   "ingr": "",
+   "ingr": "Verzeepte natuurlijke oliën (Olijf-, laurierbesolie), water.",
    "cat": "zeep",
    "status": "beschikbaar",
    "price": 3.5,
@@ -237,7 +237,7 @@
    "id": "olijfpalmzeep",
    "name": "Olijfpalmzeep (ca. 30-40 g)",
    "desc": "Handgemaakte zeep op basis van olijf- en palmolie.",
-   "ingr": "",
+   "ingr": "Verzeepte natuurlijke oliën (Olijf-, palm-, kokosolie), geeloxide, zuiver bronwater.",
    "cat": "zeep",
    "status": "beschikbaar",
    "price": 1.5,
@@ -248,12 +248,12 @@
    "id": "hyalift-biobalance",
    "name": "Hyaluronzuurserum Hya-Lift+ (Bio Balance)",
    "desc": "Hyaluronzuurserum zonder parfum, kort en mild van samenstelling (bevat wel alcohol). Gebruikt onder de peel-off maskers.",
-   "ingr": "",
+   "ingr": "Aqua (water), cucumis sativus fruit extract, sodium hyaluronate, alcohol, phenoxyethanol.",
    "cat": "janssen",
    "status": "beschikbaar",
    "price": 53,
-   "qty": null,
-   "photo": ""
+   "qty": 1,
+   "photo": "assets/verkoop/hyalift-biobalance-mvv1cjwf.jpg"
   },
   {
    "id": "janssen-spf50",
@@ -264,7 +264,7 @@
    "status": "beschikbaar",
    "price": 43.55,
    "qty": null,
-   "photo": ""
+   "photo": "assets/verkoop/janssen-spf50-mvv1clkk.jpg"
   },
   {
    "id": "janssen-body-24h",
@@ -275,7 +275,7 @@
    "status": "beschikbaar",
    "price": 28,
    "qty": null,
-   "photo": ""
+   "photo": "assets/verkoop/janssen-body-24h-mvv1cnb4.jpg"
   },
   {
    "id": "janssen-fill-me",
