@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-10-28T14:09:31.616Z",
+ "u": "2026-10-30T06:47:00.538Z",
  "items": [
   {
    "id": "nieuw-mvs6n65d",
@@ -168,28 +168,6 @@
    "photo": "assets/verkoop/syndet-bloem-groot-mvl774r8.jpg"
   },
   {
-   "id": "syndet-bloemen-klein",
-   "name": "Bloemen klein syndet zeep, zeepvrij (ca. 5 g)",
-   "desc": "Zeepvrije, ongeparfumeerde variant, speciaal voor de gevoelige huid.",
-   "ingr": "",
-   "cat": "zeep",
-   "status": "uitverkocht",
-   "price": 6,
-   "qty": 0,
-   "photo": ""
-  },
-  {
-   "id": "syndet-daisy",
-   "name": "Daisy syndet zeep, zeepvrij (ca. 18 g)",
-   "desc": "Zeepvrije, ongeparfumeerde variant, speciaal voor de gevoelige huid.",
-   "ingr": "",
-   "cat": "zeep",
-   "status": "uitverkocht",
-   "price": null,
-   "qty": null,
-   "photo": ""
-  },
-  {
    "id": "baby-geitenmelkzeep",
    "name": "Baby geitenmelkzeep, kleur en geur kiezen bij bestelling (ca. 30 g)",
    "desc": "Voedende zeep voor de droge huid: dagelijks te gebruiken bij het douchen of wassen.",
@@ -247,7 +225,7 @@
   {
    "id": "janssen-spf50",
    "name": "Zonnecrème SPF 50 (Janssen Cosmetics, 75 ml)",
-   "desc": "Anti-aging zonnecrème SPF 50, als laatste stap na de gelaatsverzorging, vooral in de zomer of na een peeling. Bevat parfum. Na openen 6 maanden houdbaar.",
+   "desc": "Anti-aging zonnecrème SPF 50, als laatste stap na de gelaatsverzorging, vooral in de zomer of na een peeling.",
    "ingr": "",
    "cat": "janssen",
    "status": "beschikbaar",
@@ -323,14 +301,14 @@
   },
   {
    "id": "janssen-anti-aging",
-   "name": "Anti-aging (Janssen Cosmetics)",
-   "desc": "",
-   "ingr": "",
+   "name": "Age Perfecting Serum 30ml",
+   "desc": "Gladmakend serum met werkzame bestanddelen voor de rijpe huid. Het krachtige complex zorgt voor een regeneratie van de huid, maakt deze glad en verbetert de uitstraling. De ideale aanvulling op de verzorgende Mature Skin crèmes.",
+   "ingr": "• Cellular Regeneration Complex:\n\n   –  Rode klaver-extract: Rijk aan isoflavonen, vermindert rimpels, maakt de huid glad, werkt vochtinbrengend\n\n   –  Komboecha: Gefermenteerde zwarte thee, maakt de huid dankzij het lipo-filling effect glad, verbetert de uitstraling en zorgt voor een mooiere teint\n\n• Hyaluronzuur met lange en korte ketens: Vochtinbrengend en -bindend. Ideaal voor de rijpe huid, de fijne rimpels heeft\n\n• Vitamine E-acetaat: Verandert in de huid in vrije vitamine E en neutraliseert schadelijke vrije radicalen\n\n• Vitamine C-fosfaat: Gestabiliseerd vitamine C, werkt als een antioxidant, ondersteunt de werking van vitamine E en de nieuwe vorming van collageen\n\n• Plantaardige stamcellen van de alpenroos: Ondersteunen de huid en maken deze bestendiger tegen door het milieu veroorzaakte stress",
    "cat": "janssen",
-   "status": "concept",
-   "price": null,
-   "qty": null,
-   "photo": ""
+   "status": "beschikbaar",
+   "price": 66.9,
+   "qty": 1,
+   "photo": "assets/verkoop/janssen-anti-aging-mvum0csj.jpg"
   },
   {
    "id": "arnica-maceraat",
@@ -341,7 +319,7 @@
    "status": "concept",
    "price": null,
    "qty": 3,
-   "photo": ""
+   "photo": "assets/verkoop/arnica-maceraat-mvum0eln.jpg"
   }
  ]
 }
