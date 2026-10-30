@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-10-30T14:27:28.253Z",
+ "u": "2026-10-30T14:32:50.448Z",
  "items": [
   {
    "id": "nieuw-mvv0lfbn",
@@ -258,12 +258,12 @@
   {
    "id": "janssen-spf50",
    "name": "Zonnecrème SPF 50 (Janssen Cosmetics, 75 ml)",
-   "desc": "Anti-aging zonnecrème SPF 50, als laatste stap na de gelaatsverzorging, vooral in de zomer of na een peeling.",
-   "ingr": "",
+   "desc": "Anti-Aging zonbeschermingslotion SPF 50 voor gezicht en lichaam. High Protection Sun Care SPF 50 biedt een zeer hoge bescherming tegen de zon en voorkomt vroegtijdige, door licht veroorzaakte huidveroudering. De snel absorberende anti-ageing formule is geschikt voor alle huidzones, gekenmerkt door zijn aangenaam lichte textuur. De celbeschermingsfactor Ectoin® versterkt het afweersysteem. Recente studies tonen aan dat Ectoin® ook de negatieve effecten van oxidatieve stress (bv. hyperpigmentatie) veroorzaakt door blauw licht en IR-A straling minimaliseert. Hyaluronzuur met korte en lange keten zorgt voor intensieve hydratatie en een comfortabel huidgevoel. Toepasbaar voor kinderen en volwassenen.",
+   "ingr": "• Diethylamino Hydroxybenzoyl Hexyl Benzoate: uv-A-filter, fotostabiel, voor een gebalanceerde zonbescherming met hoge SPF. Beschermt tegen door licht veroorzaakte huidveroudering\n\n• Ethylhexyl Methoxycinnamate: uv-B-filter, beschermt tegen zonverbranding\n\n• Diethylamino Hydroxybenzoyl Hexyl Benzoate: uv-A-filter, fotostabiel, voor een gebalanceerde zonbescherming met hoge SPF. Beschermt tegen door licht veroorzaakte huidveroudering\n\n• Octocrylene: uv-B-filter, beschermt tegen huidschade die door de zon wordt veroorzaakt\n\n• Dicaprylyl Carbonate: Huidvriendelijke, oplosbare componenten die de huid invetten, voor een egaliserend effect\n\n• C12-15 Alkyl Benzoate: Huidvriendelijke, oplosbare componenten die de huid invetten, voor een egaliserend effect\n\n• C12-13 Alkyl Lactate: Verzachtend middel op basis van melkzuren; vermindert vochtverlies",
    "cat": "janssen",
    "status": "beschikbaar",
    "price": 43.55,
-   "qty": null,
+   "qty": 2,
    "photo": "assets/verkoop/janssen-spf50-mvv1clkk.jpg"
   },
   {
@@ -274,7 +274,7 @@
    "cat": "janssen",
    "status": "beschikbaar",
    "price": 28,
-   "qty": null,
+   "qty": 1,
    "photo": "assets/verkoop/janssen-body-24h-mvv1cnb4.jpg"
   },
   {
