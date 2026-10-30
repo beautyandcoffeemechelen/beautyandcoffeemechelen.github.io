@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-10-30T14:21:46.257Z",
+ "u": "2026-10-30T14:27:28.253Z",
  "items": [
   {
    "id": "nieuw-mvv0lfbn",
@@ -182,7 +182,7 @@
    "id": "geitenmelkzeep-bloem-klein",
    "name": "Bloemen geitenmelkzeep, lavendel (ca. 4 g)",
    "desc": "Voedende zeep voor de droge huid: dagelijks te gebruiken bij het douchen of wassen.",
-   "ingr": "",
+   "ingr": "Verzeepte natuurlijke oliën (Olijf-, palm-, kokos-, cacaoboter, avocado-, castorolie), geitenmelk, etherische olie (lavendel), zuiver bronwater.",
    "cat": "zeep",
    "status": "beschikbaar",
    "price": 0.5,
@@ -203,8 +203,8 @@
   {
    "id": "baby-geitenmelkzeep",
    "name": "Baby geitenmelkzeep, kleur en geur kiezen bij bestelling (ca. 30 g)",
-   "desc": "Voedende zeep voor de droge huid: dagelijks te gebruiken bij het douchen of wassen.",
-   "ingr": "",
+   "desc": "Voedende zeep voor de droge huid: dagelijks te gebruiken bij het douchen of wassen.\nOpties: Geur (lavendel, kamille, mandarijn of geurloos) - Kleur (rood, blauw, goud, wit, geel) - Hoeveelheid.\n\nLet op: Geschikt voor baby’s vanaf 3 maanden. Gebruik onder toezicht van een volwassene. Test eerst op een klein stukje huid.",
+   "ingr": "Aqua, Glycerin, Sodium Stearate, Sorbitol, Sodium Laurate, Propylene Glycol, Sodium Laureth Sulfate, Goat Milk, Sodium Chloride, Sodium Lauryl Sulfate, Citric Acid, Titanium Dioxide (CI 77891) (indien gekozen kleurpigment), Sodium Citrate, Tetrasodium Iminodisuccinate, Tetrasodium Etidronate, Lavendel / Kamille / Mandarijn (indien etherische olie gekozen).",
    "cat": "zeep",
    "status": "concept",
    "price": null,
