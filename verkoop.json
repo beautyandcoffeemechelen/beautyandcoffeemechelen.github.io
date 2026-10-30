@@ -1,7 +1,18 @@
 {
  "v": 1,
- "u": "2026-10-30T20:39:38.598Z",
+ "u": "2026-10-30T20:43:27.105Z",
  "items": [
+  {
+   "id": "nieuw-mvvfs8e4",
+   "name": "Hand Care Cream 50ml",
+   "desc": "Een beschermende kruidencrème voor de verzorging van extra belaste handen.\nBeschermende en huidgladmakende handcrème met een zachte textuur. Verzorgt belaste handen en nagelriemen zonder een vet spoor achter te laten. Herstelt onmiddellijk de soepelheid van de handhuid en bouwt een beschermend filmlaag op. Met Echinacea purpurea (rode zonnehoed) en bisabolol.\nGebruik: Breng de Hand Care Cream naar behoefte aan op de gereinigde handen en verdeel deze gelijkmatig. Masseer hierbij ook de nagels en de nagelriemen zachtjes in.",
+   "ingr": "• Echinacea: Rode zonnehoed, regenererend\n• Alpha-bisabolol: Belangrijkste werkzame stof van kamille, verzacht irritatie\n• Glycerine: Bindt water; verhoogt het vochtgehalte van de huid",
+   "cat": "janssen",
+   "status": "beschikbaar",
+   "price": 15,
+   "qty": 2,
+   "photo": "assets/verkoop/nieuw-mvvfs8e4-mvvfw2mn.jpg"
+  },
   {
    "id": "nieuw-mvvfkjwv",
    "name": "Refreshing Shower Mousse 200ml",
