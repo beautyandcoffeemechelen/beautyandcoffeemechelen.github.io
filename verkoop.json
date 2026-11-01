@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-01T02:25:48.828Z",
+ "u": "2026-11-01T02:57:52.544Z",
  "items": [
   {
    "id": "nieuw-mvvg0gpm",
@@ -356,14 +356,14 @@
   },
   {
    "id": "janssen-droge-huid",
-   "name": "Droge huid (Janssen Cosmetics)",
-   "desc": "",
-   "ingr": "",
+   "name": "Aqualift Eye Gel 15 ml",
+   "desc": "Dit mini-lifting product maakt rimpels van binnenuit voller en hydrateert de huid tot diep in de huid. Donkere kringen onder de ogen worden zichtbaar verminderd, wallen worden tegengegaan en rimpels worden gladgestreken. Tegelijkertijd wordt de oogzone heerlijk gekoeld en verfrist. - Breng Aqualift Eye Gel ’s morgens en ’s avonds of zo vaak als u wilt in de loop van de dag aan. Dep het product met de vingertoppen rond de ogen.\n\n- Tip: Als de Aqualift Eye Gel in de koelkast wordt bewaard, voelt deze bij het aanbrengen extra verfrissend en verkoelend aan. Het koelende effect helpt extra goed tegen zwellingen.",
+   "ingr": "Hyaluronzuur met lange ketens: Legt een vochtvasthoudend laagje op de huid en vult fijne lijntjes en rimpels op\n\n• Hyaluronzuur met korte ketens: Dringt door in de bovenste lagen van de stratum corneum en houdt hier vocht vast om fijne lijntjes en rimpels te verminderen\n\n• Imperata cylindrica: Wortelextract uit de woestijnplant Imperata cylindrica; zorgt voor een aanzienlijke en langdurige verhoging van het vochtgehalte in de bovenste lagen van de opperhuid (+20% meer vocht na 24 uur)\n\n• Sensitive-complex: Hoogactieve plantaardige stof uit gistextract en panthenol evenals extracten van wilde kastanje, muisdoorn, zoethoutwortel en goudsbloem, versterkt de bloedvaten, vermindert donkere kringen onder de ogen (-65% na 28 dagen) en voorkomt zwelling. Droogtelijntjes verdwijnen en de ogen stralen meer\n\n• Extract van druiven: Beschermt de stamcellen van de huid tegen belasting door uv-stralen; verhoogt de uv-tolerantie van de huid, bestrijdt veroudering door licht; voor een huid die er levendig en gezond uitziet.",
    "cat": "janssen",
-   "status": "concept",
-   "price": null,
-   "qty": null,
-   "photo": ""
+   "status": "beschikbaar",
+   "price": 39,
+   "qty": 1,
+   "photo": "assets/verkoop/janssen-droge-huid-mvx8pfow.jpg"
   },
   {
    "id": "janssen-gevoelige-huid",
