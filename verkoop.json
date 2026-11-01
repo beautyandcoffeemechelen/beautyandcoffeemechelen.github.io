@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-10-30T20:55:48.291Z",
+ "u": "2026-11-01T02:25:48.828Z",
  "items": [
   {
    "id": "nieuw-mvvg0gpm",
@@ -65,7 +65,7 @@
    "cat": "janssen",
    "status": "beschikbaar",
    "price": 38.9,
-   "qty": 1,
+   "qty": 2,
    "photo": "assets/verkoop/nieuw-mvv6oz2i-mvv6sv4a.jpg"
   },
   {
@@ -318,7 +318,7 @@
    "cat": "janssen",
    "status": "beschikbaar",
    "price": 53,
-   "qty": 1,
+   "qty": 3,
    "photo": "assets/verkoop/hyalift-biobalance-mvv1cjwf.jpg"
   },
   {
@@ -389,14 +389,14 @@
   },
   {
    "id": "janssen-ampullen",
-   "name": "Ampullen (Janssen Cosmetics)",
-   "desc": "",
-   "ingr": "",
+   "name": "Eye Flash Fluid 7 x 1,5ml",
+   "desc": "Hydraterend oogserum met hyaluronzuren en peptidecomplex. - Eye Flash Fluid ‘s morgens en/of ’s avonds op de gereinigde huid rond de ogen aanbrengen en met licht kloppende bewegingen inmasseren. - De ampul daartoe aan de bovenkant openbreken (bescherm daarbij de handen met een tissue) en de volledige inhoud in de handpalm gieten. De inhoud vervolgens gelijkmatig verdelen over de huid rond de ogen en met zacht kloppend bewegingen inmasseren. Alleen voor uitwendig gebruik.",
+   "ingr": "Langeketen-hyaluronzuren: Vormt een beschermende film op de huid die zich aan de hoornlaag vastzet en daar vocht inbrengt. Huidverzorgend, vochtinbrengend, antirimpeleffect\n\n• Korteketen-hyaluronzuren: Sterk vochtinbrengend en vochtbehoudend. Dringt in de hogere lagen van het stratum corneum en bindt zo het vocht. Maakt de huid van binnenuit strak en glad\n\n• Glycerine: Hygroscopisch. Bindt water in de bovenste lagen van het stratum corneum\n\n• Matrixyl 3000 (peptidencomplex): Bevat speciale dragerpeptiden (matrikinen) die een rol spelen bij de huideigen reperatieprocessen. Ze activeren de nieuwe synthese van extracellulaire matrixbestanddelen van de huid, zoals hyaluronzuren en collageen en zorgen voor merkbaar minder rimpeltjes rond de ogen\n\n• Titaandioxide: natuurlijke bescherming tegen lichtinvloeden\n\n• Ethylmethoxycinnamaten: UVB-filter\n\n• Octocrylenen: UVA/UVB-breedbandfilter",
    "cat": "janssen",
-   "status": "concept",
-   "price": null,
-   "qty": null,
-   "photo": ""
+   "status": "beschikbaar",
+   "price": 29,
+   "qty": 3,
+   "photo": "assets/verkoop/janssen-ampullen-mvx7k7g8.jpg"
   },
   {
    "id": "janssen-anti-aging",
@@ -417,7 +417,7 @@
    "cat": "overig",
    "status": "beschikbaar",
    "price": 39.95,
-   "qty": 3,
+   "qty": 4,
    "photo": "assets/verkoop/arnica-maceraat-mvum0eln.jpg"
   }
  ]
