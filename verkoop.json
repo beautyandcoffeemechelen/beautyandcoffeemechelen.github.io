@@ -1,7 +1,18 @@
 {
  "v": 1,
- "u": "2026-11-01T03:59:26.015Z",
+ "u": "2026-11-01T04:04:06.937Z",
  "items": [
+  {
+   "id": "nieuw-mvxb0lnt",
+   "name": "Hyaluron Fluid 7 x 2ml",
+   "desc": "De 7-daagse hydratatiebooster voor uw huid. Sterk geconcentreerde, vochtinbrengende vloeistof met hyaluronzuur (korte en lange ketens).\nTOEPASSING\nHyaluron Fluid lichtjes aanbrengen op de gereinigde huid. Ga daarbij als volgt te werk: breek het bovenste deel van de ampul af terwijl u uw handen met een tissue beschermt, en giet de hele inhoud van de ampul in uw handpalm. Vervolgens gelijkmatig op gezicht en nek aanbrengen en lichtjes inmasseren. Alleen voor uitwendig gebruik.\n\nTip: Ideaal voor gebruik tijdens lange vliegreizen. Hydrateer tijdens de vlucht regelmatig uw huid met de inhoud van deze ampul.",
+   "ingr": "Lange-keten hyaluronzuur: Huidverzorgend, vochtinbrengend, antirimpeleffect\n\n• Korte-keten hyaluronzuur: Extreem vochtinbrengend en vochtbehoudend, grote vochtbindende werking, liftend effect, maakt de opperhuid van binnenuit glad",
+   "cat": "janssen",
+   "status": "beschikbaar",
+   "price": 26.9,
+   "qty": 3,
+   "photo": "assets/verkoop/nieuw-mvxb0lnt-mvxb2mll.jpg"
+  },
   {
    "id": "nieuw-mvxat3vh",
    "name": "Super Hydrating Cream",
@@ -331,17 +342,6 @@
    "price": 6,
    "qty": 1,
    "photo": "assets/verkoop/syndet-bloem-groot-mvv1ci16.jpg"
-  },
-  {
-   "id": "baby-geitenmelkzeep",
-   "name": "Baby geitenmelkzeep, kleur en geur kiezen bij bestelling (ca. 30 g)",
-   "desc": "Voedende zeep voor de droge huid: dagelijks te gebruiken bij het douchen of wassen.\nOpties: Geur (lavendel, kamille, mandarijn of geurloos) - Kleur (rood, blauw, goud, wit, geel) - Hoeveelheid.\n\nLet op: Geschikt voor baby’s vanaf 3 maanden. Gebruik onder toezicht van een volwassene. Test eerst op een klein stukje huid.",
-   "ingr": "Aqua, Glycerin, Sodium Stearate, Sorbitol, Sodium Laurate, Propylene Glycol, Sodium Laureth Sulfate, Goat Milk, Sodium Chloride, Sodium Lauryl Sulfate, Citric Acid, Titanium Dioxide (CI 77891) (indien gekozen kleurpigment), Sodium Citrate, Tetrasodium Iminodisuccinate, Tetrasodium Etidronate, Lavendel / Kamille / Mandarijn (indien etherische olie gekozen).",
-   "cat": "zeep",
-   "status": "concept",
-   "price": null,
-   "qty": null,
-   "photo": ""
   },
   {
    "id": "paardenbloemenzeep",
