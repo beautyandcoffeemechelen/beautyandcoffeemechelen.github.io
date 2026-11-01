@@ -1,7 +1,18 @@
 {
  "v": 1,
- "u": "2026-11-01T03:25:53.401Z",
+ "u": "2026-11-01T03:33:15.520Z",
  "items": [
+  {
+   "id": "nieuw-mvx9x8nq",
+   "name": "Regulating Retinol Cream 50ml",
+   "desc": "24-uurs verzorging voor de rijpere, enigszins droge en onzuivere huid met stabiliserend retinol en het innovatieve Equal Refining Complex. Gaat onzuiverheden tegen en ondersteunt de natuurlijke regeneratie van de huid.",
+   "ingr": "Equal-Refining Complex: De combinatie van oleanolzuur en het extract uit de schors van Enantia Chlorantha vertraagt de groei van sebocyten. De talgklieren worden in een ruststand gebracht waardoor de vettige glans na 28 dagen met 21,7% en de poriëngrootte met 16% worden gereduceerd\n\n• Ingekapselde retinol: Stimuleert de productie van collageen en de groei van nieuwe huidcellen, helpt bij het herstellen van een jeugdig uiterlijk en gaat huidveroudering tegen; Anti-rimpeleffect; verhoogde stabiliteit en functionaliteit vergeleken met niet-ingekapselde retinol, dringt beter door tot in de diepere huidlagen\n\n• Hyaluronzuur (met korte en lange ketens): Hydrateren en beschermen; droogtelijntjes worden opgevuld\n\n• Extract van aloë vera: Kalmerend, zuiverend, hydraterend\n\n• Sheaboter: Natuurlijk emollient; laat de huid fluweelzacht aanvoelen\n\n• Glycerine: Hydrateert",
+   "cat": "janssen",
+   "status": "beschikbaar",
+   "price": 43,
+   "qty": 1,
+   "photo": "assets/verkoop/nieuw-mvx9x8nq-mvx9ywkr.jpg"
+  },
   {
    "id": "nieuw-mvvg0gpm",
    "name": "Bio Balance Sensivital Ampullen 10 x 3 ml",
@@ -352,7 +363,7 @@
    "status": "beschikbaar",
    "price": 49.99,
    "qty": 1,
-   "photo": ""
+   "photo": "assets/verkoop/janssen-fill-me-mvx9yy7t.jpg"
   },
   {
    "id": "janssen-droge-huid",
