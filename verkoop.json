@@ -1,7 +1,18 @@
 {
  "v": 1,
- "u": "2026-11-01T03:33:15.520Z",
+ "u": "2026-11-01T03:35:43.817Z",
  "items": [
+  {
+   "id": "nieuw-mvx9z3zx",
+   "name": "Light Mattifying Cream 50ml",
+   "desc": "Deze lichte 24-uurs verzorging voor de vettige, onzuivere huid met het innovatieve Equal Refining Complex en hyaluronzuur vermindert zichtbaar de grove poriën en zorgt voor een glanzend gezonde huid. Silica zorgt voor een direct matterend effect.",
+   "ingr": "Equal-Refining Complex: De combinatie van oleanolzuur en het extract uit de schors van Enantia Chlorantha vertraagt de groei van sebocyten. De talgklieren worden in een ruststand gebracht waardoor de vettige glans na 28 dagen met 21,7% en de poriëngrootte met 16% worden gereduceerd\n\n• Hyaluronzuur (met korte en lange ketens): Hydrateren en beschermen; droogtelijntjes worden opgevuld\n\n• Extract van aloë vera: Kalmerend, zuiverend, hydraterend\n\n• Sheaboter: Natuurlijk emollient; laat de huid fluweelzacht aanvoelen\n\n• Silica: Werkt absorberend, matteert de huid al kort na het aanbrengen en maakt de huid aangenaam zacht",
+   "cat": "janssen",
+   "status": "beschikbaar",
+   "price": 39,
+   "qty": 1,
+   "photo": "assets/verkoop/nieuw-mvx9z3zx-mvxa24dq.jpg"
+  },
   {
    "id": "nieuw-mvx9x8nq",
    "name": "Regulating Retinol Cream 50ml",
