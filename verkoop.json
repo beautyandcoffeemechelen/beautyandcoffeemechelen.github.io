@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-01T03:16:25.978Z",
+ "u": "2026-11-01T03:25:53.401Z",
  "items": [
   {
    "id": "nieuw-mvvg0gpm",
@@ -378,14 +378,14 @@
   },
   {
    "id": "janssen-vette-huid",
-   "name": "Vette huid (Janssen Cosmetics)",
-   "desc": "",
-   "ingr": "",
+   "name": "Purifying BHA Serum 30ml",
+   "desc": "Zuiverend serum met actieve bestanddelen, waaronder salicylzuur voor de onzuivere huid dat oppervlakkige dode huidcellen los laat komen en comedonen zacht maakt. Het innovatieve Equal Refining Complex vermindert de vettige glans van de huid en verfijnt de poriën.",
+   "ingr": "Equal-Refining Complex: De combinatie van oleanolzuur en het extract uit de schors van Enantia Chlorantha vertraagt de groei van sebocyten. De talgklieren worden in een ruststand gebracht waardoor de vettige glans na 28 dagen met 21,7% en de poriëngrootte met 16% worden gereduceerd\n\n• Salicylzuur: In de natuur voorkomende actieve stof met antimicrobiële en ontstekingsremmende werking; laat oppervlakkige huidschilfers loskomen, maakt comedonen zacht (keratolytisch)\n\n• Hydratatiebooster op suikerbasis: Intensief hydraterend; versterkt de huidbarrière, vermindert droogtelijntjes en een schilferige huid\n\n• Extract van aloë vera: Rijk aan polysachariden, enzymen, essentiële vetzuren, vitamines, mineralen en vele andere actieve stoffen; werkt hydraterend en kalmerend\n\n• Hyaluronzuur (met lange ketens): Legt een vochtvasthoudend laagje op het huidoppervlak en beschermt deze zo tegen uitdrogen. Fijne lijntjes en rimpels worden opgevuld",
    "cat": "janssen",
-   "status": "concept",
-   "price": null,
-   "qty": null,
-   "photo": ""
+   "status": "beschikbaar",
+   "price": 48,
+   "qty": 1,
+   "photo": "assets/verkoop/janssen-vette-huid-mvx9pgtc.jpg"
   },
   {
    "id": "janssen-ampullen",
