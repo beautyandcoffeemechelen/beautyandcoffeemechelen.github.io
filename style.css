@@ -1549,3 +1549,11 @@ section[data-step="welcome"] .book-hub .btn--primary, section[data-step="welcome
 .gauge svg{ width:100%; max-width:170px; height:auto; } .gauge__t{ margin:0; font-weight:600; font-size:.92rem; } .gauge__s{ margin:2px 0 0; font-size:.78rem; opacity:.75; }
 
 #accAddr{ font:inherit; padding:8px 10px; border:1px solid var(--line,#CBBFAE); border-radius:10px; background:#fff; width:100%; box-sizing:border-box; margin:4px 0; }
+
+.acc-table{ border-collapse:collapse; font-size:.82rem; width:100%; } .acc-table th, .acc-table td{ border-bottom:1px solid var(--line,#CBBFAE); padding:4px 6px; text-align:right; white-space:nowrap; } .acc-table th:first-child, .acc-table td:first-child{ text-align:left; } .acc-table input{ font:inherit; padding:3px 5px; border:1px solid var(--line,#CBBFAE); border-radius:6px; width:72px; }
+.acc-checks{ list-style:none; padding-left:0; } .acc-checks li{ margin:4px 0; }
+
+.shop-actions input[data-kdx]{ font:inherit; padding:5px 8px; border:1px solid var(--line,#CBBFAE); border-radius:8px; width:110px; }
+.shop-info label{ display:grid; gap:2px; font-size:.85rem; margin:8px 0; }
+.shop-info label input, .shop-info label select{ font:inherit; padding:8px 10px; border:1px solid var(--line,#CBBFAE); border-radius:10px; background:#fff; width:100%; box-sizing:border-box; }
+.shop-info label input[type=checkbox]{ width:auto; }
