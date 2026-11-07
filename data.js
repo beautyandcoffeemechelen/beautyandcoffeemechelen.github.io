@@ -1979,7 +1979,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v213 · 07/11/2026";
+const APP_VERSION = "v214 · 07/11/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -2208,10 +2208,11 @@ const ADVENT = {
       product:"Gold Bio-Collagen Facial Mask",
       ingredients:"Aqua, Glycerin, Xanthan Gum, Mica, Chondrus Crispus Powder, Titanium Dioxide, Chlorphenesin, Glucomannan, Algin, Methylparaben, Potassium Chloride, Sodium Hyaluronate, Hydrolyzed Collagen, Butylene Glycol, Centella Asiatica Extract, Polygonum Cuspidatum Root Extract, Scutellaria Baicalensis Root Extract, Camellia Sinensis Leaf Extract, Glycyrrhiza Glabra (Licorice) Root Extract, Chamomilla Recutita (Matricaria) Flower Extract, Rosmarinus Officinalis (Rosemary) Leaf Extract, Iron Oxides, Citric Acid, Potassium Citrate, PEG-40 Hydrogenated Castor Oil, Fragrance",
       nl:"Gratis gouden collageenmasker", en:"Free gold collagen mask", fr:"Masque au collagène doré offert" },
-    spamani: { type:"extra", icon:"💅", with:{ nl:"manicure", en:"manicure", fr:"manucure" },
-      nl:"Gratis SPA manicure", en:"Free SPA manicure", fr:"Manucure SPA offerte" },
-    spapedi: { type:"extra", icon:"🦶", with:{ nl:"pedicure", en:"pedicure", fr:"pédicure" },
-      nl:"Gratis SPA pedicure", en:"Free SPA pedicure", fr:"Pédicure SPA offerte" },
+    spamanipedi: { type:"extra", icon:"💅", with:{ nl:"manicure of pedicure", en:"manicure or pedicure", fr:"manucure ou pédicure" },
+      highlights:{ nl:"Kies zelf: een SPA-manicure bij je manicure of een SPA-pedicure bij je pedicure, met peeling, masker, pakking en massage. Per dag kies je één SPA-behandeling.",
+                   en:"Your choice: a SPA manicure with your manicure or a SPA pedicure with your pedicure, with peeling, mask, wrap and massage. You can choose one SPA treatment per day.",
+                   fr:"À vous de choisir : une manucure SPA avec votre manucure ou une pédicure SPA avec votre pédicure, avec peeling, masque, enveloppement et massage. Une seule prestation SPA par jour." },
+      nl:"Gratis SPA-manicure of SPA-pedicure (1 SPA-behandeling per dag)", en:"Free SPA manicure or SPA pedicure (1 SPA treatment per day)", fr:"Manucure SPA ou pédicure SPA offerte (1 soin SPA par jour)" },
     eyeflash: { type:"extra", photo:"assets/advent/eyeflash-ill.webp", icon:"👁️", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Een ampul oogserum met hyaluronzuur en peptiden, tijdens je gelaatsverzorging zacht rond de ogen ingeklopt — voor een frissere, minder vermoeide blik. Bevat parfum.",
                    en:"An ampoule of eye serum with hyaluronic acid and peptides, gently patted around the eyes during your facial — for a fresher, less tired look. Contains fragrance.",
@@ -2339,14 +2340,14 @@ const ADVENT = {
     { day:12, item:"shop5",        stock:null },   // v212 (Sandra, 07/11/2026)
     { day:13, item:"facecupping",   stock:null },
     { day:14, item:"goldpowder",        stock:null },   // v212 (Sandra, 07/11/2026)
-    { day:15, item:"spamani",       stock:null },
+    { day:15, item:"spamanipedi",       stock:null },
     { day:16, item:"shop10", stock:null },   // v212 (Sandra, 07/11/2026)
     { day:17, item:"gelpromo10",    stock:null },   // v212 (Sandra, 07/11/2026)
     { day:18, item:"peelcare",      stock:null },   // v212 (Sandra, 07/11/2026)
     { day:19, item:"shop15",        stock:null },   // v212 (Sandra, 07/11/2026)
     { day:20, item:"body10",       stock:null },   // v212 (Sandra, 07/11/2026)
     { day:21, item:"peelblueberry",      stock:null },   // v212 (Sandra, 07/11/2026)
-    { day:22, item:"spapedi",       stock:null },
+    { day:22, item:"spamanipedi",       stock:null },
     { day:23, item:"luminoclear",   stock:null },
     { day:24, item:"goldmask",      stock:null },
     { day:25, item:"paraffinmask",  stock:null }   // gratis anti-aging paraffinemasker (Sandra, 09/10)
