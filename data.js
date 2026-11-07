@@ -268,9 +268,9 @@ const NAME_I18N = {
   "en": "Purifying Back Treatment",
   "fr": "Soin purifiant du dos"
  },
- "Botanische Anti-Age": {
-  "en": "Botanical Anti-Age Treatment",
-  "fr": "Soin anti-âge botanique"
+ "Anti-Age": {
+  "en": "Anti-Age Treatment",
+  "fr": "Soin anti-âge"
  },
  "Harmoniserende Full Body Verzorging": {
   "en": "Harmonising Full Body Treatment",
@@ -589,10 +589,10 @@ const PRICELIST_NAMES = {
   "en": "Purifying back treatment",
   "fr": "Soin purifiant du dos"
  },
- "Botanische Anti-Age": {
-  "nl": "Botanische Anti-Age",
-  "en": "Botanical Anti-Age",
-  "fr": "Anti-âge botanique"
+ "Anti-Age": {
+  "nl": "Anti-Age",
+  "en": "Anti-Age",
+  "fr": "Anti-âge"
  },
  "Harmoniserende Full Body Verzorging": {
   "nl": "Harmoniserende verzorging full body",
@@ -1157,7 +1157,7 @@ const TREATMENTS_CATALOG = [
     aftercare:{ nl:"Draag de eerste 24 uur bij voorkeur losse kleding. Eenmaal thuis kun je gewoon douchen zoals normaal.",
                 en:"Preferably wear loose clothing for the first 24 hours. You can shower normally once you're home." } },
 
-  { id:"antiagefacial", name:"Botanische Anti-Age", moods:["luxury"], genders:["vrouw"], sunSensitive:false, minAge45:true, price:"€125 (90')",
+  { id:"antiagefacial", name:"Anti-Age", moods:["luxury"], genders:["vrouw"], sunSensitive:false, minAge45:true, price:"€125 (90')",
     homecare:{ category:"facial" },
     benefits:{ nl:"Een uitgebreide botanische gelaatsverzorging voor een huid met zichtbare tekenen van huidveroudering.",
                en:"An extensive botanical facial for skin showing visible signs of aging." },
@@ -1566,12 +1566,12 @@ const FOCUS_GUIDES = {
     questions:[
       { id:"wish", required:true, label:{ nl:"Waar wil je vooral aan werken?", en:"What would you like to work on most?", fr:"Sur quoi voulez-vous surtout travailler ?" },
         options:[
-          { id:"clean", label:{ nl:"Onzuiverheden, mee-eters, grote poriën", en:"Blemishes, blackheads, large pores", fr:"Imperfections, points noirs, pores dilatés" }, s:{ equilibrepurete:9, expressfacial:2, expressuseup:2, fruitacid:2, signaturefacial:1 }, block:["fillme"], derm:true },
+          { id:"clean", label:{ nl:"Onzuiverheden, mee-eters, grote poriën", en:"Blemishes, blackheads, large pores", fr:"Imperfections, points noirs, pores dilatés" }, s:{ equilibrepurete:14, expressfacial:2, expressuseup:2, fruitacid:2, signaturefacial:9 }, block:["fillme"], derm:true, kit:"equilibrepurete" },
           { id:"hydra", label:{ nl:"Droge, trekkerige of vale huid", en:"Dry, tight or dull skin", fr:"Peau sèche, qui tiraille ou terne" }, s:{ fillme:3, hydrapeel:2, signaturefacial:2 } },
           { id:"pigment", label:{ nl:"Pigmentvlekken, een egalere teint", en:"Pigment spots, a more even tone", fr:"Taches pigmentaires, teint plus uniforme" }, months:[9,10,11,12,1,2,3], s:{ fruitacid:4, hydrapeel:2 }, off:{ fillme:3, signaturefacial:2 },
             offNote:{ nl:"Pigmentvlekken behandel ik enkel van september tot eind maart, als de zon minder sterk is: anders kunnen de vlekken net terugkomen. Daarom nu een verzorging die je huid voorbereidt; plan je pigmentbehandeling (fruitzuurpeeling) vanaf september.", en:"I only treat pigment spots from September to the end of March, when the sun is weaker; otherwise the spots can come back. So for now a treatment that prepares your skin; plan your pigment treatment (fruit acid peel) from September.", fr:"Je ne traite les taches pigmentaires que de septembre à fin mars, quand le soleil est plus faible ; sinon elles peuvent revenir. Pour l’instant, un soin qui prépare la peau ; prévoyez le soin anti-taches (peeling aux acides de fruits) dès septembre." } },
           { id:"age", label:{ nl:"Fijne lijntjes, rimpels, stevigheid", en:"Fine lines, wrinkles, firmness", fr:"Ridules, rides, fermeté" }, s:{ antiagefacial:4, liftsummere:3, fillme:2 },
-            ageNote:{ nl:"Een echte anti-agingbehandeling raad ik aan vanaf 45 jaar (Botanische Anti-Age) en de Lift Summum vanaf 30 jaar. Voor jou nu is hydratatie de beste preventie.", en:"I recommend a real anti-ageing treatment from age 45 (Botanical Anti-Age) and the Lift Summum from 30. For you right now, hydration is the best prevention.", fr:"Je conseille un vrai soin anti-âge à partir de 45 ans (Anti-Âge Botanique) et le Lift Summum dès 30 ans. Pour vous, l’hydratation est la meilleure prévention." } },
+            ageNote:{ nl:"Een echte anti-agingbehandeling raad ik aan vanaf 45 jaar (Anti-Age) en de Lift Summum vanaf 30 jaar. Voor jou nu is hydratatie de beste preventie.", en:"I recommend a real anti-ageing treatment from age 45 (Anti-Age) and the Lift Summum from 30. For you right now, hydration is the best prevention.", fr:"Je conseille un vrai soin anti-âge à partir de 45 ans (Anti-Âge) et le Lift Summum dès 30 ans. Pour vous, l’hydratation est la meilleure prévention." } },
           { id:"sensitive", label:{ nl:"Gevoelige of snel rode huid", en:"Sensitive or easily red skin", fr:"Peau sensible ou qui rougit vite" }, s:{ signaturefacial:4, expressfacial:1 } },
           { id:"glow", label:{ nl:"Snel opfrissen, een frisse glow", en:"A quick refresh, a fresh glow", fr:"Un coup d’éclat rapide" }, s:{ expressfacial:3, expressuseup:3, fillme:2 } },
           { id:"pamper", label:{ nl:"Vooral verwennen en ontspannen", en:"Mostly pampering and relaxing", fr:"Surtout me chouchouter et me détendre" }, s:{ signaturefacial:3, liftsummere:2, antiagefacial:2 } }
@@ -1979,7 +1979,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v212 · 07/11/2026";
+const APP_VERSION = "v213 · 07/11/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -2188,7 +2188,7 @@ const ADVENT = {
       nl:"Gratis Hot Stone gelaatsmassage", en:"Free Hot Stone facial massage", fr:"Massage visage aux pierres chaudes offert" },
     facecupping: { type:"extra", photo:"assets/advent/facecupping-ill.webp", icon:"✨", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       nl:"Gratis liftende cuppingmassage voor het gelaat", en:"Free lifting cupping facial massage", fr:"Massage liftant aux ventouses du visage offert" },
-    peelanti: { type:"extra", icon:"🌟", stock:6, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+    peelanti: { type:"extra", icon:"🌟", stock:3, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met kaviaarextract, hamamelis, lavendel en collageen — verstevigt en geeft de rijpere huid een frisse, gladde uitstraling. Vooraf een hyaluronzuurserum met komkommer voor extra vocht.", en:"With caviar extract, witch hazel, lavender and collagen — firms and gives mature skin a fresh, smooth look. First a hyaluronic acid serum with cucumber for extra moisture.", fr:"À l'extrait de caviar, à l'hamamélis, à la lavande et au collagène — raffermit et donne aux peaux matures un aspect frais et lisse. D'abord un sérum à l'acide hyaluronique et au concombre pour plus d'hydratation." },
       product:"Bio Balance Algoherbal Ageing (poedermasker + Essence Gel) + Hya-Lift+ serum",
       ingredients:"Poeder (Lavender): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Lavandula Angustifolia (Lavender) Flower, Sodium Phosphate, CI 42090, Lavandula Angustifolia (Lavender) Oil. — Essence Gel (Lavender & Caviar): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Caviar Extract, Hamamelis Virginiana Extract, Lavandula Angustifolia Extract, Carbomer, Triethanolamine, Hyaluronic Acid, Hydrolyzed Collagen, Allantoin, PEG-40 Hydrogenated Castor Oil, Parfum, CI 42090, Phenoxyethanol, Limonene, Linalool, Geraniol, Alpha-Isomethyl Ionone, CI 16035",
@@ -2197,7 +2197,7 @@ const ADVENT = {
       highlights:{ nl:"Met rozenblaadjes, rozenolie, aloë vera, komkommer en hyaluronzuur — kalmeert, hydrateert en verzacht de gevoelige huid. Vooraf een mild hyaluronzuurserum zonder parfum.", en:"With rose petals, rose oil, aloe vera, cucumber and hyaluronic acid — calms, hydrates and softens sensitive skin. First a mild, fragrance-free hyaluronic acid serum.", fr:"Aux pétales de rose, à l'huile de rose, à l'aloe vera, au concombre et à l'acide hyaluronique — apaise, hydrate et adoucit les peaux sensibles. D'abord un sérum doux à l'acide hyaluronique, sans parfum." },
       product:"Bio Balance Algoherbal Sensitive – Rose (poedermasker + Essence Gel) + Hya-Lift+ serum",
       ingredients:"Poeder (Rose): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Rosa Centifolia Flower, Sodium Phosphate, CI 16035, Rosa Rugosa Flower Oil. — Essence Gel (Rose): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Cucumis Sativus Fruit Extract, Hydrolyzed Collagen, Carbomer, Triethanolamine, PEG-40 Hydrogenated Castor Oil, Hyaluronic Acid, Parfum, Disodium EDTA, Phenoxyethanol, Limonene, Linalool, Alpha-Isomethyl Ionone, CI 16035",
-      nl:"Gratis rozen peel-off masker voor de gevoelige huid", en:"Free rose peel-off mask for sensitive skin", fr:"Masque peel-off à la rose pour peaux sensibles offert" },
+      nl:"Gratis peel-off masker voor de gevoelige huid", en:"Free peel-off mask for sensitive skin", fr:"Masque peel-off pour peaux sensibles offert" },
     collagen: { type:"extra", photo:"assets/advent/collagen-ill.webp", icon:"🫧", stock:4, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met marien collageen en haver — liftend en verstevigend, voor een zichtbaar gladdere huid.", en:"With marine collagen and oat — lifting and firming, for visibly smoother skin.", fr:"Au collagène marin et à l'avoine — liftant et raffermissant, pour une peau visiblement plus lisse." },
       product:"Bio Balance Super Collageen Gelmasker Lifting",
@@ -2218,7 +2218,7 @@ const ADVENT = {
                    fr:"Une ampoule de sérum contour des yeux à l'acide hyaluronique et aux peptides, appliquée en tapotant pendant votre soin du visage — pour un regard plus frais et moins fatigué. Contient du parfum." },
       product:"Janssen Cosmetics Eye Flash Fluid (ampul 1,5 ml)",
       ingredients:"Aqua (Water), Butylene Glycol, Glycerin, Pentylene Glycol, Xanthan Gum, Sodium Hyaluronate, Palmitoyl Tripeptide-1, Palmitoyl Tetrapeptide-7, Carbomer, Coco-Glucoside, Trideceth-9, PEG-40 Hydrogenated Castor Oil, PEG-7 Glyceryl Cocoate, Tetrasodium Glutamate Diacetate, Propylene Glycol, Citric Acid, Sodium Hydroxide, Parfum (Fragrance), Phenoxyethanol, Sodium Benzoate, Sodium Lactate, CI 16035 (Red 40)",
-      nl:"Gratis Eye Flash oogampul tijdens je gelaatsverzorging", en:"Free Eye Flash eye ampoule during your facial", fr:"Ampoule yeux Eye Flash offerte pendant votre soin du visage" },
+      nl:"Gratis Eye Flash Fluid oogampul tijdens je gelaatsverzorging", en:"Free Eye Flash Fluid eye ampoule during your facial", fr:"Ampoule yeux Eye Flash Fluid offerte pendant votre soin du visage" },
     guinot: { type:"extra", photo:"assets/advent/guinot-ill.webp", icon:"🧴", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Een extra zachte scrub met microkorrels van shea, tijdens je gelaatsverzorging — voor een gladde, stralende huid. Bevat zoete-amandelolie (noten) en parfum.",
                    en:"An extra gentle scrub with shea microbeads during your facial — for smooth, radiant skin. Contains sweet almond oil (nuts) and fragrance.",
@@ -2249,8 +2249,38 @@ const ADVENT = {
     peelblueberry: { type:"extra", icon:"🫐", stock:4, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met bosbes, vitamine C en kamilleolie — een kalmerend algenmasker voor de gevoelige huid.", en:"With bilberry, vitamin C and chamomile oil — a soothing seaweed mask for sensitive skin.", fr:"À la myrtille, à la vitamine C et à l'huile de camomille — un masque aux algues apaisant pour les peaux sensibles." },
       product:"Bio Balance Peel-Off Algenmasker Bosbessen (Sensitive)",
-      nl:"Gratis kalmerend bosbessen peel-off masker", en:"Free soothing blueberry peel-off mask", fr:"Masque peel-off apaisant à la myrtille offert",
+      nl:"Gratis verfrissend peel-off masker voor de gevoelige huid", en:"Free refreshing peel-off mask for sensitive skin", fr:"Masque peel-off rafraîchissant pour peaux sensibles offert",
       ingredients:"Diatomaceous Earth, Algin, Calcium Sulfate, Tetrasodium Pyrophosphate, Sodium Ascorbate, Maltodextrin, Vaccinium Myrtillus Fruit Extract, Ormenis Multicaulis Oil, Limonene" },
+    // ---- v212 (Sandra, 07/11/2026): correcties adventskalender ----
+    peelcare: { type:"extra", icon:"🌿", stock:3, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Een zachte, verzorgende peel-off met lavendel en collageen: hij kalmeert, geeft een frisse, gladde look en laat je huid heerlijk ontspannen achter. Vooraf een hyaluronzuurserum met komkommer voor extra vocht.", en:"A gentle, nourishing peel-off with lavender and collagen: it soothes, gives a fresh, smooth look and leaves your skin wonderfully relaxed. First a hyaluronic serum with cucumber for extra moisture.", fr:"Un peel-off doux et nourrissant à la lavande et au collagène : il apaise, donne un teint frais et lisse et laisse la peau délicieusement détendue. D'abord un sérum à l'acide hyaluronique et au concombre pour plus d'hydratation." },
+      product:"Bio Balance Algoherbal Ageing (poedermasker + Essence Gel) + Hya-Lift+ serum",
+      ingredients:"Zie Ingrediënten & allergieën: Bio Balance Algoherbal Ageing.",
+      nl:"Gratis verzorgend peel-off masker", en:"Free nourishing peel-off mask", fr:"Masque peel-off nourrissant offert" },
+    goldpowder: { type:"extra", icon:"🥇", stock:null, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Een luxe peel-off poedermasker met echt goud, collageen en hyaluronzuur: hydrateert, voedt, verstevigt en verheldert. Je huid straalt meteen. Bevat collageen (dierlijk), zoethout, rijstzetmeel (granen), goud en parfum.", en:"A luxurious peel-off powder mask with real gold, collagen and hyaluronic acid: it hydrates, nourishes, firms and brightens. Your skin glows instantly. Contains collagen (animal), liquorice, rice starch (cereals), gold and fragrance.", fr:"Un masque peel-off en poudre luxueux à l'or véritable, au collagène et à l'acide hyaluronique : il hydrate, nourrit, raffermit et éclaircit. Votre peau rayonne aussitôt. Contient du collagène (animal), de la réglisse, de l'amidon de riz (céréales), de l'or et du parfum." },
+      product:"Safety4You Peel-off poedermasker Goud Soft",
+      ingredients:"Glucose, Diatomaceous Earth, Oryza Sativa Starch, Algin, Pectin, Collagen, Glycyrrhiza Glabra Root Extract, Hyaluronic Acid, Sodium Bicarbonate, Gold, Parfum, CI 10316",
+      nl:"Gratis luxe gouden poedermasker", en:"Free luxury gold powder mask", fr:"Masque en poudre doré de luxe offert" },
+    massage10: { type:"discount", icon:"💆", value:"10%", noMin:true,
+      nl:"10% korting op een massage", en:"10% off a massage", fr:"10 % de réduction sur un massage",
+      treat:{ nl:"massage", en:"massage", fr:"massage" } },
+    gelpromo10: { type:"discount", icon:"💅", value:"10%", noMin:true,
+      nl:"10% korting op gellak", en:"10% off gel polish", fr:"10 % de réduction sur le vernis semi-permanent",
+      treat:{ nl:"gellak (bij een manicure of pedicure)", en:"gel polish (with a manicure or pedicure)", fr:"vernis semi-permanent (avec une manucure ou pédicure)" } },
+    body10: { type:"discount", icon:"🌿", value:"10%",
+      nl:"10% korting op een lichaamspeeling & lichaamspakking, of op een gerichte behandeling voor enkel de rug of enkel de benen", en:"10% off a body peeling & body wrap, or a targeted treatment for just the back or just the legs", fr:"10 % de réduction sur un gommage & enveloppement corps, ou sur un soin ciblé du dos seul ou des jambes seules",
+      treat:{ nl:"lichaamspeeling & lichaamspakking, of een behandeling voor enkel de rug of de benen", en:"body peeling & body wrap, or a back-only or legs-only treatment", fr:"gommage & enveloppement corps, ou soin du dos seul ou des jambes seules" } },
+    // salon verkoophoekje: geldig bij betaling t.e.m. 3/1 (shop:true, geen afspraak nodig)
+    shop5: { type:"discount", icon:"🛍️", value:"5%", noMin:true, shop:true,
+      nl:"5% korting in het salon verkoophoekje", en:"5% off in the salon shop corner", fr:"5 % de réduction dans le coin boutique du salon",
+      treat:{ nl:"salon verkoophoekje", en:"salon shop corner", fr:"coin boutique du salon" } },
+    shop10: { type:"discount", icon:"🛍️", value:"10%", noMin:true, shop:true,
+      nl:"10% korting op het salon verkoophoekje", en:"10% off the salon shop corner", fr:"10 % de réduction sur le coin boutique du salon",
+      treat:{ nl:"salon verkoophoekje", en:"salon shop corner", fr:"coin boutique du salon" } },
+    shop15: { type:"discount", icon:"🛍️", value:"15%", noMin:true, shop:true,
+      nl:"15% korting op het salon verkoophoekje", en:"15% off the salon shop corner", fr:"15 % de réduction sur le coin boutique du salon",
+      treat:{ nl:"salon verkoophoekje", en:"salon shop corner", fr:"coin boutique du salon" } },
     facial10: { type:"discount", icon:"🧖", value:"10%",
       nl:"10% korting op een gelaatsverzorging", en:"10% off a facial", fr:"10 % de réduction sur un soin du visage",
       treat:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" } },
@@ -2301,21 +2331,21 @@ const ADVENT = {
     { day:4,  item:"handspa",       stock:null },
     { day:5,  item:"liftsummum15",  stock:null },   // i.p.v. mascaraborsteltje (Sandra, 15/10)
     { day:6,  item:"neckcream",     stock:null },   // Janssen Firming Neck & Décolleté als cadeau bij een gelaatsverzorging (Sandra, 17/10; i.p.v. 10% op een gelaatsverzorging)
-    { day:7,  item:"eyeflash",      stock:null },   // in het salon, bij een gelaatsverzorging (Sandra, 13/10)
-    { day:8,  item:"peelsens",      stock:null },
+    { day:7,  item:"eyeflash",      stock:null },   // v212 (Sandra, 07/11/2026)
+    { day:8,  item:"peelsens",      stock:null },   // v212 (Sandra, 07/11/2026)
     { day:9,  item:"nailpolishfree", stock:null },  // gewone nagellak opmaken (Sandra, 15/10); gellak blijft op 3 en 17
-    { day:10, item:"guasha",        stock:null },   // gua sha met Hya-Lift+ serum (Sandra, 18/10; i.p.v. Hot Stone gelaatsmassage)
-    { day:11, item:"massage15",     stock:null },
-    { day:12, item:"buffer",        stock:null },
+    { day:10, item:"peelanti",        stock:null },   // v212 (Sandra, 07/11/2026)
+    { day:11, item:"massage10",     stock:null },   // v212 (Sandra, 07/11/2026)
+    { day:12, item:"shop5",        stock:null },   // v212 (Sandra, 07/11/2026)
     { day:13, item:"facecupping",   stock:null },
-    { day:14, item:"guinot",        stock:null },   // in het salon, bij een gelaatsverzorging
+    { day:14, item:"goldpowder",        stock:null },   // v212 (Sandra, 07/11/2026)
     { day:15, item:"spamani",       stock:null },
-    { day:16, item:"peelblueberry", stock:null },   // ongeopend, volgens Sandra en haar leerkracht nog bruikbaar (13/10)
-    { day:17, item:"gelpromo25",    stock:null },   // gellak opmaken (2e keer)
-    { day:18, item:"peelanti",      stock:null },
-    { day:19, item:"eraser",        stock:null },
-    { day:20, item:"handspa",       stock:null },   // extra hand peeling: uses up the MellowMoist lotion (Sandra, 09/10)
-    { day:21, item:"collagen",      stock:null },
+    { day:16, item:"shop10", stock:null },   // v212 (Sandra, 07/11/2026)
+    { day:17, item:"gelpromo10",    stock:null },   // v212 (Sandra, 07/11/2026)
+    { day:18, item:"peelcare",      stock:null },   // v212 (Sandra, 07/11/2026)
+    { day:19, item:"shop15",        stock:null },   // v212 (Sandra, 07/11/2026)
+    { day:20, item:"body10",       stock:null },   // v212 (Sandra, 07/11/2026)
+    { day:21, item:"peelblueberry",      stock:null },   // v212 (Sandra, 07/11/2026)
     { day:22, item:"spapedi",       stock:null },
     { day:23, item:"luminoclear",   stock:null },
     { day:24, item:"goldmask",      stock:null },
@@ -2541,7 +2571,7 @@ const PRICE_LINKS = {
   backwrap:"Energetische rugpakking", browlift:"Brow Lift", hennabrows:"Henna Brows", lashlift:"Lash Lift met kleuring",
   glammakeup:"Avondmake-up / Party / Glam", hydrapeel:"Huidvernieuwende Hydra Peeling pH", signaturefacial:"Signature gelaatsverzorging",
   fillme:"Fill Me Micro Infusie Treatment", equilibrepurete:"Guinot Équilibre Pureté", fruitacid:"Fruitzurenpeeling 4/26 Dr. Renaud", liftsummere:"Lift Summum",
-  detoxback:"Zuiverende rugbehandeling", antiagefacial:"Botanische Anti-Age", harmonizingbody:"Harmoniserende verzorging full body",
+  detoxback:"Zuiverende rugbehandeling", antiagefacial:"Anti-Age", harmonizingbody:"Harmoniserende verzorging full body",
   fullbodywrap:"Energetische lichaamspakking full body", makeupworkshop:"Beauty & Skincare Workshop", facialworkshop:"Beauty & Skincare Workshop",
   baristaworkshop:"Barista Privéworkshop", manicure:"Uitgebreide manicure", pedicureexpress:"Express pedicure", pedicure:"Uitgebreide pedicure",
   slimmassage:"Afslankingsmassage", oksel:"Oksels", rug:"Rug", buik:"Buik", borst:"Borst",
@@ -2581,7 +2611,7 @@ const PRICE_LIST = [
     PI("Fruitzurenpeeling 4/26 Dr. Renaud","Fruit acid peel 4/26 Dr. Renaud","75′","€100","Voor een egalere teint. Enkel van september tot maart.","For a more even skin tone. Only from September to March."),
     PI("Huidvernieuwende Hydra Peeling pH","Skin-renewing Hydra Peeling pH","90′","€100","Voor een frisse uitstraling en een egalere teint.","For a fresh glow and a more even skin tone."),
     PI("Lift Summum","Lift Summum","70′","€120","Voor een strakker ogende huid, met massage en gelaatsmasker.","For firmer-looking skin, with massage and face mask."),
-    PI("Botanische Anti-Age","Botanical Anti-Age","90′","€125","Verzorgende anti-age behandeling met ampul, massage en masker.","Anti-age care with ampoule, massage and mask.")
+    PI("Anti-Age","Anti-Age","90′","€125","Verzorgende anti-age behandeling met ampul, massage en masker.","Anti-age care with ampoule, massage and mask.")
   ]},
   { id:"facial-extra", icon:"✨", title:{ nl:"Extra’s bij je gelaatsverzorging", en:"Facial add-ons" }, items:[
     PI("Handpeeling & -massage","Hand peeling & massage","10′","€10"),

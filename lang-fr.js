@@ -101,6 +101,7 @@
   "download_button": "Télécharger l'image",
   "menu_cta": "Voir la carte et les tarifs",
   "pricelist_button": "Voir les tarifs",
+  "search_button": "🔍 Rechercher dans l’appli",
   "pricelist_title": "Tarifs",
   "pricelist_intro": "Tarifs en vigueur depuis le 1/06/2026. Prix finaux, exonérés de TVA. Soins uniquement sur rendez-vous. Pour les rendez-vous en 2027 ou plus tard, les prix peuvent encore changer (indexation, hausse du prix des produits).",
   "pricelist_search": "Rechercher un soin…",
@@ -184,6 +185,9 @@
   "adv_res_count_of": "{x} sur {y} remis pour cette porte.",
   "adv_res_bookby": "Le rendez-vous devait être réservé au plus tard le {d}.",
   "adv_res_discount_note": "Uniquement sur un {treat} d'au moins {dmin} € ; non cumulable.",
+  "adv_rules_shop": "<ul><li><b>Valable dans le coin boutique du salon, pour tout paiement jusqu'au {until}.</b> Montrez ce code au salon.</li><li>Uniquement sur les produits du coin boutique ; non cumulable avec d'autres réductions.</li><li>Passé cette date, la réduction expire.</li></ul>",
+  "adv_dates_shop": "🛍️ <b>Valable pour tout paiement jusqu'au {until}</b> · uniquement sur le coin boutique du salon",
+  "adv_res_shop_note": "Uniquement sur le coin boutique du salon, pour tout paiement jusqu'au {until} ; non cumulable.",
   "adv_res_invalid": "Ce n'est pas un bon de l'Avent valable.",
   "adv_res_test": "C'est un bon de test (T…). Il n'est pas valable.",
   "adv_res_real_in_test": "Vrai bon scanné en aperçu — non enregistré. Ouvrez #salon sans le lien d'aperçu.",
@@ -794,6 +798,7 @@
   "focus_colours": "Des couleurs dans l’esprit {family} : par exemple {names}. Je vous montre les nuanciers au salon.",
   "focus_fallback": "Le soin qui correspond le mieux à votre envie ne vous convient pas pour l’instant (soleil, âge, allergie ou point de santé). Voici donc un soin sûr pour vous.",
   "acne_derm_note": "Avez-vous une acné douloureuse (boutons profonds, inflammatoires ou nodules) ? Faites-la d’abord examiner par votre médecin généraliste ou un dermatologue : un soin du visage n’est alors pas la bonne première étape.",
+  "acne_purple_note": "Pour une peau à imperfections, je travaille avec la ligne violette de Janssen Cosmetics, dans le soin du visage Signature.",
 
   "why_focus": "Vous avez choisi {cat}, avec comme envie : {answers}. C’est pourquoi {treatment} vous convient le mieux.",
   "focus_advice_title": "Adapté à vos envies",
@@ -845,6 +850,7 @@
   "bh_price": "Prix",
   "bh_time": "Durée",
   "bh_desc": "Description",
+  "bh_title": "Titre",
   "bh_delete": "Supprimer",
   "bh_restore": "Rétablir",
   "bh_reset": "Original",
@@ -1539,8 +1545,8 @@
      null
     ],
     [
-     "Botanische Anti-Age",
-     "Anti-âge botanique",
+     "Anti-Age",
+     "Anti-âge",
      "Soin anti-âge avec ampoule, massage et masque.",
      null
     ]

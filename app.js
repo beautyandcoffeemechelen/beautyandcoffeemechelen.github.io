@@ -146,6 +146,7 @@
       renderPriceList();
     }
     if (name === "shop") renderShop();
+    if (name === "search") { try { gsRender(); } catch(e){ /* search module not ready yet */ } }
     try { shopSyncLinks(); } catch(e){ /* shop module not ready yet */ }
     try { accBanner(); } catch(e){ /* accounting module not ready yet */ }
     if (name === "focus") renderFocusOptions();
@@ -447,7 +448,8 @@
       if (o.ageNote && state.ageBracket !== "45plus") notes.push(fx(o.ageNote));
       if (o.tip) tips.push(fx(o.tip));
       if (o.block) o.block.forEach(id => { if (!block.includes(id)) block.push(id); });   // never propose these (v212: Fill Me bij acne/poriën)
-      if (o.derm) notes.push(t("acne_derm_note", state.lang));                              // painful acne -> dermatologist (v212)
+      if (o.derm) notes.push(t("acne_derm_note", state.lang));
+      if (o.kit && BC_UNAVAILABLE.has(o.kit)) notes.push(t("acne_purple_note", state.lang));   // kit op: Janssen purple line (Signature) in the meantime (v213)                              // painful acne -> dermatologist (v212)
       Object.entries(o.mu || {}).forEach(([k, v]) => { mu[k] = (mu[k] || 0) + v; });
       if (o.family) family = o.family;
     });
@@ -1901,7 +1903,7 @@
     if (!v || typeof v !== "object") return o;
     if (v.prices && typeof v.prices === "object") Object.keys(v.prices).slice(0, 200).forEach(k => {
       const p = v.prices[k]; if (!p || typeof p !== "object") return;
-      const e = {}; if (p.price) e.price = bhStr(p.price, 40); if (p.time) e.time = bhStr(p.time, 30); if (p.d) e.d = bhStr(p.d, 240);
+      const e = {}; if (p.price) e.price = bhStr(p.price, 40); if (p.time) e.time = bhStr(p.time, 30); if (p.d) e.d = bhStr(p.d, 240); if (p.t) e.t = bhStr(p.t, 120);
       if (Object.keys(e).length) o.prices[bhStr(k, 140)] = e;
     });
     o.hide = (Array.isArray(v.hide) ? v.hide : []).map(x => bhStr(x, 140)).filter(Boolean).slice(0, 200);
@@ -1940,7 +1942,7 @@
     const e = bhEff(), hid = new Set(e.hide);
     const base = sec.items.filter(it => !hid.has(it.n.nl)).map(it => {
       const o = Object.assign({}, it, { _key: it.n.nl }), ov = e.prices[it.n.nl];
-      if (ov){ if (ov.price) o.price = bhPrice(ov.price); if (ov.time) o.time = ov.time; if (ov.d) o.d = { nl:ov.d, en:ov.d, fr:ov.d }; o._edited = true; }
+      if (ov){ if (ov.price) o.price = bhPrice(ov.price); if (ov.time) o.time = ov.time; if (ov.d) o.d = { nl:ov.d, en:ov.d, fr:ov.d }; if (ov.t) o.n = { nl:ov.t, en:ov.t, fr:ov.t }; o._edited = true; }
       return o;
     });
     const add = e.add.filter(a => a.sec === sec.id).map(a => ({ n:{ nl:a.nl, en:a.en || a.nl, fr:a.fr || a.nl }, price:bhPrice(a.price), time:a.time, d:a.d ? { nl:a.d, en:a.d, fr:a.d } : null, note:null, _key:"add:" + a.id, _added:true }));
@@ -1953,6 +1955,7 @@
     if (!(BH && BH.edit) || !actSalon()) return "";
     const L = state.lang, k = esc(it._key);
     return `<div class="bh-row">
+      ${it._added ? "" : `<label class="bh-lab bh-wide">${t("bh_title", L)} <input type="text" class="pm-input bh-f" data-key="${k}" data-f="t" value="${esc(it.n.nl)}" maxlength="120"></label>`}
       <label class="bh-lab">${t("bh_price", L)} <input type="text" class="pm-input bh-f" data-key="${k}" data-f="price" value="${esc(it.price)}" maxlength="40" size="9"></label>
       <label class="bh-lab">${t("bh_time", L)} <input type="text" class="pm-input bh-f" data-key="${k}" data-f="time" value="${esc(it.time || "")}" maxlength="30" size="8"></label>
       <label class="bh-lab bh-wide">${t("bh_desc", L)} <input type="text" class="pm-input bh-f" data-key="${k}" data-f="d" value="${esc((it.d && it.d.nl) || "")}" maxlength="240"></label>
@@ -2076,7 +2079,8 @@
   }
   function bhChange(ev){
     const el = ev.target; if (!el.classList || !el.classList.contains("bh-f") || !actSalon()) return;
-    const key = el.dataset.key, f = el.dataset.f, val = bhStr(el.value, f === "d" ? 240 : 40), e2 = bhCopy();
+    const key = el.dataset.key, f = el.dataset.f, val = bhStr(el.value, f === "d" ? 240 : f === "t" ? 120 : 40), e2 = bhCopy();
+    if (f === "t" && val === key) val = "";   // unchanged title = no override
     if (key.startsWith("add:")){ const x = e2.add.find(y => "add:" + y.id === key); if (!x) return; x[f] = val; if (f === "price" && !val) return; }
     else { const o = e2.prices[key] || (e2.prices[key] = {}); if (val) o[f] = val; else delete o[f]; if (!Object.keys(o).length) delete e2.prices[key]; }
     bhCommit(e2);
@@ -2854,7 +2858,7 @@
 
   /* ===== v201: Verkoophoekje (shop corner) ===== */
   const SHOP_FILE = "verkoop.json", SHOP_DRAFT = "bc_shop_draft_v1", SHOP_CACHE = "bc_shop_cache_v1";
-  const shop = { pub: null, draft: null, filter: "all", edit: "", busy: false, photoFor: "", ver: "" };
+  const shop = { pub: null, draft: null, filter: "all", edit: "", busy: false, photoFor: "", photoSlot: "main", ver: "", q: "", tag: "", skin: "", pmin: "", pmax: "" };
   const SHOP_PHOTOS = "bc_shop_photos_v1";
   const shopPhotoMap = () => { try { return JSON.parse(localStorage.getItem(SHOP_PHOTOS) || "{}") || {}; } catch(e){ return {}; } };
   const SHT = {
@@ -2863,6 +2867,18 @@
     en:{ title:"Shop corner", link:"Shop corner", intro:"Handmade soaps and skincare, while stocks last.", how:"To order: send me a WhatsApp message with what you'd like and I'll let you know if it's still available. Pick-up is possible on an evening by arrangement, at Barbarastraat 25 in Mechelen. Payment on the spot only.", wa:"Order via WhatsApp", gift:"Rather give a gift? See the gift card.", soldout:"Sold out", last:"Last one", left:"{n} left", empty:"Nothing is for sale right now.", all:"All", zeep:"Soaps", janssen:"Skincare", overig:"Other", comp:"Ingredients", msg:"Hi Sandra, I'd like to order: {p}. When can I pick it up?", msgAll:"Hi Sandra, I'd like to order something from the shop corner. When can I pick it up?" },
     fr:{ title:"Coin boutique", link:"Coin boutique", intro:"Savons faits main et soins, dans la limite des stocks.", how:"Pour commander : envoyez-moi un message WhatsApp avec ce que vous souhaitez et je vous dirai si c'est encore disponible. Le retrait est possible un soir sur rendez-vous, Barbarastraat 25 à Malines. Paiement uniquement sur place.", wa:"Commander via WhatsApp", gift:"Plutôt offrir un cadeau ? Voir le bon cadeau.", soldout:"Épuisé", last:"Dernier exemplaire", left:"Encore {n} disponible(s)", empty:"Rien n'est en vente pour le moment.", all:"Tout", zeep:"Savons", janssen:"Soins", overig:"Autre", comp:"Composition", msg:"Bonjour Sandra, je voudrais commander : {p}. Quand puis-je venir le chercher ?", msgAll:"Bonjour Sandra, je voudrais commander quelque chose dans le coin boutique. Quand puis-je venir le chercher ?" }
   };
+
+  const SHOP_CATS = ["verzorging", "zepen", "boeketten", "overig"], SHOP_SKINS = ["anti-aging", "algemeen", "hydratatie", "vette-huid", "gevoelige-huid"], SHOP_TAGS = ["ampul", "serum", "40plus"];
+  const shopSkinKey = s => "sk_" + String(s || "").replace(/-/g, "");
+  Object.assign(SHT.nl, { verzorging:"Verzorging", zepen:"Zepen", boeketten:"Boeketten", sk_antiaging:"Anti-aging", sk_algemeen:"Algemeen", sk_hydratatie:"Hydratatie", sk_vettehuid:"Vette huid", sk_gevoeligehuid:"Gevoelige huid", sk_:"Overige",
+    tg_ampul:"Ampullen", tg_serum:"Serums", tg_40plus:"40+", q:"Zoek op naam of kenmerk…", skinAll:"Alle huidtypes", skinLab:"Huidtype", pFrom:"Van €", pTo:"Tot €", pr1:"t/m €15", pr2:"€15 – 30", pr3:"€30 – 50", pr4:"vanaf €50",
+    clear:"Filters wissen", readmore:"Lees meer", readless:"Lees minder", none:"Geen producten gevonden met deze filters.", photo2:"+ Extra foto (zij- of achterkant)", close:"Sluiten", tapZoom:"Tik op de foto om in te zoomen", tagsLab:"Kenmerken", photoDel:"Foto verwijderen" });
+  Object.assign(SHT.en, { verzorging:"Skincare", zepen:"Soaps", boeketten:"Bouquets", sk_antiaging:"Anti-ageing", sk_algemeen:"General", sk_hydratatie:"Hydration", sk_vettehuid:"Oily skin", sk_gevoeligehuid:"Sensitive skin", sk_:"Other",
+    tg_ampul:"Ampoules", tg_serum:"Serums", tg_40plus:"40+", q:"Search by name or feature…", skinAll:"All skin types", skinLab:"Skin type", pFrom:"From €", pTo:"To €", pr1:"up to €15", pr2:"€15 – 30", pr3:"€30 – 50", pr4:"from €50",
+    clear:"Clear filters", readmore:"Read more", readless:"Read less", none:"No products found with these filters.", photo2:"+ Extra photo (side or back)", close:"Close", tapZoom:"Tap the photo to zoom in", tagsLab:"Features", photoDel:"Remove photo" });
+  Object.assign(SHT.fr, { verzorging:"Soins", zepen:"Savons", boeketten:"Bouquets", sk_antiaging:"Anti-âge", sk_algemeen:"Général", sk_hydratatie:"Hydratation", sk_vettehuid:"Peau grasse", sk_gevoeligehuid:"Peau sensible", sk_:"Autres",
+    tg_ampul:"Ampoules", tg_serum:"Sérums", tg_40plus:"40+", q:"Rechercher par nom ou caractéristique…", skinAll:"Tous types de peau", skinLab:"Type de peau", pFrom:"De €", pTo:"À €", pr1:"jusqu’à 15 €", pr2:"15 – 30 €", pr3:"30 – 50 €", pr4:"dès 50 €",
+    clear:"Effacer les filtres", readmore:"Lire la suite", readless:"Réduire", none:"Aucun produit trouvé avec ces filtres.", photo2:"+ Photo supplémentaire (côté ou dos)", close:"Fermer", tapZoom:"Touchez la photo pour zoomer", tagsLab:"Caractéristiques", photoDel:"Supprimer la photo" });
   const sh = k => ((SHT[state.lang] || {})[k]) || SHT.nl[k] || k;
   const SHOP_PHOTO_OK = /^(https:\/\/static\.wixstatic\.com\/|assets\/verkoop\/|data:image\/jpeg;base64,)/;
   function shopClean(arr){
@@ -2872,7 +2888,9 @@
       return {
         id: String(i.id || "").replace(/[^a-z0-9-]/gi, "-").slice(0, 60),
         name: String(i.name || "").slice(0, 140), desc: String(i.desc || "").slice(0, 2000), ingr: String(i.ingr || "").slice(0, 1500),
-        cat: ["zeep", "janssen", "overig"].includes(i.cat) ? i.cat : "overig",
+        cat: (c0 => SHOP_CATS.includes(c0) ? c0 : "overig")(({ zeep:"zepen", janssen:"verzorging" })[i.cat] || i.cat),
+        skin: SHOP_SKINS.includes(i.skin) ? i.skin : "", tags: (Array.isArray(i.tags) ? i.tags : []).filter(x => SHOP_TAGS.includes(x)),
+        photos: (Array.isArray(i.photos) ? i.photos : []).filter(p => typeof p === "string" && SHOP_PHOTO_OK.test(p) && p.length < 700000).slice(0, 4),
         status: ["beschikbaar", "uitverkocht", "concept"].includes(i.status) ? i.status : "concept",
         price: (i.price === null || i.price === "" || i.price === undefined || !isFinite(price) || price < 0 || price > 9999) ? null : Math.round(price * 100) / 100,
         qty: (qty !== null && isFinite(qty) && qty >= 0 && qty <= 9999) ? Math.floor(qty) : null,
@@ -2902,6 +2920,63 @@
     if (document.body.dataset.step === "shop") renderShop();
   }
   function shopWa(text){ return `https://wa.me/${BOOKING_WHATSAPP}?text=${encodeURIComponent(text)}`; }
+  const shopStrip = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  function shopTagSet(i){   // explicit tags + automatic ones from the name/description
+    const s = new Set(i.tags || []), tx = shopStrip(i.name + " " + i.desc);
+    if (/ampul|ampoul/.test(tx)) s.add("ampul");
+    if (/serum/.test(tx)) s.add("serum");
+    if (i.skin === "anti-aging" || /40\+|vanaf 40|from 40|des 40/.test(tx)) s.add("40plus");
+    return s;
+  }
+  function shopMatches(i){
+    if (shop.q){ const hay = shopStrip(i.name + " " + i.desc + " " + i.ingr + " " + [...shopTagSet(i)].map(k => sh("tg_" + k)).join(" ") + " " + (i.skin ? sh(shopSkinKey(i.skin)) : "")); if (!shop.q.split(/\s+/).filter(Boolean).every(w => hay.includes(shopStrip(w)))) return false; }
+    if (shop.tag && !shopTagSet(i).has(shop.tag)) return false;
+    if (shop.skin && i.skin !== shop.skin) return false;
+    const lo = shop.pmin === "" ? null : Number(String(shop.pmin).replace(",", ".")), hi = shop.pmax === "" ? null : Number(String(shop.pmax).replace(",", "."));
+    if ((lo !== null && isFinite(lo)) || (hi !== null && isFinite(hi))){
+      if (!(i.price > 0)) return false;
+      if (lo !== null && isFinite(lo) && i.price < lo) return false;
+      if (hi !== null && isFinite(hi) && i.price > hi) return false;
+    }
+    return true;
+  }
+  function shopShort(d){
+    d = String(d || "").trim(); if (d.length <= 110) return d;
+    const m = d.slice(0, 130).match(/^(.{40,120}?[.!?])(\s|$)/);
+    return m ? m[1] : d.slice(0, 110).replace(/\s+\S*$/, "") + "…";
+  }
+  const shopSrc = p => (p && p.indexOf("assets/") === 0 && shop.ver) ? p + "?v=" + shop.ver : p;
+  function shopLightbox(id, idx){
+    const it = shopList().find(x => x.id === id); if (!it) return;
+    const ph = [it.photo].concat(it.photos || []).filter(Boolean); if (!ph.length) return;
+    idx = Math.max(0, Math.min(Number(idx) || 0, ph.length - 1));
+    let box = document.getElementById("shopLb"); if (!box){ box = document.createElement("div"); box.id = "shopLb"; box.className = "shop-lb"; document.body.appendChild(box); }
+    box.innerHTML = `<button type="button" class="shop-lb__x" data-lb="close" aria-label="${esc(sh("close"))}">✕</button>
+      <div class="shop-lb__stage"><img src="${esc(shopSrc(ph[idx]))}" alt="${esc(it.name)}" data-lb="zoom"></div>
+      ${ph.length > 1 ? `<div class="shop-lb__thumbs">${ph.map((p, k) => `<button type="button" class="shop-lb__t${k === idx ? " is-on" : ""}" data-lb="go" data-id="${esc(id)}" data-n="${k}"><img src="${esc(shopSrc(p))}" alt=""></button>`).join("")}</div>` : ""}
+      <p class="shop-lb__cap">${esc(it.name)} · ${esc(sh("tapZoom"))}</p>`;
+    box.classList.add("is-open"); document.body.classList.add("shop-lb-open");
+  }
+  function shopLbClose(){ const b = document.getElementById("shopLb"); if (b){ b.classList.remove("is-open"); b.innerHTML = ""; } document.body.classList.remove("shop-lb-open"); }
+  document.addEventListener("click", ev => {
+    const z = ev.target.closest && ev.target.closest("[data-zoom]");
+    if (z && !ev.target.closest("[data-sh]")){ shopLightbox(z.dataset.zoom, 0); return; }
+    const b = ev.target.closest && ev.target.closest("[data-lb]"), box = document.getElementById("shopLb");
+    if (!box || !box.classList.contains("is-open")) return;
+    if (ev.target === box){ shopLbClose(); return; }
+    if (!b) return;
+    if (b.dataset.lb === "close") shopLbClose();
+    else if (b.dataset.lb === "go") shopLightbox(b.dataset.id, b.dataset.n);
+    else if (b.dataset.lb === "zoom") b.classList.toggle("is-zoom");
+  });
+  document.addEventListener("keydown", ev => {
+    if (ev.key === "Escape") shopLbClose();
+    if ((ev.key === "Enter" || ev.key === " ") && ev.target && ev.target.dataset && ev.target.dataset.zoom){ ev.preventDefault(); shopLightbox(ev.target.dataset.zoom, 0); }
+  });
+  document.addEventListener("toggle", ev => {   // "Lees meer" <-> "Lees minder"
+    const d = ev.target; if (!d || !d.classList || !d.classList.contains("shop-more")) return;
+    const s = d.querySelector("summary"), sp = s && s.querySelector("span"); if (sp) sp.textContent = d.open ? s.dataset.less : s.dataset.more;
+  }, true);
   function shopCard(i, salon){
     const stockTxt = i.status === "uitverkocht" ? sh("soldout") : (i.qty === 1 ? sh("last") : (i.qty > 1 ? sh("left").replace("{n}", i.qty) : ""));
     const priceTxt = i.price ? shopMoney(i.price) : "";
@@ -2915,36 +2990,74 @@
         <label>${esc(sh("price"))}<input id="shE_price" inputmode="decimal" value="${i.price === null ? "" : esc(String(i.price).replace(".", ","))}"></label>
         <label>${esc(sh("qty"))}<input id="shE_qty" inputmode="numeric" value="${i.qty === null ? "" : i.qty}"></label>
         <label>${esc(sh("status"))}<select id="shE_status">${["beschikbaar", "uitverkocht", "concept"].map(s => `<option value="${s}"${i.status === s ? " selected" : ""}>${esc(s === "concept" ? sh("concept") : s === "uitverkocht" ? sh("soldout") : sh("avail").replace("Weer b", "B"))}</option>`).join("")}</select></label>
-        <label>${esc(sh("cat"))}<select id="shE_cat">${["zeep", "janssen", "overig"].map(c => `<option value="${c}"${i.cat === c ? " selected" : ""}>${esc(sh(c))}</option>`).join("")}</select></label>
+        <label>${esc(sh("cat"))}<select id="shE_cat">${SHOP_CATS.map(c => `<option value="${c}"${i.cat === c ? " selected" : ""}>${esc(sh(c))}</option>`).join("")}</select></label>
+        <label>${esc(sh("skinLab"))}<select id="shE_skin"><option value="">—</option>${SHOP_SKINS.map(c => `<option value="${c}"${i.skin === c ? " selected" : ""}>${esc(sh(shopSkinKey(c)))}</option>`).join("")}</select></label>
+        <div class="shop-tags"><span>${esc(sh("tagsLab"))}</span>${SHOP_TAGS.map(k => `<label class="shop-tags__l"><input type="checkbox" id="shE_t_${k}"${(i.tags || []).includes(k) ? " checked" : ""}> ${esc(sh("tg_" + k))}</label>`).join("")}</div>
+        <div class="shop-xphotos">${(i.photos || []).map((p, k) => `<span class="shop-xphotos__i"><img src="${esc(shopSrc(p))}" alt=""><button type="button" class="chip chip--sm" data-sh="photodel" data-id="${esc(i.id)}" data-n="${k}">✕ ${esc(sh("photoDel"))}</button></span>`).join("")}${(i.photos || []).length < 4 ? `<button type="button" class="chip chip--sm" data-sh="photo2" data-id="${esc(i.id)}">${esc(sh("photo2"))}</button>` : ""}</div>
         <label>${esc(sh("desc"))}<textarea id="shE_desc" rows="4">${esc(i.desc)}</textarea></label>
         <label>${esc(sh("ingr"))}<textarea id="shE_ingr" rows="3">${esc(i.ingr)}</textarea></label>
         <div class="shop-actions"><button type="button" class="btn btn--primary btn--sm" data-sh="save" data-id="${esc(i.id)}">${esc(sh("save"))}</button><button type="button" class="btn btn--outline btn--sm" data-sh="cancel">${esc(sh("cancel"))}</button></div></div>`
         : `<div class="shop-actions"><button type="button" class="chip chip--sm" data-sh="edit" data-id="${esc(i.id)}">${esc(sh("edit"))}</button><button type="button" class="chip chip--sm" data-sh="photo" data-id="${esc(i.id)}">${esc(sh("photo"))}</button><button type="button" class="chip chip--sm" data-sh="dec" data-id="${esc(i.id)}">−1</button><button type="button" class="chip chip--sm" data-sh="inc" data-id="${esc(i.id)}">+1</button><button type="button" class="chip chip--sm" data-sh="sold" data-id="${esc(i.id)}">${esc(i.status === "uitverkocht" ? sh("avail") : sh("sold"))}</button><button type="button" class="chip chip--sm" data-sh="del" data-id="${esc(i.id)}">${esc(sh("del"))}</button></div>`;
     }
+    const more = i.photos && i.photos.length ? `<span class="shop-card__more" aria-hidden="true">📷 +${i.photos.length}</span>` : "";
+    const sd = shopShort(i.desc), longTxt = i.desc !== sd || i.ingr;
     return `<article class="shop-card${i.status === "uitverkocht" ? " is-sold" : ""}${i.status === "concept" ? " is-concept" : ""}">
-      <div class="shop-card__img">${img}</div>
+      <div class="shop-card__img"${i.photo ? ` data-zoom="${esc(i.id)}" role="button" tabindex="0" aria-label="${esc(i.name)}"` : ""}>${img}${more}</div>
       <div class="shop-card__main"><h3>${esc(i.name)}</h3>
       ${salon && i.status === "concept" ? `<p class="shop-card__badge">${esc(sh("hidden"))}</p>` : ""}
       <p class="shop-card__price">${esc(priceTxt)}${stockTxt ? ` <span class="shop-card__stock">${esc(stockTxt)}</span>` : ""}</p>
-      ${i.desc ? `<p>${esc(i.desc)}</p>` : ""}
-      ${i.ingr ? `<details><summary>${esc(sh("comp"))}</summary><p>${esc(i.ingr)}</p></details>` : ""}
+      ${sd ? `<p class="shop-card__short">${esc(sd)}</p>` : ""}
+      ${longTxt ? `<details class="shop-more"><summary data-more="${esc(sh("readmore"))}" data-less="${esc(sh("readless"))}"><span>${esc(sh("readmore"))}</span></summary>${i.desc !== sd ? `<p>${esc(i.desc)}</p>` : ""}${i.ingr ? `<p><b>${esc(sh("comp"))}:</b> ${esc(i.ingr)}</p>` : ""}</details>` : ""}
       ${order}${admin}</div></article>`;
+  }
+  function shopFilterBar(vis){
+    const f = shop.filter, cats = ["all"].concat(SHOP_CATS.filter(c => vis.some(i => i.cat === c)));
+    const chip = (on, data, label) => `<button type="button" class="chip chip--sm${on ? " is-on" : ""}" ${data}>${esc(label)}</button>`;
+    const pre = [["", "15", "pr1"], ["15", "30", "pr2"], ["30", "50", "pr3"], ["50", "", "pr4"]];
+    return `<div class="shop-filters">
+      <input type="search" id="shQ" class="pm-input shop-q" value="${esc(shop.q)}" placeholder="${esc(sh("q"))}" autocomplete="off">
+      <div class="pop-chips">${cats.map(c => chip(f === c, `data-sh="filter" data-id="${c}"`, sh(c))).join("")}</div>
+      <div class="pop-chips">${SHOP_TAGS.map(k => chip(shop.tag === k, `data-sh="tag" data-id="${k}"`, sh("tg_" + k))).join("")}</div>
+      <label class="shop-sel">${esc(sh("skinLab"))} <select id="shSkin" class="pm-input"><option value="">${esc(sh("skinAll"))}</option>${SHOP_SKINS.map(c => `<option value="${c}"${shop.skin === c ? " selected" : ""}>${esc(sh(shopSkinKey(c)))}</option>`).join("")}</select></label>
+      <div class="shop-price"><label>${esc(sh("pFrom"))}<input type="text" inputmode="decimal" id="shMin" class="pm-input" size="4" value="${esc(shop.pmin)}"></label><label>${esc(sh("pTo"))}<input type="text" inputmode="decimal" id="shMax" class="pm-input" size="4" value="${esc(shop.pmax)}"></label></div>
+      <div class="pop-chips">${pre.map(([lo, hi, k]) => chip(shop.pmin === lo && shop.pmax === hi && (lo || hi), `data-sh="preset" data-id="${lo}|${hi}"`, sh(k))).join("")}${(shop.q || shop.tag || shop.skin || shop.pmin || shop.pmax || f !== "all") ? chip(false, 'data-sh="reset"', sh("clear")) : ""}</div>
+    </div>`;
+  }
+  function renderShopList(){
+    const out = $("#shopList"); if (!out) return;
+    const salon = shopSalon(), vis = shopList().filter(i => salon || i.status !== "concept");
+    const shown = vis.filter(i => (shop.filter === "all" || i.cat === shop.filter) && shopMatches(i)).sort((x, y) => x.name.localeCompare(y.name, "nl"));
+    if (!shown.length){ out.innerHTML = `<p class="step__hint">${esc(vis.length ? sh("none") : sh("empty"))}</p>`; return; }
+    out.innerHTML = SHOP_CATS.map(c => {
+      const items = shown.filter(i => i.cat === c); if (!items.length) return "";
+      let body;
+      if (c === "verzorging"){   // sub-division by skin function
+        body = SHOP_SKINS.concat([""]).map(s => { const g = items.filter(i => i.skin === s); return g.length ? `<h4 class="shop-sub">${esc(s ? sh(shopSkinKey(s)) : sh("sk_"))}</h4>${g.map(i => shopCard(i, salon)).join("")}` : ""; }).join("");
+      } else body = items.map(i => shopCard(i, salon)).join("");
+      return `<section class="shop-group"><h3 class="shop-group__t">${esc(sh(c))}<span>${items.length}</span></h3>${body}</section>`;
+    }).join("");
   }
   function renderShop(){
     const box = $("#shopBody"); if (!box) return;
     const salon = shopSalon(), all = shopList(), vis = all.filter(i => salon || i.status !== "concept");
     const tt = $("#shopTitle"), ti = $("#shopIntro"); if (tt) tt.textContent = sh("title"); if (ti) ti.textContent = sh("intro");
-    const f = shop.filter, shown = vis.filter(i => f === "all" || i.cat === f);
     const dirty = salon && shop.draft && JSON.stringify(shop.draft) !== JSON.stringify(shop.pub || []);
-    const chips = ["all", "zeep", "janssen", "overig"].filter(c => c === "all" || vis.some(i => i.cat === c)).map(c => `<button type="button" class="chip chip--sm${f === c ? " is-on" : ""}" data-sh="filter" data-id="${c}">${esc(sh(c))}</button>`).join("");
     box.innerHTML = `
       <div class="shop-info"><p>${esc(sh("how"))}</p>
         <p><a class="btn btn--primary btn--sm" href="${esc(shopWa(sh("msgAll")))}" target="_blank" rel="noopener noreferrer">${esc(sh("wa"))}</a>
         <button type="button" class="btn btn--text btn--sm" data-action="open-giftcard">${esc(sh("gift"))}</button></p></div>
       ${salon ? `<div class="shop-admin"><p>${esc(dirty ? sh("unsaved") : sh("saved"))}</p><div class="shop-actions"><button type="button" class="btn btn--outline btn--sm" data-sh="add">${esc(sh("add"))}</button><button type="button" class="btn btn--primary btn--sm" data-sh="publish"${shop.busy ? " disabled" : ""}>${esc(sh("pub"))}</button>${dirty ? `<button type="button" class="btn btn--outline btn--sm" data-sh="discard">${esc(sh("discard"))}</button>` : ""}</div></div>` : ""}
-      <div class="pop-chips">${chips}</div>
-      ${shown.length ? shown.map(i => shopCard(i, salon)).join("") : `<p class="step__hint">${esc(sh("empty"))}</p>`}`;
+      ${shopFilterBar(vis)}
+      <div id="shopList"></div>`;
+    renderShopList();
   }
+  // typing in the search / price boxes only refreshes the list (keeps the keyboard open)
+  document.addEventListener("input", ev => {
+    const el = ev.target; if (!el || !el.id) return;
+    if (el.id === "shQ"){ shop.q = el.value.trim().slice(0, 60); renderShopList(); }
+    else if (el.id === "shMin" || el.id === "shMax"){ shop[el.id === "shMin" ? "pmin" : "pmax"] = el.value.replace(/[^0-9.,]/g, "").slice(0, 7); renderShopList(); }
+  });
+  document.addEventListener("change", ev => { const el = ev.target; if (el && el.id === "shSkin"){ shop.skin = el.value; renderShop(); } });
   function shopErrors(items){
     const e = [];
     items.forEach(i => {
@@ -2976,6 +3089,7 @@
     try {
       for (const it of items){
         if (/^data:image\/jpeg;base64,/.test(it.photo)){ const path = `assets/verkoop/${it.id}-${Date.now().toString(36)}.jpg`; await put(path, it.photo.split(",")[1], "Productfoto (app)"); try { const m = shopPhotoMap(); m[path] = it.photo; const ks = Object.keys(m); while (ks.length > 12) delete m[ks.shift()]; localStorage.setItem(SHOP_PHOTOS, JSON.stringify(m)); } catch(e){ /* optional */ } it.photo = path; }
+        if (Array.isArray(it.photos)) for (let k = 0; k < it.photos.length; k++){ const pp = it.photos[k]; if (/^data:image\/jpeg;base64,/.test(pp)){ const path = `assets/verkoop/${it.id}-x${k}-${Date.now().toString(36)}.jpg`; await put(path, pp.split(",")[1], "Productfoto (app)"); try { const m = shopPhotoMap(); m[path] = pp; const ks = Object.keys(m); while (ks.length > 12) delete m[ks.shift()]; localStorage.setItem(SHOP_PHOTOS, JSON.stringify(m)); } catch(e){ /* optional */ } it.photos[k] = path; } }
       }
       const out = { v:1, u: new Date().toISOString(), items };
       await put(SHOP_FILE, giftToken64(JSON.stringify(out, null, 1)), "Verkoophoekje bijgewerkt (app)");
@@ -2990,16 +3104,19 @@
     const pr = v("shE_price").trim().replace(",", "."), q = v("shE_qty").trim();
     i.name = v("shE_name").trim(); i.desc = v("shE_desc").trim(); i.ingr = v("shE_ingr").trim();
     i.price = pr === "" ? null : Number(pr); i.qty = q === "" ? null : Number(q);
-    i.status = v("shE_status"); i.cat = v("shE_cat");
+    i.status = v("shE_status"); i.cat = v("shE_cat"); i.skin = v("shE_skin"); i.tags = SHOP_TAGS.filter(k => { const el = $("#shE_t_" + k); return el && el.checked; });
     const c = shopClean([i])[0]; if (c) Object.assign(i, c);
   }
   document.addEventListener("click", ev => {
-    const b = ev.target.closest && ev.target.closest("[data-sh]"); if (!b || !shopSalon() && b.dataset.sh !== "filter") return;
+    const b = ev.target.closest && ev.target.closest("[data-sh]"); if (!b || !shopSalon() && !["filter", "tag", "preset", "reset"].includes(b.dataset.sh)) return;
     const a = b.dataset.sh, id = b.dataset.id, L = state.lang;
     if (a === "filter"){ shop.filter = id; return renderShop(); }
+    if (a === "tag"){ shop.tag = shop.tag === id ? "" : id; return renderShop(); }
+    if (a === "preset"){ const [lo, hi] = String(id).split("|"); const same = shop.pmin === lo && shop.pmax === hi; shop.pmin = same ? "" : lo; shop.pmax = same ? "" : hi; return renderShop(); }
+    if (a === "reset"){ shop.q = ""; shop.tag = ""; shop.skin = ""; shop.pmin = ""; shop.pmax = ""; shop.filter = "all"; return renderShop(); }
     if (a === "publish") return void shopPublish();
     if (a === "discard"){ if (window.confirm(sh("discq"))){ shop.draft = null; try { localStorage.removeItem(SHOP_DRAFT); } catch(e){} shop.edit = ""; renderShop(); } return; }
-    if (a === "add"){ const d = shopDraft(), nid = "nieuw-" + Date.now().toString(36); d.unshift({ id: nid, name: sh("newp"), desc: "", ingr: "", cat: shop.filter === "all" ? "zeep" : shop.filter, status: "concept", price: null, qty: null, photo: "" }); shop.edit = nid; shopSaveDraft(); return renderShop(); }
+    if (a === "add"){ const d = shopDraft(), nid = "nieuw-" + Date.now().toString(36); d.unshift({ id: nid, name: sh("newp"), desc: "", ingr: "", cat: shop.filter === "all" ? "verzorging" : shop.filter, skin: "", tags: [], photos: [], status: "concept", price: null, qty: null, photo: "" }); shop.edit = nid; shopSaveDraft(); return renderShop(); }
     const d = shopDraft(), it = d.find(x => x.id === id);
     if (a === "cancel"){ drClear("shop-edit:" + shop.edit); shop.edit = ""; return renderShop(); }
     if (!it) return;
@@ -3009,7 +3126,9 @@
     if (a === "dec"){ it.qty = Math.max(0, (it.qty || 0) - 1); if (it.qty === 0) it.status = "uitverkocht"; }
     if (a === "sold"){ it.status = it.status === "uitverkocht" ? "beschikbaar" : "uitverkocht"; if (it.status === "beschikbaar" && it.qty === 0) it.qty = null; }
     if (a === "del"){ if (!window.confirm(sh("delq") + "\n" + it.name)) return; d.splice(d.indexOf(it), 1); }
-    if (a === "photo"){ shop.photoFor = id; const fi = $("#shPhoto"); if (fi) fi.click(); return; }
+    if (a === "photo"){ shop.photoFor = id; shop.photoSlot = "main"; const fi = $("#shPhoto"); if (fi) fi.click(); return; }
+    if (a === "photo2"){ if ((it.photos || []).length >= 4){ showToast(sh("photo_err")); return; } shop.photoFor = id; shop.photoSlot = "extra"; const fi = $("#shPhoto"); if (fi) fi.click(); return; }
+    if (a === "photodel"){ const n = Number(b.dataset.n); if (Array.isArray(it.photos) && n >= 0 && n < it.photos.length) it.photos.splice(n, 1); }
     shopSaveDraft(); renderShop();
   });
   document.addEventListener("change", ev => {
@@ -3021,7 +3140,7 @@
         c.width = Math.round(im.width * sc); c.height = Math.round(im.height * sc); c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
         let q = 0.82, du = c.toDataURL("image/jpeg", q); while (du.length > 330000 && q > 0.45){ q -= 0.1; du = c.toDataURL("image/jpeg", q); }   // keep each photo small
         if (!/^data:image\/jpeg/.test(du)) throw new Error("jpeg");
-        const it = shopDraft().find(x => x.id === shop.photoFor); if (it){ it.photo = du; shopSaveDraft(); renderShop(); }
+        const it = shopDraft().find(x => x.id === shop.photoFor); if (it){ if (shop.photoSlot === "extra") it.photos = (it.photos || []).concat(du).slice(0, 4); else it.photo = du; shopSaveDraft(); renderShop(); }
       } catch(e){ showToast(sh("photo_err")); } fi.value = "";
     }; im.onerror = () => { showToast(sh("photo_err")); fi.value = ""; }; im.src = String(rd.result); };
     rd.readAsDataURL(f0);
@@ -3042,6 +3161,60 @@
     const sp = document.createElement("span"); sp.className = "shop-card__nophoto"; sp.textContent = p.indexOf("assets/") === 0 ? "…" : sh("nophoto");
     im.replaceWith(sp); if (p.indexOf("assets/") === 0) shopPhotoProbe(sp, p, 0);
   }, true);
+
+  /* ===== v213: algemene zoekfunctie (verkoophoek, zepen, cadeaubon, nieuwsbrief, prijslijst, ingrediënten, …) ===== */
+  const GS = {
+    nl:{ title:"Zoeken", hint:"Zoek in de hele app: producten, cadeaubon, zepen, nieuwsbrief, prijzen, ingrediënten…", ph:"Wat zoek je?", none:"Niets gevonden. Probeer een ander woord.", shop:"Verkoophoekje", gift:"Cadeaubon", news:"Nieuwsbrief", soap:"Zepen", price:"Prijslijst", ingr:"Ingrediënten & allergieën", advent:"Adventskalender", stamp:"Stempelkaart", find:"Zo vind je me & parkeren", rules:"Huisregels", photo:"Fotomoment", prod:"Product", treat:"Behandeling", sec_static:"Snel naar", sec_shop:"In het verkoophoekje", sec_price:"In de prijslijst", sec_ingr:"Ingrediënten",
+      d_shop:"Verzorging, zepen en boeketten, met filters.", d_gift:"Geef een behandeling cadeau.", d_news:"Schrijf je in voor nieuws en acties.", d_soap:"Handgemaakte zepen uit het verkoophoekje.", d_price:"Alle behandelingen en prijzen.", d_ingr:"Wat zit er in mijn product?", d_advent:"Elke dag een verrassing in december.", d_stamp:"Spaar stempels voor korting.", d_find:"Adres, route en parkeren.", d_rules:"Afspraken in de salon.", d_photo:"Deel een foto van je moment.",
+      k_shop:"verkoophoek verkoophoekje webshop shop winkel producten product kopen bestellen boeket boeketten verzorging serum ampul", k_gift:"cadeaubon cadeau bon voucher gift kado geschenk", k_news:"nieuwsbrief newsletter mail inschrijven abonneren e-mail acties", k_soap:"zeep zepen handzeep soap savon handgemaakt", k_price:"prijs prijzen prijslijst tarief tarieven kost price prix behandelingen", k_ingr:"ingredient ingredienten ingrediënt ingrediënten allergie allergieen allergieën inci samenstelling allergen", k_advent:"advent adventskalender kalender calendar avent", k_stamp:"stempel stempelkaart loyaliteit spaarkaart stamp tampon", k_find:"locatie adres waar parkeren parking route vinden find adresse", k_rules:"huisregels regels afspraken rules reglement", k_photo:"foto fotomoment photo picture" },
+    en:{ title:"Search", hint:"Search the whole app: products, gift card, soaps, newsletter, prices, ingredients…", ph:"What are you looking for?", none:"Nothing found. Try another word.", shop:"Shop corner", gift:"Gift card", news:"Newsletter", soap:"Soaps", price:"Price list", ingr:"Ingredients & allergies", advent:"Advent calendar", stamp:"Stamp card", find:"Find me & parking", rules:"House rules", photo:"Photo moment", prod:"Product", treat:"Treatment", sec_static:"Quick links", sec_shop:"In the shop corner", sec_price:"In the price list", sec_ingr:"Ingredients",
+      d_shop:"Skincare, soaps and bouquets, with filters.", d_gift:"Give a treatment as a gift.", d_news:"Sign up for news and offers.", d_soap:"Handmade soaps from the shop corner.", d_price:"All treatments and prices.", d_ingr:"What is in my product?", d_advent:"A surprise every day in December.", d_stamp:"Collect stamps for a discount.", d_find:"Address, route and parking.", d_rules:"Agreements in the salon.", d_photo:"Share a photo of your moment." },
+    fr:{ title:"Rechercher", hint:"Cherchez dans toute l’appli : produits, bon cadeau, savons, newsletter, prix, ingrédients…", ph:"Que cherchez-vous ?", none:"Rien trouvé. Essayez un autre mot.", shop:"Coin boutique", gift:"Bon cadeau", news:"Newsletter", soap:"Savons", price:"Liste de prix", ingr:"Ingrédients & allergies", advent:"Calendrier de l’Avent", stamp:"Carte de tampons", find:"Comment me trouver & parking", rules:"Règlement intérieur", photo:"Moment photo", prod:"Produit", treat:"Soin", sec_static:"Accès rapide", sec_shop:"Dans le coin boutique", sec_price:"Dans la liste de prix", sec_ingr:"Ingrédients",
+      d_shop:"Soins, savons et bouquets, avec filtres.", d_gift:"Offrez un soin.", d_news:"Inscrivez-vous aux nouveautés et offres.", d_soap:"Savons faits main du coin boutique.", d_price:"Tous les soins et prix.", d_ingr:"Que contient mon produit ?", d_advent:"Une surprise chaque jour en décembre.", d_stamp:"Collectez des tampons pour une réduction.", d_find:"Adresse, itinéraire et parking.", d_rules:"Règles au salon.", d_photo:"Partagez une photo de votre moment." }
+  };
+  const gs = k => ((GS[state.lang] || {})[k]) || GS.nl[k] || k;
+  const gsNorm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const gsName = x => (x && typeof x === "object") ? (x[state.lang] || x.nl || "") : String(x || "");
+  function gsHit(words, text){ const t0 = gsNorm(text); return words.every(w => t0.includes(w)); }
+  function gsOpen(kind, v){
+    if (kind === "shop"){ shop.filter = "all"; shop.q = v || ""; shop.tag = ""; shop.skin = ""; shop.pmin = ""; shop.pmax = ""; return goTo("shop"); }
+    if (kind === "soap"){ shop.filter = "zepen"; shop.q = ""; shop.tag = ""; shop.skin = ""; shop.pmin = ""; shop.pmax = ""; return goTo("shop"); }
+    if (kind === "gift") return goTo("giftcard");
+    if (kind === "advent") return goTo("advent");
+    if (kind === "stamp") return goTo("stampcard");
+    if (kind === "find") return goTo("findme");
+    if (kind === "rules") return goTo("houserules");
+    if (kind === "photo") return goTo("photomoment");
+    if (kind === "price"){ goTo("pricelist"); const ps = $("#priceSearch"); if (ps){ ps.value = v || ""; renderPriceList(); } return; }
+    if (kind === "ingr"){ if (typeof ingrAllowed === "function" && ingrAllowed()){ ingr.q = v || ""; goTo("ingredients"); } return; }
+    if (kind === "news"){ goTo("welcome"); setTimeout(() => { const c = $("#newsletterCard"); if (c) c.scrollIntoView({ behavior:"smooth", block:"center" }); }, 250); }
+  }
+  function gsRender(){
+    const out = $("#gsResults"); if (!out) return;
+    const q = (($("#gsInput") || {}).value || "").trim(), words = gsNorm(q).split(/\s+/).filter(Boolean).slice(0, 5);
+    const ttl = $("#gsTitle"), hint = $("#gsHint"), inp = $("#gsInput");
+    if (ttl) ttl.textContent = gs("title"); if (hint) hint.textContent = gs("hint"); if (inp) inp.placeholder = gs("ph");
+    if (!words.length){ out.innerHTML = ""; return; }
+    const btn = (kind, v, icon, title, desc, tag) => `<button type="button" class="gs-hit" data-gs="${kind}" data-v="${esc(v || "")}"><span class="gs-hit__i">${icon}</span><span class="gs-hit__t"><b>${esc(title)}</b>${tag ? ` <em>${esc(tag)}</em>` : ""}<small>${esc(desc || "")}</small></span></button>`;
+    const sect = (name, items) => items.length ? `<p class="gs-sec">${esc(name)}</p>${items.join("")}` : "";
+    const stat = [["shop","🛍️"],["gift","🎁"],["news","☕"],["soap","🧼"],["price","💶"],["ingr","🧾"],["advent","🎄"],["stamp","☕"],["find","📍"],["rules","📋"],["photo","📸"]]
+      .filter(([k]) => gsHit(words, [GS.nl["k_" + k], gs(k), gs("d_" + k), (GS.nl[k])].join(" ")) && (k !== "ingr" || (typeof ingrAllowed === "function" && ingrAllowed())))
+      .map(([k, ic]) => btn(k, k === "shop" || k === "price" || k === "ingr" ? q : "", ic, gs(k), gs("d_" + k)));
+    const shopHits = (shop.pub || []).filter(i => i.status !== "concept" && gsHit(words, i.name + " " + i.desc + " " + i.ingr)).slice(0, 8)
+      .map(i => btn("shop", i.name, i.cat === "zepen" ? "🧼" : "🧴", i.name, i.price ? shopMoney(i.price) : "", i.status === "uitverkocht" ? sh("soldout") : ""));
+    let priceHits = [];
+    try { PRICE_LIST.forEach(sec => bhItemsFor(sec).forEach(it => { if (priceHits.length < 8 && gsHit(words, [it.n.nl, it.n.en, it.n.fr, it.d && it.d.nl].join(" "))) priceHits.push(btn("price", gsName(it.n), "💆", gsName(it.n), [it.price, it.time].filter(Boolean).join(" · "))); })); } catch(e){ /* ignore */ }
+    let ingrHits = [];
+    try { if (typeof ingrAllowed === "function" && ingrAllowed() && typeof SALON_PRODUCTS !== "undefined") Object.keys(SALON_PRODUCTS).forEach(id => { const p = SALON_PRODUCTS[id]; if (ingrHits.length < 6 && gsHit(words, gsName(p.name) + " " + (p.inci || ""))) ingrHits.push(btn("ingr", gsName(p.name), "🧾", gsName(p.name), "")); }); } catch(e){ /* ignore */ }
+    const html = sect(gs("sec_static"), stat) + sect(gs("sec_shop"), shopHits) + sect(gs("sec_price"), priceHits) + sect(gs("sec_ingr"), ingrHits);
+    out.innerHTML = html || `<p class="step__hint">${esc(gs("none"))}</p>`;
+  }
+  document.addEventListener("input", ev => { if (ev.target && ev.target.id === "gsInput") gsRender(); });
+  document.addEventListener("click", ev => {
+    const b = ev.target.closest && ev.target.closest("[data-gs]"); if (!b) return;
+    gsOpen(b.dataset.gs, b.dataset.v);
+  });
+  function gsStart(){ goTo("search"); Promise.resolve(shopLoad()).catch(() => {}).then(gsRender); gsRender(); setTimeout(() => { const i = $("#gsInput"); if (i) i.focus(); }, 150); }
   setTimeout(() => { shopLoad(); }, 0);
 
   document.addEventListener("click", popClick);
@@ -6942,10 +7115,13 @@
     const wd = new Date(y, m - 1, d).getDay();             // 0 = Sunday
     return wd === 0 ? key : advAddDays(key, 7 - wd);
   }
-  function advBookBy(day){ return advToSunday(advAddDays(advDoorDate(day), ADVENT.bookWithinDays || 21)); }
+  // v212: shop-corner discounts are valid at payment until 3 January (no appointment window)
+  function advShopBy(day){ const { y } = advParts(advDoorDate(day)); return `${y + 1}-01-03`; }
+  function advBookBy(day){ const dr = advDoor(day); if (dr && dr.shop) return advShopBy(day); return advToSunday(advAddDays(advDoorDate(day), ADVENT.bookWithinDays || 21)); }
   // … and the appointment itself takes place at the latest on …
   function advUseBy(day){
     const door = advDoor(day);
+    if (door && door.shop) return advShopBy(day);
     return advToSunday(advAddDays(advDoorDate(day), door && door.homemade ? (ADVENT.homemadeDays || 21) : (ADVENT.useWithinDays || 42)));
   }
   function advLastDay(){ return advToSunday(advAddDays(advDoorDate(25), Math.max(ADVENT.useWithinDays || 42, ADVENT.homemadeDays || 21))); }
@@ -7011,7 +7187,7 @@
     return s;
   }
   // "gift" | "homemade" | "extra" | "discount" — picks the right texts
-  function advKind(door){ return door.type === "gift" ? (door.homemade ? "homemade" : "gift") : door.type; }
+  function advKind(door){ if (door.shop) return "shop"; return door.type === "gift" ? (door.homemade ? "homemade" : "gift") : door.type; }
   // icon for lists: product photo, %-value or emoji
   function advThumb(door, cls){
     if (door.photo) return `<img class="${cls}" src="${door.photo}" data-fallback="adv" data-emoji="${door.type === "discount" ? (door.value || "%") : door.icon}" alt="" loading="lazy">`;
@@ -7527,6 +7703,7 @@
   }
   function advCondNote(door){
     const L = state.lang;
+    if (door.shop) return advFill(t("adv_res_shop_note", L), door);
     return door.type === "gift" ? advFill(t("adv_res_gift_note", L), door)
       : advFill(t(door.type === "extra" ? "adv_res_extra_note" : "adv_res_discount_note", L), door);
   }
@@ -8062,6 +8239,7 @@
       if (action === "open-stampcard") goTo("stampcard");
       if (action === "open-giftcard") goTo("giftcard");
       if (action === "open-shop") goTo("shop");
+      if (action === "open-search") gsStart();
       if (action === "open-acc"){ BH.view = "acc"; BH.edit = false; goTo("pricelist"); }
       if (action === "resume-draft") accResume(el.dataset.key);
       if (action === "open-acc-dates"){ BH.view = "acc"; BH.edit = false; ACC.tab = "dates"; goTo("pricelist"); }
