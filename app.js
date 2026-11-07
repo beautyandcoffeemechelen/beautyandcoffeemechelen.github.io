@@ -2301,7 +2301,7 @@
   const ACC = { data:null, year:0, tab:"stock", edit:"", mv:"", filter:"all" };
   const ACC_CATS = { verkoop:"Handelsgoederen (om te verkopen)", cabine:"Cabine / verbruik", grondstof:"Grondstof (zeep maken)", ander:"Ander" };
   const ACC_REASONS = { verkocht:"Verkocht", vervallen:"Vervallen / weggegooid", verbruikt:"Verbruikt", weggegeven:"Weggegeven", ander:"Andere" };
-  const ACC_FIXED = [ ["01-01", "Start fiscaal jaar", 0], ["04-10", "Voorafbetaling personenbelasting kwartaal 1", 1], ["07-10", "Voorafbetaling personenbelasting kwartaal 2", 1], ["10-10", "Voorafbetaling personenbelasting kwartaal 3", 1], ["03-31", "Klantenlisting (btw-vrijgestelden): datum controleren op de site van FOD Financiën", 0], ["10-20", "Het jaar loopt ten einde", 0], ["12-20", "Je voorraad bijhouden", 0], ["12-20", "Voorafbetaling personenbelasting kwartaal 4", 1] ];
+  const ACC_FIXED = [ ["01-01", "Start fiscaal jaar", 0], ["04-10", "Voorafbetaling personenbelasting kwartaal 1", 1], ["07-10", "Voorafbetaling personenbelasting kwartaal 2", 1], ["10-10", "Voorafbetaling personenbelasting kwartaal 3", 1], ["03-31", "Omzetmelding en klantenlisting via Intervat (ook voor btw-vrijgestelde kleine ondernemingen, ook als nihil): datum controleren bij FOD Financiën", 0], ["10-20", "Het jaar loopt ten einde", 0], ["12-20", "Je voorraad bijhouden", 0], ["12-20", "Voorafbetaling personenbelasting kwartaal 4", 1] ];
   const accPad = n => String(n).padStart(2, "0");
   const accToday = () => { const d = new Date(); return d.getFullYear() + "-" + accPad(d.getMonth() + 1) + "-" + accPad(d.getDate()); };
   const accIso = d => d.getFullYear() + "-" + accPad(d.getMonth() + 1) + "-" + accPad(d.getDate());
@@ -2311,14 +2311,21 @@
   const accFmtD = s => accIsDate(s) ? s.slice(8, 10) + "/" + s.slice(5, 7) + "/" + s.slice(0, 4) : "";
   const accDays = (a, b) => Math.round((new Date(b + "T12:00:00") - new Date(a + "T12:00:00")) / 864e5);
   function accClean(d){
-    d = d || {}; const o = { v:1, lead:[7, 14, 30].includes(+d.lead) ? +d.lead : 14, items:[], dates:[], done:{}, vatIncl:d.vatIncl ? 1 : 0, incl:{ verkoop:1, cabine:1, grondstof:1, ander:1 }, health:{ target:60, fixed:0, cost:{} }, settings:{ start:"2026-02-01", status:"vrijgesteld", askBuy:1 }, cash:[], dx:{}, checks:{}, lastBackup:"", hasDocs:0, docIdx:[] };
+    d = d || {}; const o = { v:1, lead:[7, 14, 30].includes(+d.lead) ? +d.lead : 14, items:[], dates:[], done:{}, vatIncl:d.vatIncl ? 1 : 0, incl:{ verkoop:1, cabine:1, grondstof:1, ander:1 }, health:{ target:60, fixed:0, cost:{}, ov:{} }, costs:{ fixed:[], shareSale:20, small:[], recipes:[] }, settings:{ start:"2026-02-01", status:"vrijgesteld", askBuy:1 }, cash:[], dx:{}, checks:{}, lastBackup:"", hasDocs:0, docIdx:[] };
     { const st = d.settings || {}; if (accIsDate(st.start)) o.settings.start = st.start; if (["vrijgesteld", "plichtig", "onbekend"].includes(st.status)) o.settings.status = st.status; if (st.askBuy === 0 || st.askBuy === false) o.settings.askBuy = 0; }
+    { const cc = d.costs || {}, cid = v => String(v || ("c" + Math.random().toString(36).slice(2, 9))).replace(/[^a-z0-9-]/gi, "-").slice(0, 30), sp = accNum(cc.shareSale);
+      if (sp >= 0 && sp <= 100) o.costs.shareSale = sp;
+      (Array.isArray(cc.fixed) ? cc.fixed : []).slice(0, 100).forEach(f => { if (f && f.name){ const am = accNum(f.amt), pr = accNum(f.prof); o.costs.fixed.push({ id:cid(f.id), name:String(f.name).slice(0, 80), amt:(am >= 0 && am <= 1e6) ? am : 0, per:f.per === "jaar" ? "jaar" : "maand", scope:["cabine", "verkoop", "gedeeld"].includes(f.scope) ? f.scope : "cabine", prof:(pr >= 0 && pr <= 100) ? pr : 100 }); } });
+      (Array.isArray(cc.small) ? cc.small : []).slice(0, 100).forEach(s => { if (s && s.name){ const c0 = accNum(s.cost); o.costs.small.push({ id:cid(s.id), name:String(s.name).slice(0, 80), cost:(c0 >= 0 && c0 <= 1e4) ? c0 : 0 }); } });
+      (Array.isArray(cc.recipes) ? cc.recipes : []).slice(0, 200).forEach(r => { if (r && r.name){ const yy = accNum(r.yield); o.costs.recipes.push({ id:cid(r.id), name:String(r.name).slice(0, 100), kind:["behandeling", "zeep", "boeket", "ander"].includes(r.kind) ? r.kind : "behandeling", yield:(yy > 0 && yy <= 1e5) ? yy : 1,
+        lines:(Array.isArray(r.lines) ? r.lines : []).slice(0, 60).map(l => { const q = accNum(l && l.qty), p = accNum(l && l.price); return { item:String((l && l.item) || "").slice(0, 40), name:String((l && l.name) || "").slice(0, 100), qty:(q > 0 && q <= 1e6) ? q : 0, unit:String((l && l.unit) || "").slice(0, 12), price:(p >= 0 && p <= 1e6) ? p : 0 }; }).filter(l => l.qty > 0 && (l.item || l.name)) }); } });
+    }
     (Array.isArray(d.cash) ? d.cash : []).slice(0, 6000).forEach(c => { if (c && accIsDate(c.d)){ const a = accNum(c.cash), b = accNum(c.card); o.cash.push({ id:String(c.id || ("k" + Math.random().toString(36).slice(2, 8))).replace(/[^a-z0-9-]/gi, "-").slice(0, 30), d:c.d, cash:(a >= 0 && a <= 1e6) ? a : 0, card:(b >= 0 && b <= 1e6) ? b : 0, note:String(c.note || "").slice(0, 160) }); } });
     Object.keys(d.dx || {}).slice(0, 240).forEach(k => { if (/^\d{4}-\d{2}$/.test(k)){ const n = accNum(d.dx[k]); if (n >= 0 && n <= 1e7) o.dx[k] = n; } });
     Object.keys(d.checks || {}).slice(0, 400).forEach(k => { if (d.checks[k]) o.checks[String(k).slice(0, 60)] = 1; });
     o.lastBackup = accIsDate(d.lastBackup) ? d.lastBackup : ""; o.hasDocs = d.hasDocs ? 1 : 0;
     (Array.isArray(d.docIdx) ? d.docIdx : []).slice(0, 3000).forEach(q => { if (q && accIsDate(q.d)) o.docIdx.push({ id:String(q.id || "").slice(0, 30), dir:q.dir === "out" ? "out" : "in", d:q.d, party:String(q.party || "").slice(0, 100), nr:String(q.nr || "").slice(0, 40), excl:Math.max(0, accNum(q.excl) || 0), vat:Math.min(100, Math.max(0, accNum(q.vat) || 0)), mention:q.mention ? 1 : 0 }); });
-    { const hh = d.health || {}, tg = accNum(hh.target), fx = accNum(hh.fixed); if (tg > 0 && tg <= 1000) o.health.target = tg; if (fx >= 0 && fx <= 1e6) o.health.fixed = fx; Object.keys(hh.cost || {}).slice(0, 300).forEach(k => { const n = accNum(hh.cost[k]); if (n >= 0 && n <= 1e5) o.health.cost[String(k).slice(0, 140)] = n; }); }
+    { const hh = d.health || {}, tg = accNum(hh.target), fx = accNum(hh.fixed); if (tg > 0 && tg <= 1000) o.health.target = tg; if (fx >= 0 && fx <= 1e6) o.health.fixed = fx; [ "rev", "buy", "exp", "fixed" ].forEach(k => { if (hh.ov && hh.ov[k] !== undefined && hh.ov[k] !== null && hh.ov[k] !== ""){ const n = accNum(hh.ov[k]); if (n >= 0 && n <= 1e7) o.health.ov[k] = n; } }); Object.keys(hh.cost || {}).slice(0, 300).forEach(k => { const n = accNum(hh.cost[k]); if (n >= 0 && n <= 1e5) o.health.cost[String(k).slice(0, 140)] = n; }); }
     if (d.incl && typeof d.incl === "object") Object.keys(o.incl).forEach(k => { if (d.incl[k] === 0 || d.incl[k] === false) o.incl[k] = 0; });
     (Array.isArray(d.items) ? d.items : []).slice(0, 3000).forEach(i => {
       if (!i || !i.name) return;
@@ -2371,7 +2378,7 @@
     const x = accLoad(), t = accToday(); return accAllDates().filter(e => !x.done[e.key] && accDays(t, e.d) <= x.lead && accDays(t, e.d) >= -7);
   }
   function accBanner(){
-    const wa = $("#welcomeAcc"); if (wa){ let on = false; try { on = actSalon(); } catch(e){ on = false; } wa.innerHTML = on ? `<button type="button" class="btn btn--outline btn--wide welcome-shopbtn" data-action="open-acc">Boekhouding</button>` : ""; }
+    const wa = $("#welcomeAcc"); if (wa){ let on = false; try { on = actSalon(); } catch(e){ on = false; } wa.innerHTML = on ? `<button type="button" class="btn btn--outline btn--wide welcome-shopbtn" data-action="open-acc">Boekhouding</button><button type="button" class="btn btn--outline btn--wide welcome-shopbtn" data-action="open-salon">📲 Salon-QR (stempel, cadeaubon, advent)</button>` : ""; }
     const el = $("#accBanner"); if (!el) return;
     let due = []; try { due = actSalon() ? accDue() : []; } catch(e){ due = []; }
     let drs = []; try { drs = actSalon() ? accDrafts() : []; } catch(e){ drs = []; }
@@ -2435,10 +2442,11 @@
     const x = accLoad(), t0 = accToday(), cy = Number(t0.slice(0, 4)); if (!ACC.year) ACC.year = cy;
     const ys = x.items.map(i => Number((i.date || "").slice(0, 4))).filter(Boolean).concat([cy - 1, cy]), y0 = Math.min(...ys), years = []; for (let k = y0; k <= cy; k++) years.push(k);
     const chip = (v, lb, on, a) => `<button type="button" class="chip chip--sm${on ? " is-on" : ""}" data-acc="${a}" data-v="${esc(v)}">${lb}</button>`;
-    const head = `<div class="pop-chips">${chip("stock", "📦 Voorraad", ACC.tab === "stock", "tab")}${chip("docs", "🧾 Facturen", ACC.tab === "docs", "tab")}${chip("kassa", "💶 Kassa", ACC.tab === "kassa", "tab")}${chip("health", "🩺 Gezondheid", ACC.tab === "health", "tab")}${chip("advice", "💡 Advies", ACC.tab === "advice", "tab")}${chip("dates", "🗓️ Data", ACC.tab === "dates", "tab")}</div>`;
+    const head = `<div class="pop-chips">${chip("stock", "📦 Voorraad", ACC.tab === "stock", "tab")}${chip("docs", "🧾 Facturen", ACC.tab === "docs", "tab")}${chip("kassa", "💶 Kassa", ACC.tab === "kassa", "tab")}${chip("costs", "🧮 Kosten", ACC.tab === "costs", "tab")}${chip("health", "🩺 Gezondheid", ACC.tab === "health", "tab")}${chip("advice", "💡 Advies", ACC.tab === "advice", "tab")}${chip("dates", "🗓️ Data", ACC.tab === "dates", "tab")}</div>`;
     const note = `<p class="ingr-muted">Enkel voor jou en enkel op dit toestel: dit gaat nooit naar GitHub. Wat je typt wordt onderweg bewaard als concept. Maak af en toe een back-up. Tel je producten per stuk? Dat staat bij <button type="button" class="btn btn--text btn--sm" data-action="open-inv">Voorraad per product</button>.</p>`;
     if (ACC.tab === "docs") return head + note + accDocsSkeleton();
     if (ACC.tab === "health") return head + note + accHealthHtml();
+    if (ACC.tab === "costs") return head + note + accCostsHtml(x);
     if (ACC.tab === "kassa") return head + note + accKassaHtml();
     if (ACC.tab === "advice") return head + note + accAdviceHtml();
     if (ACC.tab === "dates"){
@@ -2541,14 +2549,20 @@
     { id:"vetterijp", e:"▫️", nl:"Vette, rijpe huid", prot:["vetterijp"] },
     { id:"heren", e:"▫️", nl:"Herenverzorging", prot:["heren"] }
   ];
-  const SIG_ALIAS = { "soft cleaning mousse":"janssensoftmousse", "gentle cleaning powder":"janssencleansingpowder", "hyaluron replenisch cream":"janssenhyaluron3", "peel off mask aloe de stress":"janssenaloe", "peel off dead sea black mask":"janssendeadsea" };
+  const SIG_ALIAS = { "soft cleaning mousse":"janssensoftmousse", "gentle cleaning powder":"janssencleansingpowder", "hyaluron replenisch cream":"janssenhyaluron3", "peel off mask aloe de stress":"janssenaloe", "peel off dead sea black mask":"janssendeadsea", "skin contour fluid flawless":"jacontour", "caviar extract engery":"jacaviar", "stem cell fluid intense":"jastemcell", "peel off mask acrola vitamin c":"janssenacerola" };
   const sigNorm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
-  const sigTokens = cell => String(cell || "").split(/\n|\s\/\s|\s\+\s|\//).map(x => x.replace(/\(.*?\)/g, "").replace(/^[^:]*:\s*/, "").replace(/\d+\s*m[lL]\s*water/i, "").trim()).filter(x => sigNorm(x).length >= 5);
+  // v215: split per line, drop the "Type/Type: " prefix first, never split on a bare "/" (that cut "Tonic/Lotion: Purifying Tonic" into the wrong pieces), drop durations like 20’
+  const SIG_GENERIC = new Set(["dagcreme", "nachtcreme"]);   // generic hints in the protocols, not a product
+  const sigTokens = cell => String(cell || "").split(/\n/).flatMap(line => {
+    line = line.replace(/\(.*?\)/g, "").replace(/^[^:]*:\s*/, "").replace(/\d+\s*m[lL]\s*water/i, "").replace(/\s*-?\s*\d+(\s*-\s*\d+)?\s*['’′]\s*$/, "").trim();
+    return line.split(/\s\/\s|\s\+\s/);
+  }).map(x => x.trim()).filter(x => sigNorm(x).length >= 5 && !SIG_GENERIC.has(sigNorm(x)));
+  const sigShort = nm => sigNorm(String(nm).replace(/^[^–]*–\s*/, "").replace(/\(.*$/, "").replace(/,.*$/, ""));
   function sigProducts(lineId){
     const line = SIG_LINES.find(l => l.id === lineId); if (!line) return [];
     const cat = ingrCatalog(), out = new Map();
     line.prot.forEach(pid => { const pr = (typeof PROTOCOLS !== "undefined" ? PROTOCOLS : []).find(p => p.id === pid); if (!pr) return;
-      pr.rows.forEach(r => sigTokens(r[1]).forEach(tk => { const n = sigNorm(tk), hit = (SIG_ALIAS[n] ? cat.filter(([id]) => id === SIG_ALIAS[n]) : cat.filter(([, p]) => sigNorm(ingrName(p)).includes(n))).filter(([, p]) => !/staaltje|tester|proefje/i.test(ingrName(p))), j = hit.filter(([, p]) => /janssen/i.test(ingrName(p))); (j.length ? j : hit).slice(0, 2).forEach(h => out.set(h[0], h)); })); });
+      pr.rows.forEach(r => sigTokens(r[1]).forEach(tk => { const n = sigNorm(tk), hit0 = (SIG_ALIAS[n] ? cat.filter(([id]) => id === SIG_ALIAS[n]) : cat.filter(([, p]) => sigNorm(ingrName(p)).includes(n))).filter(([, p]) => !/staaltje|tester|proefje/i.test(ingrName(p))), ex = hit0.filter(([, p]) => sigShort(ingrName(p)) === n), hit = ex.length ? ex : hit0, j = hit.filter(([, p]) => /janssen/i.test(ingrName(p))); (j.length ? j : hit).slice(0, 2).forEach(h => out.set(h[0], h)); })); });
     return [...out.values()];
   }
   /* ---------- invoices & receipts (IndexedDB, only on this phone) ---------- */
@@ -2631,11 +2645,83 @@
   function hLevelDemand(n, prev){ let l = n >= 6 ? 0 : n >= 3 ? 1 : n >= 1 ? 2 : 3; if (prev >= 4 && n < prev * 0.5 && l < 3) l++; return l; }
   const hLevelHour = (eh, tg) => eh >= tg ? 0 : eh >= tg * 0.8 ? 1 : eh >= tg * 0.6 ? 2 : 3;
   const hLevelMargin = m => m >= 70 ? 0 : m >= 50 ? 1 : m >= 30 ? 2 : 3;
-  function accGauge(level, title, sub){
+  /* ===== v215: Kosten & kostprijs, vaste kosten cabine/verkoop, beroepsmatig %, klikbare meters ===== */
+  const ACC_KINDS = { behandeling:"Behandeling", zeep:"Zeep", boeket:"Boeket", ander:"Ander product" };
+  function accFixedYear(x){
+    const c = x.costs, r = { cabine:0, verkoop:0, gedeeld:0, total:0, deduct:0, cabineD:0, verkoopD:0 }, sh = c.shareSale / 100;
+    c.fixed.forEach(f => { const y = f.amt * (f.per === "jaar" ? 1 : 12), d = y * f.prof / 100; r[f.scope] += y; r.total += y; r.deduct += d;
+      if (f.scope === "cabine") r.cabineD += d; else if (f.scope === "verkoop") r.verkoopD += d; else { r.verkoopD += d * sh; r.cabineD += d * (1 - sh); } });
+    return r;
+  }
+  function accOverhead(x){
+    const F = accFixedYear(x), d12 = accIso(new Date(Date.now() - 365 * 864e5)); let beh = 0, sold = 0;
+    try { popLoad().e.forEach(e => { if (e.c === "beh" && e.d >= d12) beh += e.n; }); } catch(e){ /* ignore */ }
+    x.items.forEach(i => i.mv.forEach(m => { if (m.r === "verkocht" && m.d >= d12) sold += m.q; }));
+    return { F, beh, sold, perBeh: beh > 0 ? F.cabineD / beh : 0, perSold: sold > 0 ? F.verkoopD / sold : 0 };
+  }
+  function accRecipeCost(x, r, O){
+    let mat = 0; const rows = r.lines.map(l => { const it = l.item ? x.items.find(i => i.id === l.item) : null, unit = it ? accUnit(it) : l.price, c = (unit > 0 ? unit : 0) * l.qty; mat += c; return { l, c, unit, it }; });
+    const y = r.yield > 0 ? r.yield : 1, small = r.kind === "behandeling" ? x.costs.small.reduce((s, q) => s + q.cost, 0) : 0, over = r.kind === "behandeling" ? O.perBeh : (r.kind === "ander" ? 0 : O.perSold);
+    return { rows, mat, matEach: mat / y, small, over, total: mat / y + small + over };
+  }
+  function accCostsHtml(x){
+    const c = x.costs, O = accOverhead(x), F = O.F, v = n => esc(String(Math.round(n * 100) / 100).replace(".", ","));
+    const sel = (id, opts, cur) => `<select id="${id}">${opts.map(([k, lb]) => `<option value="${esc(k)}"${cur === k ? " selected" : ""}>${esc(lb)}</option>`).join("")}</select>`;
+    const fx = c.fixed.map(f => `<li class="pop-row"><div class="pop-row__top"><span class="pop-row__name">${esc(f.name)}</span><b class="pop-row__n">${esc(accEur(f.amt))} / ${f.per}</b></div>
+      <div class="ingr-muted">${esc(f.scope === "cabine" ? "Cabine" : f.scope === "verkoop" ? "Verkoop" : "Gedeeld cabine en verkoop")} · ${v(f.prof)}% beroepsmatig · per jaar ${esc(accEur(f.amt * (f.per === "jaar" ? 1 : 12)))}</div>
+      <div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="fxdel" data-id="${esc(f.id)}">Verwijderen</button></div></li>`).join("");
+    const sm = c.small.map(s => `<li class="pop-row"><div class="pop-row__top"><span class="pop-row__name">${esc(s.name)}</span><b class="pop-row__n">${esc(accEur(s.cost))}</b></div><div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="smdel" data-id="${esc(s.id)}">Verwijderen</button></div></li>`).join("");
+    const itemOpts = [["", "(vrije regel, zonder aankoop)"]].concat(x.items.slice().sort((a, b) => a.name.localeCompare(b.name)).map(i => [i.id, i.name + " (" + accEur(accUnit(i)) + " per " + (i.unit || "stuk") + ")"]));
+    const rc = c.recipes.map(r => { const k = accRecipeCost(x, r, O);
+      return `<li class="pop-row"><div class="pop-row__top"><span class="pop-row__name">${esc(r.name)} <small>(${esc(ACC_KINDS[r.kind])}${r.yield !== 1 ? ", " + v(r.yield) + " stuks per keer" : ""})</small></span><b class="pop-row__n">${esc(accEur(k.total))}</b></div>
+        <div class="ingr-muted">Materiaal ${esc(accEur(k.matEach))}${r.kind === "behandeling" ? " · kleine materialen " + esc(accEur(k.small)) + " · aandeel vaste kosten cabine " + esc(accEur(k.over)) : r.kind !== "ander" ? " · aandeel vaste kosten verkoop " + esc(accEur(k.over)) : ""} = <b>${esc(accEur(k.total))} per ${r.kind === "behandeling" ? "behandeling" : "stuk"}</b></div>
+        <ul class="ingr-muted">${k.rows.map((q, n) => `<li>${esc(q.it ? q.it.name : q.l.name)}: ${v(q.l.qty)} ${esc(q.l.unit || (q.it && q.it.unit) || "")} × ${esc(accEur(q.unit))} = ${esc(accEur(q.c))} <button type="button" class="chip chip--sm" data-acc="rldel" data-id="${esc(r.id)}" data-v="${n}">✕</button></li>`).join("") || "<li>nog geen regels</li>"}</ul>
+        <div class="shop-edit"><label>Product uit je aankopen ${sel("accRl_item_" + r.id, itemOpts, "")}</label><label>Of vrije naam<input id="accRl_name_${esc(r.id)}" maxlength="100" placeholder="bv. lavendelolie"></label>
+          <label>Hoeveelheid<input id="accRl_qty_${esc(r.id)}" inputmode="decimal" placeholder="bv. 5 (ml, g of stuks)"></label><label>Eenheid<input id="accRl_unit_${esc(r.id)}" maxlength="12" placeholder="ml"></label><label>Prijs per eenheid (€, enkel bij een vrije regel)<input id="accRl_price_${esc(r.id)}" inputmode="decimal"></label>
+          <div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="rladd" data-id="${esc(r.id)}">+ Regel toevoegen</button>${r.kind === "behandeling" ? `<button type="button" class="chip chip--sm" data-acc="rcuse" data-id="${esc(r.id)}">Gebruik als materiaalkost in de gezondheidsmeter</button>` : ""}<button type="button" class="chip chip--sm" data-acc="rcdel" data-id="${esc(r.id)}">Recept verwijderen</button></div></div></li>`; }).join("");
+    return `<div class="shop-info"><p><b>Vaste kosten</b></p><p class="ingr-muted">Water, elektriciteit, huur, verzekering, software… Kies waarvoor de kost dient: <b>cabine</b> (behandelingen), <b>verkoop</b> (zepen, boeketten, verkoophoekje) of <b>gedeeld</b>. Bij “beroepsmatig” zet je het deel dat je echt voor je zaak gebruikt (100% voor een aparte cabine, minder voor iets wat je ook privé gebruikt). Bepaal dat percentage samen met je boekhouder of in Dexxter: de app rekent er enkel mee.</p>
+      ${c.fixed.length ? `<ol class="pop-list">${fx}</ol>` : `<p class="ingr-muted">Nog geen vaste kosten ingegeven.</p>`}
+      <div class="shop-edit"><label>Kost<input id="accF_name" maxlength="80" placeholder="bv. elektriciteit"></label><label>Bedrag (€)<input id="accF_amt" inputmode="decimal"></label><label>Per ${sel("accF_per", [["maand", "maand"], ["jaar", "jaar"]], "maand")}</label>
+        <label>Voor ${sel("accF_scope", [["cabine", "cabine (behandelingen)"], ["verkoop", "verkoop"], ["gedeeld", "gedeeld"]], "cabine")}</label><label>Beroepsmatig gebruik (%)<input id="accF_prof" inputmode="decimal" value="100"></label>
+        <div class="shop-actions"><button type="button" class="btn btn--primary btn--sm" data-acc="fxadd">+ Vaste kost toevoegen</button></div></div>
+      ${c.fixed.length ? `<p class="ingr-muted"><b>Per jaar:</b> cabine ${esc(accEur(F.cabine))} · verkoop ${esc(accEur(F.verkoop))} · gedeeld ${esc(accEur(F.gedeeld))} = <b>${esc(accEur(F.total))}</b>. Beroepsmatig deel: <b>${esc(accEur(F.deduct))}</b> (privé: ${esc(accEur(F.total - F.deduct))}).<br>Verdeeld over de zaak: cabine ${esc(accEur(F.cabineD))}, verkoop ${esc(accEur(F.verkoopD))}. Van de gedeelde kosten gaat <input id="accF_share" inputmode="decimal" size="3" value="${v(c.shareSale)}">% naar verkoop <button type="button" class="chip chip--sm" data-acc="shsave">Bewaren</button></p>
+      <p class="ingr-muted">Aandeel per behandeling: ${O.beh > 0 ? esc(accEur(O.perBeh)) + " (" + O.beh + " behandelingen in 12 maanden)" : "nog geen telgegevens (open Populariteit)"} · per verkocht stuk: ${O.sold > 0 ? esc(accEur(O.perSold)) + " (" + v(O.sold) + " verkocht in 12 maanden)" : "nog niets verkocht afgeboekt"}.</p>` : ""}</div>
+      <div class="shop-info"><p><b>Kleine materialen per behandeling</b></p><p class="ingr-muted">Watjes, oorstokjes, tissues, handschoenen… Vul de kost <b>per behandeling</b> in. Ze tellen mee bij elk recept van het soort “behandeling”.</p>
+      ${c.small.length ? `<ol class="pop-list">${sm}</ol><p class="ingr-muted">Samen: <b>${esc(accEur(c.small.reduce((s, q) => s + q.cost, 0)))}</b> per behandeling.</p>` : ""}
+      <div class="shop-edit"><label>Materiaal<input id="accS2_name" maxlength="80" placeholder="bv. watjes"></label><label>Kost per behandeling (€)<input id="accS2_cost" inputmode="decimal" placeholder="bv. 0,15"></label><div class="shop-actions"><button type="button" class="btn btn--primary btn--sm" data-acc="smadd">+ Toevoegen</button></div></div></div>
+      <div class="shop-info"><p><b>Kostprijs per behandeling of product (recepten)</b></p><p class="ingr-muted">Een behandeling of een zeep bestaat uit meerdere producten. Maak een recept, voeg per regel een product uit je aankopen toe met de hoeveelheid, en de app rekent de kostprijs per behandeling of per stuk uit, met kleine materialen en je aandeel vaste kosten erbij.</p>
+      ${c.recipes.length ? `<ol class="pop-list">${rc}</ol>` : ""}
+      <div class="shop-edit"><label>Naam<input id="accR_name" maxlength="100" placeholder="bv. Signature gelaatsverzorging of Lavendelzeep"></label><label>Soort ${sel("accR_kind", Object.entries(ACC_KINDS), "behandeling")}</label><label>Aantal stuks per keer (zeep: 12 per bak, behandeling: 1)<input id="accR_yield" inputmode="decimal" value="1"></label>
+        <div class="shop-actions"><button type="button" class="btn btn--primary btn--sm" data-acc="rcadd">+ Recept maken</button></div></div></div>`;
+  }
+  function accGaugeDetail(H, i){
+    const D = H.det, h = H.h, eur = n => esc(accEur(n)), OVr = (k, lb, auto) => `<label>${lb}<input id="accO_${k}" inputmode="decimal" placeholder="automatisch: ${esc(String(Math.round(auto * 100) / 100).replace(".", ","))}" value="${h.ov && h.ov[k] !== undefined ? esc(String(h.ov[k]).replace(".", ",")) : ""}"></label>`;
+    const ovBtn = `<div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="hov">Bewaren</button><button type="button" class="chip chip--sm" data-acc="hovreset">Terug naar automatisch</button></div>`;
+    let body = "";
+    if (i === 0){
+      const top = H.items.filter(q => q.n > 0 || q.prev > 0).sort((a, b) => b.n - a.n).slice(0, 15);
+      body = `<p class="ingr-muted">De vraag telt hoeveel keer elke behandeling in de laatste 12 maanden voorkwam (uit Populariteit), tegenover het jaar daarvoor. Totaal: ${D.tot12} nu, ${D.totP} vorig jaar. Je wijzigt de aantallen in Populariteit.</p><ol class="pop-list">${top.map(q => `<li class="pop-row"><div class="pop-row__top"><span class="pop-row__name">${esc(popLabel(q.k))}</span><b class="pop-row__n">${q.n}× (vorig jaar ${q.prev}×)</b></div></li>`).join("")}</ol>`;
+    } else if (i === 1){
+      body = `<p class="ingr-muted">Omzet per uur = prijs ÷ duur × 60, gewogen over alle behandelingen van de laatste 12 maanden: ${D.avgEh === null ? "geen gegevens" : eur(D.avgEh)} (${D.hrs ? D.hrs.toFixed(1).replace(".", ",") : 0} uur, omzet ${eur(D.rv || 0)}). Je doel: ${eur(h.target)} per uur.</p><div class="shop-edit"><label>Doel omzet per uur (€)<input id="accG_t" inputmode="decimal" value="${esc(String(h.target).replace(".", ","))}"></label><div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="hgoal2">Bewaren</button></div></div>`;
+    } else if (i === 2){
+      const li = accLoad().items, vv = []; li.forEach(it => it.mv.forEach(m => { if (m.r === "vervallen" && m.d >= D.d12) vv.push({ n:it.name, d:m.d, q:m.q, w:accUnit(it) * m.q }); }));
+      body = `<p class="ingr-muted">Aankopen laatste 12 maanden: ${eur(D.buy12)}${D.buy12 !== D.buyA ? " (aangepast, automatisch " + eur(D.buyA) + ")" : ""}. Vervallen of weggegooid: ${eur(D.exp12)}${D.exp12 !== D.expA ? " (aangepast, automatisch " + eur(D.expA) + ")" : ""} = ${D.lossPct === null ? "onbekend" : Math.round(D.lossPct) + "%"}.</p>
+        ${vv.length ? `<ol class="pop-list">${vv.slice(0, 20).map(q => `<li class="pop-row"><div class="pop-row__top"><span class="pop-row__name">${esc(q.n)}</span><b class="pop-row__n">${eur(q.w)}</b></div><div class="ingr-muted">${esc(accFmtD(q.d))} · ${v2(q.q)} stuks</div></li>`).join("")}</ol>` : ""}
+        <div class="shop-edit">${OVr("buy", "Aankopen laatste 12 maanden, werkelijk (€)", D.buyA)}${OVr("exp", "Vervallen of weggegooid, werkelijk (€)", D.expA)}${ovBtn}</div>`;
+    } else if (i === 3){
+      body = `<p class="ingr-muted">Marge = (omzet − aankopen − vaste kosten) ÷ omzet. Omzet ${eur(D.revBase)}${D.act12 > 0 ? " (werkelijk: kassa en verkoopfacturen)" : " (schatting uit je prijslijst)"}, aankopen ${eur(D.buy12)}, vaste kosten ${eur(D.fixedU)}${D.fixedU !== D.fixedA ? " (aangepast, automatisch " + eur(D.fixedA) + ")" : ""} = ${D.margin === null ? "onbekend" : Math.round(D.margin) + "%"}. Heb je vaste kosten ingegeven bij Kosten, dan gebruikt de meter het beroepsmatige deel daarvan.</p>
+        <div class="shop-edit">${OVr("rev", "Omzet laatste 12 maanden, werkelijk (€, zonder btw)", D.act12A > 0 ? D.act12A : H.rev12)}${OVr("buy", "Aankopen laatste 12 maanden, werkelijk (€)", D.buyA)}${OVr("fixed", "Vaste kosten per jaar, werkelijk (€)", D.fixedA)}${ovBtn}</div>`;
+    } else {
+      body = `<p class="ingr-muted">De algemene meter is de slechtste van de vier. Tik op een van de andere meters voor de cijfers erachter.</p>`;
+    }
+    return `<div class="shop-info gauge-detail"><p><b>${i < 0 ? "Algemeen" : esc(H.g[i].t)}</b> ${i >= 0 ? esc(H.g[i].s) : ""}</p>${body}<div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="gauge" data-v="${i}">Sluiten</button></div></div>`;
+  }
+  const v2 = n => String(Math.round(n * 100) / 100).replace(".", ",");
+  function accGauge(level, title, sub, idx){
     const cx = 70, cy = 68, r = 52, pt = (a, rr) => [cx + rr * Math.cos(a * Math.PI / 180), cy - rr * Math.sin(a * Math.PI / 180)];
     const arcs = [0, 1, 2, 3].map(i => { const a1 = 180 - i * 45, a2 = 180 - (i + 1) * 45, p1 = pt(a1, r), p2 = pt(a2, r); return `<path d="M${p1[0].toFixed(1)} ${p1[1].toFixed(1)} A${r} ${r} 0 0 1 ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}" fill="none" stroke="${RAYG[i]}" stroke-width="14"${level === i ? "" : ' opacity=".45"'}/>`; }).join("");
     const nd = level === null ? "" : (() => { const a = 180 - (level * 45 + 22.5), p = pt(a, 40); return `<line x1="${cx}" y1="${cy}" x2="${p[0].toFixed(1)}" y2="${p[1].toFixed(1)}" stroke="#3b2f26" stroke-width="3" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="5" fill="#3b2f26"/>`; })();
-    return `<div class="gauge"><svg viewBox="0 0 140 80" role="img" aria-label="${esc(title)}: ${level === null ? "geen gegevens" : RAYG_NL[level]}">${arcs}${nd}</svg><p class="gauge__t">${esc(title)}</p><p class="gauge__s">${esc(sub)}</p></div>`;
+    return `<button type="button" class="gauge gauge--btn${String(ACC.gOpen) === String(idx) ? " is-open" : ""}" data-acc="gauge" data-v="${idx}"><svg viewBox="0 0 140 80" role="img" aria-label="${esc(title)}: ${level === null ? "geen gegevens" : RAYG_NL[level]}">${arcs}${nd}</svg><p class="gauge__t">${esc(title)}</p><p class="gauge__s">${esc(sub)}</p></button>`;
   }
   function accHealth(){
     const x = accLoad(), h = x.health, pop = popLoad().e.filter(e => e.c === "beh"), t0 = accToday(), d12 = new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10), d24 = new Date(Date.now() - 730 * 864e5).toISOString().slice(0, 10);
@@ -2647,15 +2733,15 @@
       i.lv = { d:hLevelDemand(i.n, i.prev), h:i.eh === null ? null : hLevelHour(i.eh, h.target), m:i.mg === null ? null : hLevelMargin(i.mg) }; i.worst = Math.max(...Object.values(i.lv).filter(v => v !== null)); });
     const tot12 = items.reduce((s, i) => s + i.n, 0), totP = items.reduce((s, i) => s + i.prev, 0), rev12 = items.reduce((s, i) => s + i.rev, 0), noPrice = items.filter(i => !i.price).reduce((s, i) => s + i.n, 0), firstD = pop.reduce((m, e) => (!m || e.d < m) ? e.d : m, ""), partial = !firstD || firstD > d24;
     const wh = items.filter(i => i.eh !== null && i.n > 0), hrs = wh.reduce((s, i) => s + i.n * i.min / 60, 0), rv = wh.reduce((s, i) => s + i.n * i.price, 0), avgEh = hrs > 0 ? rv / hrs : null;
-    const li = x.items, buy12 = li.filter(i => i.date >= d12).reduce((s, i) => s + accBase(i), 0), exp12 = li.reduce((s, i) => s + i.mv.filter(m => m.r === "vervallen" && m.d >= d12).reduce((a, m) => a + accUnit(i) * m.q, 0), 0);
-    const trend = totP >= 8 ? (tot12 - totP) / totP * 100 : null, lossPct = buy12 > 0 ? exp12 / buy12 * 100 : null, act12 = x.cash.filter(c => c.d >= d12).reduce((a, c) => a + c.cash + c.card, 0) + x.docIdx.filter(q => q.dir === "out" && q.d >= d12).reduce((a, q) => a + q.excl, 0), revBase = act12 > 0 ? act12 : rev12, margin = (revBase > 0 && buy12 > 0) ? (revBase - buy12 - h.fixed) / revBase * 100 : null;
+    const li = x.items, OV = h.ov || {}, buyA = li.filter(i => i.date >= d12).reduce((s, i) => s + accBase(i), 0), expA = li.reduce((s, i) => s + i.mv.filter(m => m.r === "vervallen" && m.d >= d12).reduce((a, m) => a + accUnit(i) * m.q, 0), 0), buy12 = OV.buy !== undefined ? OV.buy : buyA, exp12 = OV.exp !== undefined ? OV.exp : expA;
+    const trend = totP >= 8 ? (tot12 - totP) / totP * 100 : null, lossPct = buy12 > 0 ? exp12 / buy12 * 100 : null, act12A = x.cash.filter(c => c.d >= d12).reduce((a, c) => a + c.cash + c.card, 0) + x.docIdx.filter(q => q.dir === "out" && q.d >= d12).reduce((a, q) => a + q.excl, 0), act12 = OV.rev !== undefined ? OV.rev : act12A, fixedA = x.costs.fixed.length ? accFixedYear(x).deduct : h.fixed, fixedU = OV.fixed !== undefined ? OV.fixed : fixedA, revBase = act12 > 0 ? act12 : rev12, margin = (revBase > 0 && buy12 > 0) ? (revBase - buy12 - fixedU) / revBase * 100 : null;
     const g = [
       { t:"Vraag", lv:trend === null ? null : (trend >= -5 ? 0 : trend >= -20 ? 1 : trend >= -40 ? 2 : 3), s:trend === null ? "te weinig geschiedenis" : (trend >= 0 ? "+" : "") + Math.round(trend) + "% t.o.v. vorige 12 mnd" + (partial ? " (vorig jaar onvolledig)" : "") },
       { t:"Omzet per uur", lv:avgEh === null ? null : hLevelHour(avgEh, h.target), s:avgEh === null ? "geen data" : accEur(avgEh) + " (doel " + accEur(h.target) + ")" },
       { t:"Voorraadverlies", lv:lossPct === null ? null : (lossPct <= 5 ? 0 : lossPct <= 10 ? 1 : lossPct <= 20 ? 2 : 3), s:lossPct === null ? "geen aankopen ingegeven" : Math.round(lossPct) + "% van de aankopen vervallen" },
       { t:"Marge (schatting)", lv:margin === null ? null : (margin >= 50 ? 0 : margin >= 30 ? 1 : margin >= 10 ? 2 : 3), s:margin === null ? "vul aankopen in" : Math.round(margin) + "% na aankopen en vaste kosten" }
     ];
-    const known = g.filter(q => q.lv !== null).map(q => q.lv); return { items, g, overall: known.length ? Math.max(...known) : null, rev12, tot12, noPrice, act12, tcAll, h };
+    const known = g.filter(q => q.lv !== null).map(q => q.lv); return { items, g, overall: known.length ? Math.max(...known) : null, rev12, tot12, noPrice, act12, tcAll, h, det:{ buy12, buyA, exp12, expA, act12, act12A, fixedU, fixedA, revBase, avgEh, hrs, rv, trend, tot12, totP, lossPct, margin, d12 } };
   }
   function accHealthHtml(){
     const H = accHealth(), x = accLoad(), h = x.health, lvl = l => l === null ? "⚪" : ["🟢", "🟡", "🟠", "🔴"][l];
@@ -2664,7 +2750,8 @@
       <div class="ingr-muted">Vraag ${lvl(i.lv.d)} ${i.n}× in 12 mnd${i.prev ? " (vorig jaar " + i.prev + "×)" : ""} · €/uur ${lvl(i.lv.h)} ${i.eh === null ? "onbekend" : esc(accEur(i.eh))} · marge ${lvl(i.lv.m)} ${i.mg === null ? "kost niet ingevuld" : Math.round(i.mg) + "%" + (i.costAuto ? " (kost ±" + esc(accEur(i.cost)) + " uit je facturen)" : "")}${i.rev ? " · omzet ± " + esc(accEur(i.rev)) : ""}</div>
       ${i.price ? `<div class="shop-actions"><label class="ingr-muted">Materiaalkost per behandeling (€) <input data-hc="${esc(i.k)}" inputmode="decimal" size="6" value="${i.cost === undefined ? "" : esc(String(i.cost).replace(".", ","))}"></label><button type="button" class="chip chip--sm" data-acc="hcost" data-k="${esc(i.k)}">Bewaren</button></div>` : ""}</li>`;
     return `<p class="ingr-muted">Zoals een kleurmeter (groen, geel, oranje, rood) voor je hele zaak en per behandeling. De cijfers zijn een <b>schatting</b>: de omzet is aantal × de prijs uit je prijslijst, niet je echte kassa of bank. Het is een hulpmiddel om na te denken, geen oordeel.</p>
-      <div class="gauges">${accGauge(H.overall, "Algemeen", H.overall === null ? "nog te weinig gegevens" : "slechtste van de vier: " + RAYG_NL[H.overall])}${H.g.map(q => accGauge(q.lv, q.t, q.s)).join("")}</div>
+      <div class="gauges">${accGauge(H.overall, "Algemeen", H.overall === null ? "nog te weinig gegevens" : "slechtste van de vier: " + RAYG_NL[H.overall], -1)}${H.g.map((q, i) => accGauge(q.lv, q.t, q.s, i)).join("")}</div>
+      ${(ACC.gOpen === undefined || ACC.gOpen === "") ? `<p class="ingr-muted">👆 Tik op een meter om de cijfers erachter te zien en ze aan te passen aan de werkelijkheid.</p>` : accGaugeDetail(H, Number(ACC.gOpen))}
       ${H.act12 ? `<p class="ingr-muted">Werkelijke omzet laatste 12 maanden (kassa en verkoopfacturen, zonder btw): <b>${esc(accEur(H.act12))}</b>. De marge-meter gebruikt dit bedrag.</p>` : ""}<p class="ingr-muted">Omzet laatste 12 maanden (schatting): <b>${esc(accEur(H.rev12))}</b> uit ${H.tot12} behandelingen${H.noPrice ? ", waarvan " + H.noPrice + " “niet nader omschreven” (zonder prijs, dus niet meegeteld: de echte omzet ligt hoger)" : ""}.</p>
       <div class="shop-info"><p><b>Jouw doelen</b></p><label>Doel omzet per uur (€)<input id="accH_t" inputmode="decimal" value="${esc(String(h.target).replace(".", ","))}"></label> <label>Vaste kosten per jaar (€, bv. verzekering, software)<input id="accH_f" inputmode="decimal" value="${esc(String(h.fixed).replace(".", ","))}"></label> <button type="button" class="chip chip--sm" data-acc="hgoal">Bewaren</button></div>
       <p class="ingr-muted"><b>Regels</b> · Vraag: 6× of meer in 12 maanden groen, 3–5 geel, 1–2 oranje, 0 rood (een stap slechter als het minder dan de helft van vorig jaar is). Omzet per uur t.o.v. je doel: vanaf 100% groen, 80% geel, 60% oranje, daaronder rood. Marge: 70% of meer groen, 50% geel, 30% oranje. Voorraadverlies: tot 5% groen, 10% geel, 20% oranje. Algemeen = de slechtste meter.</p>
@@ -2774,6 +2861,10 @@
 
   /* ===== v211b: kassa and double check with Dexxter, advice with sources, material cost per treatment ===== */
   const ACC_LINKS = [
+    ["Intervat inloggen (btw-loket FOD Financiën: aangiftes, klantenlisting, omzetmelding)", "https://intervat.minfin.fgov.be"],
+    ["Intervat: uitleg en hulp (FOD Financiën)", "https://finance.belgium.be/en/E-services/Intervat"],
+    ["Klantenlisting indienen via Intervat (FOD Financiën)", "https://finance.belgium.be/en/E-services/Intervat/how-to-use-intervat/submit-customer-list"],
+    ["Nihil klantenlisting als btw-vrijgestelde kleine onderneming (Accountable)", "https://www.accountable.eu/nl-be/help-center/hoe-dien-je-een-nihil-klantenlisting-in-via-intervat-als-btw-vrijgestelde-kleine-onderneming-vrijstellingsregeling/"],
     ["FOD Financiën (btw, Intervat, MyMinfin)", "https://financien.belgium.be"],
     ["Bijzondere btw-aangifte (formulier 629): uitleg Accountable", "https://www.accountable.eu/nl-be/help-center/hoe-dien-ik-een-bijzondere-btw-aangifte-of-een-aangifte-629-in/"],
     ["Aankopen in het buitenland en btw (SBB, voor kleine ondernemingen en vzw’s)", "https://www.sbb.be/nl/node/1601"],
@@ -2842,6 +2933,25 @@
   }
   document.addEventListener("click", ev => {
     const b = ev.target.closest && ev.target.closest("[data-acc]"); if (!b || !actSalon()) return; const a = b.dataset.acc, id = b.dataset.id, v = b.dataset.v, x = accLoad();
+    if (a === "gauge"){ ACC.gOpen = String(ACC.gOpen) === String(v) ? "" : v; return accRender(); }
+    if (a === "hgoal2"){ const t = accNum(($("#accG_t") || {}).value); if (t > 0 && t <= 1000){ accLoad().health.target = t; accSave(); } return accRender(); }
+    if (a === "hov"){ const x2 = accLoad(); ["rev", "buy", "exp", "fixed"].forEach(k => { const el = $("#accO_" + k); if (!el) return; const val = el.value.trim(); if (val === "") delete x2.health.ov[k]; else { const n = accNum(val); if (n >= 0 && n <= 1e7) x2.health.ov[k] = n; } }); accSave(); showToast("Aangepast."); return accRender(); }
+    if (a === "hovreset"){ accLoad().health.ov = {}; accSave(); return accRender(); }
+    const g2 = k => (($("#" + k) || {}).value || "").trim();
+    if (a === "fxadd"){ const am = accNum(g2("accF_amt")), pr = g2("accF_prof") === "" ? 100 : accNum(g2("accF_prof")); if (!g2("accF_name") || !(am >= 0) || !(pr >= 0 && pr <= 100)){ showToast("Vul een naam, een bedrag en een percentage tussen 0 en 100 in."); return; }
+      x.costs.fixed.push({ id:"c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 4), name:g2("accF_name"), amt:am, per:g2("accF_per") === "jaar" ? "jaar" : "maand", scope:["cabine", "verkoop", "gedeeld"].includes(g2("accF_scope")) ? g2("accF_scope") : "cabine", prof:pr }); accSave(); return accRender(); }
+    if (a === "fxdel"){ x.costs.fixed = x.costs.fixed.filter(f => f.id !== id); accSave(); return accRender(); }
+    if (a === "shsave"){ const n = accNum(g2("accF_share")); if (n >= 0 && n <= 100){ x.costs.shareSale = n; accSave(); } return accRender(); }
+    if (a === "smadd"){ const n = accNum(g2("accS2_cost")); if (!g2("accS2_name") || !(n >= 0)){ showToast("Vul een naam en een bedrag in."); return; } x.costs.small.push({ id:"c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 4), name:g2("accS2_name"), cost:n }); accSave(); return accRender(); }
+    if (a === "smdel"){ x.costs.small = x.costs.small.filter(s => s.id !== id); accSave(); return accRender(); }
+    if (a === "rcadd"){ const yy = g2("accR_yield") === "" ? 1 : accNum(g2("accR_yield")); if (!g2("accR_name") || !(yy > 0)){ showToast("Vul een naam in en een aantal groter dan 0."); return; } x.costs.recipes.push({ id:"c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 4), name:g2("accR_name"), kind:g2("accR_kind"), yield:yy, lines:[] }); accSave(); return accRender(); }
+    if (a === "rcdel"){ const r = x.costs.recipes.find(q => q.id === id); if (r && window.confirm("Dit recept verwijderen?\n" + r.name)){ x.costs.recipes = x.costs.recipes.filter(q => q.id !== id); accSave(); accRender(); } return; }
+    if (a === "rladd"){ const r = x.costs.recipes.find(q => q.id === id); if (!r) return; const q = accNum(g2("accRl_qty_" + id)), item = g2("accRl_item_" + id), nm = g2("accRl_name_" + id), pr = g2("accRl_price_" + id) === "" ? 0 : accNum(g2("accRl_price_" + id));
+      if (!(q > 0) || !(item || nm) || !(pr >= 0)){ showToast("Kies een product of typ een naam, en vul een hoeveelheid in."); return; }
+      if (!item && !(pr > 0)){ showToast("Bij een vrije regel hoort een prijs per eenheid."); return; }
+      r.lines.push({ item, name:nm, qty:q, unit:g2("accRl_unit_" + id), price:pr }); accSave(); return accRender(); }
+    if (a === "rldel"){ const r = x.costs.recipes.find(q => q.id === id); if (r){ r.lines.splice(Number(v), 1); accSave(); accRender(); } return; }
+    if (a === "rcuse"){ const r = x.costs.recipes.find(q => q.id === id); if (r){ const k = accRecipeCost(x, r, accOverhead(x)); x.health.cost[r.name] = Math.round((k.matEach + k.small) * 100) / 100; accSave(); showToast("Materiaalkost bewaard voor “" + r.name + "”: " + accEur(x.health.cost[r.name]) + " (zonder aandeel vaste kosten). De naam moet gelijk zijn aan de behandeling in je prijslijst."); } return; }
     if (a === "kyear"){ ACC.kYear = Number(v); return accRender(); }
     if (a === "kadd"){ const g = k => (($("#accK_" + k) || {}).value || "").trim(), d = g("d"), cash = g("cash") === "" ? 0 : accNum(g("cash")), card = g("card") === "" ? 0 : accNum(g("card"));
       if (!accIsDate(d) || !(cash >= 0) || !(card >= 0) || cash + card <= 0){ showToast("Vul een datum en minstens één bedrag in."); return; }
@@ -8240,6 +8350,7 @@
       if (action === "open-giftcard") goTo("giftcard");
       if (action === "open-shop") goTo("shop");
       if (action === "open-search") gsStart();
+      if (action === "open-salon") openSalonMode();
       if (action === "open-acc"){ BH.view = "acc"; BH.edit = false; goTo("pricelist"); }
       if (action === "resume-draft") accResume(el.dataset.key);
       if (action === "open-acc-dates"){ BH.view = "acc"; BH.edit = false; ACC.tab = "dates"; goTo("pricelist"); }

@@ -1596,3 +1596,8 @@ body.shop-lb-open{overflow:hidden}
 .gs-hit__i{font-size:1.4rem}
 .gs-hit__t small{display:block;opacity:.7}
 .gs-hit__t em{font-size:.75rem;opacity:.75}
+
+/* ---- v215: klikbare gezondheidsmeters ---- */
+button.gauge--btn{background:transparent;border:1px solid transparent;border-radius:12px;color:inherit;font:inherit;cursor:pointer;padding:.2rem}
+button.gauge--btn.is-open{border-color:var(--gold,#b8975a)}
+.gauge-detail{margin-top:.6rem}

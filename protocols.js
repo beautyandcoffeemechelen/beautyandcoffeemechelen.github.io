@@ -499,13 +499,13 @@ const PROTOCOLS = [
 "Katoenenschijfjes"
 ],
 [
-"Reiniging & afnemen",
-"Purifying Cleansing Gel",
+"Reiniging & afnemen\n- na 5-10’ inwerkingstijd inmasseren van Multi Action Cleansing Balm\n- Met natte vingers Luxury Oil Cleanser inmasseren tot schuim en afspoelen",
+"Multi Action Cleansing Balm (droge huid)\nLuxury Oil Cleanser",
 "Vochtige kompressen"
 ],
 [
 "Verfrissing & drogen",
-"Purifying Tonic",
+"Micellar Skin Tonic",
 "Katoenenschijfjes + tissues"
 ],
 [
@@ -515,21 +515,16 @@ const PROTOCOLS = [
 ],
 [
 "Oogverzorging (contouren)",
-"Ooggel: Aqualift Eye Gel",
+"Oogcrème: Tri-Care Eye Cream",
 ""
 ],
 [
-"Diepe reiniging /peeling",
-"Enzyme Peeling Powder",
+"Diepe reiniging /peeling (comedonen)",
+"Skin Refining Enzyme Peel",
 "Penseel + glazen schaaltje"
 ],
 [
-"Verwijderen peeling & drogen",
-"",
-"Vochtige kompressen + tissues"
-],
-[
-"Na reiniging (comedonen)",
+"Ev. extra reiniging (comedonen)\nPlaatselijk inmasseren",
 "Purifying BHA Serum",
 ""
 ],
@@ -539,19 +534,24 @@ const PROTOCOLS = [
 "Pincet / hars + loupelamp + handschoenen + tissue + comedonenring"
 ],
 [
+"Concentraat met werkzame stoffen / serum",
+"Age Perfecting Serum (strakker)\nInstant Lift Serum (lijnen, rimpels, vermoeide matte huid)",
+""
+],
+[
 "Concentraat in ampul",
-"Refining Retinol Fluid",
+"Skin Contour Fluid - Flawless\nCaviar Extract - Engery\nStem Cell Fluid - Intense",
 ""
 ],
 [
 "Massage: 20’",
-"Balancing Cream",
+"Rich Recovery Cream (elasticiteit, winter)\nSkin Contour cream (wangen verstevigen)",
 ""
 ],
 [
-"Masker gelaat + hals: 15’",
-"Peel Off Dead Sea Black Mask",
-"Maatbeker + spatel + mengkom"
+"Masker gelaat + hals: 15’\n- Rejuvenating Mask: 10-15’\n- Peel Off Mask Acrola Vitamin C: 15-20’\n- Lift Contour Cream Mask: 20’ max",
+"Rejuvenating Mask (vochtinbrengend, verstevigend)\nLift Contour Cream Mask (regenereert & verstevigt)\nPeel Off Mask Acrola Vitamin C",
+"Penseel + glazen schaaltje of maatbeker + spatel + mengkom"
 ],
 [
 "Verwijderen masker",
@@ -560,7 +560,7 @@ const PROTOCOLS = [
 ],
 [
 "Verfrissing & drogen",
-"Tonic/Lotion: Purifying Tonic",
+"Tonic/Lotion: Micellar Skin Tonic",
 "Katoenenschijfjes + tissues"
 ],
 [
@@ -570,12 +570,12 @@ const PROTOCOLS = [
 ],
 [
 "Afronding oogzone",
-"Ooggel: Aqualift Eye Gel",
+"Oogcrème: Tri-Care Eye Cream",
 ""
 ],
 [
-"Bescherming overdag/nacht",
-"Microsilver Serum\nRegulating Retinol Cream\nAHA Face Cream (niet in zomer)",
+"Bescherming overdag/nacht\n- Ceramide Protection: aanbrengen en inmasseren",
+"Perfect Lift Cream (make-up base, elasticiteit)\nCeramide Protection (lijntjes, rimpels, pigment, verstevigen)",
 ""
 ]
 ]
@@ -2511,7 +2511,7 @@ const PROTOCOLS = [
 },
 {
 "id": "manicure",
-"title": "Manicure basis",
+"title": "Uitgebreide manicure",
 "treat": [
 "manicure",
 "manicureexpress"
@@ -2995,7 +2995,7 @@ const PROTOCOLS = [
 },
 {
 "id": "pedicure",
-"title": "Pedicure basis",
+"title": "Uitgebreide pedicure",
 "treat": [
 "pedicure",
 "pedicureexpress"
