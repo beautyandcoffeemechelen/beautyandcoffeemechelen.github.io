@@ -1207,7 +1207,7 @@ const PROTOCOLS = [
 {
 "id": "guinotzuiverend",
 "title": "Zuiverende behandeling Équilibre Pureté Guinot (onzuiverheden, acne)",
-"treat": ["expressuseup"],
+"treat": ["equilibrepurete","expressuseup"],
 "intro": [],
 "rows": [
 [

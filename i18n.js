@@ -796,6 +796,8 @@ const I18N = {
     focus_need: "Kies eerst een antwoord op de eerste vraag.",
     focus_colours: "Kleuren in de sfeer {family}: bijvoorbeeld {names}. In de salon toon ik je de stalen.",
     focus_fallback: "De behandeling die het best bij je wens past, is nu niet geschikt voor jou (bijvoorbeeld door de zon, je leeftijd, een allergie of een aandachtspunt). Daarom deze, die wel veilig is.",
+    acne_derm_note: "Heb je pijnlijke acne (diepe, ontstoken puistjes of knobbels)? Laat die dan eerst door je huisarts of een dermatoloog bekijken: een gelaatsverzorging is dan niet de juiste eerste stap.",
+
     why_focus: "Je koos gericht voor {cat}, met als wens: {answers}. Daarom past {treatment} het best bij jou.",
     focus_advice_title: "Afgestemd op jouw wensen",
     ingr_tab_stock: "📦 Voorraad",
@@ -1890,6 +1892,8 @@ const I18N = {
     focus_need: "Please answer the first question first.",
     focus_colours: "Colours in a {family} mood: for example {names}. I’ll show you the swatches in the salon.",
     focus_fallback: "The treatment that best fits your wish isn’t suitable for you right now (for example because of the sun, your age, an allergy or a health point). So here is one that is safe.",
+    acne_derm_note: "Do you have painful acne (deep, inflamed spots or nodules)? Please have it checked by your GP or a dermatologist first: a facial is not the right first step then.",
+
     why_focus: "You chose {cat}, wishing for: {answers}. That’s why {treatment} suits you best.",
     focus_advice_title: "Tailored to your wishes",
     ingr_tab_stock: "📦 Stock",

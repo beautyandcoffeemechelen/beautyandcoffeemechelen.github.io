@@ -256,6 +256,10 @@ const NAME_I18N = {
   "en": "Fill Me Micro Infusion Treatment",
   "fr": "Soin Fill Me par micro-infusion"
  },
+ "Guinot Équilibre Pureté": {
+  "en": "Guinot Équilibre Pureté",
+  "fr": "Guinot Équilibre Pureté"
+ },
  "Fruit Acid Peeling Dr. Renaud": {
   "en": "Fruit Acid Peeling Dr. Renaud",
   "fr": "Peeling aux acides de fruits Dr. Renaud"
@@ -564,6 +568,11 @@ const PRICELIST_NAMES = {
   "nl": "Fill Me Micro Infusie Treatment",
   "en": "Fill Me Micro Infusion Treatment",
   "fr": "Fill Me Micro Infusion Treatment"
+ },
+ "Guinot Équilibre Pureté": {
+  "nl": "Guinot Équilibre Pureté",
+  "en": "Guinot Équilibre Pureté",
+  "fr": "Guinot Équilibre Pureté"
  },
  "Fruit Acid Peeling Dr. Renaud": {
   "nl": "Fruitzurenpeeling 4/26 Dr. Renaud",
@@ -1109,6 +1118,18 @@ const TREATMENTS_CATALOG = [
     aftercare:{ nl:"Draag de eerste 24 uur geen make-up en vermijd 48 uur de zon en sauna. Het dagelijks aanbrengen van een zonnebrandcrème met SPF 50 is essentieel om de pas vernieuwde huid optimaal te beschermen.",
                 en:"Avoid wearing makeup for the first 24 hours and stay out of the sun and sauna for 48 hours. Daily application of SPF 50 sunscreen is essential to properly protect your newly refreshed skin." } },
 
+  { id:"equilibrepurete", name:"Guinot Équilibre Pureté", moods:["focus"], genders:["vrouw","man"], sunSensitive:true, price:"€65 (60')",
+    homecare:{ category:"facial" },
+    benefits:{ nl:"Een zuiverende gelaatsverzorging voor een onzuivere huid met mee-eters, grote poriën of puistjes: een verwarmende exfoliant, een zuiverend kleimasker en een serumcrème die de huid matteert en egaliseert.",
+               en:"A purifying facial for blemished skin with blackheads, large pores or spots: a warming exfoliator, a purifying clay mask and a cream serum that mattifies and evens the skin.",
+               fr:"Un soin du visage purifiant pour les peaux à imperfections, points noirs, pores dilatés ou boutons : un exfoliant chauffant, un masque purifiant à l’argile et un sérum crème qui matifie et unifie le teint." },
+    funfact:{ nl:"Wrijven stimuleert de talgproductie: reinig een onzuivere huid daarom zacht en dep ze droog.",
+              en:"Rubbing stimulates sebum production: cleanse blemished skin gently and pat it dry.",
+              fr:"Frotter stimule la production de sébum : nettoyez une peau à imperfections en douceur et séchez-la en tamponnant." },
+    aftercare:{ nl:"Gebruik 7 dagen dagelijks SPF 50, knijp niets uit en sla scrubs 48 uur over.",
+                en:"Use SPF 50 daily for 7 days, don’t squeeze anything and skip scrubs for 48 hours.",
+                fr:"Utilisez chaque jour un SPF 50 pendant 7 jours, ne pressez rien et évitez les gommages pendant 48 heures." } },
+
   { id:"fruitacid", name:"Fruit Acid Peeling Dr. Renaud", moods:["focus"], genders:["vrouw","man"], sunSensitive:true, monthRange:[9,10,11,12,1,2,3], seasonalBoost:true, price:"€100 (75')",
     homecare:{ category:"facial" },
     benefits:{ nl:"Een professionele peeling met fruitzuren, gericht op een frissere en egalere huiduitstraling.",
@@ -1487,7 +1508,7 @@ const COMPLAINT_KEYWORDS = [
   { words:["griep","griepje","verkouden","verkoudheid","snotneus","neus verstopt","flu","a cold","grippe","rhume"], ids:["cupping","swedishbackneck"] },
   { words:["rimpels","veroudering","verouderen","huidveroudering","stevigheid"], ids:["antiagefacial","liftsummere"] },
   { words:["pigmentatie","pigmentvlekken","oneffen","dof","vale huid","vaal"], ids:["hydrapeel","fruitacid"] },
-  { words:["onzuiverheden","puistjes","acne","vette huid"], ids:["signaturefacial","expressfacial","fruitacid"] },
+  { words:["onzuiverheden","puistjes","acne","vette huid","mee-eters","grote poriën"], ids:["equilibrepurete","signaturefacial","expressfacial","fruitacid"] },
   { words:["voeten","voet","eelt","nagelriem","ingegroeide nagel"], ids:["pedicure"] },
   { words:["nagels","handen","manicure"], ids:["manicure","manipedispa","manicureexpress","cateye"] },
   { words:["wimpers","wenkbrauwen","brows","lashes"], ids:["lashlift","browlift","hennabrows","browtint","browshaping","lashtint","wenkbrauwontharing"] },
@@ -1520,7 +1541,7 @@ const AVOID_GROUPS = {
   hands:    ["manicure","manicureexpress","manipedispa","cateye"],
   massage:  ["hotstone","cupping","cuppingpeeling","swedish","swedishbackneck","swedishlegs","backwrap","detoxback","harmonizingbody","fullbodywrap","slimmassage","harmonizingback"],
   waxing:   ["oksel","been","rug","buik","borst","browshaping","kin","bovenlip","wenkbrauwontharing","schouders","borstbuik","volledigebenen"],
-  face:     ["hydrapeel","signaturefacial","fillme","fruitacid","liftsummere","antiagefacial","expressfacial","expressuseup"],
+  face:     ["hydrapeel","signaturefacial","equilibrepurete","fillme","fruitacid","liftsummere","antiagefacial","expressfacial","expressuseup"],
   makeup:   ["glammakeup","bridaltrial","bridalpackage","weddingguest"],
   browlash: ["browlift","hennabrows","lashlift","browtint","browshaping","lashtint","wenkbrauwontharing"],
   workshop: ["makeupworkshop","facialworkshop","tastingbasic","tastingadvanced","baristaworkshop","teambeauty","teamcoffee","cateye"]
@@ -1545,7 +1566,7 @@ const FOCUS_GUIDES = {
     questions:[
       { id:"wish", required:true, label:{ nl:"Waar wil je vooral aan werken?", en:"What would you like to work on most?", fr:"Sur quoi voulez-vous surtout travailler ?" },
         options:[
-          { id:"clean", label:{ nl:"Onzuiverheden, mee-eters, grote poriën", en:"Blemishes, blackheads, large pores", fr:"Imperfections, points noirs, pores dilatés" }, s:{ hydrapeel:3, expressfacial:2, expressuseup:2, fruitacid:2, signaturefacial:1 } },
+          { id:"clean", label:{ nl:"Onzuiverheden, mee-eters, grote poriën", en:"Blemishes, blackheads, large pores", fr:"Imperfections, points noirs, pores dilatés" }, s:{ equilibrepurete:9, expressfacial:2, expressuseup:2, fruitacid:2, signaturefacial:1 }, block:["fillme"], derm:true },
           { id:"hydra", label:{ nl:"Droge, trekkerige of vale huid", en:"Dry, tight or dull skin", fr:"Peau sèche, qui tiraille ou terne" }, s:{ fillme:3, hydrapeel:2, signaturefacial:2 } },
           { id:"pigment", label:{ nl:"Pigmentvlekken, een egalere teint", en:"Pigment spots, a more even tone", fr:"Taches pigmentaires, teint plus uniforme" }, months:[9,10,11,12,1,2,3], s:{ fruitacid:4, hydrapeel:2 }, off:{ fillme:3, signaturefacial:2 },
             offNote:{ nl:"Pigmentvlekken behandel ik enkel van september tot eind maart, als de zon minder sterk is: anders kunnen de vlekken net terugkomen. Daarom nu een verzorging die je huid voorbereidt; plan je pigmentbehandeling (fruitzuurpeeling) vanaf september.", en:"I only treat pigment spots from September to the end of March, when the sun is weaker; otherwise the spots can come back. So for now a treatment that prepares your skin; plan your pigment treatment (fruit acid peel) from September.", fr:"Je ne traite les taches pigmentaires que de septembre à fin mars, quand le soleil est plus faible ; sinon elles peuvent revenir. Pour l’instant, un soin qui prépare la peau ; prévoyez le soin anti-taches (peeling aux acides de fruits) dès septembre." } },
@@ -1735,7 +1756,7 @@ const HEALTH_EXTRA = [
   { key:"varicose", icon:"🦵", exclude:[],
     label:{ nl:"Spataders", en:"Varicose veins", fr:"Varices" },
     note:{ nl:"Met spataders kan een massage gewoon: ik sla enkel de plekken met spataders zelf over en masseer daar niet.", en:"With varicose veins a massage is fine: I simply skip the areas with the veins themselves.", fr:"Avec des varices, le massage reste possible : j’évite simplement les zones des varices." } },
-  { key:"oncology", icon:"🎗️", exclude:["fruitacid","hydrapeel","cuppingpeeling","fillme","liftsummere","antiagefacial","expressuseup","facialworkshop"],
+  { key:"oncology", icon:"🎗️", exclude:["fruitacid","hydrapeel","equilibrepurete","cuppingpeeling","fillme","liftsummere","antiagefacial","expressuseup","facialworkshop"],
     label:{ nl:"Ik ben (of was kort geleden) in behandeling voor kanker", en:"I am (or recently was) being treated for cancer", fr:"Je suis (ou j’ai été récemment) traité(e) pour un cancer" },
     note:{ nl:"Tijdens of na een kankerbehandeling ben je zeker welkom, ook voor een massage. Voor je gezicht werk ik extra zacht, zonder peeling, met de kalmerende Janssen-lijn voor de gevoelige huid.", en:"During or after cancer treatment you are very welcome, massages included. For your face I work extra gently, without peels, with Janssen’s soothing line for sensitive skin.", fr:"Pendant ou après un traitement contre le cancer, vous êtes la bienvenue, massages compris. Pour le visage, je travaille tout en douceur, sans peeling, avec la gamme apaisante de Janssen pour peaux sensibles." },
     sandraNote:{ nl:"Alleen voor jou: gelaat enkel met de roze lijn van Janssen (Sensitive Skin: Soft Cleansing Mousse, Soft Soothing Tonic, Intense Calming Serum en Cream, Instant Soothing Oil en Mask, Comfort Eye Care; staan allemaal in je voorraad, zoek op “gevoelige huid”), volgens je oncologisch protocol. Geen peeling, geen ampullen met actieve zuren.", en:"Only for you: face only with Janssen’s pink line (Sensitive Skin), as in your oncology protocol. No peels.", fr:"Uniquement pour toi : visage uniquement avec la ligne rose Janssen (Sensitive Skin), selon ton protocole oncologique. Pas de peeling." } },
@@ -1958,7 +1979,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v211 · 28/10/2026";
+const APP_VERSION = "v212 · 07/11/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -2498,7 +2519,7 @@ const APPT_PREP = {
   ]
 };
 /* free text in the appointment ("lash lift", "kleuren"…) → category */
-const APPT_PREP_WORDS = { browlash:["lash","wimper","wenkbrauw","brow","henna","tint","kleur","cils","sourcil"], face:["gelaat","facial","soin du visage","peeling","fill me","lift summum","anti-age"], makeup:["make-up","makeup","visagie","bruid","bridal","maquillage"], waxing:["ontharen","wax","harsen","épilation"], feet:["pedicure","pédicure","voet"], hands:["manicure","manucure","nagel","gellak"], massage:["massage","cupping","hot stone"] };
+const APPT_PREP_WORDS = { browlash:["lash","wimper","wenkbrauw","brow","henna","tint","kleur","cils","sourcil"], face:["gelaat","facial","soin du visage","peeling","fill me","lift summum","anti-age","pureté","équilibre"], makeup:["make-up","makeup","visagie","bruid","bridal","maquillage"], waxing:["ontharen","wax","harsen","épilation"], feet:["pedicure","pédicure","voet"], hands:["manicure","manucure","nagel","gellak"], massage:["massage","cupping","hot stone"] };
 
 /* Is a (non-yearly) action on today? soldOut, from and until are checked.
    Used by the banner, the price list and the match, so one switch stops all. */
@@ -2519,7 +2540,7 @@ const PRICE_LINKS = {
   swedish:"Zweedse full body massage", swedishbackneck:"Zweedse rug-nek-schouder massage", swedishlegs:"Zweedse benen-voeten massage",
   backwrap:"Energetische rugpakking", browlift:"Brow Lift", hennabrows:"Henna Brows", lashlift:"Lash Lift met kleuring",
   glammakeup:"Avondmake-up / Party / Glam", hydrapeel:"Huidvernieuwende Hydra Peeling pH", signaturefacial:"Signature gelaatsverzorging",
-  fillme:"Fill Me Micro Infusie Treatment", fruitacid:"Fruitzurenpeeling 4/26 Dr. Renaud", liftsummere:"Lift Summum",
+  fillme:"Fill Me Micro Infusie Treatment", equilibrepurete:"Guinot Équilibre Pureté", fruitacid:"Fruitzurenpeeling 4/26 Dr. Renaud", liftsummere:"Lift Summum",
   detoxback:"Zuiverende rugbehandeling", antiagefacial:"Botanische Anti-Age", harmonizingbody:"Harmoniserende verzorging full body",
   fullbodywrap:"Energetische lichaamspakking full body", makeupworkshop:"Beauty & Skincare Workshop", facialworkshop:"Beauty & Skincare Workshop",
   baristaworkshop:"Barista Privéworkshop", manicure:"Uitgebreide manicure", pedicureexpress:"Express pedicure", pedicure:"Uitgebreide pedicure",
@@ -2556,6 +2577,7 @@ const PRICE_LIST = [
     PI("Express gelaatsverzorging – opgebruikactie","Express facial – special offer","30′","€50","Zoals de Express, met producten van Bio Balance, Guinot, Dr. Renaud of Safety4You. Zolang de voorraad strekt.","Like the Express, with Bio Balance, Guinot, Dr. Renaud or Safety4You products. While stocks last."),
     PI("Signature gelaatsverzorging","Signature facial","75′","€85","Uitgebreide verzorging met massage; ook voor gevoelige huid.","Full facial with massage; also suitable for sensitive skin."),
     PI("Fill Me Micro Infusie Treatment","Fill Me Micro Infusion Treatment","45–60′","€99","Cleanser, tonic, Fill Me Serum, masker, LED-masker & UV-bescherming.","Cleanser, tonic, Fill Me Serum, mask, LED mask & UV protection."),
+    PI("Guinot Équilibre Pureté","Guinot Équilibre Pureté","60′","€65","Zuiverende verzorging bij onzuiverheden, mee-eters en grote poriën.","Purifying facial for blemishes, blackheads and large pores."),
     PI("Fruitzurenpeeling 4/26 Dr. Renaud","Fruit acid peel 4/26 Dr. Renaud","75′","€100","Voor een egalere teint. Enkel van september tot maart.","For a more even skin tone. Only from September to March."),
     PI("Huidvernieuwende Hydra Peeling pH","Skin-renewing Hydra Peeling pH","90′","€100","Voor een frisse uitstraling en een egalere teint.","For a fresh glow and a more even skin tone."),
     PI("Lift Summum","Lift Summum","70′","€120","Voor een strakker ogende huid, met massage en gelaatsmasker.","For firmer-looking skin, with massage and face mask."),
@@ -2827,7 +2849,7 @@ const SKIN_FACT_POOLS = {
     oksel:["G","E"], been:["G"], rug:["G"], buik:["G"], borst:["G"],
     browlift:["G"], hennabrows:["G"], lashlift:["G"],
     hydrapeel:["A","B","C","D"], signaturefacial:["A","B","C","D"], fillme:["A","B","C","D"],
-    fruitacid:["A","B","C","D"], liftsummere:["A","B","C","D"], antiagefacial:["A","B","C","D"],
+    equilibrepurete:["A","B","C","D"], fruitacid:["A","B","C","D"], liftsummere:["A","B","C","D"], antiagefacial:["A","B","C","D"],
     glammakeup:["A","B"], makeupworkshop:["A","B","C"], facialworkshop:["A","B","C"],
     hotstone:["A","D","E"], cupping:["A","D","E"], cuppingpeeling:["A","D","E"],
     swedish:["A","D","E"], swedishbackneck:["A","D","E"], swedishlegs:["A","D","E"],
@@ -2921,7 +2943,7 @@ const CONDITION_FACT_POOLS = {
     hotstone:["ZW"], swedish:["ZW"], swedishbackneck:["ZW"], swedishlegs:["ZW","PE"],
     detoxback:["ZW"], slimmassage:["ZW"],
     hydrapeel:["PI","DR"], signaturefacial:["PI","DR"], fillme:["PI"],
-    fruitacid:["PI","DR"], liftsummere:["PI"], antiagefacial:["PI","TU"],
+    equilibrepurete:["AC","PI"], fruitacid:["PI","DR"], liftsummere:["PI"], antiagefacial:["PI","TU"],
     glammakeup:["AL"], facialworkshop:["AC","PI"], makeupworkshop:["AL"],
     hennabrows:["AL"], browlift:["AL"], lashlift:["AL"],
     oksel:["AL"], been:["AL","PE"], rug:["AL","TU"], buik:["AL"], borst:["AL"]
@@ -3233,7 +3255,7 @@ const MORE_FACT_POOLS = {
     pedicure:["NA","NB","NC","ND","NE","NF"], pedicureexpress:["NA","NB","NC","ND","NE","NF"],
     lashlift:["LL", "LT", "BR", "LS"],
     hydrapeel:["GV", "SK", "HV"], signaturefacial:["GV", "SK", "HV"], fillme:["GV", "SK", "HV"],
-    fruitacid:["GV", "SK", "HV"], liftsummere:["GV", "SK", "HV"], antiagefacial:["GV", "SK", "HV"],
+    equilibrepurete:["GV", "SK", "HV"], fruitacid:["GV", "SK", "HV"], liftsummere:["GV", "SK", "HV"], antiagefacial:["GV", "SK", "HV"],
     detoxback:["GV", "SK", "BS"], harmonizingbody:["GV", "SK", "BS", "MU"], fullbodywrap:["GV", "SK", "BS"],
     facialworkshop:["GV", "SK", "HV"], makeupworkshop:["GV"],
     hotstone:["GV", "HS", "MU"], swedish:["GV", "MU"], swedishbackneck:["GV", "MU"], swedishlegs:["GV", "MU"],
@@ -3334,6 +3356,7 @@ const UPSELL_SUGGESTIONS = {
   hydrapeel: U("Voeg een collageenvliesmasker toe", "Add a collagen sheet mask", "Ajoutez un masque en tissu au collagène", "+€20"),
   signaturefacial: U("Voeg een Hot Stone gelaatsmassage toe", "Add a Hot Stone facial massage", "Ajoutez un massage du visage Hot Stone", "+€20"),
   fillme: U("Voeg LED-therapie toe", "Add LED therapy", "Ajoutez la luminothérapie LED", "+€10"),
+  equilibrepurete: U("Voeg LED-therapie (blauw licht) toe", "Add LED therapy (blue light)", "Ajoutez la luminothérapie LED (lumière bleue)", "+€10"),
   fruitacid: U("Voeg een anti-aging paraffinemasker toe", "Add an anti-aging paraffin mask", "Ajoutez un masque à la paraffine anti-âge", "+€20"),
   liftsummere: U("Voeg een peel-off masker toe", "Add a peel-off mask", "Ajoutez un masque peel-off", "+€15"),
   antiagefacial: U("Voeg een collageenvliesmasker toe", "Add a collagen sheet mask", "Ajoutez un masque en tissu au collagène", "+€20"),

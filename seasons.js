@@ -4,6 +4,8 @@
    day itself (New Year and Chinese New Year run on ~2 weeks). In
    between, the season look is shown (autumn, winter, spring, summer).
    When two holidays overlap, the one whose date is closest wins.
+   When they fall on the SAME day (e.g. Sinte-Mette + Singles’ Day on 11 Nov) their
+   fun facts alternate, one after the other.
 
    To preview a look:  …/?thema=halloween   (any id below)
    or a date:          …/?themadag=2026-12-10
@@ -43,6 +45,16 @@ const SEASON_THEMES = [
       nl:["In Mechelen heet Sint-Maarten ‘Sinte-Mette’: op 11 november gaan kinderen zingend van deur tot deur voor een snoepje.","Sint-Maarten sneed zijn rode mantel in twee om een arme bedelaar warm te houden.","Volgens een oud verhaal verstopte Maarten zich tussen de ganzen toen hij bisschop moest worden — hun gesnater verraadde hem."],
       en:["In Mechelen, Saint Martin is called ‘Sinte-Mette’: on 11 November children go singing from door to door for sweets.","Saint Martin cut his red cloak in two to keep a poor beggar warm.","Legend says Martin hid among geese when he was to become bishop — their honking gave him away."],
       fr:["À Malines, saint Martin s’appelle « Sinte-Mette » : le 11 novembre, les enfants chantent de porte en porte pour des bonbons.","Saint Martin a coupé son manteau rouge en deux pour réchauffer un pauvre mendiant.","Selon la légende, Martin s’est caché parmi les oies pour ne pas devenir évêque — leurs cris l’ont trahi."] } },
+
+  /* Chinese Singles’ Day (11.11) falls on the same day as Sinte-Mette: same window, same look.
+     When themes share a day the app alternates their fun facts (see seasonFactItems in app.js). */
+  { id:"singlesday", date:"11-11", from:10, to:0, fx:"stars", fxItems:["✨","🛍️"],
+    deco:[{ e:"🧧", at:"tl" }, { e:"🛍️", at:"br" }, { e:"🎁", at:"bl" }],
+    hello:{ nl:"11.11 is ook Chinese Singles’ Day: een dag om jezelf te verwennen! 🧧", en:"11.11 is also Chinese Singles’ Day: a day to treat yourself! 🧧", fr:"Le 11.11, c’est aussi la Fête des célibataires chinoise : un jour pour se faire plaisir ! 🧧" },
+    facts:{
+      nl:["Singles’ Day (11.11) begon in de jaren 90 bij studenten van de universiteit van Nanjing. Vier enen lijken op vier losse stokjes: vier singles. 🧧","In 2009 maakte Alibaba er een online shoppingdag van: slechts 27 webwinkels deden mee en toch werd er meer dan 50 miljoen yuan uitgegeven. 🛍️","Oorspronkelijk trakteerden singles zichzelf die dag op een cadeautje. Een verzorging is ook een mooi cadeau voor jezelf. 💆"],
+      en:["Singles’ Day (11.11) began in the 1990s with students at Nanjing University. Four ones look like four lone sticks: four singles. 🧧","In 2009 Alibaba turned it into an online shopping day: only 27 online shops took part, yet more than 50 million yuan was spent. 🛍️","Originally, singles treated themselves to a present that day. A treatment is a lovely gift to yourself too. 💆"],
+      fr:["La Fête des célibataires (11.11) est née dans les années 1990 chez des étudiants de l’université de Nankin. Quatre « 1 » ressemblent à quatre bâtons isolés : quatre célibataires. 🧧","En 2009, Alibaba en a fait une journée d’achats en ligne : seulement 27 boutiques y ont participé, et pourtant plus de 50 millions de yuans ont été dépensés. 🛍️","À l’origine, les célibataires s’offraient un cadeau ce jour-là. Un soin est aussi un joli cadeau à soi-même. 💆"] } },
 
   { id:"sinterklaas", date:"12-06", from:24, to:0, fx:"sweets", fxItems:["🍬","🍪","⭐"],
     deco:[{ e:"🎁", at:"tl" }, { e:"🐴", at:"walk" }, { e:"👞", at:"bl" }, { e:"🥕", at:"br" }],

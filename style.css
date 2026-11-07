@@ -1055,7 +1055,7 @@ body{
 /* ===== Seasonal looks (v64) — colours per theme ===== */
 body{ --s-bg:#fbf5ea; --s-ink:var(--espresso); --s-accent:var(--gold); --s-line:var(--gold-light); }
 body[data-theme="halloween"]{ --s-bg:linear-gradient(135deg,#2b1638,#4a2350); --s-ink:#fff4e6; --s-accent:#ff8a1f; --s-line:#ff8a1f; }
-body[data-theme="sintemette"]{ --s-bg:linear-gradient(135deg,#fff3e0,#fde3c4); --s-accent:#c0392b; --s-line:#c0392b; }
+body[data-theme="sintemette"], body[data-theme="singlesday"]{ --s-bg:linear-gradient(135deg,#fff3e0,#fde3c4); --s-accent:#c0392b; --s-line:#c0392b; }
 body[data-theme="sinterklaas"]{ --s-bg:linear-gradient(135deg,#5a1820,#7a2a31); --s-ink:#fff8e7; --s-accent:#f1c75b; --s-line:#f1c75b; }
 body[data-theme="kerst"]{ --s-bg:linear-gradient(135deg,#143a28,#1d5236); --s-ink:#fffaf0; --s-accent:#e8c26a; --s-line:#c0392b; }
 body[data-theme="nieuwjaar"]{ --s-bg:linear-gradient(135deg,#14142e,#2a2a55); --s-ink:#fdf6e3; --s-accent:#e3bd72; --s-line:#e3bd72; }

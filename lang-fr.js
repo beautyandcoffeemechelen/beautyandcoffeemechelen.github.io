@@ -793,6 +793,8 @@
   "focus_need": "Répondez d’abord à la première question.",
   "focus_colours": "Des couleurs dans l’esprit {family} : par exemple {names}. Je vous montre les nuanciers au salon.",
   "focus_fallback": "Le soin qui correspond le mieux à votre envie ne vous convient pas pour l’instant (soleil, âge, allergie ou point de santé). Voici donc un soin sûr pour vous.",
+  "acne_derm_note": "Avez-vous une acné douloureuse (boutons profonds, inflammatoires ou nodules) ? Faites-la d’abord examiner par votre médecin généraliste ou un dermatologue : un soin du visage n’est alors pas la bonne première étape.",
+
   "why_focus": "Vous avez choisi {cat}, avec comme envie : {answers}. C’est pourquoi {treatment} vous convient le mieux.",
   "focus_advice_title": "Adapté à vos envies",
   "ingr_tab_stock": "📦 Stock",

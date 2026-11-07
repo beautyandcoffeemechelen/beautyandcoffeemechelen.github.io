@@ -428,11 +428,15 @@
     goTo("category");
   }
   // scores + notes + advice from the answers (used by generateMatch)
+  // v212: free text about acne / large pores / blackheads
+  function acneComplaint(txt){
+    return /acne|acné|puist|pistje|poriën|porien|pores|mee-?eter|zwarte puntjes|points? noirs?|blackhead|onzuiver|pimple|boutons?/i.test(String(txt || ""));
+  }
   function focusEvaluate(){
     const f = state.focus, g = f && FOCUS_GUIDES[f.cat];
     if (!g) return null;
     const month = new Date().getMonth() + 1;
-    const scores = {}, notes = [], tips = [], labels = [], mu = {};
+    const scores = {}, notes = [], tips = [], labels = [], mu = {}, block = [];
     let family = null;
     const addS = obj => Object.entries(obj || {}).forEach(([k, v]) => { scores[k] = (scores[k] || 0) + v; });
     g.questions.forEach(q => {
@@ -442,6 +446,8 @@
       else addS(o.s);
       if (o.ageNote && state.ageBracket !== "45plus") notes.push(fx(o.ageNote));
       if (o.tip) tips.push(fx(o.tip));
+      if (o.block) o.block.forEach(id => { if (!block.includes(id)) block.push(id); });   // never propose these (v212: Fill Me bij acne/poriën)
+      if (o.derm) notes.push(t("acne_derm_note", state.lang));                              // painful acne -> dermatologist (v212)
       Object.entries(o.mu || {}).forEach(([k, v]) => { mu[k] = (mu[k] || 0) + v; });
       if (o.family) family = o.family;
     });
@@ -458,7 +464,7 @@
       const c = FOCUS_COLOURS[fam];
       if (c) tips.push(t("focus_colours", state.lang).replace("{family}", fx(c.label)).replace("{names}", c.names.join(", ")));
     }
-    return { cat:f.cat, scores, notes, tips, labels, group: g.group };
+    return { cat:f.cat, scores, notes, tips, labels, group: g.group, block };
   }
   function focusGroupIds(group){
     if (group === "nails") return [...new Set([...(AVOID_GROUPS.hands || []), ...(AVOID_GROUPS.feet || [])])].filter(id => id !== "cateye");
@@ -1260,6 +1266,10 @@
       allergyExclude: allergyPicked().flatMap(a => a.exclude || []).concat(healthExtraExclude())
     };
     const focusEval = state.focus ? focusEvaluate() : null;
+    // v212: acne / large pores / blackheads (wish or free text) -> Fill Me Up is never proposed
+    const acneBlock = (focusEval && focusEval.block ? focusEval.block.slice() : []);
+    if (acneComplaint(state.complaintText) && !acneBlock.includes("fillme")) acneBlock.push("fillme");
+    if (acneBlock.length) mFlags.allergyExclude = (mFlags.allergyExclude || []).concat(acneBlock);
     let treatmentObj = null;
     if (focusEval){
       // the client's own wishes, then any treatment of that kind that is safe for her
@@ -1418,6 +1428,13 @@
     else if (w.category === "tea") dk = w.caffeine === "decaf" ? "why_drink_tea_decaf" : "why_drink_tea";
     else dk = w.caffeine === "decaf" ? "why_drink_decaf" : (drinkNotes ? "why_drink_coffee_notes" : "why_drink_coffee");
     parts.push(t(dk, L).replace("{drink}", drinkFull).replace("{notes}", (drinkNotes || "").toLowerCase()));
+    if (!fe && acneComplaint(state.complaintText)){            // free text about acne: same dermatologist advice
+      const n = t("acne_derm_note", L);
+      return `<div class="match-why">
+        <p class="match-why__title">💡 ${t("why_title", L)}</p>
+        <p class="match-why__text">${parts.join(" ")}</p>
+      </div><div class="match-focus"><p class="match-why__title">🎯 ${t("focus_advice_title", L)}</p><p class="match-focus__note">${n}</p></div>${allergyClientHtml(m, L)}`;
+    }
     const fa = fe && (fe.notes.length || fe.tips.length) ? `<div class="match-focus">
         <p class="match-why__title">🎯 ${t("focus_advice_title", L)}</p>
         ${fe.notes.map(n => `<p class="match-focus__note">${n}</p>`).join("")}
@@ -7663,7 +7680,7 @@
      Picks today's holiday look (or else the season) and decorates the
      app: a welcome card with a greeting + fun fact + soap-shop link,
      little figures in the corners and a gentle falling effect. */
-  const season = { theme:null, factIndex:0 };
+  const season = { theme:null, group:[], factIndex:0 };
   function seasonParam(name){ try { return new URLSearchParams(location.search).get(name); } catch(e){ return null; } }
   function seasonTodayKey(){
     const d = seasonParam("themadag");
@@ -7680,6 +7697,7 @@
     if (forced){ const f = SEASON_THEMES.find(x => x.id === forced); if (f) return { theme:f, year:Number(key.slice(0, 4)) }; }
     const y = Number(key.slice(0, 4));
     let best = null;
+    const cands = [];
     SEASON_THEMES.filter(x => !x.season).forEach(th => {
       [y - 1, y, y + 1].forEach(yy => {
         const md = typeof th.date === "function" ? th.date(yy) : th.date;
@@ -7687,10 +7705,15 @@
         const diff = seasonDays(key, `${yy}-${md}`);                     // > 0: still to come
         if (diff > (th.from || 0) || -diff > (th.to || 0)) return;
         const score = Math.abs(diff) + (diff >= 0 ? 0 : 0.5);              // a tie goes to the upcoming one
+        cands.push({ theme:th, year:yy, score });
         if (!best || score < best.score) best = { theme:th, year:yy, score };
       });
     });
-    if (best) return best;
+    if (best){
+      // themes on exactly the same day (e.g. Sinte-Mette + Singles’ Day, 11 Nov): their facts alternate (v212)
+      best.group = cands.filter(c => c.score === best.score && c.year === best.year).map(c => c.theme);
+      return best;
+    }
     const md = key.slice(5);
     const id = md >= "12-21" || md < "03-20" ? "winter" : md < "06-21" ? "lente" : md < "09-22" ? "zomer" : "herfst";
     return { theme:SEASON_THEMES.find(x => x.id === id), year:y };
@@ -7710,19 +7733,32 @@
     if (!pick || !pick.theme) return;
     const changed = !season.theme || season.theme.id !== pick.theme.id;
     season.theme = pick.theme; season.year = pick.year;
+    season.group = (pick.group && pick.group.length) ? pick.group : [pick.theme];
     document.body.dataset.theme = pick.theme.id;
-    if (changed){ season.factIndex = Math.floor(Math.random() * 3); buildSeasonDeco(); }
+    if (changed){ season.factIndex = Math.floor(Math.random() * Math.max(1, seasonFactItems(state.lang).length)); buildSeasonDeco(); }
     renderSeasonCard();
+  }
+  // fun facts of today's theme(s). When several themes share the day (Sinte-Mette + Singles’ Day on 11 Nov)
+  // the facts alternate: theme A fact 1, theme B fact 1, theme A fact 2, … (v212)
+  function seasonFactItems(L){
+    const group = (season.group && season.group.length) ? season.group : (season.theme ? [season.theme] : []);
+    const lists = group.map(th => ({ th, f:(th.facts && (th.facts[L] || th.facts.nl)) || [] }));
+    const out = [], max = Math.max(0, ...lists.map(x => x.f.length));
+    for (let i = 0; i < max; i++) lists.forEach(x => { if (i < x.f.length) out.push({ th:x.th, text:x.f[i] }); });
+    return out;
   }
   function renderSeasonCard(){
     const card = $("#seasonCard");
     if (!card || !season.theme) return;
-    const th = season.theme, L = state.lang;
-    const facts = (th.facts && (th.facts[L] || th.facts.nl)) || [];
-    const fact = facts.length ? seasonText({ [L]:facts[season.factIndex % facts.length] }, season.year) : "";
+    const L = state.lang;
+    const items = seasonFactItems(L);                                   // one theme: its facts; several themes on one day: alternating
+    const cur = items.length ? items[season.factIndex % items.length] : null;
+    const th = cur ? cur.th : season.theme;                             // greeting + icon follow the theme of the fact shown
+    const facts = items;
+    const fact = cur ? seasonText({ [L]:cur.text }, season.year) : "";
     const promo = seasonText(th.promo || SEASON_DEFAULT_PROMO, season.year);
     const icons = (th.deco || []).map(d => d.e).slice(0, 1).join(" ");
-    card.className = "season-card season-card--" + th.id;
+    card.className = "season-card season-card--" + season.theme.id;
     card.innerHTML = `
       <p class="season-card__hello"><span aria-hidden="true">${icons}</span> ${seasonText(th.hello, season.year)}</p>
       ${seasonDateHtml(th, season.year)}
