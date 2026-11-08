@@ -55,7 +55,7 @@ const PROTOCOLS = [
 ],
 [
 "Epileren/waxen + onzuiverheden verwijderen",
-"Filmhars: Monoï",
+"Filmhars (enkel bij waxen): Intimate Wax Depilève",
 "Pincet / hars + loupelamp + handschoenen + tissue + comedonenring"
 ],
 [
@@ -151,7 +151,7 @@ const PROTOCOLS = [
 ],
 [
 "Epileren/waxen + onzuiverheden verwijderen",
-"Filmhars: Monoï",
+"Filmhars (enkel bij waxen): Intimate Wax Depilève",
 "Pincet / hars + loupelamp + handschoenen + tissue, comedonenring"
 ],
 [
@@ -252,7 +252,7 @@ const PROTOCOLS = [
 ],
 [
 "Epileren/waxen + onzuiverheden verwijderen",
-"Filmhars: Monoï",
+"Filmhars (enkel bij waxen): Intimate Wax Depilève",
 "Pincet / hars + loupelamp + handschoenen + tissue + comedonenring"
 ],
 [
@@ -348,7 +348,7 @@ const PROTOCOLS = [
 ],
 [
 "Epileren/waxen + onzuiverheden verwijderen",
-"Filmhars: Monoï",
+"Filmhars (enkel bij waxen): Intimate Wax Depilève",
 "Pincet / hars + loupelamp + handschoenen + tissue + comedonenring"
 ],
 [
@@ -444,7 +444,7 @@ const PROTOCOLS = [
 ],
 [
 "Epileren/waxen + onzuiverheden verwijderen",
-"Filmhars: Monoï",
+"Filmhars (enkel bij waxen): Intimate Wax Depilève",
 "Pincet / hars + loupelamp + handschoenen + tissue + comedonenring"
 ],
 [
@@ -530,7 +530,7 @@ const PROTOCOLS = [
 ],
 [
 "Epileren/waxen + onzuiverheden verwijderen",
-"Filmhars: Monoï",
+"Filmhars (enkel bij waxen): Intimate Wax Depilève",
 "Pincet / hars + loupelamp + handschoenen + tissue + comedonenring"
 ],
 [
@@ -621,7 +621,7 @@ const PROTOCOLS = [
 ],
 [
 "Epileren/waxen + onzuiverheden verwijderen",
-"Filmhars: Monoï",
+"Filmhars (enkel bij waxen): Intimate Wax Depilève",
 "Pincet / hars + loupelamp + handschoenen + tissue + comedonenring"
 ],
 [
@@ -722,7 +722,7 @@ const PROTOCOLS = [
 ],
 [
 "Epileren + onzuiverheden verwijderen + neusharen/ oorharen knippen",
-"Filmhars: Monoï",
+"Filmhars (enkel bij waxen): Intimate Wax Depilève",
 "Pincet / hars + schaartje + loupelamp + handschoenen + tissue"
 ],
 [
@@ -916,7 +916,7 @@ const PROTOCOLS = [
 ],
 [
 "Epileren",
-"Ontsmettingsmiddel 80% (pincet)\nEv. filmhars: Monoï",
+"Ontsmettingsmiddel 80% (pincet)\nEv. filmhars: Intimate Wax Depilève",
 "Pincet/harsverwarmer + wattenschijf + loupelamp"
 ],
 [
@@ -1227,7 +1227,7 @@ const PROTOCOLS = [
 ],
 [
 "Epileren",
-"Ev. filmhars: Monoï",
+"Ev. filmhars: Intimate Wax Depilève",
 "Pincet/harsverwarmer + loupelamp"
 ],
 [
