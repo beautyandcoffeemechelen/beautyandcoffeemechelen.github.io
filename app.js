@@ -2141,17 +2141,9 @@
     return [...out];
   }
   /* v204: all gel/peel-off colours already known from the product notes (single source: ingredients.js) */
-  function popGelDefaults(){
+  function popGelDefaults(){   // v217: one entry per colour product (each colour is now its own product with variant + gelSeries)
     const S = (typeof SALON_PRODUCTS === "object" && SALON_PRODUCTS) || {}, out = [];
-    const note = id => (S[id] && S[id].note) ? (S[id].note.nl || "") : "", nm = id => (S[id] && S[id].name) ? (S[id].name.nl || "") : "";
-    const after = (txt, key) => { const i = txt.indexOf(key); return i < 0 ? [] : txt.slice(i + key.length).replace(/\.\s*$/, "").split(/,\s*/).map(x => x.trim()).filter(Boolean); };
-    const par = txt => { const m = txt.match(/\(([^)]*)\)/); return m ? m[1].replace(/^[^:]*:\s*/, "").split(/,\s*/).map(x => x.trim()).filter(Boolean) : []; };
-    after(note("gelcolour"), "HEMA-vrij: ").forEach(n => out.push(n + " (Cobra)"));
-    after(note("gelcolourhema"), "uitgehard: ").forEach(n => out.push(n + " (Cobra)"));
-    par(nm("gelgalaxy")).forEach(n => out.push(n + " (Cobra Galaxy)"));
-    par(nm("pgcateye")).forEach(n => out.push(n + " (Pink Gellac Cat Eye)"));
-    const kids = note("pgkids"), ki = kids.indexOf("zoals ");
-    if (ki >= 0) kids.slice(ki + 6).replace(/\.\s*$/, "").split(/,\s*|\s+en\s+/).map(x => x.trim()).filter(Boolean).forEach(n => out.push(n + " (Pink Gellac kids, peel-off)"));
+    Object.keys(S).forEach(id => { const p = S[id]; if (p && p.gelSeries && p.variant) out.push(p.variant + " (" + p.gelSeries + ")"); });
     return out.map(x => bhStr(x, 120)).filter(Boolean);
   }
   /* v205: groups per kind of treatment, nicer labels, and the keep-or-drop overview */
