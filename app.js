@@ -3162,9 +3162,12 @@
   function renderShopList(){
     const out = $("#shopList"); if (!out) return;
     const salon = shopSalon(), vis = shopList().filter(i => salon || i.status !== "concept");
-    const shown = vis.filter(i => (shop.filter === "all" || i.cat === shop.filter) && shopMatches(i)).sort((x, y) => x.name.localeCompare(y.name, "nl"));
-    if (!shown.length){ out.innerHTML = `<p class="step__hint">${esc(vis.length ? sh("none") : sh("empty"))}</p>`; return; }
-    out.innerHTML = SHOP_CATS.map(c => {
+    const ed = salon && shop.edit ? shopList().find(x => x.id === shop.edit) : null;   // v218: the product being edited is always shown first, whatever the filters
+    const shown = vis.filter(i => !(ed && i.id === ed.id) && (shop.filter === "all" || i.cat === shop.filter) && shopMatches(i)).sort((x, y) => x.name.localeCompare(y.name, "nl"));
+    const hidden = vis.length - shown.length - (ed ? 1 : 0), edHtml = ed ? `<section class="shop-group"><h3 class="shop-group__t">✏️ Je bewerkt dit product</h3>${shopCard(ed, salon)}</section>` : "";
+    const hint = (salon && hidden > 0 && (shop.q || shop.tag || shop.skin || shop.pmin || shop.pmax || shop.filter !== "all")) ? `<p class="step__hint">ℹ️ ${hidden} product(en) verborgen door de filters. Tik op “${esc(sh("clear"))}” om alles te zien.</p>` : "";
+    if (!shown.length){ out.innerHTML = edHtml + hint + (ed ? "" : `<p class="step__hint">${esc(vis.length ? sh("none") : sh("empty"))}</p>`); return; }
+    out.innerHTML = edHtml + hint + SHOP_CATS.map(c => {
       const items = shown.filter(i => i.cat === c); if (!items.length) return "";
       let body;
       if (c === "verzorging"){   // sub-division by skin function
@@ -3252,7 +3255,7 @@
     if (a === "reset"){ shop.q = ""; shop.tag = ""; shop.skin = ""; shop.pmin = ""; shop.pmax = ""; shop.filter = "all"; return renderShop(); }
     if (a === "publish") return void shopPublish();
     if (a === "discard"){ if (window.confirm(sh("discq"))){ shop.draft = null; try { localStorage.removeItem(SHOP_DRAFT); } catch(e){} shop.edit = ""; renderShop(); } return; }
-    if (a === "add"){ const d = shopDraft(), nid = "nieuw-" + Date.now().toString(36); d.unshift({ id: nid, name: sh("newp"), desc: "", ingr: "", cat: shop.filter === "all" ? "verzorging" : shop.filter, skin: "", tags: [], photos: [], status: "concept", price: null, qty: null, photo: "" }); shop.edit = nid; shopSaveDraft(); return renderShop(); }
+    if (a === "add"){ const d = shopDraft(), nid = "nieuw-" + Date.now().toString(36); d.unshift({ id: nid, name: sh("newp"), desc: "", ingr: "", cat: shop.filter === "all" ? "verzorging" : shop.filter, skin: "", tags: [], photos: [], status: "concept", price: null, qty: null, photo: "" }); shop.edit = nid; shop.q = ""; shop.tag = ""; shop.skin = ""; shop.pmin = ""; shop.pmax = ""; shopSaveDraft(); renderShop(); const ec = $("#shopList"); if (ec && ec.scrollIntoView) ec.scrollIntoView({ block:"start" }); return; }
     const d = shopDraft(), it = d.find(x => x.id === id);
     if (a === "cancel"){ drClear("shop-edit:" + shop.edit); shop.edit = ""; return renderShop(); }
     if (!it) return;
@@ -7555,7 +7558,7 @@
     const late = !expired && kind !== "homemade" && today > book ? `<p class="advent-voucher__late">${advFill(t("adv_late_note", state.lang), door)}</p>` : "";
     const stockNote = door.replacedFrom ? `<p class="advent-voucher__limited">🔄 ${t("adv_repl_note", state.lang).replace("{item}", advDoorText(ADVENT.items[door.replacedFrom] || {}, state.lang))}</p>`
       : door.soldOut ? `<p class="advent-voucher__soldout">😔 ${t("adv_soldout_banner", state.lang)}</p>`
-      : (door.itemStock != null ? `<p class="advent-voucher__limited">${t("adv_limited", state.lang).replace("{n}", door.itemStock)}</p>` : "");
+      : "";   // v218: customers no longer see how many are left (Sandra gives alternatives)
     const boxHtml = door.photo ? `<img class="bc-voucher__photo" src="${door.photo}" data-fallback="adv" data-emoji="${door.type === "discount" ? (door.value || "%") : door.icon}" alt="">`
       : door.type === "discount" ? `<b>${door.value || ""}</b>`
       : door.type === "extra" ? `<i aria-hidden="true">${door.icon}</i><small>${t("adv_free", state.lang)}</small>`
