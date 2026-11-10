@@ -1,7 +1,37 @@
 {
  "v": 1,
- "u": "2026-11-07T13:18:45.689Z",
+ "u": "2026-11-10T10:33:30.357Z",
  "items": [
+  {
+   "id": "nieuw-mwajmk4j",
+   "name": "Autumn Elegance",
+   "desc": "Een luxueus, handgebonden herfstboeket van ruim 35–38 stelen dat dankzij de ambachtelijke korenschooftechniek volledig zelfstandig rechtop blijft staan. Geen vaas nodig; instant najaarswarmte op je dressoir, tafel of balie.",
+   "ingr": "",
+   "cat": "boeketten",
+   "skin": "",
+   "tags": [],
+   "photos": [
+    "assets/verkoop/nieuw-mwajmk4j-x0-mwajxwpa.jpg"
+   ],
+   "status": "beschikbaar",
+   "price": 70,
+   "qty": 1,
+   "photo": "assets/verkoop/nieuw-mwajmk4j-mwajxuqh.jpg"
+  },
+  {
+   "id": "nieuw-mwafqk92",
+   "name": "Burgundy Embrace",
+   "desc": "Haal de warme, ontspannen sfeer van Beauty & Coffee in huis met Burgundy Embrace. Dit unieke, staande droogboeket is door mij met veel liefde en zorg zelf samengesteld. De combinatie van diepe burgundytinten, warme natuurtinten en speelse sprieten (zoals hazenstaartjes en tarwe) vormt een stijlvolle eyecatcher voor elk interieur. Het boeket is stevig gebonden met jute touw en is zo ontworpen dat het zonder vaas kan staan op een tafel, schap of dressoir.",
+   "ingr": "",
+   "cat": "boeketten",
+   "skin": "",
+   "tags": [],
+   "photos": [],
+   "status": "beschikbaar",
+   "price": 16,
+   "qty": 1,
+   "photo": "assets/verkoop/nieuw-mwafqk92-mwajxy9n.jpg"
+  },
   {
    "id": "nieuw-mvxb7dv2",
    "name": "Refining Retinol Fluid 7x 2ml",
@@ -229,22 +259,22 @@
    "name": "Sweet Blossom",
    "desc": "Een speelse combinatie van uitgesproken fuchsia en dieprode accenten, zachte naturelle granen en luchtig gipskruid. Prachtig om vrij neer te zetten op tafel of een opvallend plekje te geven. Duurzaam, uniek en een echte blikvanger! ✨",
    "ingr": "",
-   "cat": "overig",
-   "skin": "algemeen",
+   "cat": "boeketten",
+   "skin": "",
    "tags": [],
    "photos": [],
    "status": "beschikbaar",
    "price": 22,
    "qty": 1,
-   "photo": "assets/verkoop/nieuw-mvv0lfbn-mvv0nsjl.jpg"
+   "photo": "assets/verkoop/nieuw-mvv0lfbn-mwajy00v.jpg"
   },
   {
    "id": "nieuw-mvv0efbz",
    "name": "Soft Romance",
    "desc": "Breng een zachte, dromerige sfeer in huis met dit handgemaakte droogbloemenboeket. Gevuld met speelse roze tinten, vrolijke fuchsia accenten, luchtig gipskruid en elegante graansoorten. Prachtig om neer te zetten of op te hangen. Duurzaam, uniek en direct klaar voor een mooi plekje! ✨",
    "ingr": "",
-   "cat": "overig",
-   "skin": "algemeen",
+   "cat": "boeketten",
+   "skin": "",
    "tags": [],
    "photos": [],
    "status": "beschikbaar",
@@ -273,14 +303,14 @@
    "name": "Autumn Spice",
    "desc": "Breng de warme sfeer van de herfst in huis met dit handgemaakte droogbloemenboeket. Gevuld met sfeervolle oranje en bronskleurige accenten, robuuste granen en fijne pluimpjes. Prachtig om neer te zetten of op te hangen. Duurzaam, uniek en direct klaar voor een mooi plekje! ✨",
    "ingr": "",
-   "cat": "overig",
-   "skin": "algemeen",
+   "cat": "boeketten",
+   "skin": "",
    "tags": [],
    "photos": [],
    "status": "beschikbaar",
    "price": 25,
    "qty": 1,
-   "photo": "assets/verkoop/nieuw-mvs6n65d-mvuvlt8e.jpg"
+   "photo": "assets/verkoop/nieuw-mvs6n65d-mwajy21y.jpg"
   },
   {
    "id": "amandelmelkzeep",
