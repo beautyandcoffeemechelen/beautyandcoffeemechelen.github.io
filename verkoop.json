@@ -1,11 +1,29 @@
 {
  "v": 1,
- "u": "2026-11-10T10:33:30.357Z",
+ "u": "2026-11-10T11:28:25.535Z",
  "items": [
+  {
+   "id": "nieuw-mwakzckt",
+   "name": "Amber Glow",
+   "desc": "Breng de pure warmte van het seizoen in huis met het handgebonden droogbloemarrangement Amber Glow. Deze unieke creatie combineert warme oranje tinten, stralende herfstgebleekte accenten en natuurlijke granen met een sfeervolle, najaarachtige uitstraling.\nWat dit arrangement bijzonder maakt, is het slimme en unieke ontwerp: dankzij een ambachtelijke spiraalbinding van ruim 36 stelen vormt de basis onderaan een stevige piramide. Hierdoor heeft het boeket geen vaas nodig en blijft het volledig zelfstandig en stabiel rechtop staan op elk dressoir, tafel of balie. Een duurzaam, 100% onderhoudsvrij interieurobject waar je jarenlang zorgeloos van geniet.",
+   "ingr": "",
+   "cat": "boeketten",
+   "skin": "",
+   "tags": [],
+   "photos": [
+    "assets/verkoop/nieuw-mwakzckt-x0-mwalwkhc.jpg",
+    "assets/verkoop/nieuw-mwakzckt-x1-mwalwmfk.jpg",
+    "assets/verkoop/nieuw-mwakzckt-x2-mwalwo64.jpg"
+   ],
+   "status": "beschikbaar",
+   "price": 25,
+   "qty": 1,
+   "photo": "assets/verkoop/nieuw-mwakzckt-mwalwitw.jpg"
+  },
   {
    "id": "nieuw-mwajmk4j",
    "name": "Autumn Elegance",
-   "desc": "Een luxueus, handgebonden herfstboeket van ruim 35–38 stelen dat dankzij de ambachtelijke korenschooftechniek volledig zelfstandig rechtop blijft staan. Geen vaas nodig; instant najaarswarmte op je dressoir, tafel of balie.",
+   "desc": "Een luxueus, handgebonden herfstboeket van ruim 37 stelen dat dankzij de ambachtelijke korenschooftechniek volledig zelfstandig rechtop blijft staan. Geen vaas nodig; instant najaarswarmte op je dressoir, tafel of balie.",
    "ingr": "",
    "cat": "boeketten",
    "skin": "",
