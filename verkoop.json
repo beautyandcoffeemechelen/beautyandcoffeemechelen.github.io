@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-11T18:46:36.971Z",
+ "u": "2026-11-11T19:01:04.619Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -15,6 +15,20 @@
   "algemeen"
  ],
  "items": [
+  {
+   "id": "nieuw-mwch3mx2",
+   "name": "Gehwol Fusskraft Intensive Cream (Blauw)",
+   "desc": "INTENSIEVE CRÈME met natuurlijke lanoline maakt uw voeten merkbaar zachter en soepeler. * Rijke, hydraterende formule voor een soepele en gladde huid * Aloë vera en ureum zorgen voor vocht * De natuurlijke etherische oliën van rozemarijn, bergdennen en lavendel stimuleren en geven de INTENSIVE CREAM zijn karakteristieke aroma * Desinfecterende actieve ingrediënten beschermen betrouwbaar tegen voetschimmel en jeuk – zelfs tussen de tenen. Dagelijks  op de voeten aanbrengen, ook tussen de tenen verdelen en zachtjes masseren.",
+   "ingr": "",
+   "cat": "verzorging",
+   "skin": "algemeen",
+   "tags": [],
+   "photos": [],
+   "status": "beschikbaar",
+   "price": 12.6,
+   "qty": 1,
+   "photo": "assets/verkoop/nieuw-mwch3mx2-mwchilz8.jpg"
+  },
   {
    "id": "nieuw-mwcgxbuj",
    "name": "Deep Xpress Hydro Mask 75ml",
