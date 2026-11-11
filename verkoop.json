@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-11T12:00:36.711Z",
+ "u": "2026-11-11T12:03:37.730Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -15,6 +15,20 @@
   "algemeen"
  ],
  "items": [
+  {
+   "id": "nieuw-mwc2js8m",
+   "name": "Intense Clearing Mask 75ml",
+   "desc": "Reinigingsgel om de onzuivere huid mild te reinigen . De milde reinigingsgel verwijdert vuil en overtollig talg, en behoudt het vochtgehalte van de huid. Aangeraden ook bij anti-ageing.",
+   "ingr": "• Equal-Refining Complex: De combinatie van oleanolzuur en het extract uit de schors van Enantia Chlorantha vertraagt de groei van sebocyten. De talgklieren worden in een ruststand gebracht waardoor de vettige glans na 28 dagen met 21,7% en de poriëngrootte met 16% worden gereduceerd\n\n• Kaolien: Witte porseleinaarde; zeer fijnkorrelige, sterk talgabsorberende werking, reinigend en matterend\n\n• Extract van aloë vera: Kalmerend, zuiverend, hydraterend\n\n• Bisabolol: Voorkomt ontstekingen\n\n• Menthol: Zorgt voor een verkoelend, verfrissend effect op de huid\n\n• Glycerine: Conditioner voor de huid. Glycerine werkt hygroscopisch en bindt water. Daardoor wordt het vochtgehalte van de huid verhoogd.",
+   "cat": "verzorging",
+   "skin": "vette-huid",
+   "tags": [],
+   "photos": [],
+   "status": "beschikbaar",
+   "price": 39.9,
+   "qty": 1,
+   "photo": "assets/verkoop/nieuw-mwc2js8m-mwc2lt1a.jpg"
+  },
   {
    "id": "nieuw-mwc2epse",
    "name": "AHA Face Cream 50ml",
