@@ -1,6 +1,19 @@
 {
  "v": 1,
- "u": "2026-11-10T11:29:39.092Z",
+ "u": "2026-11-11T07:52:09.932Z",
+ "cats": [
+  "verzorging",
+  "zepen",
+  "boeketten",
+  "overig"
+ ],
+ "skins": [
+  "anti-aging",
+  "gevoelige-huid",
+  "hydratatie",
+  "vette-huid",
+  "algemeen"
+ ],
  "items": [
   {
    "id": "nieuw-mwakzckt",
