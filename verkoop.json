@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-11T18:30:15.447Z",
+ "u": "2026-11-11T18:33:09.440Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -15,6 +15,20 @@
   "algemeen"
  ],
  "items": [
+  {
+   "id": "nieuw-mwcgf59d",
+   "name": "Soft Cleansing Mousse 150ml",
+   "desc": "Zacht reinigingsschuim voor een grondige reiniging van de meest gevoelige huid.\n\nHet zachte, pH-neutrale reinigingsschuim met allantoïne verzacht de geïrriteerde huid en gaat roodheid van de huid tegen. \n\nTOEPASSING\n’s Morgens en ’s avonds een kleine hoeveelheid schuim (2-3 pompjes) met ronddraaiende bewegingen over het gezicht, de hals en het decolleté verdelen. Daarna grondig afspoelen met lauw water en de huid tonifiëren met de Soft Soothing Tonic.",
+   "ingr": "• Allantoïne: Kalmeert de geïrriteerde huid en bestrijdt roodheden.",
+   "cat": "verzorging",
+   "skin": "gevoelige-huid",
+   "tags": [],
+   "photos": [],
+   "status": "beschikbaar",
+   "price": 37.95,
+   "qty": 1,
+   "photo": "assets/verkoop/nieuw-mwcgf59d-mwcgiqo2.jpg"
+  },
   {
    "id": "nieuw-mwcgcuif",
    "name": "Soft Soothing Tonic 200ml",
