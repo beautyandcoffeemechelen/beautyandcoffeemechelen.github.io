@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-11T11:53:02.901Z",
+ "u": "2026-11-11T11:57:02.830Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -15,6 +15,20 @@
   "algemeen"
  ],
  "items": [
+  {
+   "id": "nieuw-mwc28kmo",
+   "name": "Purifying Cleansing Gel 200 ml",
+   "desc": "Reinigingsgel om de onzuivere huid mild te reinigen . De milde reinigingsgel verwijdert vuil en overtollig talg, en behoudt het vochtgehalte van de huid. Aangeraden ook bij anti-ageing.",
+   "ingr": "• Decylglucoside (suikertenside): Wasactieve grondstof op plantaardige basis voor een milde reiniging van de huid\n\n• Panthenol: Provitamine B5. Panthenol bezit hydraterende en ontstekingsremmende eigenschappen. Dat voorkomt roodheid. Bovendien bezit panthenol kalmerende eigenschappen",
+   "cat": "verzorging",
+   "skin": "vette-huid",
+   "tags": [],
+   "photos": [],
+   "status": "beschikbaar",
+   "price": 25.99,
+   "qty": 1,
+   "photo": ""
+  },
   {
    "id": "nieuw-mwakzckt",
    "name": "Amber Glow",
