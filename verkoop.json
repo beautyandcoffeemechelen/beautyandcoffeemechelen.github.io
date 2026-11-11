@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-11T18:41:12.248Z",
+ "u": "2026-11-11T18:44:07.564Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -15,6 +15,20 @@
   "algemeen"
  ],
  "items": [
+  {
+   "id": "nieuw-mwcgu2je",
+   "name": "Mild Face Rub 50ml",
+   "desc": "Een- of tweemaal per week heeft de huid een peeling nodig om dode huidcellen los te maken om de huid klaar te maken voor opname van hoogwaardige en voedende oliën  en actieve bestanddelen. Onzuiverheden worden tegengegaan, het huidoppervlak wordt verfijnd en de daaropvolgende verzorging kan veel beter door de huid worden opgenomen. Het resultaat: De huid ziet er rozig fris uit en voelt glad en soepel aan.\nTOEPASSING\nMild Face Rub een- of tweemaal per week aanbrengen op de gereinigde huid van gezicht en decolleté. Enkele minuten rustig inmasseren met vochtige vingers; daarna grondig afspoelen met warm water. Gebruik vervolgens Radiant Firming Tonic. Ideaal ter voorbereiding op een serum.",
+   "ingr": "• Peelingkorreltjes van jojobawas: Gepolijste korreltjes die na het aanbrengen smelten op de warme huid\n\n• Avocado-olie: Rijk aan natuurlijke vetzuren en vitamine A, E en D; verzorgt en beschermt de huid al tijdens de reiniging en laat een soepel en glad gevoel na.",
+   "cat": "verzorging",
+   "skin": "hydratatie",
+   "tags": [],
+   "photos": [],
+   "status": "beschikbaar",
+   "price": 27,
+   "qty": 1,
+   "photo": "assets/verkoop/nieuw-mwcgu2je-mwcgwudg.jpg"
+  },
   {
    "id": "nieuw-mwcgqadx",
    "name": "Mild Creamy Cleanser 200ml",
