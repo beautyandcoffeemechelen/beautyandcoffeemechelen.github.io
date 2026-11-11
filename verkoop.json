@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-11T11:57:02.830Z",
+ "u": "2026-11-11T11:58:01.140Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -27,7 +27,7 @@
    "status": "beschikbaar",
    "price": 25.99,
    "qty": 1,
-   "photo": ""
+   "photo": "assets/verkoop/nieuw-mwc28kmo-mwc2el98.jpg"
   },
   {
    "id": "nieuw-mwakzckt",
