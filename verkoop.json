@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-11T18:44:07.564Z",
+ "u": "2026-11-11T18:46:36.971Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -15,6 +15,20 @@
   "algemeen"
  ],
  "items": [
+  {
+   "id": "nieuw-mwcgxbuj",
+   "name": "Deep Xpress Hydro Mask 75ml",
+   "desc": "De gedehydrateerde huid wordt intensief en langdurig van meer vocht voorzien. De huid wordt doeltreffend beschermd tegen uitdroging door het innovatieve Hydro Express Complex, dat een onzichtbaar beschermend moleculair netwerk vormt dat de huid continu hydrateert en beschermt. Uw huid ziet er fris en glad uit. Binnen 30 minuten na het aanbrengen neemt het huideigen vochtgehalte met 25% toe en dit houdt tot 48 uur aan.",
+   "ingr": "• Hydro Express Complex: Moleculair netwerk van natuurlijke biopolymeren (hyaluronzuur, alginaat en pullulan) met sterk geconcentreerde hydraterende actieve stoffen (glycerine, serine, trehalose en ureum). De actieve stoffen worden geleidelijk aan afgegeven aan de hoornlaag. De effectiviteit van Hydro Express Complex is aangetoond: Onmiddellijke verbetering – verhoogt het vochtgehalte na 30 minuten met 25%. Langdurige bescherming – tot 48 uur hydratatie, zelfs na slechts één toepassing. Geoptimaliseerd vochtvasthoudend vermogen – verlengt de hydratatie tot wel 5 dagen na gebruik\n\n• Pullulan: Deze natuurlijke polysacharide wordt verkregen door fermentatie met behulp van een schimmel (Aureobasidium pullulans). Hij bestaat uit glucoside-eenheden en is goed oplosbaar in water. Het grote voordeel van pullulan is het vermogen resistente elastische lagen te vormen.",
+   "cat": "verzorging",
+   "skin": "hydratatie",
+   "tags": [],
+   "photos": [],
+   "status": "beschikbaar",
+   "price": 34,
+   "qty": 1,
+   "photo": "assets/verkoop/nieuw-mwcgxbuj-mwch01pz.jpg"
+  },
   {
    "id": "nieuw-mwcgu2je",
    "name": "Mild Face Rub 50ml",
