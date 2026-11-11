@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-11T07:55:30.881Z",
+ "u": "2026-11-11T11:53:02.901Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -75,7 +75,7 @@
    ],
    "photos": [],
    "status": "beschikbaar",
-   "price": 28,
+   "price": 29,
    "qty": 3,
    "photo": "assets/verkoop/nieuw-mvxb7dv2-mvxb9sym.jpg"
   },
@@ -223,7 +223,7 @@
    "tags": [],
    "photos": [],
    "status": "beschikbaar",
-   "price": 15,
+   "price": 15.5,
    "qty": 2,
    "photo": "assets/verkoop/nieuw-mvvfs8e4-mvvfw2mn.jpg"
   },
