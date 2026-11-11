@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-11T18:27:39.598Z",
+ "u": "2026-11-11T18:30:15.447Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -15,6 +15,20 @@
   "algemeen"
  ],
  "items": [
+  {
+   "id": "nieuw-mwcgcuif",
+   "name": "Soft Soothing Tonic 200ml",
+   "desc": "Het alcoholvrije gezichtswater met Sensitive Complex en allantoïne. Soft Soothing Tonic is speciaal ontwikkeld voor de huid die gevoelig is voor roodheden en vormt de perfecte afsluiting voor een grondige gezichtsreiniging! Het verzacht huidirritaties al tijdens de gezichtsreiniging.\n\nTOEPASSING\nDe Soft Soothing Tonic na elke reiniging met de Soft Cleansing Mousse aanbrengen met behulp van een wattenschijfje.  Zacht verdelen over het gezicht, de hals en het decolleté.\n\nTip: verkoelt, verzacht en verfrist de huid na het ontharen.",
+   "ingr": "Sensitive Complex: Actieve plantenextracten uit Aziatische waternavel, muisdoorn, goudsbloem, paardenkastanjes en zoethout verzachten de irritatie van de huid (roodheid, zwellingen, een trekkerig gevoel)\n\n• Allantoïne: Kalmeert de geïrriteerde huid en bestrijdt roodheden",
+   "cat": "verzorging",
+   "skin": "gevoelige-huid",
+   "tags": [],
+   "photos": [],
+   "status": "beschikbaar",
+   "price": 29.99,
+   "qty": 1,
+   "photo": "assets/verkoop/nieuw-mwcgcuif-mwcgezyh.jpg"
+  },
   {
    "id": "nieuw-mwcg94bs",
    "name": "Instant Soothing Mask 75ml",
