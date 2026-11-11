@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-11T11:58:01.140Z",
+ "u": "2026-11-11T12:00:36.711Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -15,6 +15,20 @@
   "algemeen"
  ],
  "items": [
+  {
+   "id": "nieuw-mwc2epse",
+   "name": "AHA Face Cream 50ml",
+   "desc": "Crème met fruitzuren voor de vette, onzuivere huid.\n\nCrème met fruitzuren voor de vette, onzuivere huid. Verwijdert afgestorven huidcellen, vermindert mee-eters en verfijnt de poriën. Met fruitzuren en hydraterend suikercomplex.",
+   "ingr": "• Glycolzuur: Komt op natuurlijke wijze in o.a. onrijpe wijndruiven, suikerrietsap en suikerbieten voor. Heeft een keratolytische werking\n\n• Appelzuur: Te vinden in onrijpe appels, kruisbessen en andere vruchten; ook in hogere concentraties heeft ze een licht keratolytische werking\n\n• Wijnzuur: Wijnzuur en haar zouten zijn rijkelijk te vinden in de wijnstokken, druiven en bladeren van de wijngaard; heeft een licht keratolytische werking\n\n• Citroenzuur: Komt in citroen, maar ook in vele andere vruchten voor; heeft een keratolytische werking\n\n• Saccharide isomerate: Biedt hydratatie van natuurlijke suikers. Deze vormt met het keratine (hoornsubstantie) van de huid een natuurlijke binding en wordt daarom beschouwd als een “vochtmagneet”",
+   "cat": "verzorging",
+   "skin": "vette-huid",
+   "tags": [],
+   "photos": [],
+   "status": "beschikbaar",
+   "price": 39.99,
+   "qty": 1,
+   "photo": "assets/verkoop/nieuw-mwc2epse-mwc2hwyh.jpg"
+  },
   {
    "id": "nieuw-mwc28kmo",
    "name": "Purifying Cleansing Gel 200 ml",
