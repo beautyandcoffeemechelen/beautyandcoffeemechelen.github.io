@@ -1978,7 +1978,7 @@ const BOOKING_SLOTS = [
    CACHE_NAME in sw.js too).
    SOCIAL_LINKS: leave a link "" to hide that button.
    ============================================================ */
-const APP_VERSION = "v218 · 08/11/2026";
+const APP_VERSION = "v220 · 08/11/2026";
 /* Newsletter: paste the address of the newsletter page on the WordPress
    site (the page with the Subscribe block), e.g.
    "https://sanmakeupstudio.wordpress.com/nieuwsbrief/".
@@ -2192,10 +2192,10 @@ const ADVENT = {
       product:"Bio Balance Algoherbal Ageing (poedermasker + Essence Gel) + Hya-Lift+ serum",
       ingredients:"Poeder (Lavender): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Lavandula Angustifolia (Lavender) Flower, Sodium Phosphate, CI 42090, Lavandula Angustifolia (Lavender) Oil. — Essence Gel (Lavender & Caviar): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Caviar Extract, Hamamelis Virginiana Extract, Lavandula Angustifolia Extract, Carbomer, Triethanolamine, Hyaluronic Acid, Hydrolyzed Collagen, Allantoin, PEG-40 Hydrogenated Castor Oil, Parfum, CI 42090, Phenoxyethanol, Limonene, Linalool, Geraniol, Alpha-Isomethyl Ionone, CI 16035",
       nl:"Gratis anti-aging peel-off masker", en:"Free anti-ageing peel-off mask", fr:"Masque peel-off anti-âge offert" },
-    peelsens: { type:"extra", icon:"🌹", stock:1, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
-      highlights:{ nl:"Met rozenblaadjes, rozenolie, aloë vera, komkommer en hyaluronzuur — kalmeert, hydrateert en verzacht de gevoelige huid. Vooraf een mild hyaluronzuurserum zonder parfum.", en:"With rose petals, rose oil, aloe vera, cucumber and hyaluronic acid — calms, hydrates and softens sensitive skin. First a mild, fragrance-free hyaluronic acid serum.", fr:"Aux pétales de rose, à l'huile de rose, à l'aloe vera, au concombre et à l'acide hyaluronique — apaise, hydrate et adoucit les peaux sensibles. D'abord un sérum doux à l'acide hyaluronique, sans parfum." },
-      product:"Bio Balance Algoherbal Sensitive – Rose (poedermasker + Essence Gel) + Hya-Lift+ serum",
-      ingredients:"Poeder (Rose): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Rosa Centifolia Flower, Sodium Phosphate, CI 16035, Rosa Rugosa Flower Oil. — Essence Gel (Rose): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Cucumis Sativus Fruit Extract, Hydrolyzed Collagen, Carbomer, Triethanolamine, PEG-40 Hydrogenated Castor Oil, Hyaluronic Acid, Parfum, Disodium EDTA, Phenoxyethanol, Limonene, Linalool, Alpha-Isomethyl Ionone, CI 16035",
+    peelsens: { type:"extra", icon:"🌿", stock:5, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Een zacht, kalmerend en verfrissend peel-off masker voor de gevoelige huid: het hydrateert, verzacht en laat je huid tot rust komen. Vooraf een mild hyaluronzuurserum zonder parfum.", en:"A gentle, soothing and refreshing peel-off mask for sensitive skin: it hydrates, softens and lets your skin calm down. First a mild fragrance-free hyaluronic serum.", fr:"Un masque peel-off doux, apaisant et rafraîchissant pour les peaux sensibles : il hydrate, adoucit et laisse la peau se calmer. D'abord un sérum doux à l'acide hyaluronique sans parfum." },
+      product:"Peel-off voor de gevoelige huid (Sandra kiest: Bio Balance Sensitive Rose of Peel-Off Algenmasker Bosbessen) + Hya-Lift+ serum",
+      ingredients:"Je krijgt een van deze twee zachte maskers. Rozenversie: Poeder (Rose): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Rosa Centifolia Flower, Sodium Phosphate, CI 16035, Rosa Rugosa Flower Oil. — Essence Gel (Rose): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Cucumis Sativus Fruit Extract, Hydrolyzed Collagen, Carbomer, Triethanolamine, PEG-40 Hydrogenated Castor Oil, Hyaluronic Acid, Parfum, Disodium EDTA, Phenoxyethanol, Limonene, Linalool, Alpha-Isomethyl Ionone, CI 16035 Bosbessenversie: Diatomaceous Earth, Algin, Calcium Sulfate, Tetrasodium Pyrophosphate, Sodium Ascorbate, Maltodextrin, Vaccinium Myrtillus Fruit Extract, Ormenis Multicaulis Oil, Limonene",
       nl:"Gratis peel-off masker voor de gevoelige huid", en:"Free peel-off mask for sensitive skin", fr:"Masque peel-off pour peaux sensibles offert" },
     collagen: { type:"extra", photo:"assets/advent/collagen-ill.webp", icon:"🫧", stock:4, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Met marien collageen en haver — liftend en verstevigend, voor een zichtbaar gladdere huid.", en:"With marine collagen and oat — lifting and firming, for visibly smoother skin.", fr:"Au collagène marin et à l'avoine — liftant et raffermissant, pour une peau visiblement plus lisse." },
@@ -2208,10 +2208,8 @@ const ADVENT = {
       ingredients:"Aqua, Glycerin, Xanthan Gum, Mica, Chondrus Crispus Powder, Titanium Dioxide, Chlorphenesin, Glucomannan, Algin, Methylparaben, Potassium Chloride, Sodium Hyaluronate, Hydrolyzed Collagen, Butylene Glycol, Centella Asiatica Extract, Polygonum Cuspidatum Root Extract, Scutellaria Baicalensis Root Extract, Camellia Sinensis Leaf Extract, Glycyrrhiza Glabra (Licorice) Root Extract, Chamomilla Recutita (Matricaria) Flower Extract, Rosmarinus Officinalis (Rosemary) Leaf Extract, Iron Oxides, Citric Acid, Potassium Citrate, PEG-40 Hydrogenated Castor Oil, Fragrance",
       nl:"Gratis gouden collageenmasker", en:"Free gold collagen mask", fr:"Masque au collagène doré offert" },
     spamanipedi: { type:"extra", icon:"💅", with:{ nl:"manicure of pedicure", en:"manicure or pedicure", fr:"manucure ou pédicure" },
-      highlights:{ nl:"Kies zelf: een SPA-manicure bij je manicure of een SPA-pedicure bij je pedicure, met peeling, masker, pakking en massage. Per dag kies je één SPA-behandeling.",
-                   en:"Your choice: a SPA manicure with your manicure or a SPA pedicure with your pedicure, with peeling, mask, wrap and massage. You can choose one SPA treatment per day.",
-                   fr:"À vous de choisir : une manucure SPA avec votre manucure ou une pédicure SPA avec votre pédicure, avec peeling, masque, enveloppement et massage. Une seule prestation SPA par jour." },
-      nl:"Gratis SPA-manicure of SPA-pedicure (1 SPA-behandeling per dag)", en:"Free SPA manicure or SPA pedicure (1 SPA treatment per day)", fr:"Manucure SPA ou pédicure SPA offerte (1 soin SPA par jour)" },
+      highlights:{ nl:"Jij kiest wat je wenst: je manicure óf je pedicure wordt een SPA-behandeling, met peeling, masker, pakking en massage. Per dag kan je één SPA-behandeling nemen.", en:"You choose what you wish: your manicure or your pedicure becomes a SPA treatment, with peeling, mask, wrap and massage. You can have one SPA treatment per day.", fr:"À vous de choisir : votre manucure ou votre pédicure devient un soin SPA, avec peeling, masque, enveloppement et massage. Un seul soin SPA par jour." },
+      nl:"Gratis upgrade naar SPA bij je manicure of pedicure", en:"Free upgrade to SPA with your manicure or pedicure", fr:"Mise à niveau SPA offerte pour votre manucure ou pédicure" },
     eyeflash: { type:"extra", photo:"assets/advent/eyeflash-ill.webp", icon:"👁️", with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Een ampul oogserum met hyaluronzuur en peptiden, tijdens je gelaatsverzorging zacht rond de ogen ingeklopt — voor een frissere, minder vermoeide blik. Bevat parfum.",
                    en:"An ampoule of eye serum with hyaluronic acid and peptides, gently patted around the eyes during your facial — for a fresher, less tired look. Contains fragrance.",
@@ -2252,33 +2250,32 @@ const ADVENT = {
       nl:"Gratis verfrissend peel-off masker voor de gevoelige huid", en:"Free refreshing peel-off mask for sensitive skin", fr:"Masque peel-off rafraîchissant pour peaux sensibles offert",
       ingredients:"Diatomaceous Earth, Algin, Calcium Sulfate, Tetrasodium Pyrophosphate, Sodium Ascorbate, Maltodextrin, Vaccinium Myrtillus Fruit Extract, Ormenis Multicaulis Oil, Limonene" },
     // ---- v212 (Sandra, 07/11/2026): correcties adventskalender ----
-    peelcare: { type:"extra", icon:"🌿", stock:3, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
-      highlights:{ nl:"Een zachte, verzorgende peel-off met lavendel en collageen: hij kalmeert, geeft een frisse, gladde look en laat je huid heerlijk ontspannen achter. Vooraf een hyaluronzuurserum met komkommer voor extra vocht.", en:"A gentle, nourishing peel-off with lavender and collagen: it soothes, gives a fresh, smooth look and leaves your skin wonderfully relaxed. First a hyaluronic serum with cucumber for extra moisture.", fr:"Un peel-off doux et nourrissant à la lavande et au collagène : il apaise, donne un teint frais et lisse et laisse la peau délicieusement détendue. D'abord un sérum à l'acide hyaluronique et au concombre pour plus d'hydratation." },
-      product:"Bio Balance Algoherbal Ageing (poedermasker + Essence Gel) + Hya-Lift+ serum",
-      ingredients:"Zie Ingrediënten & allergieën: Bio Balance Algoherbal Ageing.",
-      nl:"Gratis verzorgend peel-off masker", en:"Free nourishing peel-off mask", fr:"Masque peel-off nourrissant offert" },
+    peelcare: { type:"extra", icon:"✨", stock:3, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
+      highlights:{ nl:"Een verzorgend anti-aging masker dat de huid verstevigt, verfrist en een gladde, stralende uitstraling geeft. Vooraf een hyaluronzuurserum met komkommer voor extra vocht.", en:"A nourishing anti-ageing mask that firms and refreshes the skin and gives a smooth, radiant look. First a hyaluronic serum with cucumber for extra moisture.", fr:"Un masque anti-âge nourrissant qui raffermit et rafraîchit la peau pour un teint lisse et éclatant. D'abord un sérum à l'acide hyaluronique au concombre pour plus d'hydratation." },
+      product:"Anti-aging masker (Sandra kiest: o.a. Bio Balance Algoherbal Ageing met lavendel) + Hya-Lift+ serum",
+      ingredients:"Poeder (Lavender): Zea Mays (Corn) Starch, Algin, Calcium Sulfate, Glucose, Magnesium Carbonate, Lavandula Angustifolia (Lavender) Flower, Sodium Phosphate, CI 42090, Lavandula Angustifolia (Lavender) Oil. — Essence Gel (Lavender & Caviar): Aqua, Butylene Glycol, Aloe Barbadensis Extract, Glycerin, Caviar Extract, Hamamelis Virginiana Extract, Lavandula Angustifolia Extract, Carbomer, Triethanolamine, Hyaluronic Acid, Hydrolyzed Collagen, Allantoin, PEG-40 Hydrogenated Castor Oil, Parfum, CI 42090, Phenoxyethanol, Limonene, Linalool, Geraniol, Alpha-Isomethyl Ionone, CI 16035", ingredientsNote:{ nl:"Krijg je een ander anti-aging masker, dan krijg je de ingrediëntenlijst in het salon.", en:"If you get a different anti-ageing mask, you will get its ingredient list in the salon.", fr:"Si vous recevez un autre masque anti-âge, vous obtenez sa liste d'ingrédients au salon." },
+      nl:"Gratis anti-aging masker", en:"Free anti-ageing mask", fr:"Masque anti-âge offert" },
     goldpowder: { type:"extra", icon:"🥇", stock:null, with:{ nl:"gelaatsverzorging", en:"facial", fr:"soin du visage" },
       highlights:{ nl:"Een luxe peel-off poedermasker met echt goud, collageen en hyaluronzuur: hydrateert, voedt, verstevigt en verheldert. Je huid straalt meteen. Bevat collageen (dierlijk), zoethout, rijstzetmeel (granen), goud en parfum.", en:"A luxurious peel-off powder mask with real gold, collagen and hyaluronic acid: it hydrates, nourishes, firms and brightens. Your skin glows instantly. Contains collagen (animal), liquorice, rice starch (cereals), gold and fragrance.", fr:"Un masque peel-off en poudre luxueux à l'or véritable, au collagène et à l'acide hyaluronique : il hydrate, nourrit, raffermit et éclaircit. Votre peau rayonne aussitôt. Contient du collagène (animal), de la réglisse, de l'amidon de riz (céréales), de l'or et du parfum." },
       product:"Safety4You Peel-off poedermasker Goud Soft",
       ingredients:"Glucose, Diatomaceous Earth, Oryza Sativa Starch, Algin, Pectin, Collagen, Glycyrrhiza Glabra Root Extract, Hyaluronic Acid, Sodium Bicarbonate, Gold, Parfum, CI 10316",
       nl:"Gratis luxe gouden poedermasker", en:"Free luxury gold powder mask", fr:"Masque en poudre doré de luxe offert" },
-    massage10: { type:"discount", icon:"💆", value:"10%", noMin:true,
+    massage10: { type:"discount", icon:"💆", value:"10%", noMin:true, fixed:true,
       nl:"10% korting op een massage", en:"10% off a massage", fr:"10 % de réduction sur un massage",
       treat:{ nl:"massage", en:"massage", fr:"massage" } },
-    gelpromo10: { type:"discount", icon:"💅", value:"10%", noMin:true,
+    gelpromo10: { type:"discount", icon:"💅", value:"10%", noMin:true, fixed:true,
       nl:"10% korting op gellak", en:"10% off gel polish", fr:"10 % de réduction sur le vernis semi-permanent",
       treat:{ nl:"gellak (bij een manicure of pedicure)", en:"gel polish (with a manicure or pedicure)", fr:"vernis semi-permanent (avec une manucure ou pédicure)" } },
-    body10: { type:"discount", icon:"🌿", value:"10%",
-      nl:"10% korting op een lichaamspeeling & lichaamspakking, of op een gerichte behandeling voor enkel de rug of enkel de benen", en:"10% off a body peeling & body wrap, or a targeted treatment for just the back or just the legs", fr:"10 % de réduction sur un gommage & enveloppement corps, ou sur un soin ciblé du dos seul ou des jambes seules",
-      treat:{ nl:"lichaamspeeling & lichaamspakking, of een behandeling voor enkel de rug of de benen", en:"body peeling & body wrap, or a back-only or legs-only treatment", fr:"gommage & enveloppement corps, ou soin du dos seul ou des jambes seules" } },
-    // salon verkoophoekje: geldig bij betaling t.e.m. 3/1 (shop:true, geen afspraak nodig)
-    shop5: { type:"discount", icon:"🛍️", value:"5%", noMin:true, shop:true,
+    body10: { type:"discount", icon:"🌿", value:"10%", noMin:true, fixed:true,
+      nl:"10% korting op een lichaamspeeling & lichaamspakking, of op een behandeling voor enkel de rug of enkel de benen", en:"10% off a body peeling & body wrap, or a treatment for just the back or just the legs", fr:"10 % de réduction sur un gommage & enveloppement corps, ou sur un soin du dos seul ou des jambes seules",
+      treat:{ nl:"Zuiverende rugbehandeling, Harmoniserende verzorging rug, Harmoniserende verzorging full body, Energetische rugpakking, Energetische lichaamspakking full body of Cupping Body Renewal", en:"Purifying back treatment, Harmonising back care, Harmonising full-body care, Energising back wrap, Energising full-body wrap or Cupping Body Renewal", fr:"soin purifiant du dos, soin harmonisant du dos, soin harmonisant corps entier, enveloppement énergisant du dos, enveloppement énergisant corps entier ou Cupping Body Renewal" } },
+    shop5: { type:"discount", icon:"🛍️", value:"5%", noMin:true, fixed:true, shop:true,
       nl:"5% korting in het salon verkoophoekje", en:"5% off in the salon shop corner", fr:"5 % de réduction dans le coin boutique du salon",
       treat:{ nl:"salon verkoophoekje", en:"salon shop corner", fr:"coin boutique du salon" } },
-    shop10: { type:"discount", icon:"🛍️", value:"10%", noMin:true, shop:true,
+    shop10: { type:"discount", icon:"🛍️", value:"10%", noMin:true, fixed:true, shop:true,
       nl:"10% korting op het salon verkoophoekje", en:"10% off the salon shop corner", fr:"10 % de réduction sur le coin boutique du salon",
       treat:{ nl:"salon verkoophoekje", en:"salon shop corner", fr:"coin boutique du salon" } },
-    shop15: { type:"discount", icon:"🛍️", value:"15%", noMin:true, shop:true,
+    shop15: { type:"discount", icon:"🛍️", value:"15%", noMin:true, fixed:true, shop:true,
       nl:"15% korting op het salon verkoophoekje", en:"15% off the salon shop corner", fr:"15 % de réduction sur le coin boutique du salon",
       treat:{ nl:"salon verkoophoekje", en:"salon shop corner", fr:"coin boutique du salon" } },
     facial10: { type:"discount", icon:"🧖", value:"10%",
@@ -2345,7 +2342,7 @@ const ADVENT = {
     { day:18, item:"peelcare",      stock:null },   // v212 (Sandra, 07/11/2026)
     { day:19, item:"shop15",        stock:null },   // v212 (Sandra, 07/11/2026)
     { day:20, item:"body10",       stock:null },   // v212 (Sandra, 07/11/2026)
-    { day:21, item:"peelblueberry",      stock:null },   // v212 (Sandra, 07/11/2026)
+    { day:21, item:"peelsens",      stock:null },   // v212 (Sandra, 07/11/2026)
     { day:22, item:"spamanipedi",       stock:null },
     { day:23, item:"luminoclear",   stock:null },
     { day:24, item:"goldmask",      stock:null },
@@ -2385,7 +2382,7 @@ const ADVENT = {
   ADVENT.doors = ADVENT.doors.map(dr => {
     const it = ADVENT.items[dr.item];
     const st = steps.find(s => dr.day <= s.to);
-    if (!it || it.type !== "discount" || !st || it.value === st.v) return dr;
+    if (!it || it.type !== "discount" || it.fixed || !st || it.value === st.v) return dr;   // v219: items with fixed:true keep their own percentage
     const id = dr.item + "@" + st.v.replace("%", "");
     if (!ADVENT.items[id]){
       const rep = (s, fr) => typeof s === "string" ? s.replace(/\d{1,2}\s?%/g, fr ? st.v.replace("%", " %") : st.v) : s;

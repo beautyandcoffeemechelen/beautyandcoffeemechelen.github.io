@@ -2305,7 +2305,7 @@
   const accFmtD = s => accIsDate(s) ? s.slice(8, 10) + "/" + s.slice(5, 7) + "/" + s.slice(0, 4) : "";
   const accDays = (a, b) => Math.round((new Date(b + "T12:00:00") - new Date(a + "T12:00:00")) / 864e5);
   function accClean(d){
-    d = d || {}; const o = { v:1, lead:[7, 14, 30].includes(+d.lead) ? +d.lead : 14, items:[], dates:[], done:{}, vatIncl:d.vatIncl ? 1 : 0, incl:{ verkoop:1, cabine:1, grondstof:1, ander:1 }, health:{ target:60, fixed:0, cost:{}, ov:{} }, costs:{ fixed:[], shareSale:20, small:[], recipes:[], rate:1, buf:15 }, settings:{ start:"2026-02-01", status:"vrijgesteld", askBuy:1 }, cash:[], dx:{}, checks:{}, lastBackup:"", hasDocs:0, docIdx:[] };
+    d = d || {}; const o = { v:1, lead:[7, 14, 30].includes(+d.lead) ? +d.lead : 14, items:[], dates:[], done:{}, vatIncl:d.vatIncl ? 1 : 0, incl:{ verkoop:1, cabine:1, grondstof:1, ander:1 }, health:{ target:60, fixed:0, cost:{}, ov:{} }, costs:{ fixed:[], shareSale:20, small:[], recipes:[], rate:1, buf:15 }, skip:{}, showSkip:0, todos:[], settings:{ start:"2026-02-01", status:"vrijgesteld", askBuy:1 }, cash:[], dx:{}, checks:{}, lastBackup:"", hasDocs:0, docIdx:[] };
     { const st = d.settings || {}; if (accIsDate(st.start)) o.settings.start = st.start; if (["vrijgesteld", "plichtig", "onbekend"].includes(st.status)) o.settings.status = st.status; if (st.askBuy === 0 || st.askBuy === false) o.settings.askBuy = 0; }
     { const cc = d.costs || {}, cid = v => String(v || ("c" + Math.random().toString(36).slice(2, 9))).replace(/[^a-z0-9-]/gi, "-").slice(0, 30), sp = accNum(cc.shareSale);
       if (sp >= 0 && sp <= 100) o.costs.shareSale = sp;
@@ -2315,6 +2315,15 @@
       (Array.isArray(cc.recipes) ? cc.recipes : []).slice(0, 200).forEach(r => { if (r && r.name){ const yy = accNum(r.yield); o.costs.recipes.push({ id:cid(r.id), name:String(r.name).slice(0, 100), kind:["behandeling", "zeep", "boeket", "ander"].includes(r.kind) ? r.kind : "behandeling", yield:(yy > 0 && yy <= 1e5) ? yy : 1,
         lines:(Array.isArray(r.lines) ? r.lines : []).slice(0, 60).map(l => { const q = accNum(l && l.qty), p = accNum(l && l.price); return { item:String((l && l.item) || "").slice(0, 40), name:String((l && l.name) || "").slice(0, 100), qty:(q > 0 && q <= 1e6) ? q : 0, unit:String((l && l.unit) || "").slice(0, 12), price:(p >= 0 && p <= 1e6) ? p : 0 }; }).filter(l => l.qty > 0 && (l.item || l.name)) }); } });
     }
+    // v220: skipped steps ("niet van toepassing") and open actions with reminders
+    Object.keys(d.skip || {}).slice(0, 400).forEach(k => { if (d.skip[k]) o.skip[String(k).slice(0, 160)] = 1; });
+    o.showSkip = d.showSkip ? 1 : 0;
+    if (Array.isArray(d.todos)) d.todos.slice(0, 200).forEach(q => { if (q && q.t) o.todos.push({ id:String(q.id || ("t" + Math.random().toString(36).slice(2, 8))).replace(/[^a-z0-9-]/gi, "-").slice(0, 30), t:String(q.t).slice(0, 400), d:accIsDate(q.d) ? q.d : "", done:q.done ? 1 : 0, note:String(q.note || "").slice(0, 400) }); });
+    else [["mhb", "Mrs. Highbrow: boek het terugbetalingsbewijs van bestelling #68145 (€ 35,85) in als creditnota en koppel de terugbetaling op je rekening aan die creditnota.", ""],
+      ["fysio", "FysioSupplies: boek de betaalde bijzondere btw (€ 15,32, datum 04/11/2026) in als kost bij een leverancier van het type particulier met de naam “Bijzondere btw-aangifte”, in dezelfde kostencategorie als de factuur van FysioSupplies. Koppel ze aan de bankbetaling.", ""],
+      ["q4", "Bijzondere btw-aangifte (formulier 629) voor het 4e kwartaal indienen via Intervat: factuur van de droogbloemengroothandel (oktober) en andere aankopen met verlegde btw tot eind december. Dexxter: indienen tussen 1 en 25 januari 2027.", "2027-01-20"],
+      ["lq", "Le Quartier: vraag of zij de roerende voorheffing hebben doorgestort en je een fiscale fiche bezorgen (nodig voor je aangifte personenbelasting), en vraag het resterende, nog niet uitbetaalde bedrag.", ""],
+      ["cs", "Bij elke figuratie- of reclameopdracht: laat de factuur opmaken via Creative Shelter (Craft-platform) en niet zelf.", ""]].forEach(([id, t, dd]) => o.todos.push({ id:"seed-" + id, t, d:dd, done:0, note:"Dexxter-support, nov 2026" }));
     if (!d.costs){   // v216: ready-made lines (amounts still to fill in) for the fixed costs Sandra named
       [["Water (behandelingen en was van de handdoeken)", "cabine"], ["Elektriciteit en gas (verwarming salon en onthaal, droogkast, toestellen, warm water)", "cabine"], ["Onthaal (koffie, thee, chocomelk)", "cabine"]].forEach(([n, sc], k) => o.costs.fixed.push({ id:"seed" + k, name:n, amt:0, per:"maand", scope:sc, prof:100 }));
       ["Watjes", "Tissues", "Oorstokjes", "Lipbrushes", "Wimperbrushes"].forEach((n, k) => o.costs.small.push({ id:"seeds" + k, name:n, cost:0 }));
@@ -2371,10 +2380,12 @@
     const y = Number(accToday().slice(0, 4)), x = accLoad(), out = [];
     [y - 1, y, y + 1].forEach(yy => accFixedDates(yy).forEach(f => out.push(f)));
     x.dates.forEach(c => out.push({ d:c.d, t:c.t, key:"eigen|" + c.d + "|" + c.t, own:true }));
+    x.todos.filter(q => q.d && !q.done).forEach(q => out.push({ d:q.d, t:"✅ Actie: " + q.t, key:"todo|" + q.id }));
+    out.forEach(e => { if (x.skip[e.key]) e.skipped = true; });
     return out.sort((a, b) => a.d.localeCompare(b.d) || a.t.localeCompare(b.t));
   }
   function accDue(){
-    const x = accLoad(), t = accToday(); return accAllDates().filter(e => !x.done[e.key] && accDays(t, e.d) <= x.lead && accDays(t, e.d) >= -7);
+    const x = accLoad(), t = accToday(); return accAllDates().filter(e => !e.skipped && !x.done[e.key] && accDays(t, e.d) <= x.lead && accDays(t, e.d) >= -7);
   }
   function accBanner(){
     const wa = $("#welcomeAcc"); if (wa){ let on = false; try { on = actSalon(); } catch(e){ on = false; } wa.innerHTML = on ? `<button type="button" class="btn btn--outline btn--wide welcome-shopbtn" data-action="open-acc">Boekhouding</button><button type="button" class="btn btn--outline btn--wide welcome-shopbtn" data-action="open-salon">📲 Salon-QR (stempel, cadeaubon, advent)</button>` : ""; }
@@ -2441,18 +2452,20 @@
     const x = accLoad(), t0 = accToday(), cy = Number(t0.slice(0, 4)); if (!ACC.year) ACC.year = cy;
     const ys = x.items.map(i => Number((i.date || "").slice(0, 4))).filter(Boolean).concat([cy - 1, cy]), y0 = Math.min(...ys), years = []; for (let k = y0; k <= cy; k++) years.push(k);
     const chip = (v, lb, on, a) => `<button type="button" class="chip chip--sm${on ? " is-on" : ""}" data-acc="${a}" data-v="${esc(v)}">${lb}</button>`;
-    const head = `<div class="pop-chips">${chip("stock", "📦 Voorraad", ACC.tab === "stock", "tab")}${chip("docs", "🧾 Facturen", ACC.tab === "docs", "tab")}${chip("kassa", "💶 Kassa", ACC.tab === "kassa", "tab")}${chip("costs", "🧮 Kosten", ACC.tab === "costs", "tab")}${chip("health", "🩺 Gezondheid", ACC.tab === "health", "tab")}${chip("advice", "💡 Advies", ACC.tab === "advice", "tab")}${chip("dates", "🗓️ Data", ACC.tab === "dates", "tab")}</div>`;
+    const head = `<div class="pop-chips">${chip("stock", "📦 Voorraad", ACC.tab === "stock", "tab")}${chip("docs", "🧾 Facturen", ACC.tab === "docs", "tab")}${chip("kassa", "💶 Kassa", ACC.tab === "kassa", "tab")}${chip("costs", "🧮 Kosten", ACC.tab === "costs", "tab")}${chip("health", "🩺 Gezondheid", ACC.tab === "health", "tab")}${chip("help", "🧭 Hulp & acties", ACC.tab === "help", "tab")}${chip("advice", "💡 Advies", ACC.tab === "advice", "tab")}${chip("dates", "🗓️ Data", ACC.tab === "dates", "tab")}</div>`;
     const note = `<p class="ingr-muted">Enkel voor jou en enkel op dit toestel: dit gaat nooit naar GitHub. Wat je typt wordt onderweg bewaard als concept. Maak af en toe een back-up. Tel je producten per stuk? Dat staat bij <button type="button" class="btn btn--text btn--sm" data-action="open-inv">Voorraad per product</button>.</p>`;
     if (ACC.tab === "docs") return head + note + accDocsSkeleton();
     if (ACC.tab === "health") return head + note + accHealthHtml();
     if (ACC.tab === "costs") return head + note + accCostsHtml(x);
     if (ACC.tab === "kassa") return head + note + accKassaHtml();
     if (ACC.tab === "advice") return head + note + accAdviceHtml();
+    if (ACC.tab === "help") return head + note + accHelpHtml();
     if (ACC.tab === "dates"){
-      const t = accAllDates().filter(e => e.d >= accIso(new Date(Date.now() - 30 * 864e5))).slice(0, 14);
+      const t = accAllDates().filter(e => e.d >= accIso(new Date(Date.now() - 30 * 864e5)) && (x.showSkip || !e.skipped)).slice(0, 14), nSkip = accAllDates().filter(e => e.skipped).length;
       return head + note + accChecklistHtml(Number(t0.slice(5, 7)) === 1 ? cy - 1 : cy) + `<p class="ingr-muted">Bij “+1 binnen” in Voorraad per product een aankoop voorstellen: <button type="button" class="chip chip--sm${x.settings.askBuy ? " is-on" : ""}" data-acc="askbuy">${x.settings.askBuy ? "aan" : "uit"}</button></p>`
+        + `<p class="ingr-muted">Stappen die niet voor jou gelden (bv. btw-kwartalen als je btw-vrijgesteld bent) zet je op “Niet van toepassing”: ze verdwijnen uit de lijst en uit de waarschuwingen. Overgeslagen: ${nSkip} <button type="button" class="chip chip--sm${x.showSkip ? " is-on" : ""}" data-acc="showskip">${x.showSkip ? "verberg ze" : "toon ze"}</button></p>`
         + `<p class="ingr-muted">Waarschuwing op het startscherm: ${[7, 14, 30].map(n => chip(String(n), n + " dagen vooraf", x.lead === n, "lead")).join("")}</p>
-        <ol class="pop-list">${t.map(e => { const n = accDays(t0, e.d), dn = !!x.done[e.key]; return `<li class="pop-row"><div class="pop-row__top"><span class="pop-row__name">${esc(e.t)}</span><b class="pop-row__n">${esc(accFmtD(e.d))}</b></div><div class="ingr-muted">${n === 0 ? "vandaag" : n > 0 ? "over " + n + " dagen" : Math.abs(n) + " dagen geleden"}${dn ? " · ✅ gedaan" : ""}</div><div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="done" data-k="${esc(e.key)}">${dn ? "↺ Terug open" : "✓ Gedaan"}</button>${e.own ? `<button type="button" class="chip chip--sm" data-acc="deldate" data-k="${esc(e.key)}">Verwijderen</button>` : ""}</div></li>`; }).join("")}</ol>
+        <ol class="pop-list">${t.map(e => { const n = accDays(t0, e.d), dn = !!x.done[e.key]; return `<li class="pop-row"><div class="pop-row__top"><span class="pop-row__name">${esc(e.t)}</span><b class="pop-row__n">${esc(accFmtD(e.d))}</b></div><div class="ingr-muted">${n === 0 ? "vandaag" : n > 0 ? "over " + n + " dagen" : Math.abs(n) + " dagen geleden"}${dn ? " · ✅ gedaan" : ""}</div><div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="done" data-k="${esc(e.key)}">${dn ? "↺ Terug open" : "✓ Gedaan"}</button><button type="button" class="chip chip--sm" data-acc="skip" data-k="${esc(e.key)}">${e.skipped ? "↺ Weer tonen" : "⏭️ Niet van toepassing"}</button>${e.own ? `<button type="button" class="chip chip--sm" data-acc="deldate" data-k="${esc(e.key)}">Verwijderen</button>` : ""}</div></li>`; }).join("")}</ol>
         <div class="shop-edit"><label>Eigen datum toevoegen<input id="accNewD" type="date"></label><label>Wat<input id="accNewT" maxlength="120" placeholder="bv. Aangifte personenbelasting"></label><div class="shop-actions"><button type="button" class="btn btn--primary btn--sm" data-acc="adddate">Toevoegen</button></div></div>
         <p class="ingr-muted">De vaste data komen uit je Dexxter-tijdlijn (voorafbetalingen verschuiven naar de eerstvolgende werkdag). Controleer ze in Dexxter: feestdagen houd ik niet bij.</p>`;
     }
@@ -2488,7 +2501,7 @@
       <div class="shop-actions"><button type="button" class="btn btn--primary btn--sm" data-acc="add">+ Aankoop toevoegen</button><button type="button" class="btn btn--outline btn--sm" data-acc="xlsx">⬇ Excel ${y}</button></div>
       <div class="pop-chips">${chip("all", "Alle soorten", !ACC.soort || ACC.soort === "all", "soort")}${Object.entries(ACC_CATS).map(([k, lb]) => chip(k, esc(lb.split(" (")[0]), ACC.soort === k, "soort")).join("")}</div>
       <div class="pop-chips">${chip("all", "Alles", ACC.filter === "all", "filter")}${chip("open", "Nog op voorraad", ACC.filter === "open", "filter")}${chip("gone", "Afgeboekt", ACC.filter === "gone", "filter")}</div>
-      ${ACC.edit === "new" ? form({ id:"new", name:"", cat:"verkoop", supplier:"", inv:"", date:t0, qty:1, unit:"", cost:0, vat:0, exp:"", price:null, note:"" }) : ""}
+      ${ACC.edit === "new" ? form({ id:"new", name:"", cat:"verkoop", supplier:"", inv:"", date:t0, qty:1, unit:"", cost:0, vat:21, exp:"", price:null, note:"" }) : ""}
       ${shown.length ? `<ol class="pop-list">${shown.map(card).join("")}</ol>` : `<p class="ingr-muted">Nog niets ingegeven. Stuur me je facturen, dan zet ik ze voor je klaar, of voeg ze zelf toe.</p>`}
       <div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="backup">Back-up (json)</button><button type="button" class="chip chip--sm" data-acc="restore">Herstellen uit bestand</button><input type="file" id="accFile" accept=".json,application/json" hidden></div>`;
   }
@@ -2514,6 +2527,8 @@
     if (a === "save"){
       const g = k => (($("#accE_" + k) || {}).value || "").trim(), name = g("name"), cost = accNum(g("cost")), qty = accNum(g("qty")), vat = g("vat") === "" ? 0 : accNum(g("vat")), pr = g("price") === "" ? null : accNum(g("price"));
       if (!name || !(qty > 0) || !(cost >= 0) || !(vat >= 0 && vat <= 100) || (pr !== null && !(pr >= 0))){ showToast("Controleer naam, aantal, prijs en btw."); return; }
+      if (vat === 0 && x.settings.status !== "plichtig" && !window.confirm("Btw 0% klopt niet in jouw situatie (btw-vrijgesteld, bijberoep): de btw op aankopen is 21% of 6%.\n\nRekent een (buitenlandse) leverancier toch 0% aan met je btw-nummer, dan moet je zelf een bijzondere btw-aangifte (formulier 629) indienen. Alternatief: vraag de leverancier je als particulier te behandelen en btw aan te rekenen, en vraag een creditnota voor de eerste factuur.\n\nToch bewaren met 0% en een herinnering zetten?")) return;
+      if (vat === 0 && x.settings.status !== "plichtig" && accIsDate(g("date"))) x.todos.push({ id:"z" + Date.now().toString(36), t:"Bijzondere btw-aangifte (formulier 629) nakijken: aankoop “" + name.slice(0, 60) + "” met 0% btw. Of vraag een nieuwe factuur met btw en een creditnota voor de eerste.", d:accQuarterDeadline(g("date")), done:0, note:"" });
       const rec = { name, cat:g("cat"), supplier:g("supplier"), inv:g("inv"), date:g("date"), qty, unit:g("unit"), cost, vat, exp:g("exp"), price:pr, note:g("note") };
       if (id === "new"){ x.items.push(accClean({ items:[Object.assign({ id:"a" + Date.now().toString(36), mv:[] }, rec)] }).items[0]); } else { const i = x.items.find(q => q.id === id); if (!i) return; Object.assign(i, accClean({ items:[Object.assign({}, i, rec)] }).items[0]); }
       drClear("acc-edit:" + id); ACC.edit = ""; accSave(); return accRender();
@@ -2598,7 +2613,7 @@
     const form = !P ? "" : `<div class="shop-edit" data-draft="doc:${esc(P.id)}" data-label="Factuur: ${esc(P.fileName)}"><p class="ingr-muted">${esc(P.fileName)}</p>
       <label>Soort<select id="accD_dir"><option value="in"${P.dir === "in" ? " selected" : ""}>Aankoopfactuur of bon (van een leverancier)</option><option value="out"${P.dir === "out" ? " selected" : ""}>Verkoopfactuur (uit Dexxter, naar een klant)</option></select></label>
       ${fld("date", "Datum", P.date, 'type="date"')}${fld("party", "Leverancier of klant", P.party, 'maxlength="100"')}${fld("nr", "Factuurnummer", P.nr, 'maxlength="40"')}
-      ${fld("excl", "Bedrag zonder btw (€)", String(P.excl || "").replace(".", ","), 'inputmode="decimal"')}${fld("vat", "Btw % (0 als vrijgesteld)", String(P.vat || 0).replace(".", ","), 'inputmode="decimal"')}
+      ${fld("excl", "Bedrag zonder btw (€)", String(P.excl || "").replace(".", ","), 'inputmode="decimal"')}${fld("vat", P.dir === "out" ? "Btw % (0 als vrijgesteld)" : "Btw % op de aankoopfactuur (21 of 6; nooit 0% bij een Belgische leverancier)", String(P.vat || 0).replace(".", ","), 'inputmode="decimal"')}
       ${fld("cat", "Categorie in Dexxter (optioneel)", P.cat, 'maxlength="60"')}${P.dir === "out" ? `<label><input type="checkbox" id="accD_mention"${P.mention ? " checked" : ""}> De vermelding “kleine onderneming onderworpen aan de vrijstellingsregeling, btw niet toepasselijk” staat op de factuur</label>` : ""}${fld("note", "Opmerking", P.note, 'maxlength="300"')}
       <div class="shop-actions"><button type="button" class="btn btn--primary btn--sm" data-acc="docsave">Bewaren</button><button type="button" class="btn btn--outline btn--sm" data-acc="doccancel">Annuleren</button></div></div>`;
     box.innerHTML = `<div class="shop-info"><p><b>Digitale bonnen en facturen</b></p>
@@ -2615,7 +2630,7 @@
         <div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="docview" data-id="${esc(d.id)}">Bekijk</button>${d.dir === "out" ? "" : `<button type="button" class="chip chip--sm" data-acc="docsend" data-id="${esc(d.id)}">→ Dexxter</button><button type="button" class="chip chip--sm" data-acc="docsent" data-id="${esc(d.id)}">${d.sent ? "↺ Niet doorgestuurd" : "✓ Doorgestuurd"}</button>`}<button type="button" class="chip chip--sm" data-acc="docedit" data-id="${esc(d.id)}">Bewerken</button><button type="button" class="chip chip--sm" data-acc="docdel" data-id="${esc(d.id)}">Verwijderen</button></div></li>`).join("")}</ol>` : `<p class="ingr-muted">Nog geen stukken voor ${y}.</p>`}
       <div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="doczip">⬇ Alles van ${y} (zip + overzicht)</button></div>
       <p class="ingr-muted">“→ Dexxter” opent het deelmenu van je telefoon met de factuur als bijlage en kopieert het adres; kies je mailapp en plak het adres bij Aan. De app kan zelf geen e-mail versturen, en kan niet controleren of de mail effectief is aangekomen: kijk dat na in Dexxter.</p>`;
-    const onFile = async ev => { const f = ev.target.files && ev.target.files[0]; ev.target.value = ""; if (!f) return; if (f.size > 25 * 1024 * 1024){ showToast("Bestand te groot (max. 25 MB)."); return; } const g = await accShrink(f); try { await docPut({ id:"draft-new", name:g.name, type:g.type || "application/octet-stream", size:g.size, blob:g, draftFile:true }); } catch(e){ /* storage full: continue without a saved copy */ } ACC.docForm = { id:"new", file:g, fileName:g.name + " (" + Math.round(g.size / 1024) + " KB)", dir:ACC.docDir === "out" ? "out" : "in", date:accToday(), party:"", nr:"", excl:"", vat:0, cat:"", note:"" }; accDocsRender(); };
+    const onFile = async ev => { const f = ev.target.files && ev.target.files[0]; ev.target.value = ""; if (!f) return; if (f.size > 25 * 1024 * 1024){ showToast("Bestand te groot (max. 25 MB)."); return; } const g = await accShrink(f); try { await docPut({ id:"draft-new", name:g.name, type:g.type || "application/octet-stream", size:g.size, blob:g, draftFile:true }); } catch(e){ /* storage full: continue without a saved copy */ } ACC.docForm = { id:"new", file:g, fileName:g.name + " (" + Math.round(g.size / 1024) + " KB)", dir:ACC.docDir === "out" ? "out" : "in", date:accToday(), party:"", nr:"", excl:"", vat:ACC.docDir === "out" ? 0 : 21, cat:"", note:"" }; accDocsRender(); };
     const c1 = $("#accDocCam"), c2 = $("#accDocFile"); if (c1) c1.onchange = onFile; if (c2) c2.onchange = onFile;
   }
   async function accDocSend(id){
@@ -2726,6 +2741,35 @@
     return `<div class="shop-info gauge-detail"><p><b>${i < 0 ? "Algemeen" : esc(H.g[i].t)}</b> ${i >= 0 ? esc(H.g[i].s) : ""}</p>${body}<div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="gauge" data-v="${i}">Sluiten</button></div></div>`;
   }
   const v2 = n => String(Math.round(n * 100) / 100).replace(".", ",");
+  /* ===== v220: Hulp & acties (Dexxter-support, nov 2026): open acties met herinneringen + stappen per situatie ===== */
+  const ACC_HELP = [
+    { t:"Leverancier rekent 0% btw met je btw-nummer (bv. een buitenlandse leverancier)", s:["Betaal die btw niet aan de leverancier: je geeft ze zelf aan, anders betaal je ze twee keer.",
+      "Dien een bijzondere btw-aangifte (formulier 629) in via Intervat: tussen de 1e en de 25e van de maand na het kwartaal waarin je de factuur ontving (4e kwartaal: 1 tot 25 januari 2027). Meerdere facturen van hetzelfde kwartaal bundel je in één aangifte. De app zet voor de zekerheid de 20e in je lijst.",
+      "Vul in de aangifte enkel de geldige factuur in: het bedrag zonder btw in vak 71 en de btw in vak 80. Een factuur die je liet crediteren en de creditnota zelf horen er niet in. Vak 77 en 78 hoef je niet aan te duiden.",
+      "Boek de betaalde btw in Dexxter als kost: leverancier van het type particulier met de naam “Bijzondere btw-aangifte”, factuurdatum = de dag waarop je de btw betaalt, bedrag = de betaalde btw, dezelfde kostencategorie als de oorspronkelijke aankoop. Koppel de bankbetaling eraan.",
+      "Bankdeel: koppel je oorspronkelijke betaling (met btw) aan de factuur zonder btw. Het deel boven het factuurbedrag (de btw) en een terugbetaling van die btw boek je als overige betaling, met in de omschrijving een verwijzing naar je eerste betaling en de factuur.",
+      "Volgende keer vermijden: vraag een buitenlandse leverancier vooraf om je als particulier te behandelen en gewoon btw aan te rekenen."] },
+    { t:"Leverancier rekende 0% btw en stuurt een nieuwe factuur met 21%", s:["Boek de nieuwe factuur in met 21% btw.","Vraag de leverancier een creditnota voor de eerste factuur (0%). Een factuur annuleren kan enkel met een creditnota; zolang die er niet is, bestaat de eerste factuur nog en lijkt het alsof je goederen zonder btw invoerde, wat een bijzondere aangifte kan vragen.","Boek de creditnota in bij dezelfde leverancier en koppel de terugbetaling op je rekening aan die creditnota."] },
+    { t:"Betaald zonder btw, maar de factuur bevat btw (bv. Mrs. Highbrow)", s:["Vraag een nieuwe, juiste factuur en boek het terugbetalingsbewijs van de eerste bestelling in als creditnota bij dezelfde leverancier.","Koppel de terugbetaling op je rekening aan die creditnota."] },
+    { t:"Je rekende een klant te veel aan", s:["Maak een creditnota voor het verschil (bv. € 4) en stuur ze naar je klant: je inkomsten dalen met dat bedrag.","Heeft de klant al het volledige bedrag betaald, stort dan het verschil terug."] },
+    { t:"Reclamespot of figuratie (Le Quartier, Creative Shelter)", s:["Voor reclamespots waarin je acteert mag een deel als auteursrechten worden aangerekend: dat wordt mild belast. Voorwaarde: de facturen lopen via een bureau zoals Creative Shelter. Zij houden een beperkte commissie in, die kleiner is dan het belastingvoordeel.",
+      "Maak je zelf een gewone factuur zonder auteursrechten, dan moet er geen (roerende) voorheffing betaald worden.",
+      "Bij een volgende figuratie- of reclameopdracht: laat de factuur opmaken via het Craft-platform van Creative Shelter (zie het filmpje bij de links), niet zelf.",
+      "Heeft het bureau je al uitbetaald alsof je auteursrechten aanrekende? Vraag eerst aan Creative Shelter of zij nog kunnen factureren aan Le Quartier; dan maak jij voor je eigen factuur een creditnota. Heeft Le Quartier de voorheffing al doorgestort aan de FOD, dan kan dat niet meer: dan moet Le Quartier je een fiscale fiche bezorgen, die je nodig hebt voor je aangifte personenbelasting van volgend jaar.",
+      "Een lager ontvangen bedrag dan gefactureerd is geen probleem. Je kan Le Quartier vragen het resterende bedrag uit te betalen omdat je enkel de prestaties factureert en geen auteursrechten wil gebruiken (dus geen voorheffing)."] },
+    { t:"Twee facturen met dezelfde factuurdatum", s:["Het maakt niet uit welke je eerst hebt opgemaakt, zolang de nummering klopt met de factuurdatums."] }
+  ];
+  function accHelpHtml(){
+    const x = accLoad(), t0 = accToday(), esc2 = esc;
+    const todos = x.todos.slice().sort((a, b) => (a.done - b.done) || (a.d || "9999").localeCompare(b.d || "9999"));
+    const rows = todos.map(q => `<li class="pop-row"><div class="pop-row__top"><span class="pop-row__name">${q.done ? "✅ " : ""}${esc2(q.t)}</span>${q.d ? `<b class="pop-row__n">${esc2(accFmtD(q.d))}</b>` : ""}</div>${q.note ? `<div class="ingr-muted">${esc2(q.note)}</div>` : ""}<div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="tododone" data-id="${esc2(q.id)}">${q.done ? "↺ Terug open" : "✓ Gedaan"}</button><button type="button" class="chip chip--sm" data-acc="tododel" data-id="${esc2(q.id)}">Verwijderen</button></div></li>`).join("");
+    const proc = ACC_HELP.map(h => `<details class="shop-more"><summary data-more="" data-less=""><span>${esc2(h.t)}</span></summary><ol>${h.s.map(s => `<li>${esc2(s)}</li>`).join("")}</ol></details>`).join("");
+    return `<div class="shop-info"><p><b>✅ Openstaande acties</b></p><p class="ingr-muted">Acties met een datum verschijnen ook in Data en op het startscherm.</p>${rows ? `<ol class="pop-list">${rows}</ol>` : `<p class="ingr-muted">Geen acties.</p>`}
+      <div class="shop-edit"><label>Nieuwe actie<input id="accT_t" maxlength="300" placeholder="bv. creditnota vragen aan leverancier"></label><label>Uiterste datum (optioneel)<input id="accT_d" type="date"></label><div class="shop-actions"><button type="button" class="btn btn--primary btn--sm" data-acc="todoadd">+ Actie toevoegen</button></div></div></div>
+      <div class="shop-info"><p><b>🧭 Wat moet ik doen als…</b></p><p class="ingr-muted">Stappen uit de support van Dexxter (jouw berichten van november 2026). Controleer bij twijfel altijd met Dexxter of je boekhouder: dit is geen boekhoudkundig advies.</p>${proc}
+      <p class="ingr-muted"><b>Btw-regel voor jou</b>: als btw-vrijgestelde in bijberoep betaal je 21% of 6% btw aan Belgische leveranciers en reken je die door in je prijzen. Btw 0% op een aankoop klopt dus niet, behalve bij een buitenlandse leverancier: dan volgt een bijzondere btw-aangifte. Bij het inboeken van een aankoop met 0% vraagt de app daarom bevestiging en zet ze een herinnering.</p>
+      <ul>${ACC_LINKS.filter(([tt]) => /Bijzondere|Craft|Intervat inloggen|klantenlisting/i.test(tt)).map(([tt, u]) => `<li><a href="${esc2(u)}" target="_blank" rel="noopener noreferrer">${esc2(tt)}</a></li>`).join("")}</ul></div>`;
+  }
   function accGauge(level, title, sub, idx){
     const cx = 70, cy = 68, r = 52, pt = (a, rr) => [cx + rr * Math.cos(a * Math.PI / 180), cy - rr * Math.sin(a * Math.PI / 180)];
     const arcs = [0, 1, 2, 3].map(i => { const a1 = 180 - i * 45, a2 = 180 - (i + 1) * 45, p1 = pt(a1, r), p2 = pt(a2, r); return `<path d="M${p1[0].toFixed(1)} ${p1[1].toFixed(1)} A${r} ${r} 0 0 1 ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}" fill="none" stroke="${RAYG[i]}" stroke-width="14"${level === i ? "" : ' opacity=".45"'}/>`; }).join("");
@@ -2818,7 +2862,7 @@
     if (k === "acc-edit"){ ACC.tab = "stock"; ACC.edit = id; ACC.mv = ""; }
     else if (k === "acc-mv"){ ACC.tab = "stock"; ACC.mv = id; ACC.edit = ""; }
     else if (k === "kassa"){ ACC.tab = "kassa"; }
-    else if (k === "doc"){ ACC.tab = "docs"; try { if (id === "new"){ const r = await docGet("draft-new"); if (!r){ drClear(key); showToast("De foto of het bestand van dit concept staat niet meer klaar."); } else ACC.docForm = { id:"new", file:new File([r.blob], r.name, { type:r.type }), fileName:r.name + " (" + Math.round(r.size / 1024) + " KB)", dir:"in", date:accToday(), party:"", nr:"", excl:"", vat:0, cat:"", note:"" }; } else { const r = await docGet(id); if (r) ACC.docForm = { id:r.id, fileName:r.name, dir:r.dir, date:r.date, party:r.party, nr:r.nr, excl:r.excl, vat:r.vat, cat:r.cat, note:r.note }; } } catch(e){ /* ignore */ } }
+    else if (k === "doc"){ ACC.tab = "docs"; try { if (id === "new"){ const r = await docGet("draft-new"); if (!r){ drClear(key); showToast("De foto of het bestand van dit concept staat niet meer klaar."); } else ACC.docForm = { id:"new", file:new File([r.blob], r.name, { type:r.type }), fileName:r.name + " (" + Math.round(r.size / 1024) + " KB)", dir:"in", date:accToday(), party:"", nr:"", excl:"", vat:21, cat:"", note:"" }; } else { const r = await docGet(id); if (r) ACC.docForm = { id:r.id, fileName:r.name, dir:r.dir, date:r.date, party:r.party, nr:r.nr, excl:r.excl, vat:r.vat, cat:r.cat, note:r.note }; } } catch(e){ /* ignore */ } }
     goTo("pricelist");
   }
 
@@ -2838,8 +2882,8 @@
     return `<div class="shop-info"><p><b>⚠️ Vervallen producten die nog op voorraad staan (${list.length})</b></p><ul>${list.map(i => `<li>${esc(i.name)} · THT ${esc(accFmtD(i.exp))} · nog ${esc(String(accLeft(i, "9999-12-31")).replace(".", ","))} <button type="button" class="chip chip--sm" data-acc="expire" data-id="${esc(i.id)}">Afboeken als vervallen</button></li>`).join("")}</ul><p class="ingr-muted">Zo daalt je eindvoorraad en komt het verlies in de meter Voorraadverlies.</p></div>`;
   }
   function accChecklistHtml(y){
-    const x = accLoad(), done = ACC_CHECKS.filter(([k]) => x.checks[y + "|" + k]).length;
-    return `<div class="shop-info"><p><b>📋 Afsluiten ${y}</b> (${done} van ${ACC_CHECKS.length})</p><ul class="acc-checks">${ACC_CHECKS.map(([k, t]) => `<li><button type="button" class="chip chip--sm${x.checks[y + "|" + k] ? " is-on" : ""}" data-acc="check" data-v="${y}|${k}">${x.checks[y + "|" + k] ? "✓" : "○"}</button> ${esc(t)}</li>`).join("")}</ul><p class="ingr-muted">Dexxter herinnert je rond 20/12 aan je voorraad. Tel dan je producten, boek af wat vervallen is en maak een back-up.</p></div>`;
+    const x = accLoad(), chk = ACC_CHECKS.filter(([k]) => x.showSkip || !x.skip["chk|" + k]), done = ACC_CHECKS.filter(([k]) => x.checks[y + "|" + k] && !x.skip["chk|" + k]).length, tot = ACC_CHECKS.filter(([k]) => !x.skip["chk|" + k]).length;
+    return `<div class="shop-info"><p><b>📋 Afsluiten ${y}</b> (${done} van ${tot})</p><ul class="acc-checks">${chk.map(([k, t]) => `<li><button type="button" class="chip chip--sm${x.checks[y + "|" + k] ? " is-on" : ""}" data-acc="check" data-v="${y}|${k}">${x.checks[y + "|" + k] ? "✓" : "○"}</button> ${esc(t)} <button type="button" class="chip chip--sm" data-acc="skip" data-k="chk|${k}">${x.skip["chk|" + k] ? "↺ Weer tonen" : "⏭️ Niet van toepassing"}</button></li>`).join("")}</ul><p class="ingr-muted">Dexxter herinnert je rond 20/12 aan je voorraad. Tel dan je producten, boek af wat vervallen is en maak een back-up.</p></div>`;
   }
   function accOfferPurchase(id){
     let ok = false; try { ok = actSalon(); } catch(e){ ok = false; } if (!ok) return; const x = accLoad(); if (!x.settings.askBuy) return;
@@ -2875,6 +2919,9 @@
     ["Klantenlisting indienen via Intervat (FOD Financiën)", "https://finance.belgium.be/en/E-services/Intervat/how-to-use-intervat/submit-customer-list"],
     ["Nihil klantenlisting als btw-vrijgestelde kleine onderneming (Accountable)", "https://www.accountable.eu/nl-be/help-center/hoe-dien-je-een-nihil-klantenlisting-in-via-intervat-als-btw-vrijgestelde-kleine-onderneming-vrijstellingsregeling/"],
     ["FOD Financiën (btw, Intervat, MyMinfin)", "https://financien.belgium.be"],
+    ["Bijzondere btw-aangifte: uitleg van Dexxter", "https://intercom.help/dexxter-7ffe8eed3ba9/nl/articles/11501752-bijzondere-aangifte"],
+    ["Bijzondere btw-aangifte indienen: filmpje van Dexxter", "https://player.vimeo.com/video/715711339"],
+    ["Factuur aanmaken in het Craft-platform van Creative Shelter (filmpje)", "https://www.loom.com/share/38ebba6ff97a45b1a1f511e50e0d6c04"],
     ["Bijzondere btw-aangifte (formulier 629): uitleg Accountable", "https://www.accountable.eu/nl-be/help-center/hoe-dien-ik-een-bijzondere-btw-aangifte-of-een-aangifte-629-in/"],
     ["Aankopen in het buitenland en btw (SBB, voor kleine ondernemingen en vzw’s)", "https://www.sbb.be/nl/node/1601"],
     ["Betalingstermijn bijzondere btw-aangifte (SBB)", "https://www.sbb.be/nl/node/1619"],
@@ -2960,6 +3007,11 @@
         <p><b>Je rekende ${e2(perMin)} per minuut.</b> Doel ${e2(rt)} per minuut = ${e2(needed)} voor deze tijd. ${gap > 0.5 ? "Tekort: <b>" + e2(gap) + "</b>." : "Doel gehaald."}${listMin !== total - bf0 && real !== null && real > listMin ? " De echte tijd was " + (real - listMin) + " min langer dan de prijslijst (" + listMin + " min): plan zo'n combinatie met meer tijd of reken er een toeslag voor." : ""}</p>
         <p class="ingr-muted">Kosten in deze sessie (schatting): ${fixedShare !== null ? "vaste kosten cabine " + e2(fixedShare) + " · " : "vaste kosten nog niet berekend (vul bedragen in en tel behandelingen in Populariteit) · "}kleine materialen ${e2(small)} · producten ${known ? e2(prod) + (known < names.length ? " (bekend voor " + known + " van " + names.length + ")" : "") : "nog niet bekend (maak een recept en gebruik het als materiaalkost)"}. Dat is samen ${e2(cost)}; wat overblijft voor jou: <b>${e2(net - cost)}</b>.</p></div>`;
       accSave(); return accRender(); }
+    if (a === "skip"){ const k = b.dataset.k; if (k){ if (x.skip[k]) delete x.skip[k]; else x.skip[k] = 1; accSave(); } return accRender(); }
+    if (a === "showskip"){ x.showSkip = x.showSkip ? 0 : 1; accSave(); return accRender(); }
+    if (a === "todoadd"){ const tt = (($("#accT_t") || {}).value || "").trim(), dd = (($("#accT_d") || {}).value || "").trim(); if (!tt){ showToast("Typ eerst de actie."); return; } x.todos.push({ id:"t" + Date.now().toString(36), t:tt.slice(0, 400), d:accIsDate(dd) ? dd : "", done:0, note:"" }); accSave(); return accRender(); }
+    if (a === "tododone"){ const q = x.todos.find(z => z.id === id); if (q){ q.done = q.done ? 0 : 1; if (q.d){ if (q.done) x.done["todo|" + q.id] = 1; else delete x.done["todo|" + q.id]; } accSave(); } return accRender(); }
+    if (a === "tododel"){ const q = x.todos.find(z => z.id === id); if (q && window.confirm("Deze actie verwijderen?\n" + q.t.slice(0, 90))){ x.todos = x.todos.filter(z => z.id !== id); accSave(); accRender(); } return; }
     if (a === "gauge"){ ACC.gOpen = String(ACC.gOpen) === String(v) ? "" : v; return accRender(); }
     if (a === "hgoal2"){ const t = accNum(($("#accG_t") || {}).value); if (t > 0 && t <= 1000){ accLoad().health.target = t; accSave(); } return accRender(); }
     if (a === "hov"){ const x2 = accLoad(); ["rev", "buy", "exp", "fixed"].forEach(k => { const el = $("#accO_" + k); if (!el) return; const val = el.value.trim(); if (val === "") delete x2.health.ov[k]; else { const n = accNum(val); if (n >= 0 && n <= 1e7) x2.health.ov[k] = n; } }); accSave(); showToast("Aangepast."); return accRender(); }
@@ -2994,7 +3046,7 @@
 
   /* ===== v201: Verkoophoekje (shop corner) ===== */
   const SHOP_FILE = "verkoop.json", SHOP_DRAFT = "bc_shop_draft_v1", SHOP_CACHE = "bc_shop_cache_v1";
-  const shop = { pub: null, draft: null, filter: "all", edit: "", busy: false, photoFor: "", photoSlot: "main", ver: "", q: "", tag: "", skin: "", pmin: "", pmax: "" };
+  const shop = { catOrder: null, skinOrder: null, pub: null, draft: null, filter: "all", edit: "", busy: false, photoFor: "", photoSlot: "main", ver: "", q: "", tag: "", skin: "", pmin: "", pmax: "" };
   const SHOP_PHOTOS = "bc_shop_photos_v1";
   const shopPhotoMap = () => { try { return JSON.parse(localStorage.getItem(SHOP_PHOTOS) || "{}") || {}; } catch(e){ return {}; } };
   const SHT = {
@@ -3004,15 +3056,15 @@
     fr:{ title:"Coin boutique", link:"Coin boutique", intro:"Savons faits main et soins, dans la limite des stocks.", how:"Pour commander : envoyez-moi un message WhatsApp avec ce que vous souhaitez et je vous dirai si c'est encore disponible. Le retrait est possible un soir sur rendez-vous, Barbarastraat 25 à Malines. Paiement uniquement sur place.", wa:"Commander via WhatsApp", gift:"Plutôt offrir un cadeau ? Voir le bon cadeau.", soldout:"Épuisé", last:"Dernier exemplaire", left:"Encore {n} disponible(s)", empty:"Rien n'est en vente pour le moment.", all:"Tout", zeep:"Savons", janssen:"Soins", overig:"Autre", comp:"Composition", msg:"Bonjour Sandra, je voudrais commander : {p}. Quand puis-je venir le chercher ?", msgAll:"Bonjour Sandra, je voudrais commander quelque chose dans le coin boutique. Quand puis-je venir le chercher ?" }
   };
 
-  const SHOP_CATS = ["verzorging", "zepen", "boeketten", "overig"], SHOP_SKINS = ["anti-aging", "algemeen", "hydratatie", "vette-huid", "gevoelige-huid"], SHOP_TAGS = ["ampul", "serum", "40plus"];
+  const SHOP_CATS = ["verzorging", "zepen", "boeketten", "overig"], SHOP_SKINS = ["anti-aging", "hydratatie", "vette-huid", "gevoelige-huid", "algemeen"], SHOP_TAGS = ["ampul", "serum", "40plus"];
   const shopSkinKey = s => "sk_" + String(s || "").replace(/-/g, "");
-  Object.assign(SHT.nl, { verzorging:"Verzorging", zepen:"Zepen", boeketten:"Boeketten", sk_antiaging:"Anti-aging", sk_algemeen:"Algemeen", sk_hydratatie:"Hydratatie", sk_vettehuid:"Vette huid", sk_gevoeligehuid:"Gevoelige huid", sk_:"Overige",
+  Object.assign(SHT.nl, { verzorging:"Verzorging", zepen:"Zepen", boeketten:"Boeketten", sk_antiaging:"Anti-aging", sk_algemeen:"Hele lichaam (geen huidtype)", sk_hydratatie:"Hydratatie", sk_vettehuid:"Vette huid", sk_gevoeligehuid:"Gevoelige huid", sk_:"Overige",
     tg_ampul:"Ampullen", tg_serum:"Serums", tg_40plus:"40+", q:"Zoek op naam of kenmerk…", skinAll:"Alle huidtypes", skinLab:"Huidtype", pFrom:"Van €", pTo:"Tot €", pr1:"t/m €15", pr2:"€15 – 30", pr3:"€30 – 50", pr4:"vanaf €50",
     clear:"Filters wissen", readmore:"Lees meer", readless:"Lees minder", none:"Geen producten gevonden met deze filters.", photo2:"+ Extra foto (zij- of achterkant)", close:"Sluiten", tapZoom:"Tik op de foto om in te zoomen", tagsLab:"Kenmerken", photoDel:"Foto verwijderen" });
-  Object.assign(SHT.en, { verzorging:"Skincare", zepen:"Soaps", boeketten:"Bouquets", sk_antiaging:"Anti-ageing", sk_algemeen:"General", sk_hydratatie:"Hydration", sk_vettehuid:"Oily skin", sk_gevoeligehuid:"Sensitive skin", sk_:"Other",
+  Object.assign(SHT.en, { verzorging:"Skincare", zepen:"Soaps", boeketten:"Bouquets", sk_antiaging:"Anti-ageing", sk_algemeen:"Whole body (no skin type)", sk_hydratatie:"Hydration", sk_vettehuid:"Oily skin", sk_gevoeligehuid:"Sensitive skin", sk_:"Other",
     tg_ampul:"Ampoules", tg_serum:"Serums", tg_40plus:"40+", q:"Search by name or feature…", skinAll:"All skin types", skinLab:"Skin type", pFrom:"From €", pTo:"To €", pr1:"up to €15", pr2:"€15 – 30", pr3:"€30 – 50", pr4:"from €50",
     clear:"Clear filters", readmore:"Read more", readless:"Read less", none:"No products found with these filters.", photo2:"+ Extra photo (side or back)", close:"Close", tapZoom:"Tap the photo to zoom in", tagsLab:"Features", photoDel:"Remove photo" });
-  Object.assign(SHT.fr, { verzorging:"Soins", zepen:"Savons", boeketten:"Bouquets", sk_antiaging:"Anti-âge", sk_algemeen:"Général", sk_hydratatie:"Hydratation", sk_vettehuid:"Peau grasse", sk_gevoeligehuid:"Peau sensible", sk_:"Autres",
+  Object.assign(SHT.fr, { verzorging:"Soins", zepen:"Savons", boeketten:"Bouquets", sk_antiaging:"Anti-âge", sk_algemeen:"Tout le corps (pas un type de peau)", sk_hydratatie:"Hydratation", sk_vettehuid:"Peau grasse", sk_gevoeligehuid:"Peau sensible", sk_:"Autres",
     tg_ampul:"Ampoules", tg_serum:"Sérums", tg_40plus:"40+", q:"Rechercher par nom ou caractéristique…", skinAll:"Tous types de peau", skinLab:"Type de peau", pFrom:"De €", pTo:"À €", pr1:"jusqu’à 15 €", pr2:"15 – 30 €", pr3:"30 – 50 €", pr4:"dès 50 €",
     clear:"Effacer les filtres", readmore:"Lire la suite", readless:"Réduire", none:"Aucun produit trouvé avec ces filtres.", photo2:"+ Photo supplémentaire (côté ou dos)", close:"Fermer", tapZoom:"Touchez la photo pour zoomer", tagsLab:"Caractéristiques", photoDel:"Supprimer la photo" });
   const sh = k => ((SHT[state.lang] || {})[k]) || SHT.nl[k] || k;
@@ -3048,10 +3100,11 @@
     if (owner && repo) tries.push([`https://api.github.com/repos/${owner}/${repo}/contents/${SHOP_FILE}`, { headers:{ Accept:"application/vnd.github.raw+json" }, cache:"no-store" }]);
     tries.push([`${SHOP_FILE}?t=${Date.now()}`, { cache:"no-store" }]);
     for (const [u, o] of tries){
-      try { const r = await fetch(u, o); if (!r.ok) continue; const j = JSON.parse(await r.text()); if (j && Array.isArray(j.items)){ shop.pub = shopClean(j.items); shop.ver = String(j.u || "").replace(/[^0-9]/g, "").slice(0, 14); try { localStorage.setItem(SHOP_CACHE, JSON.stringify(shop.pub)); } catch(e){} break; } } catch(e){ /* next */ }
+      try { const r = await fetch(u, o); if (!r.ok) continue; const j = JSON.parse(await r.text()); if (j && Array.isArray(j.items)){ shop.catOrder = shopPerm(j.cats, SHOP_CATS); shop.skinOrder = shopPerm(j.skins, SHOP_SKINS); shop.pub = shopClean(j.items); shop.ver = String(j.u || "").replace(/[^0-9]/g, "").slice(0, 14); try { localStorage.setItem(SHOP_CACHE, JSON.stringify(shop.pub)); } catch(e){} break; } } catch(e){ /* next */ }
     }
     if (!shop.pub){ try { shop.pub = shopClean(JSON.parse(localStorage.getItem(SHOP_CACHE) || "[]")); } catch(e){ shop.pub = []; } }
     try { shop.draft = shopSalon() ? shopClean(JSON.parse(localStorage.getItem(SHOP_DRAFT) || "null")) : null; if (shop.draft && !shop.draft.length && !localStorage.getItem(SHOP_DRAFT)) shop.draft = null; } catch(e){ shop.draft = null; }
+    if (shopSalon()){ try { const o = JSON.parse(localStorage.getItem(SHOP_ORDER_KEY) || "null"); if (o){ shop.catOrder = shopPerm(o.cats, SHOP_CATS); shop.skinOrder = shopPerm(o.skins, SHOP_SKINS); } } catch(e){ /* ignore */ } }
     shopSyncLinks();
     if (document.body.dataset.step === "shop") renderShop();
   }
@@ -3113,6 +3166,21 @@
     const d = ev.target; if (!d || !d.classList || !d.classList.contains("shop-more")) return;
     const s = d.querySelector("summary"), sp = s && s.querySelector("span"); if (sp) sp.textContent = d.open ? s.dataset.less : s.dataset.more;
   }, true);
+  // v220: Sandra can change the order of categories, sub-groups and products (stored in verkoop.json as cats/skins + the item order)
+  const SHOP_ORDER_KEY = "bc_shop_order_v1";
+  function shopPerm(arr, base){ const out = []; (Array.isArray(arr) ? arr : []).forEach(x => { if (base.includes(x) && !out.includes(x)) out.push(x); }); base.forEach(x => { if (!out.includes(x)) out.push(x); }); return out; }
+  function shopCatOrder(){ return shopPerm(shop.catOrder, SHOP_CATS); }
+  function shopSkinOrder(){ return shopPerm(shop.skinOrder, SHOP_SKINS); }
+  function shopSaveOrder(){ try { localStorage.setItem(SHOP_ORDER_KEY, JSON.stringify({ cats:shopCatOrder(), skins:shopSkinOrder() })); } catch(e){ /* ignore */ } }
+  function shopMove(list, id, dir){ const i = list.indexOf(id), j = i + dir; if (i < 0 || j < 0 || j >= list.length) return list; const o = list.slice(); o[i] = o[j]; o[j] = id; return o; }
+  function shopOrderHtml(){
+    const row = (k, lb, kind) => `<li class="pop-row"><span class="pop-row__name">${esc(lb)}</span> <button type="button" class="chip chip--sm" data-sh="${kind}up" data-id="${esc(k)}" aria-label="omhoog">▲</button> <button type="button" class="chip chip--sm" data-sh="${kind}down" data-id="${esc(k)}" aria-label="omlaag">▼</button></li>`;
+    return `<details class="shop-order"><summary>↕️ Volgorde aanpassen</summary>
+      <p class="ingr-muted">Categorieën, onderverdelingen en producten staan in deze volgorde voor je klanten. Producten verplaats je met ▲ ▼ op de productkaart. Vergeet niet te publiceren.</p>
+      <p><b>Categorieën</b></p><ol class="pop-list">${shopCatOrder().map(c => row(c, sh(c), "cat")).join("")}</ol>
+      <p><b>Onderverdeling binnen Verzorging</b></p><ol class="pop-list">${shopSkinOrder().map(c => row(c, sh(shopSkinKey(c)), "skin")).join("")}</ol>
+      <div class="shop-actions"><button type="button" class="chip chip--sm" data-sh="az">Producten van A tot Z zetten</button></div></details>`;
+  }
   function shopCard(i, salon){
     const stockTxt = i.status === "uitverkocht" ? sh("soldout") : (i.qty === 1 ? sh("last") : (i.qty > 1 ? sh("left").replace("{n}", i.qty) : ""));
     const priceTxt = i.price ? shopMoney(i.price) : "";
@@ -3133,7 +3201,7 @@
         <label>${esc(sh("desc"))}<textarea id="shE_desc" rows="4">${esc(i.desc)}</textarea></label>
         <label>${esc(sh("ingr"))}<textarea id="shE_ingr" rows="3">${esc(i.ingr)}</textarea></label>
         <div class="shop-actions"><button type="button" class="btn btn--primary btn--sm" data-sh="save" data-id="${esc(i.id)}">${esc(sh("save"))}</button><button type="button" class="btn btn--outline btn--sm" data-sh="cancel">${esc(sh("cancel"))}</button></div></div>`
-        : `<div class="shop-actions"><button type="button" class="chip chip--sm" data-sh="edit" data-id="${esc(i.id)}">${esc(sh("edit"))}</button><button type="button" class="chip chip--sm" data-sh="photo" data-id="${esc(i.id)}">${esc(sh("photo"))}</button><button type="button" class="chip chip--sm" data-sh="dec" data-id="${esc(i.id)}">−1</button><button type="button" class="chip chip--sm" data-sh="inc" data-id="${esc(i.id)}">+1</button><button type="button" class="chip chip--sm" data-sh="sold" data-id="${esc(i.id)}">${esc(i.status === "uitverkocht" ? sh("avail") : sh("sold"))}</button><button type="button" class="chip chip--sm" data-sh="del" data-id="${esc(i.id)}">${esc(sh("del"))}</button></div>`;
+        : `<div class="shop-actions"><button type="button" class="chip chip--sm" data-sh="mvup" data-id="${esc(i.id)}" aria-label="omhoog">▲</button><button type="button" class="chip chip--sm" data-sh="mvdown" data-id="${esc(i.id)}" aria-label="omlaag">▼</button><button type="button" class="chip chip--sm" data-sh="edit" data-id="${esc(i.id)}">${esc(sh("edit"))}</button><button type="button" class="chip chip--sm" data-sh="photo" data-id="${esc(i.id)}">${esc(sh("photo"))}</button><button type="button" class="chip chip--sm" data-sh="dec" data-id="${esc(i.id)}">−1</button><button type="button" class="chip chip--sm" data-sh="inc" data-id="${esc(i.id)}">+1</button><button type="button" class="chip chip--sm" data-sh="sold" data-id="${esc(i.id)}">${esc(i.status === "uitverkocht" ? sh("avail") : sh("sold"))}</button><button type="button" class="chip chip--sm" data-sh="del" data-id="${esc(i.id)}">${esc(sh("del"))}</button></div>`;
     }
     const more = i.photos && i.photos.length ? `<span class="shop-card__more" aria-hidden="true">📷 +${i.photos.length}</span>` : "";
     const sd = shopShort(i.desc), longTxt = i.desc !== sd || i.ingr;
@@ -3147,14 +3215,14 @@
       ${order}${admin}</div></article>`;
   }
   function shopFilterBar(vis){
-    const f = shop.filter, cats = ["all"].concat(SHOP_CATS.filter(c => vis.some(i => i.cat === c)));
+    const f = shop.filter, cats = ["all"].concat(shopCatOrder().filter(c => c !== "overig" || vis.some(i => i.cat === c)));
     const chip = (on, data, label) => `<button type="button" class="chip chip--sm${on ? " is-on" : ""}" ${data}>${esc(label)}</button>`;
     const pre = [["", "15", "pr1"], ["15", "30", "pr2"], ["30", "50", "pr3"], ["50", "", "pr4"]];
     return `<div class="shop-filters">
       <input type="search" id="shQ" class="pm-input shop-q" value="${esc(shop.q)}" placeholder="${esc(sh("q"))}" autocomplete="off">
       <div class="pop-chips">${cats.map(c => chip(f === c, `data-sh="filter" data-id="${c}"`, sh(c))).join("")}</div>
       <div class="pop-chips">${SHOP_TAGS.map(k => chip(shop.tag === k, `data-sh="tag" data-id="${k}"`, sh("tg_" + k))).join("")}</div>
-      <label class="shop-sel">${esc(sh("skinLab"))} <select id="shSkin" class="pm-input"><option value="">${esc(sh("skinAll"))}</option>${SHOP_SKINS.map(c => `<option value="${c}"${shop.skin === c ? " selected" : ""}>${esc(sh(shopSkinKey(c)))}</option>`).join("")}</select></label>
+      <label class="shop-sel">${esc(sh("skinLab"))} <select id="shSkin" class="pm-input"><option value="">${esc(sh("skinAll"))}</option>${SHOP_SKINS.filter(c => c !== "algemeen").map(c => `<option value="${c}"${shop.skin === c ? " selected" : ""}>${esc(sh(shopSkinKey(c)))}</option>`).join("")}<option value="algemeen"${shop.skin === "algemeen" ? " selected" : ""}>${esc(sh("sk_algemeen"))}</option></select></label>
       <div class="shop-price"><label>${esc(sh("pFrom"))}<input type="text" inputmode="decimal" id="shMin" class="pm-input" size="4" value="${esc(shop.pmin)}"></label><label>${esc(sh("pTo"))}<input type="text" inputmode="decimal" id="shMax" class="pm-input" size="4" value="${esc(shop.pmax)}"></label></div>
       <div class="pop-chips">${pre.map(([lo, hi, k]) => chip(shop.pmin === lo && shop.pmax === hi && (lo || hi), `data-sh="preset" data-id="${lo}|${hi}"`, sh(k))).join("")}${(shop.q || shop.tag || shop.skin || shop.pmin || shop.pmax || f !== "all") ? chip(false, 'data-sh="reset"', sh("clear")) : ""}</div>
     </div>`;
@@ -3163,15 +3231,15 @@
     const out = $("#shopList"); if (!out) return;
     const salon = shopSalon(), vis = shopList().filter(i => salon || i.status !== "concept");
     const ed = salon && shop.edit ? shopList().find(x => x.id === shop.edit) : null;   // v218: the product being edited is always shown first, whatever the filters
-    const shown = vis.filter(i => !(ed && i.id === ed.id) && (shop.filter === "all" || i.cat === shop.filter) && shopMatches(i)).sort((x, y) => x.name.localeCompare(y.name, "nl"));
+    const shown = vis.filter(i => !(ed && i.id === ed.id) && (shop.filter === "all" || i.cat === shop.filter) && shopMatches(i));   // manual order (array order), v220
     const hidden = vis.length - shown.length - (ed ? 1 : 0), edHtml = ed ? `<section class="shop-group"><h3 class="shop-group__t">✏️ Je bewerkt dit product</h3>${shopCard(ed, salon)}</section>` : "";
     const hint = (salon && hidden > 0 && (shop.q || shop.tag || shop.skin || shop.pmin || shop.pmax || shop.filter !== "all")) ? `<p class="step__hint">ℹ️ ${hidden} product(en) verborgen door de filters. Tik op “${esc(sh("clear"))}” om alles te zien.</p>` : "";
-    if (!shown.length){ out.innerHTML = edHtml + hint + (ed ? "" : `<p class="step__hint">${esc(vis.length ? sh("none") : sh("empty"))}</p>`); return; }
-    out.innerHTML = edHtml + hint + SHOP_CATS.map(c => {
+    if (!shown.length){ out.innerHTML = edHtml + hint + (ed ? "" : `<p class="step__hint">${esc(shop.filter !== "all" && !vis.some(i => i.cat === shop.filter) ? "Nog geen producten in deze categorie." : (vis.length ? sh("none") : sh("empty")))}</p>`); return; }
+    out.innerHTML = edHtml + hint + shopCatOrder().map(c => {
       const items = shown.filter(i => i.cat === c); if (!items.length) return "";
       let body;
       if (c === "verzorging"){   // sub-division by skin function
-        body = SHOP_SKINS.concat([""]).map(s => { const g = items.filter(i => i.skin === s); return g.length ? `<h4 class="shop-sub">${esc(s ? sh(shopSkinKey(s)) : sh("sk_"))}</h4>${g.map(i => shopCard(i, salon)).join("")}` : ""; }).join("");
+        body = shopSkinOrder().concat([""]).map(s => { const g = items.filter(i => i.skin === s); return g.length ? `<h4 class="shop-sub">${esc(s ? sh(shopSkinKey(s)) : sh("sk_"))}</h4>${g.map(i => shopCard(i, salon)).join("")}` : ""; }).join("");
       } else body = items.map(i => shopCard(i, salon)).join("");
       return `<section class="shop-group"><h3 class="shop-group__t">${esc(sh(c))}<span>${items.length}</span></h3>${body}</section>`;
     }).join("");
@@ -3187,6 +3255,7 @@
         <button type="button" class="btn btn--text btn--sm" data-action="open-giftcard">${esc(sh("gift"))}</button></p></div>
       ${salon ? `<div class="shop-admin"><p>${esc(dirty ? sh("unsaved") : sh("saved"))}</p><div class="shop-actions"><button type="button" class="btn btn--outline btn--sm" data-sh="add">${esc(sh("add"))}</button><button type="button" class="btn btn--primary btn--sm" data-sh="publish"${shop.busy ? " disabled" : ""}>${esc(sh("pub"))}</button>${dirty ? `<button type="button" class="btn btn--outline btn--sm" data-sh="discard">${esc(sh("discard"))}</button>` : ""}</div></div>` : ""}
       ${shopFilterBar(vis)}
+      ${salon ? shopOrderHtml() : ""}
       <div id="shopList"></div>`;
     renderShopList();
   }
@@ -3230,10 +3299,10 @@
         if (/^data:image\/jpeg;base64,/.test(it.photo)){ const path = `assets/verkoop/${it.id}-${Date.now().toString(36)}.jpg`; await put(path, it.photo.split(",")[1], "Productfoto (app)"); try { const m = shopPhotoMap(); m[path] = it.photo; const ks = Object.keys(m); while (ks.length > 12) delete m[ks.shift()]; localStorage.setItem(SHOP_PHOTOS, JSON.stringify(m)); } catch(e){ /* optional */ } it.photo = path; }
         if (Array.isArray(it.photos)) for (let k = 0; k < it.photos.length; k++){ const pp = it.photos[k]; if (/^data:image\/jpeg;base64,/.test(pp)){ const path = `assets/verkoop/${it.id}-x${k}-${Date.now().toString(36)}.jpg`; await put(path, pp.split(",")[1], "Productfoto (app)"); try { const m = shopPhotoMap(); m[path] = pp; const ks = Object.keys(m); while (ks.length > 12) delete m[ks.shift()]; localStorage.setItem(SHOP_PHOTOS, JSON.stringify(m)); } catch(e){ /* optional */ } it.photos[k] = path; } }
       }
-      const out = { v:1, u: new Date().toISOString(), items };
+      const out = { v:1, u: new Date().toISOString(), cats: shopCatOrder(), skins: shopSkinOrder(), items };
       await put(SHOP_FILE, giftToken64(JSON.stringify(out, null, 1)), "Verkoophoekje bijgewerkt (app)");
       shop.pub = shopClean(items); shop.ver = out.u.replace(/[^0-9]/g, "").slice(0, 14); shop.draft = null;
-      try { localStorage.removeItem(SHOP_DRAFT); localStorage.setItem(SHOP_CACHE, JSON.stringify(shop.pub)); } catch(e){}
+      try { localStorage.removeItem(SHOP_DRAFT); localStorage.removeItem(SHOP_ORDER_KEY); localStorage.setItem(SHOP_CACHE, JSON.stringify(shop.pub)); } catch(e){}
       showToast(sh("pub_ok"));
     } catch(e){ showToast(sh("pub_fail").replace("{e}", String(e && e.message || e))); }
     shop.busy = false; renderShop(); shopSyncLinks();
@@ -3256,7 +3325,11 @@
     if (a === "publish") return void shopPublish();
     if (a === "discard"){ if (window.confirm(sh("discq"))){ shop.draft = null; try { localStorage.removeItem(SHOP_DRAFT); } catch(e){} shop.edit = ""; renderShop(); } return; }
     if (a === "add"){ const d = shopDraft(), nid = "nieuw-" + Date.now().toString(36); d.unshift({ id: nid, name: sh("newp"), desc: "", ingr: "", cat: shop.filter === "all" ? "verzorging" : shop.filter, skin: "", tags: [], photos: [], status: "concept", price: null, qty: null, photo: "" }); shop.edit = nid; shop.q = ""; shop.tag = ""; shop.skin = ""; shop.pmin = ""; shop.pmax = ""; shopSaveDraft(); renderShop(); const ec = $("#shopList"); if (ec && ec.scrollIntoView) ec.scrollIntoView({ block:"start" }); return; }
+    if (a === "catup" || a === "catdown"){ shop.catOrder = shopMove(shopCatOrder(), id, a === "catup" ? -1 : 1); shopSaveOrder(); return renderShop(); }
+    if (a === "skinup" || a === "skindown"){ shop.skinOrder = shopMove(shopSkinOrder(), id, a === "skinup" ? -1 : 1); shopSaveOrder(); return renderShop(); }
+    if (a === "az"){ const d0 = shopDraft(); d0.sort((x, y) => x.name.localeCompare(y.name, "nl")); shopSaveDraft(); return renderShop(); }
     const d = shopDraft(), it = d.find(x => x.id === id);
+    if (a === "mvup" || a === "mvdown"){ if (!it) return; const grp = d.filter(x => x.cat === it.cat && (it.cat !== "verzorging" || x.skin === it.skin)), gi = grp.indexOf(it), oth = grp[gi + (a === "mvup" ? -1 : 1)]; if (oth){ const p = d.indexOf(it), q = d.indexOf(oth); d[p] = oth; d[q] = it; shopSaveDraft(); } return renderShop(); }
     if (a === "cancel"){ drClear("shop-edit:" + shop.edit); shop.edit = ""; return renderShop(); }
     if (!it) return;
     if (a === "edit"){ shop.edit = id; return renderShop(); }
