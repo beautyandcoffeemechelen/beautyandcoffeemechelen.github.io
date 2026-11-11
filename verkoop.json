@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-11T16:44:23.707Z",
+ "u": "2026-11-11T16:48:32.330Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -15,6 +15,22 @@
   "algemeen"
  ],
  "items": [
+  {
+   "id": "nieuw-mwccn94e",
+   "name": "Skin Contour Fluid 7 x 2ml",
+   "desc": "Skin Contour Fluid zacht over de gereinigde huid verdelen. Ga daarbij als volgt te werk: breek het bovenste deel van de ampul af terwijl u uw handen met een tissue beschermt en giet de volledige inhoud van de ampul in uw handpalm. De vloeistof vervolgens gelijkmatig op gezicht en hals aanbrengen en lichtjes inmasseren. Alleen voor uitwendig gebruik.",
+   "ingr": "• ESP: Elastinestimulerende peptide; stimuleert de elastinesynthese in de fibroblasten, verstevigt de bindweefselstructuur en lift de gezichtscontouren\n\n• Plantenextract SORR: Zeer actief extract uit sigesbeckia orientalis en rabdosia rubescens met ontstekingsremmende en antioxidatieve werking, bevordert een egale en stralende teint\n\n• Saccharide-isomeraat: Natuurlijk koolhydratencomplex. Vormt een stevige binding met huideigen keratine en zorgt voor optimale hydratatie dankzij het sterke vochtvasthoudend vermogen\n\n• Lange-ketenhyaluronzuur: Huidverzorgend, hydraterend, antirimpeleffect",
+   "cat": "verzorging",
+   "skin": "anti-aging",
+   "tags": [
+    "ampul"
+   ],
+   "photos": [],
+   "status": "beschikbaar",
+   "price": 30.9,
+   "qty": 4,
+   "photo": "assets/verkoop/nieuw-mwccn94e-mwccs75d.jpg"
+  },
   {
    "id": "nieuw-mwccghqx",
    "name": "Instant Soothing Oil 7×2 ml",
