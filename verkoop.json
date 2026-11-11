@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-11T16:39:14.861Z",
+ "u": "2026-11-11T16:44:23.707Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -16,13 +16,31 @@
  ],
  "items": [
   {
+   "id": "nieuw-mwccghqx",
+   "name": "Instant Soothing Oil 7×2 ml",
+   "desc": "Kalmerend serum op oliebasis voor de gevoelige huid.\nTOEPASSING\n‘s morgens en/of ’s avonds op de gereinigde huid rond de ogen aanbrengen en met licht kloppende bewegingen inmasseren.\n\nDe ampul daartoe aan de bovenkant openbreken (bescherm daarbij de handen met een tissue) en de volledige inhoud in de handpalm gieten. De inhoud vervolgens gelijkmatig verdelen over de huid rond de ogen en met zacht kloppend bewegingen inmasseren. Alleen voor uitwendig gebruik.",
+   "ingr": "Macadamia integrifolia seed oil, propylheptyl caprylate, isostearyl isostearate, decyl oleate, squalane, octyldodecanol, caprylic/capric triglyceride, bisabolol, Calendula officinalis flower extract, Cardiospermum halicacabum flower/leaf/vine extract, Rosmarinus officinalis (rosemary) leaf extract, Ribes nigrum seed oil, Helianthus annuus (sunflower) seed oil, Helianthus annuus (sunflower) seed oil unsaponifiables, hydrogenated palm glycerides citrate, tocopherol, parfum (fragrance).",
+   "cat": "verzorging",
+   "skin": "gevoelige-huid",
+   "tags": [
+    "ampul"
+   ],
+   "photos": [],
+   "status": "beschikbaar",
+   "price": 29,
+   "qty": 3,
+   "photo": "assets/verkoop/nieuw-mwccghqx-mwccmtlv.jpg"
+  },
+  {
    "id": "nieuw-mwccba48",
    "name": "Melafadin Fluid 7 x 2 ml",
    "desc": "Concentraat met actieve bestanddelen voor een lichtere huid en de behandeling van pigmentvlekjes. Bevat lipoaminozuur, vitamine-C-fosfaat en SORR.\nTOEPASSING\nMelafadin Fluid rustig aanbrengen op de gereinigde huid. Ga daarbij als volgt te werk: breek het bovenste deel van de ampul af terwijl je je handen met een tissue beschermt. Giet vervolgens de volledige inhoud van de ampul in je handpalm. De vloeistof daarna gelijkmatig op gezicht en hals aanbrengen en lichtjes inmasseren.\n\nEen reguliere kuur van vier weken iedere twee tot drie maanden is bijzonder effectief gebleken.\n\nTijdens de gebruiksperiode de huid niet rechtstreeks blootstellen aan zonnestraling. Het beste resultaat wordt bereikt in combinatie met Brightening Day Protection, SPF 20 (ref. 3311) of Face Guard SPF 30. Uitsluitend voor uitwendig gebruik. Oogcontouren vermijden.\n\nTip: Voor een effectieve “huid verheldering in 4 stappen” de dagelijkse huidverzorging aanvullen met cosmeceuticals uit de serie FAIR SKIN.",
    "ingr": "• Hyaluronzuur (lange ketens): Verzacht, verzorgt en hydrateert de huid\n\n• Lipoaminozuur: (INCI: undecylenoyl-fenylalanine), effectieve skin lightener, blokkeert de α-MSH-receptoren aan de buitenzijde van de melanocyten, met aantoonbaar resultaat\n\n• Vitamine C-fosfaat: Gestabiliseerd ascorbinezuur; is stabiel in water, maar wordt in de huid door huideigen enzymen (esterasen) omgezet in vrije vitamine C; remt de rijping van melanine\n\n• SORR: Hoogactief plantaardig extract van Siegesbeckia orientalis en Rabdosia rubescens; remt de opname van melanine in de keratinocyten, heeft een verzachtend effect, werkt als antioxidant en bevordert een egale en stralende teint.",
    "cat": "verzorging",
    "skin": "",
-   "tags": [],
+   "tags": [
+    "ampul"
+   ],
    "photos": [],
    "status": "beschikbaar",
    "price": 29,
