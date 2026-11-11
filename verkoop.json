@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-11T16:58:07.008Z",
+ "u": "2026-11-11T18:27:39.598Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -15,6 +15,20 @@
   "algemeen"
  ],
  "items": [
+  {
+   "id": "nieuw-mwcg94bs",
+   "name": "Instant Soothing Mask 75ml",
+   "desc": "Het SOS-crèmemasker vermindert direct irritaties, roodheden en een trekkerig gevoel. Snel, doeltreffend en onmiddellijk zichtbaar! Instant Soothing Mask is dé snelle verzorging bij geïrriteerde huid! \n\nTOEPASSING\nNaar wens, bij voorkeur ’s avonds, aanbrengen op de gereinigde huid en 15 minuten laten intrekken. Overtollig product verwijderen met een vochtig doekje of zacht inmasseren.\n\nTip: Ook SOS hulp bij zonnebrand. Voor de snelle verzachting van acute huidreacties zoals roodheden: een dikke laag van het Instant Soothing Mask aanbrengen en zo lang mogelijk laten intrekken. Overtollig product daarna zacht verwijderen en de rest ’s nachts laten intrekken.",
+   "ingr": "• Fucogel® Powder: Hoogmoleculaire polysacharide uit L-fructose, D-galactose en galacturonzuur; legt een beschermlaagje over de huid en kalmeert de huid meteen\n\n• Skin Defense Complex+: Een bijzonder actief fytocomplex uit aalbessenpitolie (rijk aan omega 3- en omega 6-vetzuren, vermindert ontstekingen en herstelt de huidbarrière), blaasjeswingerd (rijk aan fytosterolen, is een plantaardig alternatief voor hydrocortisone, remt ontstekingen) en onverzeepbare delen van zonnebloemolie (rijk aan essentiële vetzuren, beschermt en versterkt de beschadigde huidbarrière, vermindert allergische reacties)\n\n• ISIS (Isostearyl Isostearate): Zachtmaker op basis van plantaardige grondstoffen – klinisch onderzoek toonde aan dat deze stof opgenomen wordt in de intercellulaire lipiden en zo de huidbarrière versterkt\n\n• Allantoïne: Kalmeert de geïrriteerde huid en bestrijdt roodheden\n\n• Sacharide-isomeraat: Een koolhydraatcomplex dat ook in de huid voorkomt en de huid langdurig hydrateert; 72 uur lang hydratatie door binding aan de keratinocyten van de hoornlaag",
+   "cat": "verzorging",
+   "skin": "gevoelige-huid",
+   "tags": [],
+   "photos": [],
+   "status": "beschikbaar",
+   "price": 39.99,
+   "qty": 1,
+   "photo": "assets/verkoop/nieuw-mwcg94bs-mwcgbntf.jpg"
+  },
   {
    "id": "nieuw-mwcd27gb",
    "name": "Detox Fluid 7 x 2 ml",
