@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-11T16:48:32.330Z",
+ "u": "2026-11-11T16:52:39.494Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -15,6 +15,22 @@
   "algemeen"
  ],
  "items": [
+  {
+   "id": "nieuw-mwccte36",
+   "name": "Caviar Extract 7 x 2ml",
+   "desc": "De 7-daagse energiebooster voor uw huid. Een all-round regenererende huidverzorging voor alle huidtypes die een oppepper kunnen gebruiken.\nTOEPASSING\nCaviar Extract rustig aanbrengen op de gereinigde huid. Ga daarbij als volgt te werk: breek het bovenste deel van de ampul af terwijl je je handen met een tissue beschermt. Giet vervolgens de volledige inhoud van de ampul in je handpalm. De vloeistof daarna gelijkmatig op gezicht en hals aanbrengen en lichtjes inmasseren. Alleen voor uitwendig gebruik.",
+   "ingr": "• Hyaluronzuur (lange ketens): Heeft een huidverzorgend, hydraterend antirimpeleffect\n\n• Kaviaarextract: Bevat aminozuren en suikerverbindingen. De ideale onderschepper van vrije radicalen; werkt tegelijkertijd als moisturizer en voorziet de huid van een beschermend laagje; bevordert de bloedcirculatie in de haarvaatjes, stimuleert de zuurstofvoorziening en de vorming van nieuwe cellen\n\n• Artemia-extract: Marien bestanddeel uit planktonextract. Heeft een herstellende werking, activeert de celstofwisseling en stimuleert de energievoorziening.",
+   "cat": "verzorging",
+   "skin": "anti-aging",
+   "tags": [
+    "ampul"
+   ],
+   "photos": [],
+   "status": "beschikbaar",
+   "price": 29.5,
+   "qty": 4,
+   "photo": "assets/verkoop/nieuw-mwccte36-mwccxhtf.jpg"
+  },
   {
    "id": "nieuw-mwccn94e",
    "name": "Skin Contour Fluid 7 x 2ml",
@@ -411,7 +427,8 @@
    "cat": "verzorging",
    "skin": "anti-aging",
    "tags": [
-    "serum"
+    "serum",
+    "40plus"
    ],
    "photos": [],
    "status": "beschikbaar",
