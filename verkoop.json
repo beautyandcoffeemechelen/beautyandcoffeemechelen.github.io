@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-11T18:38:11.721Z",
+ "u": "2026-11-11T18:41:12.248Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -15,6 +15,20 @@
   "algemeen"
  ],
  "items": [
+  {
+   "id": "nieuw-mwcgqadx",
+   "name": "Mild Creamy Cleanser 200ml",
+   "desc": "Verwijdert make-up en vuil grondig en tot diep in de poriën van de huid. De huideigen vochtigheid blijft behouden en onaangename gevoelens van spanning worden voorkomen. De rijke, zachte reiniging bereidt de huid optimaal voor op de volgende verzorging en werkt ideaal in combinatie met de Radiant Firming Tonic.\n\nTOEPASSING\nBreng de Milde crèmige reiniger ’s ochtends en ’s avonds aan op gezicht en hals en masseer met de vingertoppen in met ronddraaiende bewegingen. Verwijderen met veel lauw water of vochtige kompressen. Vervolgens wordt de huid gereinigd met Radiant Firming Tonic.\n\nTip: Voor zware make-up is een dubbele reiniging met Mild Creamy Cleanser aan te bevelen. Daartoe de reinigingsmelk aanbrengen, afspoelen, opnieuw aanbrengen en afspoelen met veel water of kompressen.",
+   "ingr": "Avocado-olie: Rijk aan natuurlijke vetzuren en vitamine A, E en D; verzorgt en beschermt de huid, zelfs tijdens het reinigen; doet de huid heerlijk zacht en glad aanvoelen.",
+   "cat": "verzorging",
+   "skin": "hydratatie",
+   "tags": [],
+   "photos": [],
+   "status": "beschikbaar",
+   "price": 26.5,
+   "qty": 1,
+   "photo": "assets/verkoop/nieuw-mwcgqadx-mwcgt33v.jpg"
+  },
   {
    "id": "nieuw-mwcgmgn4",
    "name": "Radiant Firming Tonic 200ml",
