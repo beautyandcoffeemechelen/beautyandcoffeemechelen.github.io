@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-11T16:52:39.494Z",
+ "u": "2026-11-11T16:58:07.008Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -15,6 +15,38 @@
   "algemeen"
  ],
  "items": [
+  {
+   "id": "nieuw-mwcd27gb",
+   "name": "Detox Fluid 7 x 2 ml",
+   "desc": "Revitaliserend actief concentraat met de sterk geconcentreerde ontgiftende actieve bestanddelen α-glucaan en avocadopeptide.\nTOEPASSING\n‘s morgens en/of ’s avonds op de gereinigde huid rond de ogen aanbrengen en met licht kloppende bewegingen inmasseren.\n\nDe ampul daartoe aan de bovenkant openbreken (bescherm daarbij de handen met een tissue) en de volledige inhoud in de handpalm gieten. De inhoud vervolgens gelijkmatig verdelen over de huid rond de ogen en met zacht kloppend bewegingen inmasseren. Alleen voor uitwendig gebruik.",
+   "ingr": "• Avocadopeptide: Peptideconcentraat uit de avocadovrucht; stimuleert natuurlijke ontgiftingsprocessen in de cel en helpt overtollige en onbruikbare afvalbijproducten van proteïnen af te breken\n\n• Gistextract: Bevordert het natuurlijke autofagocytoseproces van de cel, breekt “cellulaire afvalstoffen” (geoxideerde proteïnen en lipiden) in de cellen af. Zorgt voor een stralendere huid\n\n• Lange-keten hyaluronzuur: Hydraterend, verzachtend, antirimpeleffect\n\n• Korte-keten hyaluronzuur: Extreem vochtinbrengend, vochtvasthoudend, grote vochtbindende werking, maakt de opperhuid van binnenuit zacht en glad",
+   "cat": "verzorging",
+   "skin": "anti-aging",
+   "tags": [
+    "ampul"
+   ],
+   "photos": [],
+   "status": "beschikbaar",
+   "price": 27,
+   "qty": 3,
+   "photo": "assets/verkoop/nieuw-mwcd27gb-mwcd4f9i.jpg"
+  },
+  {
+   "id": "nieuw-mwccyla0",
+   "name": "Stem Cell Fluid 7 x 2ml",
+   "desc": "Verkwikkend serum op basis van plantaardige stamcellen van een Zwitsers appelras, de “Uttwiler Spätlauber” en hyaluronzuur (lange en korte ketens).\nTOEPASSING\nStem Cell Fluid voorzichtig op de gereinigde huid aanbrengen. Ga daarbij als volgt te werk: breek het bovenste deel van de ampul af terwijl u uw handen met een tissue beschermt en giet de volledige inhoud van de ampul in uw handpalm. De vloeistof vervolgens gelijkmatig op gezicht en hals aanbrengen en lichtjes inmasseren. Alleen voor uitwendig gebruik.",
+   "ingr": "• Extract van stamcellen van appel: Malus domestica-fruitcellen gekweekt uit de “Uttwiler Spätlauber”, een oud appelras uit Zwitserland; stimuleren de stamcel-activiteit van de huid\n\n• Lange-keten hyaluronzuur: Huidverzorgend, hydraterend, antirimpeleffect\n\n• Korte-keten hyaluronzuur: Extreem hydraterend en vochtvasthoudend; versterkt het vochtbindend vermogen van de huid; verstevigt het huidoppervlak van binnenuit en doet het gladder aanvoelen",
+   "cat": "verzorging",
+   "skin": "anti-aging",
+   "tags": [
+    "ampul"
+   ],
+   "photos": [],
+   "status": "beschikbaar",
+   "price": 32,
+   "qty": 4,
+   "photo": "assets/verkoop/nieuw-mwccyla0-mwcd4if5.jpg"
+  },
   {
    "id": "nieuw-mwccte36",
    "name": "Caviar Extract 7 x 2ml",
