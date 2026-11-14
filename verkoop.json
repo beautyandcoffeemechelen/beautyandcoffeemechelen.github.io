@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-14T07:05:25.745Z",
+ "u": "2026-11-14T07:25:23.615Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -24,12 +24,13 @@
    "skin": "",
    "tags": [],
    "photos": [
-    "assets/verkoop/nieuw-mwg1f3lw-x0-mwg29je9.jpg"
+    "assets/verkoop/nieuw-mwg1f3lw-x0-mwg2z7d4.jpg",
+    "assets/verkoop/nieuw-mwg1f3lw-x1-mwg2z9c2.jpg"
    ],
    "status": "beschikbaar",
    "price": 11.5,
    "qty": 1,
-   "photo": "assets/verkoop/nieuw-mwg1f3lw-mwg29ggh.jpg"
+   "photo": "assets/verkoop/nieuw-mwg1f3lw-mwg2z17j.jpg"
   },
   {
    "id": "nieuw-mwg1bq89",
@@ -45,7 +46,7 @@
    "status": "beschikbaar",
    "price": 12,
    "qty": 1,
-   "photo": "assets/verkoop/nieuw-mwg1bq89-mwg29lkz.jpg"
+   "photo": "assets/verkoop/nieuw-mwg1bq89-mwg2zbj7.jpg"
   },
   {
    "id": "nieuw-mwg0yb3c",
@@ -56,12 +57,14 @@
    "skin": "",
    "tags": [],
    "photos": [
-    "assets/verkoop/nieuw-mwg0yb3c-x0-mwg29u47.jpg"
+    "assets/verkoop/nieuw-mwg0yb3c-x0-mwg2zfe8.jpg",
+    "assets/verkoop/nieuw-mwg0yb3c-x1-mwg2zhga.jpg",
+    "assets/verkoop/nieuw-mwg0yb3c-x2-mwg2zji4.jpg"
    ],
    "status": "beschikbaar",
    "price": 9.5,
    "qty": 1,
-   "photo": "assets/verkoop/nieuw-mwg0yb3c-mwg29qk8.jpg"
+   "photo": "assets/verkoop/nieuw-mwg0yb3c-mwg2zdhx.jpg"
   },
   {
    "id": "nieuw-mwch3mx2",
