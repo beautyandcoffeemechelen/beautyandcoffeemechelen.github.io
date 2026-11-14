@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-11T19:05:36.099Z",
+ "u": "2026-11-14T07:05:25.745Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -15,6 +15,54 @@
   "algemeen"
  ],
  "items": [
+  {
+   "id": "nieuw-mwg1f3lw",
+   "name": "Amber Glow Jar",
+   "desc": "Een sfeervol glazen flesje dat de warme, knusse gloed van het seizoen vangt. Gevuld met herfstige getinte bladeren, gipskruid en natuurlijke accenten, afgewerkt met een handgeschreven houten wenskaartje.",
+   "ingr": "",
+   "cat": "boeketten",
+   "skin": "",
+   "tags": [],
+   "photos": [
+    "assets/verkoop/nieuw-mwg1f3lw-x0-mwg29je9.jpg"
+   ],
+   "status": "beschikbaar",
+   "price": 11.5,
+   "qty": 1,
+   "photo": "assets/verkoop/nieuw-mwg1f3lw-mwg29ggh.jpg"
+  },
+  {
+   "id": "nieuw-mwg1bq89",
+   "name": "Festive Ruby Bottle",
+   "desc": "Speels en kleurrijk! Deze glazen fles combineert opvallende fuchsia/rode pluisjes (lagurus) met frisgroen rendiermos en fijne droogbloemen. Inclusief feestelijk houten label van Beauty & Coffee met 'Fijne Feestdagen' – klaar om cadeau te geven.",
+   "ingr": "",
+   "cat": "boeketten",
+   "skin": "",
+   "tags": [],
+   "photos": [
+    "assets/verkoop/nieuw-mwg1bq89-x0-mwg29nsm.jpg"
+   ],
+   "status": "beschikbaar",
+   "price": 12,
+   "qty": 1,
+   "photo": "assets/verkoop/nieuw-mwg1bq89-mwg29lkz.jpg"
+  },
+  {
+   "id": "nieuw-mwg0yb3c",
+   "name": "Winter Whispers",
+   "desc": "Dromerig en winters door het lichte rendiermos, verfijnde droogbloemetjes en een natuurlijk zaadje. Dit unieke flesje brengt een serene, natuurlijke sfeer in elk interieur tijdens de donkere dagen.",
+   "ingr": "",
+   "cat": "boeketten",
+   "skin": "",
+   "tags": [],
+   "photos": [
+    "assets/verkoop/nieuw-mwg0yb3c-x0-mwg29u47.jpg"
+   ],
+   "status": "beschikbaar",
+   "price": 9.5,
+   "qty": 1,
+   "photo": "assets/verkoop/nieuw-mwg0yb3c-mwg29qk8.jpg"
+  },
   {
    "id": "nieuw-mwch3mx2",
    "name": "Gehwol Fusskraft Intensive Cream (Blauw)",
@@ -559,7 +607,7 @@
    "tags": [],
    "photos": [],
    "status": "beschikbaar",
-   "price": 40,
+   "price": 37.5,
    "qty": 1,
    "photo": "assets/verkoop/nieuw-mvv0efbz-mvv0hm6a.jpg"
   },
