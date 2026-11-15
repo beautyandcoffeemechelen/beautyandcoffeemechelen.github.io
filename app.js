@@ -2310,7 +2310,7 @@
     { const cc = d.costs || {}, cid = v => String(v || ("c" + Math.random().toString(36).slice(2, 9))).replace(/[^a-z0-9-]/gi, "-").slice(0, 30), sp = accNum(cc.shareSale);
       if (sp >= 0 && sp <= 100) o.costs.shareSale = sp;
       { const rt = accNum(cc.rate), bf = accNum(cc.buf); if (rt > 0 && rt <= 100) o.costs.rate = rt; if (bf >= 0 && bf <= 240) o.costs.buf = bf; }
-      (Array.isArray(cc.fixed) ? cc.fixed : []).slice(0, 100).forEach(f => { if (f && f.name){ const am = accNum(f.amt), pr = accNum(f.prof); o.costs.fixed.push({ id:cid(f.id), name:String(f.name).slice(0, 80), amt:(am >= 0 && am <= 1e6) ? am : 0, per:f.per === "jaar" ? "jaar" : "maand", scope:["cabine", "verkoop", "gedeeld"].includes(f.scope) ? f.scope : "cabine", prof:(pr >= 0 && pr <= 100) ? pr : 100 }); } });
+      (Array.isArray(cc.fixed) ? cc.fixed : []).slice(0, 100).forEach(f => { if (f && f.name){ const am = accNum(f.amt), pr = accNum(f.prof); o.costs.fixed.push({ id:cid(f.id), name:String(f.name).slice(0, 80), amt:(am >= 0 && am <= 1e6) ? am : 0, per:f.per === "jaar" ? "jaar" : "maand", scope:["cabine", "verkoop", "gedeeld"].includes(f.scope) ? f.scope : "cabine", prof:(pr >= 0 && pr <= 100) ? pr : 100, dex:String(f.dex || "").slice(0, 100) }); } });
       (Array.isArray(cc.small) ? cc.small : []).slice(0, 100).forEach(s => { if (s && s.name){ const c0 = accNum(s.cost); o.costs.small.push({ id:cid(s.id), name:String(s.name).slice(0, 80), cost:(c0 >= 0 && c0 <= 1e4) ? c0 : 0 }); } });
       (Array.isArray(cc.recipes) ? cc.recipes : []).slice(0, 200).forEach(r => { if (r && r.name){ const yy = accNum(r.yield); o.costs.recipes.push({ id:cid(r.id), name:String(r.name).slice(0, 100), kind:["behandeling", "zeep", "boeket", "ander"].includes(r.kind) ? r.kind : "behandeling", yield:(yy > 0 && yy <= 1e5) ? yy : 1,
         lines:(Array.isArray(r.lines) ? r.lines : []).slice(0, 60).map(l => { const q = accNum(l && l.qty), p = accNum(l && l.price); return { item:String((l && l.item) || "").slice(0, 40), name:String((l && l.name) || "").slice(0, 100), qty:(q > 0 && q <= 1e6) ? q : 0, unit:String((l && l.unit) || "").slice(0, 12), price:(p >= 0 && p <= 1e6) ? p : 0 }; }).filter(l => l.qty > 0 && (l.item || l.name)) }); } });
@@ -2335,6 +2335,7 @@
     (Array.isArray(d.docIdx) ? d.docIdx : []).slice(0, 3000).forEach(q => { if (q && accIsDate(q.d)) o.docIdx.push({ id:String(q.id || "").slice(0, 30), dir:q.dir === "out" ? "out" : "in", d:q.d, party:String(q.party || "").slice(0, 100), nr:String(q.nr || "").slice(0, 40), excl:Math.max(0, accNum(q.excl) || 0), vat:Math.min(100, Math.max(0, accNum(q.vat) || 0)), mention:q.mention ? 1 : 0 }); });
     { const hh = d.health || {}, tg = accNum(hh.target), fx = accNum(hh.fixed); if (tg > 0 && tg <= 1000) o.health.target = tg; if (fx >= 0 && fx <= 1e6) o.health.fixed = fx; [ "rev", "buy", "exp", "fixed" ].forEach(k => { if (hh.ov && hh.ov[k] !== undefined && hh.ov[k] !== null && hh.ov[k] !== ""){ const n = accNum(hh.ov[k]); if (n >= 0 && n <= 1e7) o.health.ov[k] = n; } }); Object.keys(hh.cost || {}).slice(0, 300).forEach(k => { const n = accNum(hh.cost[k]); if (n >= 0 && n <= 1e5) o.health.cost[String(k).slice(0, 140)] = n; }); }
     if (d.incl && typeof d.incl === "object") Object.keys(o.incl).forEach(k => { if (d.incl[k] === 0 || d.incl[k] === false) o.incl[k] = 0; });
+    o.inclSet = d.inclSet ? 1 : 0; if (!o.inclSet) o.incl = { verkoop:1, cabine:0, grondstof:0, ander:0 };   // v221: by default only goods for resale count as stock for Dexxter
     (Array.isArray(d.items) ? d.items : []).slice(0, 3000).forEach(i => {
       if (!i || !i.name) return;
       const qty = accNum(i.qty), cost = accNum(i.cost), vat = accNum(i.vat), price = (i.price === null || i.price === "" || i.price === undefined) ? NaN : accNum(i.price);
@@ -2343,7 +2344,7 @@
         name: String(i.name).slice(0, 140), cat: ACC_CATS[i.cat] ? i.cat : "verkoop", supplier: String(i.supplier || "").slice(0, 80), inv: String(i.inv || "").slice(0, 40),
         date: accIsDate(i.date) ? i.date : "", qty: (qty > 0 && qty <= 1e6) ? qty : 1, unit: String(i.unit || "").slice(0, 12),
         cost: (cost >= 0 && cost <= 1e6) ? Math.round(cost * 100) / 100 : 0, vat: (vat >= 0 && vat <= 100) ? vat : 0,
-        exp: accIsDate(i.exp) ? i.exp : "", price: (price >= 0 && price <= 1e5) ? Math.round(price * 100) / 100 : null, note: String(i.note || "").slice(0, 300),
+        exp: accIsDate(i.exp) ? i.exp : "", price: (price >= 0 && price <= 1e5) ? Math.round(price * 100) / 100 : null, note: String(i.note || "").slice(0, 300), pid: String(i.pid || "").replace(/[^a-z0-9]/gi, "").slice(0, 40), doc: String(i.doc || "").replace(/[^a-z0-9-]/gi, "").slice(0, 40),
         mv: (Array.isArray(i.mv) ? i.mv : []).slice(0, 300).map(m => ({ d: accIsDate(m && m.d) ? m.d : "", q: accNum(m && m.q), r: ACC_REASONS[m && m.r] ? m.r : "ander", p: (m && m.p !== null && m.p !== "" && m.p !== undefined && accNum(m.p) >= 0) ? Math.round(accNum(m.p) * 100) / 100 : null })).filter(m => m.d && m.q > 0 && m.q <= 1e6)
       });
     });
@@ -2513,7 +2514,7 @@
     if (a === "year"){ ACC.year = Number(v); return accRender(); }
     if (a === "filter"){ ACC.filter = v; return accRender(); }
     if (a === "vat"){ x.vatIncl = v === "1" ? 1 : 0; accSave(); return accRender(); }
-    if (a === "incl"){ x.incl[v] = x.incl[v] ? 0 : 1; accSave(); return accRender(); }
+    if (a === "incl"){ x.incl[v] = x.incl[v] ? 0 : 1; x.inclSet = 1; accSave(); return accRender(); }
     if (a === "lead"){ x.lead = Number(v); accSave(); accBanner(); return accRender(); }
     if (a === "done"){ const k = b.dataset.k; if (x.done[k]) delete x.done[k]; else x.done[k] = 1; accSave(); accBanner(); return accRender(); }
     if (a === "deldate"){ const k = b.dataset.k; x.dates = x.dates.filter(c => ("eigen|" + c.d + "|" + c.t) !== k); accSave(); accBanner(); return accRender(); }
@@ -2614,14 +2615,15 @@
       <label>Soort<select id="accD_dir"><option value="in"${P.dir === "in" ? " selected" : ""}>Aankoopfactuur of bon (van een leverancier)</option><option value="out"${P.dir === "out" ? " selected" : ""}>Verkoopfactuur (uit Dexxter, naar een klant)</option></select></label>
       ${fld("date", "Datum", P.date, 'type="date"')}${fld("party", "Leverancier of klant", P.party, 'maxlength="100"')}${fld("nr", "Factuurnummer", P.nr, 'maxlength="40"')}
       ${fld("excl", "Bedrag zonder btw (€)", String(P.excl || "").replace(".", ","), 'inputmode="decimal"')}${fld("vat", P.dir === "out" ? "Btw % (0 als vrijgesteld)" : "Btw % op de aankoopfactuur (21 of 6; nooit 0% bij een Belgische leverancier)", String(P.vat || 0).replace(".", ","), 'inputmode="decimal"')}
-      ${fld("cat", "Categorie in Dexxter (optioneel)", P.cat, 'maxlength="60"')}${P.dir === "out" ? `<label><input type="checkbox" id="accD_mention"${P.mention ? " checked" : ""}> De vermelding “kleine onderneming onderworpen aan de vrijstellingsregeling, btw niet toepasselijk” staat op de factuur</label>` : ""}${fld("note", "Opmerking", P.note, 'maxlength="300"')}
-      <div class="shop-actions"><button type="button" class="btn btn--primary btn--sm" data-acc="docsave">Bewaren</button><button type="button" class="btn btn--outline btn--sm" data-acc="doccancel">Annuleren</button></div></div>`;
+      <label>Categorie in Dexxter (optioneel)${accDexSelect("accD_cat", P.cat)}</label>${P.dir === "out" ? `<label><input type="checkbox" id="accD_mention"${P.mention ? " checked" : ""}> De vermelding “kleine onderneming onderworpen aan de vrijstellingsregeling, btw niet toepasselijk” staat op de factuur</label>` : ""}${fld("note", "Opmerking", P.note, 'maxlength="300"')}
+      ${P.dir === "out" ? "" : accLinesHtml(P)}
+      <div class="shop-actions"><button type="button" class="btn btn--primary btn--sm" data-acc="docsave">Bewaren</button><button type="button" class="btn btn--outline btn--sm" data-acc="dexcopy">📋 Kopieer voor Dexxter</button><button type="button" class="btn btn--outline btn--sm" data-acc="doccancel">Annuleren</button></div></div>`;
     box.innerHTML = `<div class="shop-info"><p><b>Digitale bonnen en facturen</b></p>
       <p class="ingr-muted">Bewaar hier je inkomende facturen en bonnetjes (leveranciers, salonproducten, apparatuur) en je uitgaande facturen. Ze blijven op dit toestel en gaan nooit naar GitHub.</p><details class="ingr-more"><summary>Waarom en hoe lang bewaren?</summary><p class="ingr-muted">Het bewaren hoort bij de btw-plicht of de vrijstellingsregeling: maak daarom af en toe een back-up (zip), en beveilig je e-mail en cloudopslag goed. De wettelijke bewaartermijn is volgens mijn algemene kennis meestal 7 jaar voor de boekhouding en tot 10 jaar voor btw-stukken: vraag het bevestigen aan Dexxter of je boekhouder.</p></details>
       <p>Dexxter-adres voor facturen: <input id="accAddr" type="email" autocomplete="off" placeholder="het adres dat Dexxter je gaf" value="${esc(addr)}" style="min-width:70%"> <button type="button" class="chip chip--sm" data-acc="docaddr">Bewaren</button></p>
       <p class="ingr-muted">Dit adres is persoonlijk: het staat nooit leesbaar in de app-code of de openbare repo. Het blijft alleen op dit toestel. ${addr ? "" : `<button type="button" class="chip chip--sm" data-acc="getaddr">🔑 Adres ophalen met je voorproefsleutel</button>`}</p></div>
       ${form}
-      <div class="shop-actions"><label class="btn btn--primary btn--sm">📷 Foto nemen<input type="file" id="accDocCam" accept="image/*" capture="environment" hidden></label><label class="btn btn--outline btn--sm">📎 Bestand kiezen<input type="file" id="accDocFile" accept="image/*,application/pdf" hidden></label></div>
+      <div class="shop-actions"><label class="btn btn--primary btn--sm">📷 Foto nemen<input type="file" id="accDocCam" accept="image/*" capture="environment" hidden></label><label class="btn btn--outline btn--sm">📎 Bestand kiezen<input type="file" id="accDocFile" accept="image/*,application/pdf" hidden></label><label class="btn btn--outline btn--sm">📄 E-factuur (UBL/XML)<input type="file" id="accUblTop" accept=".xml,application/xml,text/xml" hidden></label></div>
       <div class="pop-chips">${ys.map(k => ch(String(k), String(k), k === y, "docyear")).join("")}</div>
       <div class="pop-chips">${ch("all", "Alles", dirF === "all", "docdir")}${ch("in", "Aankoop", dirF === "in", "docdir")}${ch("out", "Verkoop (Dexxter)", dirF === "out", "docdir")}${ch("open", onlyOpen ? "✓ Aankoop nog niet doorgestuurd" : "Aankoop nog niet doorgestuurd", onlyOpen, "docopen")}</div>
       <p class="ingr-muted">${y}: aankoopfacturen ${esc(accEur(sum("in")))} · verkoopfacturen ${esc(accEur(sum("out")))} (zonder btw) · ${all.filter(d => String(d.date).slice(0, 4) === String(y)).length} stukken</p>
@@ -2683,7 +2685,7 @@
     const c = x.costs, O = accOverhead(x), F = O.F, v = n => esc(String(Math.round(n * 100) / 100).replace(".", ","));
     const sel = (id, opts, cur) => `<select id="${id}">${opts.map(([k, lb]) => `<option value="${esc(k)}"${cur === k ? " selected" : ""}>${esc(lb)}</option>`).join("")}</select>`;
     const fx = c.fixed.map(f => `<li class="pop-row"><div class="pop-row__top"><span class="pop-row__name">${esc(f.name)}</span><b class="pop-row__n">${esc(accEur(f.amt))} / ${f.per}</b></div>
-      <div class="ingr-muted">${esc(f.scope === "cabine" ? "Cabine" : f.scope === "verkoop" ? "Verkoop" : "Gedeeld cabine en verkoop")} · ${v(f.prof)}% beroepsmatig · per jaar ${esc(accEur(f.amt * (f.per === "jaar" ? 1 : 12)))}</div>
+      <div class="ingr-muted">${f.dex ? esc(f.dex) + " · " : ""}${esc(f.scope === "cabine" ? "Cabine" : f.scope === "verkoop" ? "Verkoop" : "Gedeeld cabine en verkoop")} · ${v(f.prof)}% beroepsmatig · per jaar ${esc(accEur(f.amt * (f.per === "jaar" ? 1 : 12)))}</div>
       <div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="fxdel" data-id="${esc(f.id)}">Verwijderen</button></div></li>`).join("");
     const sm = c.small.map(s => `<li class="pop-row"><div class="pop-row__top"><span class="pop-row__name">${esc(s.name)}</span><b class="pop-row__n">${esc(accEur(s.cost))}</b></div><div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="smdel" data-id="${esc(s.id)}">Verwijderen</button></div></li>`).join("");
     const itemOpts = [["", "(vrije regel, zonder aankoop)"]].concat(x.items.slice().sort((a, b) => a.name.localeCompare(b.name)).map(i => [i.id, i.name + " (" + accEur(accUnit(i)) + " per " + (i.unit || "stuk") + ")"]));
@@ -2706,8 +2708,8 @@
     return sess + `<div class="shop-info"><p><b>Vaste kosten</b></p><p class="ingr-muted">Water, elektriciteit, huur, verzekering, software… Kies waarvoor de kost dient: <b>cabine</b> (behandelingen), <b>verkoop</b> (zepen, boeketten, verkoophoekje) of <b>gedeeld</b>. Bij “beroepsmatig” zet je het deel dat je echt voor je zaak gebruikt (100% voor een aparte cabine, minder voor iets wat je ook privé gebruikt). Bepaal dat percentage samen met je boekhouder of in Dexxter: de app rekent er enkel mee.</p>
       ${c.fixed.length ? `<ol class="pop-list">${fx}</ol>` : `<p class="ingr-muted">Nog geen vaste kosten ingegeven.</p>`}
       <div class="shop-edit"><label>Kost<input id="accF_name" maxlength="80" placeholder="bv. elektriciteit"></label><label>Bedrag (€)<input id="accF_amt" inputmode="decimal"></label><label>Per ${sel("accF_per", [["maand", "maand"], ["jaar", "jaar"]], "maand")}</label>
-        <label>Voor ${sel("accF_scope", [["cabine", "cabine (behandelingen)"], ["verkoop", "verkoop"], ["gedeeld", "gedeeld"]], "cabine")}</label><label>Beroepsmatig gebruik (%)<input id="accF_prof" inputmode="decimal" value="100"></label>
-        <div class="shop-actions"><button type="button" class="btn btn--primary btn--sm" data-acc="fxadd">+ Vaste kost toevoegen</button></div></div>
+        <label>Voor ${sel("accF_scope", [["cabine", "cabine (behandelingen)"], ["verkoop", "verkoop"], ["gedeeld", "gedeeld"]], "cabine")}</label><label>Categorie in Dexxter (optioneel)${accDexSelect("accF_dex", "")}</label><label>Beroepsmatig gebruik (%)<input id="accF_prof" inputmode="decimal" value="100"></label>
+        <div class="shop-actions"><button type="button" class="btn btn--primary btn--sm" data-acc="fxadd">+ Vaste kost toevoegen</button></div><p class="ingr-muted">Kies je een Dexxter-categorie met een standaardpercentage voor bijberoep (bv. 20% voor een personenwagen), dan vult de app dat percentage in; je kan het aanpassen.</p></div>
       ${c.fixed.length ? `<p class="ingr-muted"><b>Per jaar:</b> cabine ${esc(accEur(F.cabine))} · verkoop ${esc(accEur(F.verkoop))} · gedeeld ${esc(accEur(F.gedeeld))} = <b>${esc(accEur(F.total))}</b>. Beroepsmatig deel: <b>${esc(accEur(F.deduct))}</b> (privé: ${esc(accEur(F.total - F.deduct))}).<br>Verdeeld over de zaak: cabine ${esc(accEur(F.cabineD))}, verkoop ${esc(accEur(F.verkoopD))}. Van de gedeelde kosten gaat <input id="accF_share" inputmode="decimal" size="3" value="${v(c.shareSale)}">% naar verkoop <button type="button" class="chip chip--sm" data-acc="shsave">Bewaren</button></p>
       <p class="ingr-muted">Aandeel per behandeling: ${O.beh > 0 ? esc(accEur(O.perBeh)) + " (" + O.beh + " behandelingen in 12 maanden)" : "nog geen telgegevens (open Populariteit)"} · per verkocht stuk: ${O.sold > 0 ? esc(accEur(O.perSold)) + " (" + v(O.sold) + " verkocht in 12 maanden)" : "nog niets verkocht afgeboekt"}.</p>` : ""}</div>
       <div class="shop-info"><p><b>Kleine materialen per behandeling</b></p><p class="ingr-muted">Watjes, oorstokjes, tissues, handschoenen… Vul de kost <b>per behandeling</b> in. Ze tellen mee bij elk recept van het soort “behandeling”.</p>
@@ -2770,6 +2772,61 @@
       <p class="ingr-muted"><b>Btw-regel voor jou</b>: als btw-vrijgestelde in bijberoep betaal je 21% of 6% btw aan Belgische leveranciers en reken je die door in je prijzen. Btw 0% op een aankoop klopt dus niet, behalve bij een buitenlandse leverancier: dan volgt een bijzondere btw-aangifte. Bij het inboeken van een aankoop met 0% vraagt de app daarom bevestiging en zet ze een herinnering.</p>
       <ul>${ACC_LINKS.filter(([tt]) => /Bijzondere|Craft|Intervat inloggen|klantenlisting/i.test(tt)).map(([tt, u]) => `<li><a href="${esc2(u)}" target="_blank" rel="noopener noreferrer">${esc2(tt)}</a></li>`).join("")}</ul></div>`;
   }
+  /* ===== v221: cost categories as in Dexxter (main category > sub-category with the default "% beroepsmatig gebruik" for a side job) ===== */
+  const ACC_DEX_MAIN = ["Algemene kosten", "Erelonen & consultancy", "Handelsgoederen", "Huur", "Investeringen", "Kosten lichte vracht", "Kosten motorvoertuig", "Kosten personenwagen", "Kosten software", "Kosten woning", "Onderaannemingen", "Opstartkosten", "Overige diensten", "Personeel", "Publiciteit & marketing", "Sociale bijdragen", "Verzekeringen"];
+  const ACC_DEX_SUB = [["Aflossing financiële leasing (motor)fiets", "Kosten motorvoertuig", 20], ["Aflossing financiële leasing lichte vracht", "Kosten lichte vracht", 75], ["Aflossing financiële leasing materiaal & overige", "Algemene kosten", 100], ["Aflossing financiële leasing personenwagen", "Kosten personenwagen", 20],
+    ["Algemene kosten & onderhoud (motor)fiets", "Kosten motorvoertuig", 20], ["Algemene kosten & onderhoud lichte vracht", "Kosten lichte vracht", 75], ["Algemene kosten & onderhoud personenwagen", "Kosten personenwagen", 20], ["Boeken, opleidingen, (vak)tijdschriften, ...", "Algemene kosten", 100], ["Brandstof lichte vracht", "Kosten lichte vracht", null]];
+  const accDexLabel = (m, s) => s ? m + " › " + s : m;
+  function accDexSelect(id, cur){
+    const opts = ACC_DEX_MAIN.map(m => { const subs = ACC_DEX_SUB.filter(s => s[1] === m); return `<optgroup label="${esc(m)}"><option value="${esc(m)}"${cur === m ? " selected" : ""}>${esc(m)} (algemeen)</option>${subs.map(s => `<option value="${esc(accDexLabel(m, s[0]))}"${cur === accDexLabel(m, s[0]) ? " selected" : ""}>${esc(s[0])}${s[2] !== null ? " (" + s[2] + "% beroepsmatig)" : ""}</option>`).join("")}</optgroup>`; }).join("");
+    const known = ACC_DEX_MAIN.some(m => cur === m || ACC_DEX_SUB.some(s => cur === accDexLabel(m, s[0])));
+    return `<select id="${id}"><option value="">—</option>${opts}${cur && !known ? `<option value="${esc(cur)}" selected>${esc(cur)}</option>` : ""}</select>`;
+  }
+  const accDexPct = v => { const s = ACC_DEX_SUB.find(q => accDexLabel(q[1], q[0]) === v); return s ? s[2] : null; };
+  /* ===== v221: invoice lines fill the stock (Boekhouding) and the product inventory (Ingrediënten) in one go; e-invoice (UBL/Peppol XML) import ===== */
+  const accNameNorm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+  function accFindPid(name){
+    const n = accNameNorm(name); if (n.length < 4 || typeof SALON_PRODUCTS === "undefined") return "";
+    const ids = Object.keys(SALON_PRODUCTS); let best = "", bl = 0;
+    ids.forEach(id => { const pn = accNameNorm(ingrName(SALON_PRODUCTS[id])); if (pn === n) { best = id; bl = 1e9; } else if (bl < 1e9 && pn.length >= 8 && (pn.includes(n) || n.includes(pn)) && pn.length > bl){ best = id; bl = pn.length; } });
+    return best;
+  }
+  function accSyncDocForm(){
+    const P = ACC.docForm; if (!P) return; const g = k => (($("#accD_" + k) || {}).value || "");
+    ["date", "party", "nr", "excl", "vat", "cat", "note"].forEach(k => { const el = $("#accD_" + k); if (el) P[k] = g(k); }); const d = $("#accD_dir"); if (d) P.dir = d.value;
+  }
+  function accLinesHtml(P){
+    const lines = P.lines || [], sum = lines.reduce((s, l) => s + l.qty * l.price, 0), names = new Set();
+    try { Object.keys(SALON_PRODUCTS).forEach(id => names.add(ingrName(SALON_PRODUCTS[id]))); accLoad().items.forEach(i => names.add(i.name)); } catch(e){ /* ignore */ }
+    return `<div class="shop-info"><p><b>Producten op deze factuur</b></p><p class="ingr-muted">Vul ze hier één keer in: ze komen automatisch in je voorraad (Boekhouding) en bij Ingrediënten → Voorraad (ongeopend + aantal), met de aankoopprijs voor de materiaalkost per behandeling. Je hoeft ze niet nog eens in te geven. Heb je een e-factuur als XML (UBL/Peppol)? Importeer ze hieronder: de regels worden dan automatisch ingevuld.</p>
+      ${lines.length ? `<ul class="acc-checks">${lines.map((l, n) => `<li>${esc(l.name)} · ${l.qty} × ${esc(accEur(l.price))} excl. · ${esc(ACC_CATS[l.cat] || l.cat)}${l.pid ? " · gekoppeld aan product ✔" : ""} <button type="button" class="chip chip--sm" data-acc="dlrem" data-v="${n}">✕</button></li>`).join("")}</ul><p class="ingr-muted">Samen: ${esc(accEur(sum))} zonder btw.</p>` : ""}
+      <div class="shop-edit"><label>Product<input id="accL_name" list="accL_dl" maxlength="140" placeholder="typ om te zoeken in je productlijst"></label><datalist id="accL_dl">${[...names].sort().map(n => `<option value="${esc(n)}">`).join("")}</datalist>
+        <label>Aantal<input id="accL_qty" inputmode="decimal" value="1"></label><label>Prijs per stuk zonder btw (€)<input id="accL_price" inputmode="decimal"></label>
+        <label>Soort<select id="accL_cat">${Object.keys(ACC_CATS).map(k => `<option value="${k}">${esc(ACC_CATS[k])}</option>`).join("")}</select></label>
+        <div class="shop-actions"><button type="button" class="chip chip--sm" data-acc="dladd">+ Regel toevoegen</button><label class="chip chip--sm">📄 E-factuur importeren (UBL/XML)<input type="file" id="accUbl" accept=".xml,application/xml,text/xml" hidden></label></div></div></div>`;
+  }
+  function accParseUbl(txt){
+    const doc = new DOMParser().parseFromString(txt, "application/xml"); if (doc.getElementsByTagName("parsererror").length) return null;
+    const root = doc.documentElement, ln = (el, n) => Array.from(el.getElementsByTagNameNS("*", n)), first = (el, n) => { const r = ln(el, n)[0]; return r ? (r.textContent || "").trim() : ""; };
+    const direct = n => { const c = Array.from(root.children).find(e => e.localName === n); return c ? (c.textContent || "").trim() : ""; };
+    const sup = ln(root, "AccountingSupplierParty")[0], party = sup ? (first(sup, "RegistrationName") || first(sup, "Name")) : "";
+    const lines = ln(root, "InvoiceLine").map(l => { const nm = first(l, "Name") || first(l, "Description"), qty = accNum(first(l, "InvoicedQuantity")), ext = accNum(first(l, "LineExtensionAmount")), pr = accNum(first(l, "PriceAmount")), vt = accNum(first(l, "Percent"));
+      const price = Number.isFinite(pr) && pr >= 0 ? pr : (qty > 0 && Number.isFinite(ext) ? ext / qty : 0); return { name:nm.slice(0, 140), qty:qty > 0 ? qty : 1, price:Math.round(price * 100) / 100, vat:Number.isFinite(vt) ? vt : null }; }).filter(l => l.name);
+    const vats = lines.map(l => l.vat).filter(v => v !== null), vat = vats.length ? vats.sort((p, q) => vats.filter(z => z === q).length - vats.filter(z => z === p).length)[0] : 21;
+    const tot = accNum(first(ln(root, "LegalMonetaryTotal")[0] || root, "TaxExclusiveAmount"));
+    return { nr:direct("ID").slice(0, 40), date:direct("IssueDate"), party:party.slice(0, 100), vat, excl:Number.isFinite(tot) ? tot : lines.reduce((s, l) => s + l.qty * l.price, 0), lines };
+  }
+  document.addEventListener("change", ev => {
+    const el = ev.target; if (!el || (el.id !== "accUbl" && el.id !== "accUblTop") || !el.files || !el.files[0]) return; const f = el.files[0];
+    f.text().then(txt => {
+      const u = accParseUbl(txt); if (!u || !u.lines.length){ showToast("Dit bestand is geen e-factuur (UBL) met productregels."); return; }
+      accSyncDocForm(); const P0 = ACC.docForm;
+      const lines = u.lines.map(l => { const pid = accFindPid(l.name), iv = pid ? invData().p[pid] : null; return { pid, name:l.name, qty:l.qty, price:l.price, cat:(iv && iv.sell) ? "verkoop" : "cabine" }; });
+      ACC.docForm = Object.assign({ id:"new", file:f, fileName:f.name, dir:"in", date:accToday(), party:"", nr:"", excl:"", vat:21, cat:"", note:"" }, P0 || {}, { id:(P0 && P0.id) || "new", dir:"in", date:accIsDate(u.date) ? u.date : (P0 && P0.date) || accToday(), party:u.party || (P0 && P0.party) || "", nr:u.nr || (P0 && P0.nr) || "", excl:Math.round(u.excl * 100) / 100, vat:u.vat, lines });
+      if (!P0 || P0.id === "new") ACC.docForm.file = (P0 && P0.file) || f;
+      showToast(lines.length + " regels ingelezen. Controleer de soort per regel en bewaar."); accDocsRender();
+    }).catch(() => showToast("Bestand kon niet gelezen worden."));
+  });
   function accGauge(level, title, sub, idx){
     const cx = 70, cy = 68, r = 52, pt = (a, rr) => [cx + rr * Math.cos(a * Math.PI / 180), cy - rr * Math.sin(a * Math.PI / 180)];
     const arcs = [0, 1, 2, 3].map(i => { const a1 = 180 - i * 45, a2 = 180 - (i + 1) * 45, p1 = pt(a1, r), p2 = pt(a2, r); return `<path d="M${p1[0].toFixed(1)} ${p1[1].toFixed(1)} A${r} ${r} 0 0 1 ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}" fill="none" stroke="${RAYG[i]}" stroke-width="14"${level === i ? "" : ' opacity=".45"'}/>`; }).join("");
@@ -2819,16 +2876,24 @@
     if (a === "docopen"){ ACC.docOpen = !ACC.docOpen; return accDocsRender(); }
     if (a === "docaddr"){ const el = $("#accAddr"), val = ((el || {}).value || "").trim(); if (val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){ showToast("Dat is geen geldig e-mailadres."); return; } try { if (val) localStorage.setItem(ACC_ADDR, val); else localStorage.removeItem(ACC_ADDR); showToast(val ? "Adres bewaard (enkel op dit toestel)." : "Adres gewist."); } catch(e){ showToast("Bewaren mislukt."); } return; }
     if (a === "doccancel"){ if (ACC.docForm){ drClear("doc:" + ACC.docForm.id); if (ACC.docForm.id === "new") docDel("draft-new").catch(() => {}); } ACC.docForm = null; return accDocsRender(); }
+    if (a === "dladd"){ accSyncDocForm(); const P = ACC.docForm; if (!P) return; const nm = g2("accL_name"), q = accNum(g2("accL_qty")), pr = accNum(g2("accL_price"));
+      if (!nm || !(q > 0) || !(pr >= 0)){ showToast("Vul een product, een aantal en een prijs in."); return; }
+      P.lines = (P.lines || []).concat([{ pid:accFindPid(nm), name:nm.slice(0, 140), qty:q, price:Math.round(pr * 100) / 100, cat:g2("accL_cat") || "cabine" }]);
+      if (!String(P.excl || "").trim()) P.excl = Math.round(P.lines.reduce((s, l) => s + l.qty * l.price, 0) * 100) / 100; return accDocsRender(); }
+    if (a === "dlrem"){ accSyncDocForm(); const P = ACC.docForm; if (P && P.lines){ P.lines.splice(Number(v), 1); } return accDocsRender(); }
+    if (a === "dexcopy"){ accSyncDocForm(); const P = ACC.docForm; if (!P) return; const ex = accNum(P.excl) || 0, vt = accNum(P.vat) || 0, tx = [P.dir === "out" ? "Verkoopfactuur" : "Aankoopfactuur", "Leverancier/klant: " + P.party, "Factuurnummer: " + P.nr, "Datum: " + accFmtD(P.date), "Bedrag excl. btw: " + accEur(ex), "Btw " + vt + "%: " + accEur(ex * vt / 100), "Totaal incl. btw: " + accEur(ex * (1 + vt / 100)), P.cat ? "Categorie: " + P.cat : ""].filter(Boolean).join("\n");
+      try { navigator.clipboard.writeText(tx).then(() => showToast("Gekopieerd: plak het in Dexxter."), () => window.prompt("Kopieer dit:", tx)); } catch(e){ window.prompt("Kopieer dit:", tx); } return; }
     if (a === "docsave"){
       const P = ACC.docForm; if (!P) return; const g = k => (($("#accD_" + k) || {}).value || "").trim();
       const m = docMeta({ id:P.id === "new" ? "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5) : P.id, dir:g("dir"), date:g("date"), party:g("party"), nr:g("nr"), excl:g("excl"), vat:g("vat"), cat:g("cat"), note:g("note"), mention:(($("#accD_mention") || {}).checked) ? 1 : 0 });
       if (!m.party){ showToast("Vul de leverancier of klant in."); return; }
-      (async () => { try { if (P.id === "new"){ const f = P.file; await docPut(Object.assign(m, { name:f.name, type:f.type || "application/octet-stream", size:f.size, blob:f, sent:0, sentAt:"", added:accToday() })); } else { const old = await docGet(P.id); await docPut(Object.assign({}, old, m)); } accIndexDoc(m); if (m.dir === "in" && m.vat === 0 && accLoad().settings.status !== "plichtig" && accAddRemind({ id:m.id, party:m.party, date:m.date })) showToast("Factuur zonder btw: herinnering gezet voor de bijzondere btw-aangifte (" + accFmtD(accQuarterDeadline(m.date)) + "). Zie Advies."); drClear("doc:" + P.id); if (P.id === "new") docDel("draft-new").catch(() => {}); ACC.docForm = null; showToast("Bewaard."); accDocsRender(); } catch(e){ showToast("Bewaren mislukt: opslagruimte vol of geblokkeerd."); } })(); return;
+      (async () => { try { if (P.id === "new"){ const f = P.file; await docPut(Object.assign(m, { name:f.name, type:f.type || "application/octet-stream", size:f.size, blob:f, sent:0, sentAt:"", added:accToday() })); } else { const old = await docGet(P.id); await docPut(Object.assign({}, old, m)); } accIndexDoc(m); if (m.dir === "in" && P.lines && P.lines.length){ const xs = accLoad(), iv = invData(); P.lines.forEach(l => { xs.items.push(accClean({ items:[{ id:"a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name:l.name, cat:l.cat, supplier:m.party, inv:m.nr, date:m.date, qty:l.qty, unit:"stuk", cost:Math.round(l.qty * l.price * 100) / 100, vat:m.vat, pid:l.pid, doc:m.id, note:"uit factuur " + m.nr, mv:[] }] }).items[0]); if (l.pid){ const r = iv.p[l.pid] || (iv.p[l.pid] = { n:0, per:0, left:null, sold:0 }); r.n = (r.n || 0) + l.qty; r.buy = l.price; r.vat = m.vat; } }); accSave(); invSave(iv); showToast(P.lines.length + " regel(s) in je voorraad gezet" + (P.lines.some(l => l.pid) ? " en bij Ingrediënten → Voorraad bijgewerkt." : ".")); P.lines = []; }
+      if (m.dir === "in" && m.vat === 0 && accLoad().settings.status !== "plichtig" && accAddRemind({ id:m.id, party:m.party, date:m.date })) showToast("Factuur zonder btw: herinnering gezet voor de bijzondere btw-aangifte (" + accFmtD(accQuarterDeadline(m.date)) + "). Zie Advies."); drClear("doc:" + P.id); if (P.id === "new") docDel("draft-new").catch(() => {}); ACC.docForm = null; showToast("Bewaard."); accDocsRender(); } catch(e){ showToast("Bewaren mislukt: opslagruimte vol of geblokkeerd."); } })(); return;
     }
     if (a === "docview"){ docGet(id).then(d => { if (d){ const u = URL.createObjectURL(d.blob); window.open(u, "_blank", "noopener"); setTimeout(() => URL.revokeObjectURL(u), 60000); } }); return; }
     if (a === "docsend"){ accDocSend(id); return; }
     if (a === "docsent"){ docGet(id).then(async d => { if (!d) return; d.sent = d.sent ? 0 : 1; d.sentAt = d.sent ? accToday() : ""; await docPut(d); accDocsRender(); }); return; }
-    if (a === "docedit"){ docGet(id).then(d => { if (!d) return; ACC.docForm = { id:d.id, fileName:d.name, dir:d.dir, date:d.date, party:d.party, nr:d.nr, excl:d.excl, vat:d.vat, cat:d.cat, note:d.note }; accDocsRender(); }); return; }
+    if (a === "docedit"){ docGet(id).then(d => { if (!d) return; ACC.docForm = { lines:[], id:d.id, fileName:d.name, dir:d.dir, date:d.date, party:d.party, nr:d.nr, excl:d.excl, vat:d.vat, cat:d.cat, note:d.note }; accDocsRender(); }); return; }
     if (a === "docdel"){ docGet(id).then(d => { if (d && window.confirm("Dit stuk definitief verwijderen?\n" + d.party + " " + d.date)) docDel(id).then(() => { accIndexDoc({ id }, true); accDocsRender(); }); }); return; }
     if (a === "doczip"){ const xb = accLoad(); xb.lastBackup = accToday(); accSave(); accDocZip(ACC.docYear || Number(accToday().slice(0, 4))); return; }
     if (a === "hcost"){ const el = $(`[data-hc="${CSS.escape(b.dataset.k)}"]`), val = ((el || {}).value || "").trim(), x = accLoad(); if (val === "") delete x.health.cost[b.dataset.k]; else { const n = accNum(val); if (!(n >= 0)){ showToast("Vul een bedrag in."); return; } x.health.cost[b.dataset.k] = n; } accSave(); return accRender(); }
@@ -2870,12 +2935,12 @@
   /* ===== v211: soorten gescheiden, startscherm, A/B/D/E, verkoop- en aankoopfacturen, Dexxter-adres ===== */
   const ACC_CHECKS = [["verkoop", "Voorraad verkoop geteld en ingegeven"], ["cabine", "Voorraad cabine geteld en bijgewerkt"], ["vervallen", "Vervallen producten afgeboekt"], ["dexxter", "Begin- en eindvoorraad in Dexxter ingevuld"], ["aankoop", "Aankoopfacturen compleet en naar Dexxter"], ["verkoopfact", "Verkoopfacturen uit Dexxter hier opgeladen"], ["kassa", "Kassa en dagontvangsten vergeleken met Dexxter"], ["backup", "Back-up gemaakt (json en zip)"]];
   function accSoortCards(x, y, past){
-    const val = n => String(Math.round(n * 100) / 100).replace(".", ","), tot = accSummary(x.items, y), kinds = Object.keys(ACC_CATS).filter(k => k === "verkoop" || k === "cabine" || x.items.some(i => i.cat === k));
-    const card = k => { const s = accSummary(x.items.filter(i => i.cat === k), y); return `<div class="shop-info"><p><b>${esc(ACC_CATS[k])}</b> · voorraad voor ${y}</p>
+    const val = n => String(Math.round(n * 100) / 100).replace(".", ","), tot = accSummary(x.items.filter(i => x.incl[i.cat]), y), kinds = Object.keys(ACC_CATS).filter(k => k === "verkoop" || k === "cabine" || x.items.some(i => i.cat === k));
+    const card = k => { const s = accSummary(x.items.filter(i => i.cat === k), y); return `<div class="shop-info"><p><b>${esc(ACC_CATS[k])}</b> · voorraad voor ${y} <button type="button" class="chip chip--sm${x.incl[k] ? " is-on" : ""}" data-acc="incl" data-v="${k}">${x.incl[k] ? "✔ telt mee voor Dexxter" : "telt niet mee voor Dexxter"}</button></p>${x.incl[k] ? "" : `<p class="ingr-muted">Gebruiksgoederen of materiaal voor in de salon: niet om door te verkopen en niet meegeteld in de totalen voor Dexxter.</p>`}
       <p>Beginvoorraad (01-01): <b>${esc(accEur(s.b))}</b> <button type="button" class="chip chip--sm" data-acc="copy" data-v="${val(s.b)}">Kopieer</button></p>
       <p>Eindvoorraad (31-12): <b>${esc(accEur(s.e))}</b>${past ? "" : " (prognose, het jaar loopt nog)"} <button type="button" class="chip chip--sm" data-acc="copy" data-v="${val(s.e)}">Kopieer</button></p>
       <p class="ingr-muted">Aankopen ${esc(accEur(s.buy))} · verkocht (kostprijs) ${esc(accEur(s.soldCost))} · omzet ${esc(accEur(s.soldRev))} · vervallen ${esc(accEur(s.expCost))}${Math.abs(s.check) > 0.005 ? " · ⚠️ controle " + esc(accEur(s.check)) : ""}</p></div>`; };
-    return kinds.map(card).join("") + `<p class="ingr-muted"><b>Alle soorten samen</b>: begin ${esc(accEur(tot.b))} · eind ${esc(accEur(tot.e))}. Verkoop en cabine blijven gescheiden; welke je aan Dexxter doorgeeft als voorraad, bepaal je met Dexxter of je boekhouder.<br>Waardering: <button type="button" class="chip chip--sm${x.vatIncl ? "" : " is-on"}" data-acc="vat" data-v="0">aankoopprijs excl. btw</button> <button type="button" class="chip chip--sm${x.vatIncl ? " is-on" : ""}" data-acc="vat" data-v="1">incl. btw</button><br>${x.settings.status === "vrijgesteld" ? "Je bent btw-vrijgesteld (kleine onderneming): de btw op aankopen kun je niet terugvorderen, dus rekenen met de prijs <b>inclusief btw</b> ligt dan voor de hand. Laat het bevestigen." : "Controleer met Dexxter of je boekhouder of je met of zonder btw waardeert."}</p>`;
+    return kinds.map(card).join("") + `<p class="ingr-muted"><b>Voor Dexxter</b> (enkel meegeteld: ${esc(kinds.filter(k => x.incl[k]).map(k => ACC_CATS[k]).join(", ") || "niets")}): begin ${esc(accEur(tot.b))} · eind ${esc(accEur(tot.e))}. Wat niet meetelt is gebruiksmateriaal voor in de salon; zet het hierboven aan of uit per soort.<br>Waardering: <button type="button" class="chip chip--sm${x.vatIncl ? "" : " is-on"}" data-acc="vat" data-v="0">aankoopprijs excl. btw</button> <button type="button" class="chip chip--sm${x.vatIncl ? " is-on" : ""}" data-acc="vat" data-v="1">incl. btw</button><br>${x.settings.status === "vrijgesteld" ? "Je bent btw-vrijgesteld (kleine onderneming): de btw op aankopen kun je niet terugvorderen, dus rekenen met de prijs <b>inclusief btw</b> ligt dan voor de hand. Laat het bevestigen." : "Controleer met Dexxter of je boekhouder of je met of zonder btw waardeert."}</p>`;
   }
   function accExpiredHtml(x){
     const t0 = accToday(), list = x.items.filter(i => i.exp && i.exp <= t0 && accLeft(i, "9999-12-31") > 0); if (!list.length) return "";
@@ -2978,11 +3043,14 @@
       <div class="shop-info"><p><b>Nuttige websites</b></p><ul>${lk}</ul></div>
       <p class="ingr-muted"><b>Bewaren</b>: bewaar al je facturen en bonnen (aankoop en verkoop) zorgvuldig; volgens mijn algemene kennis is de termijn meestal 7 jaar voor de boekhouding en tot 10 jaar voor btw-stukken. Maak regelmatig een back-up en beveilig je e-mail en cloudopslag.</p>`;
   }
+  const accVatApplies = () => { try { const s = accLoad(); return s.settings.status !== "plichtig" || !!s.vatIncl; } catch(e){ return true; } };
+  function invCostPerUse(r, per){ return (r.buy * (1 + (accVatApplies() ? (r.vat != null ? r.vat : 21) / 100 : 0))) / Math.max(1, per || r.per || 1); }
   function accTreatCosts(){
     const x = accLoad(), out = [], inv = invData();
     const ids = []; ingrTreatments().filter(id => !ingrIsAdventUse(id)).forEach(id => { if (id === "signaturefacial") SIG_LINES.forEach(l => ids.push("signaturefacial:" + l.id)); else ids.push(id); });
     ids.forEach(id => { const ps = ingrProductsFor(id); if (!ps.length) return; let sum = 0, found = 0;
-      ps.forEach(([pid, p]) => { const nm = sigNorm(ingrName(p)); const hit = x.items.filter(i => i.date && i.qty > 0 && i.cost > 0 && nm.length >= 6 && (nm.includes(sigNorm(i.name)) || sigNorm(i.name).includes(nm)) && sigNorm(i.name).length >= 6).sort((a, b) => b.date.localeCompare(a.date))[0]; if (!hit) return;
+      ps.forEach(([pid, p]) => { const r0 = inv.p[pid]; if (r0 && r0.buy > 0){ const per0 = r0.per || invGuess(p, pid).per; if (per0 > 0){ sum += invCostPerUse(r0, per0); found++; return; } }   // v221: price, VAT and uses per pack entered on the product itself
+        const nm = sigNorm(ingrName(p)); const hit = x.items.filter(i => i.date && i.qty > 0 && i.cost > 0 && nm.length >= 6 && (nm.includes(sigNorm(i.name)) || sigNorm(i.name).includes(nm)) && sigNorm(i.name).length >= 6).sort((a, b) => b.date.localeCompare(a.date))[0]; if (!hit) return;
         const r = inv.p[pid], per = (r && r.per) || invGuess(p, pid).per; if (!(per > 0)) return; sum += accUnit(hit) / per; found++; });
       out.push({ id, name:ingrTreatName(id), cost:found ? sum : null, found, total:ps.length }); });
     return out;
@@ -3017,7 +3085,7 @@
     if (a === "hov"){ const x2 = accLoad(); ["rev", "buy", "exp", "fixed"].forEach(k => { const el = $("#accO_" + k); if (!el) return; const val = el.value.trim(); if (val === "") delete x2.health.ov[k]; else { const n = accNum(val); if (n >= 0 && n <= 1e7) x2.health.ov[k] = n; } }); accSave(); showToast("Aangepast."); return accRender(); }
     if (a === "hovreset"){ accLoad().health.ov = {}; accSave(); return accRender(); }
     if (a === "fxadd"){ const am = accNum(g2("accF_amt")), pr = g2("accF_prof") === "" ? 100 : accNum(g2("accF_prof")); if (!g2("accF_name") || !(am >= 0) || !(pr >= 0 && pr <= 100)){ showToast("Vul een naam, een bedrag en een percentage tussen 0 en 100 in."); return; }
-      x.costs.fixed.push({ id:"c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 4), name:g2("accF_name"), amt:am, per:g2("accF_per") === "jaar" ? "jaar" : "maand", scope:["cabine", "verkoop", "gedeeld"].includes(g2("accF_scope")) ? g2("accF_scope") : "cabine", prof:pr }); accSave(); return accRender(); }
+      x.costs.fixed.push({ id:"c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 4), name:g2("accF_name"), amt:am, per:g2("accF_per") === "jaar" ? "jaar" : "maand", scope:["cabine", "verkoop", "gedeeld"].includes(g2("accF_scope")) ? g2("accF_scope") : "cabine", prof:pr, dex:g2("accF_dex") }); accSave(); return accRender(); }
     if (a === "fxdel"){ x.costs.fixed = x.costs.fixed.filter(f => f.id !== id); accSave(); return accRender(); }
     if (a === "shsave"){ const n = accNum(g2("accF_share")); if (n >= 0 && n <= 100){ x.costs.shareSale = n; accSave(); } return accRender(); }
     if (a === "smadd"){ const n = accNum(g2("accS2_cost")); if (!g2("accS2_name") || !(n >= 0)){ showToast("Vul een naam en een bedrag in."); return; } x.costs.small.push({ id:"c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 4), name:g2("accS2_name"), cost:n }); accSave(); return accRender(); }
@@ -3046,7 +3114,7 @@
 
   /* ===== v201: Verkoophoekje (shop corner) ===== */
   const SHOP_FILE = "verkoop.json", SHOP_DRAFT = "bc_shop_draft_v1", SHOP_CACHE = "bc_shop_cache_v1";
-  const shop = { catOrder: null, skinOrder: null, pub: null, draft: null, filter: "all", edit: "", busy: false, photoFor: "", photoSlot: "main", ver: "", q: "", tag: "", skin: "", pmin: "", pmax: "" };
+  const shop = { custom: { cats: [], skins: [] }, catOrder: null, skinOrder: null, pub: null, draft: null, filter: "all", edit: "", busy: false, photoFor: "", photoSlot: "main", ver: "", q: "", tag: "", skin: "", pmin: "", pmax: "" };
   const SHOP_PHOTOS = "bc_shop_photos_v1";
   const shopPhotoMap = () => { try { return JSON.parse(localStorage.getItem(SHOP_PHOTOS) || "{}") || {}; } catch(e){ return {}; } };
   const SHT = {
@@ -3056,15 +3124,15 @@
     fr:{ title:"Coin boutique", link:"Coin boutique", intro:"Savons faits main et soins, dans la limite des stocks.", how:"Pour commander : envoyez-moi un message WhatsApp avec ce que vous souhaitez et je vous dirai si c'est encore disponible. Le retrait est possible un soir sur rendez-vous, Barbarastraat 25 à Malines. Paiement uniquement sur place.", wa:"Commander via WhatsApp", gift:"Plutôt offrir un cadeau ? Voir le bon cadeau.", soldout:"Épuisé", last:"Dernier exemplaire", left:"Encore {n} disponible(s)", empty:"Rien n'est en vente pour le moment.", all:"Tout", zeep:"Savons", janssen:"Soins", overig:"Autre", comp:"Composition", msg:"Bonjour Sandra, je voudrais commander : {p}. Quand puis-je venir le chercher ?", msgAll:"Bonjour Sandra, je voudrais commander quelque chose dans le coin boutique. Quand puis-je venir le chercher ?" }
   };
 
-  const SHOP_CATS = ["verzorging", "zepen", "boeketten", "overig"], SHOP_SKINS = ["anti-aging", "hydratatie", "vette-huid", "gevoelige-huid", "algemeen"], SHOP_TAGS = ["ampul", "serum", "40plus"];
+  const SHOP_CATS = ["verzorging", "zepen", "boeketten", "overig"], SHOP_SKINS = ["anti-aging", "hydratatie", "vette-huid", "gevoelige-huid", "pigmentatie", "algemeen"], SHOP_TAGS = ["ampul", "serum", "40plus"];
   const shopSkinKey = s => "sk_" + String(s || "").replace(/-/g, "");
-  Object.assign(SHT.nl, { verzorging:"Verzorging", zepen:"Zepen", boeketten:"Boeketten", sk_antiaging:"Anti-aging", sk_algemeen:"Hele lichaam (geen huidtype)", sk_hydratatie:"Hydratatie", sk_vettehuid:"Vette huid", sk_gevoeligehuid:"Gevoelige huid", sk_:"Overige",
+  Object.assign(SHT.nl, { verzorging:"Verzorging", zepen:"Zepen", boeketten:"Boeketten", sk_antiaging:"Anti-aging", sk_pigmentatie:"Pigmentatie", sk_algemeen:"Hele lichaam (geen huidtype)", sk_hydratatie:"Hydratatie", sk_vettehuid:"Vette huid", sk_gevoeligehuid:"Gevoelige huid", sk_:"Overige",
     tg_ampul:"Ampullen", tg_serum:"Serums", tg_40plus:"40+", q:"Zoek op naam of kenmerk…", skinAll:"Alle huidtypes", skinLab:"Huidtype", pFrom:"Van €", pTo:"Tot €", pr1:"t/m €15", pr2:"€15 – 30", pr3:"€30 – 50", pr4:"vanaf €50",
     clear:"Filters wissen", readmore:"Lees meer", readless:"Lees minder", none:"Geen producten gevonden met deze filters.", photo2:"+ Extra foto (zij- of achterkant)", close:"Sluiten", tapZoom:"Tik op de foto om in te zoomen", tagsLab:"Kenmerken", photoDel:"Foto verwijderen" });
-  Object.assign(SHT.en, { verzorging:"Skincare", zepen:"Soaps", boeketten:"Bouquets", sk_antiaging:"Anti-ageing", sk_algemeen:"Whole body (no skin type)", sk_hydratatie:"Hydration", sk_vettehuid:"Oily skin", sk_gevoeligehuid:"Sensitive skin", sk_:"Other",
+  Object.assign(SHT.en, { verzorging:"Skincare", zepen:"Soaps", boeketten:"Bouquets", sk_antiaging:"Anti-ageing", sk_pigmentatie:"Pigmentation", sk_algemeen:"Whole body (no skin type)", sk_hydratatie:"Hydration", sk_vettehuid:"Oily skin", sk_gevoeligehuid:"Sensitive skin", sk_:"Other",
     tg_ampul:"Ampoules", tg_serum:"Serums", tg_40plus:"40+", q:"Search by name or feature…", skinAll:"All skin types", skinLab:"Skin type", pFrom:"From €", pTo:"To €", pr1:"up to €15", pr2:"€15 – 30", pr3:"€30 – 50", pr4:"from €50",
     clear:"Clear filters", readmore:"Read more", readless:"Read less", none:"No products found with these filters.", photo2:"+ Extra photo (side or back)", close:"Close", tapZoom:"Tap the photo to zoom in", tagsLab:"Features", photoDel:"Remove photo" });
-  Object.assign(SHT.fr, { verzorging:"Soins", zepen:"Savons", boeketten:"Bouquets", sk_antiaging:"Anti-âge", sk_algemeen:"Tout le corps (pas un type de peau)", sk_hydratatie:"Hydratation", sk_vettehuid:"Peau grasse", sk_gevoeligehuid:"Peau sensible", sk_:"Autres",
+  Object.assign(SHT.fr, { verzorging:"Soins", zepen:"Savons", boeketten:"Bouquets", sk_antiaging:"Anti-âge", sk_pigmentatie:"Pigmentation", sk_algemeen:"Tout le corps (pas un type de peau)", sk_hydratatie:"Hydratation", sk_vettehuid:"Peau grasse", sk_gevoeligehuid:"Peau sensible", sk_:"Autres",
     tg_ampul:"Ampoules", tg_serum:"Sérums", tg_40plus:"40+", q:"Rechercher par nom ou caractéristique…", skinAll:"Tous types de peau", skinLab:"Type de peau", pFrom:"De €", pTo:"À €", pr1:"jusqu’à 15 €", pr2:"15 – 30 €", pr3:"30 – 50 €", pr4:"dès 50 €",
     clear:"Effacer les filtres", readmore:"Lire la suite", readless:"Réduire", none:"Aucun produit trouvé avec ces filtres.", photo2:"+ Photo supplémentaire (côté ou dos)", close:"Fermer", tapZoom:"Touchez la photo pour zoomer", tagsLab:"Caractéristiques", photoDel:"Supprimer la photo" });
   const sh = k => ((SHT[state.lang] || {})[k]) || SHT.nl[k] || k;
@@ -3100,11 +3168,11 @@
     if (owner && repo) tries.push([`https://api.github.com/repos/${owner}/${repo}/contents/${SHOP_FILE}`, { headers:{ Accept:"application/vnd.github.raw+json" }, cache:"no-store" }]);
     tries.push([`${SHOP_FILE}?t=${Date.now()}`, { cache:"no-store" }]);
     for (const [u, o] of tries){
-      try { const r = await fetch(u, o); if (!r.ok) continue; const j = JSON.parse(await r.text()); if (j && Array.isArray(j.items)){ shop.catOrder = shopPerm(j.cats, SHOP_CATS); shop.skinOrder = shopPerm(j.skins, SHOP_SKINS); shop.pub = shopClean(j.items); shop.ver = String(j.u || "").replace(/[^0-9]/g, "").slice(0, 14); try { localStorage.setItem(SHOP_CACHE, JSON.stringify(shop.pub)); } catch(e){} break; } } catch(e){ /* next */ }
+      try { const r = await fetch(u, o); if (!r.ok) continue; const j = JSON.parse(await r.text()); if (j && Array.isArray(j.items)){ shopApplyCustom(j.custom); try { localStorage.setItem(SHOP_CUSTOM_KEY, JSON.stringify(shop.custom)); } catch(e){ /* ignore */ } if (shopSalon() && shopLocalCustom()) shopApplyCustom(shopMergeCustom(j.custom, shopLocalCustom())); shop.catOrder = shopPerm(j.cats, SHOP_CATS); shop.skinOrder = shopPerm(j.skins, SHOP_SKINS); shop.pub = shopClean(j.items); shop.ver = String(j.u || "").replace(/[^0-9]/g, "").slice(0, 14); try { localStorage.setItem(SHOP_CACHE, JSON.stringify(shop.pub)); } catch(e){} break; } } catch(e){ /* next */ }
     }
     if (!shop.pub){ try { shop.pub = shopClean(JSON.parse(localStorage.getItem(SHOP_CACHE) || "[]")); } catch(e){ shop.pub = []; } }
     try { shop.draft = shopSalon() ? shopClean(JSON.parse(localStorage.getItem(SHOP_DRAFT) || "null")) : null; if (shop.draft && !shop.draft.length && !localStorage.getItem(SHOP_DRAFT)) shop.draft = null; } catch(e){ shop.draft = null; }
-    if (shopSalon()){ try { const o = JSON.parse(localStorage.getItem(SHOP_ORDER_KEY) || "null"); if (o){ shop.catOrder = shopPerm(o.cats, SHOP_CATS); shop.skinOrder = shopPerm(o.skins, SHOP_SKINS); } } catch(e){ /* ignore */ } }
+    if (shopSalon()){ try { const o = JSON.parse(localStorage.getItem(SHOP_ORDER_KEY) || "null"); if (o){ if (o.custom) shopApplyCustom(o.custom); shop.catOrder = shopPerm(o.cats, SHOP_CATS); shop.skinOrder = shopPerm(o.skins, SHOP_SKINS); } } catch(e){ /* ignore */ } }
     shopSyncLinks();
     if (document.body.dataset.step === "shop") renderShop();
   }
@@ -3118,7 +3186,7 @@
     return s;
   }
   function shopMatches(i){
-    if (shop.q){ const hay = shopStrip(i.name + " " + i.desc + " " + i.ingr + " " + [...shopTagSet(i)].map(k => sh("tg_" + k)).join(" ") + " " + (i.skin ? sh(shopSkinKey(i.skin)) : "")); if (!shop.q.split(/\s+/).filter(Boolean).every(w => hay.includes(shopStrip(w)))) return false; }
+    if (shop.q){ const hay = shopStrip(i.name + " " + i.desc + " " + i.ingr + " " + [...shopTagSet(i)].map(k => sh("tg_" + k)).join(" ") + " " + (i.skin ? shopSkinLabel(i.skin) : "")); if (!shop.q.split(/\s+/).filter(Boolean).every(w => hay.includes(shopStrip(w)))) return false; }
     if (shop.tag && !shopTagSet(i).has(shop.tag)) return false;
     if (shop.skin && i.skin !== shop.skin) return false;
     const lo = shop.pmin === "" ? null : Number(String(shop.pmin).replace(",", ".")), hi = shop.pmax === "" ? null : Number(String(shop.pmax).replace(",", "."));
@@ -3167,18 +3235,38 @@
     const s = d.querySelector("summary"), sp = s && s.querySelector("span"); if (sp) sp.textContent = d.open ? s.dataset.less : s.dataset.more;
   }, true);
   // v220: Sandra can change the order of categories, sub-groups and products (stored in verkoop.json as cats/skins + the item order)
-  const SHOP_ORDER_KEY = "bc_shop_order_v1";
+  // v221: Sandra can add her own categories and sub-groups (stored in verkoop.json as custom.cats / custom.skins)
+  const SHOP_CATS_BASE = SHOP_CATS.slice(), SHOP_SKINS_BASE = SHOP_SKINS.slice();
+  const shopSlug = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 24) || "x";
+  function shopCustomClean(c){
+    const out = { cats:[], skins:[] }, seen = new Set(SHOP_CATS_BASE.concat(SHOP_SKINS_BASE));
+    [["cats", 12], ["skins", 20]].forEach(([k, max]) => (c && Array.isArray(c[k]) ? c[k] : []).slice(0, max).forEach(x => { const id = String((x && x.id) || "").replace(/[^a-z0-9-]/g, "").slice(0, 40), lb = String((x && x.label) || "").trim().slice(0, 40); if (id && lb && !seen.has(id)){ seen.add(id); out[k].push({ id, label:lb }); } }));
+    return out;
+  }
+  function shopApplyCustom(c){
+    shop.custom = shopCustomClean(c);
+    SHOP_CATS.length = 0; SHOP_CATS_BASE.concat(shop.custom.cats.map(x => x.id)).forEach(x => SHOP_CATS.push(x));
+    SHOP_SKINS.length = 0; SHOP_SKINS_BASE.concat(shop.custom.skins.map(x => x.id)).forEach(x => SHOP_SKINS.push(x));
+  }
+  function shopMergeCustom(a0, b0){ const x = shopCustomClean(a0), y = shopCustomClean(b0); ["cats", "skins"].forEach(k => y[k].forEach(q => { if (!x[k].some(z => z.id === q.id)) x[k].push(q); })); return x; }
+  function shopLocalCustom(){ try { const o = JSON.parse(localStorage.getItem(SHOP_ORDER_KEY) || "null"); return o && o.custom ? o.custom : null; } catch(e){ return null; } }
+  const shopCatLabel = id => { const c = shop.custom.cats.find(x => x.id === id); return c ? c.label : sh(id); };
+  const shopSkinLabel = id => { const c = shop.custom.skins.find(x => x.id === id); return c ? c.label : sh(shopSkinKey(id)); };
+  const SHOP_ORDER_KEY = "bc_shop_order_v1", SHOP_CUSTOM_KEY = "bc_shop_custom_v1";
+  try { const c1 = JSON.parse(localStorage.getItem(SHOP_CUSTOM_KEY) || "null"), o1 = JSON.parse(localStorage.getItem(SHOP_ORDER_KEY) || "null"); if (o1 && o1.custom) shopApplyCustom(o1.custom); else if (c1) shopApplyCustom(c1); } catch(e){ /* ignore */ }
   function shopPerm(arr, base){ const out = []; (Array.isArray(arr) ? arr : []).forEach(x => { if (base.includes(x) && !out.includes(x)) out.push(x); }); base.forEach(x => { if (!out.includes(x)) out.push(x); }); return out; }
   function shopCatOrder(){ return shopPerm(shop.catOrder, SHOP_CATS); }
   function shopSkinOrder(){ return shopPerm(shop.skinOrder, SHOP_SKINS); }
-  function shopSaveOrder(){ try { localStorage.setItem(SHOP_ORDER_KEY, JSON.stringify({ cats:shopCatOrder(), skins:shopSkinOrder() })); } catch(e){ /* ignore */ } }
+  function shopSaveOrder(){ try { localStorage.setItem(SHOP_ORDER_KEY, JSON.stringify({ cats:shopCatOrder(), skins:shopSkinOrder(), custom:shop.custom })); } catch(e){ /* ignore */ } }
   function shopMove(list, id, dir){ const i = list.indexOf(id), j = i + dir; if (i < 0 || j < 0 || j >= list.length) return list; const o = list.slice(); o[i] = o[j]; o[j] = id; return o; }
   function shopOrderHtml(){
-    const row = (k, lb, kind) => `<li class="pop-row"><span class="pop-row__name">${esc(lb)}</span> <button type="button" class="chip chip--sm" data-sh="${kind}up" data-id="${esc(k)}" aria-label="omhoog">▲</button> <button type="button" class="chip chip--sm" data-sh="${kind}down" data-id="${esc(k)}" aria-label="omlaag">▼</button></li>`;
+    const row = (k, lb, kind, own) => `<li class="pop-row"><span class="pop-row__name">${esc(lb)}${own ? " ⭐" : ""}</span> <button type="button" class="chip chip--sm" data-sh="${kind}up" data-id="${esc(k)}" aria-label="omhoog">▲</button> <button type="button" class="chip chip--sm" data-sh="${kind}down" data-id="${esc(k)}" aria-label="omlaag">▼</button>${own ? ` <button type="button" class="chip chip--sm" data-sh="${kind}del" data-id="${esc(k)}">✕ Verwijderen</button>` : ""}</li>`;
     return `<details class="shop-order"><summary>↕️ Volgorde aanpassen</summary>
       <p class="ingr-muted">Categorieën, onderverdelingen en producten staan in deze volgorde voor je klanten. Producten verplaats je met ▲ ▼ op de productkaart. Vergeet niet te publiceren.</p>
-      <p><b>Categorieën</b></p><ol class="pop-list">${shopCatOrder().map(c => row(c, sh(c), "cat")).join("")}</ol>
-      <p><b>Onderverdeling binnen Verzorging</b></p><ol class="pop-list">${shopSkinOrder().map(c => row(c, sh(shopSkinKey(c)), "skin")).join("")}</ol>
+      <p><b>Categorieën</b></p><ol class="pop-list">${shopCatOrder().map(c => row(c, shopCatLabel(c), "cat", shop.custom.cats.some(x => x.id === c))).join("")}</ol>
+      <p><b>Onderverdeling binnen Verzorging</b></p><ol class="pop-list">${shopSkinOrder().map(c => row(c, shopSkinLabel(c), "skin", shop.custom.skins.some(x => x.id === c))).join("")}</ol>
+      <div class="shop-edit"><label>Eigen categorie toevoegen (bv. Cadeaus)<input id="shNewCat" maxlength="40"></label><label>Eigen onderverdeling in Verzorging toevoegen (bv. Rosacea)<input id="shNewSkin" maxlength="40"></label>
+        <div class="shop-actions"><button type="button" class="chip chip--sm" data-sh="catadd">+ Categorie</button><button type="button" class="chip chip--sm" data-sh="skinadd">+ Onderverdeling</button></div></div>
       <div class="shop-actions"><button type="button" class="chip chip--sm" data-sh="az">Producten van A tot Z zetten</button></div></details>`;
   }
   function shopCard(i, salon){
@@ -3194,8 +3282,8 @@
         <label>${esc(sh("price"))}<input id="shE_price" inputmode="decimal" value="${i.price === null ? "" : esc(String(i.price).replace(".", ","))}"></label>
         <label>${esc(sh("qty"))}<input id="shE_qty" inputmode="numeric" value="${i.qty === null ? "" : i.qty}"></label>
         <label>${esc(sh("status"))}<select id="shE_status">${["beschikbaar", "uitverkocht", "concept"].map(s => `<option value="${s}"${i.status === s ? " selected" : ""}>${esc(s === "concept" ? sh("concept") : s === "uitverkocht" ? sh("soldout") : sh("avail").replace("Weer b", "B"))}</option>`).join("")}</select></label>
-        <label>${esc(sh("cat"))}<select id="shE_cat">${SHOP_CATS.map(c => `<option value="${c}"${i.cat === c ? " selected" : ""}>${esc(sh(c))}</option>`).join("")}</select></label>
-        <label>${esc(sh("skinLab"))}<select id="shE_skin"><option value="">—</option>${SHOP_SKINS.map(c => `<option value="${c}"${i.skin === c ? " selected" : ""}>${esc(sh(shopSkinKey(c)))}</option>`).join("")}</select></label>
+        <label>${esc(sh("cat"))}<select id="shE_cat">${SHOP_CATS.map(c => `<option value="${c}"${i.cat === c ? " selected" : ""}>${esc(shopCatLabel(c))}</option>`).join("")}</select></label>
+        <label>${esc(sh("skinLab"))}<select id="shE_skin"><option value="">—</option>${SHOP_SKINS.map(c => `<option value="${c}"${i.skin === c ? " selected" : ""}>${esc(shopSkinLabel(c))}</option>`).join("")}</select></label>
         <div class="shop-tags"><span>${esc(sh("tagsLab"))}</span>${SHOP_TAGS.map(k => `<label class="shop-tags__l"><input type="checkbox" id="shE_t_${k}"${(i.tags || []).includes(k) ? " checked" : ""}> ${esc(sh("tg_" + k))}</label>`).join("")}</div>
         <div class="shop-xphotos">${(i.photos || []).map((p, k) => `<span class="shop-xphotos__i"><img src="${esc(shopSrc(p))}" alt=""><button type="button" class="chip chip--sm" data-sh="photodel" data-id="${esc(i.id)}" data-n="${k}">✕ ${esc(sh("photoDel"))}</button></span>`).join("")}${(i.photos || []).length < 4 ? `<button type="button" class="chip chip--sm" data-sh="photo2" data-id="${esc(i.id)}">${esc(sh("photo2"))}</button>` : ""}</div>
         <label>${esc(sh("desc"))}<textarea id="shE_desc" rows="4">${esc(i.desc)}</textarea></label>
@@ -3220,9 +3308,9 @@
     const pre = [["", "15", "pr1"], ["15", "30", "pr2"], ["30", "50", "pr3"], ["50", "", "pr4"]];
     return `<div class="shop-filters">
       <input type="search" id="shQ" class="pm-input shop-q" value="${esc(shop.q)}" placeholder="${esc(sh("q"))}" autocomplete="off">
-      <div class="pop-chips">${cats.map(c => chip(f === c, `data-sh="filter" data-id="${c}"`, sh(c))).join("")}</div>
+      <div class="pop-chips">${cats.map(c => chip(f === c, `data-sh="filter" data-id="${c}"`, shopCatLabel(c))).join("")}</div>
       <div class="pop-chips">${SHOP_TAGS.map(k => chip(shop.tag === k, `data-sh="tag" data-id="${k}"`, sh("tg_" + k))).join("")}</div>
-      <label class="shop-sel">${esc(sh("skinLab"))} <select id="shSkin" class="pm-input"><option value="">${esc(sh("skinAll"))}</option>${SHOP_SKINS.filter(c => c !== "algemeen").map(c => `<option value="${c}"${shop.skin === c ? " selected" : ""}>${esc(sh(shopSkinKey(c)))}</option>`).join("")}<option value="algemeen"${shop.skin === "algemeen" ? " selected" : ""}>${esc(sh("sk_algemeen"))}</option></select></label>
+      <label class="shop-sel">${esc(sh("skinLab"))} <select id="shSkin" class="pm-input"><option value="">${esc(sh("skinAll"))}</option>${SHOP_SKINS.filter(c => c !== "algemeen").map(c => `<option value="${c}"${shop.skin === c ? " selected" : ""}>${esc(shopSkinLabel(c))}</option>`).join("")}<option value="algemeen"${shop.skin === "algemeen" ? " selected" : ""}>${esc(sh("sk_algemeen"))}</option></select></label>
       <div class="shop-price"><label>${esc(sh("pFrom"))}<input type="text" inputmode="decimal" id="shMin" class="pm-input" size="4" value="${esc(shop.pmin)}"></label><label>${esc(sh("pTo"))}<input type="text" inputmode="decimal" id="shMax" class="pm-input" size="4" value="${esc(shop.pmax)}"></label></div>
       <div class="pop-chips">${pre.map(([lo, hi, k]) => chip(shop.pmin === lo && shop.pmax === hi && (lo || hi), `data-sh="preset" data-id="${lo}|${hi}"`, sh(k))).join("")}${(shop.q || shop.tag || shop.skin || shop.pmin || shop.pmax || f !== "all") ? chip(false, 'data-sh="reset"', sh("clear")) : ""}</div>
     </div>`;
@@ -3239,9 +3327,9 @@
       const items = shown.filter(i => i.cat === c); if (!items.length) return "";
       let body;
       if (c === "verzorging"){   // sub-division by skin function
-        body = shopSkinOrder().concat([""]).map(s => { const g = items.filter(i => i.skin === s); return g.length ? `<h4 class="shop-sub">${esc(s ? sh(shopSkinKey(s)) : sh("sk_"))}</h4>${g.map(i => shopCard(i, salon)).join("")}` : ""; }).join("");
+        body = shopSkinOrder().concat([""]).map(s => { const g = items.filter(i => i.skin === s); return g.length ? `<h4 class="shop-sub">${esc(s ? shopSkinLabel(s) : sh("sk_"))}</h4>${g.map(i => shopCard(i, salon)).join("")}` : ""; }).join("");
       } else body = items.map(i => shopCard(i, salon)).join("");
-      return `<section class="shop-group"><h3 class="shop-group__t">${esc(sh(c))}<span>${items.length}</span></h3>${body}</section>`;
+      return `<section class="shop-group"><h3 class="shop-group__t">${esc(shopCatLabel(c))}<span>${items.length}</span></h3>${body}</section>`;
     }).join("");
   }
   function renderShop(){
@@ -3287,22 +3375,30 @@
     if (errs.length){ window.alert(sh("err") + "\n• " + errs.slice(0, 10).join("\n• ")); return; }
     shop.busy = true; renderShop();
     const H = { Authorization: "Bearer " + tok, Accept: "application/vnd.github+json" };
-    const put = async (path, b64, msg) => {
-      const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`; let sha;
-      const g = await fetch(api, { headers: H, cache:"no-store" });
-      if (g.ok) sha = (await g.json()).sha; else if (g.status !== 404) throw new Error("GET " + g.status);
-      const p = await fetch(api, { method:"PUT", headers: { ...H, "Content-Type":"application/json" }, body: JSON.stringify({ message: msg, content: b64, ...(sha ? { sha } : {}) }) });
-      if (!p.ok) throw new Error("PUT " + p.status);
+    const ghMsg = async r => { try { const j = await r.clone().json(); return String(j.message || "").replace(/\s+/g, " ").slice(0, 140); } catch(e){ return ""; } };
+    const put = async (path, b64, msg) => {   // v221: look up the current sha, retry on 409/422/5xx (another tab or a commit in between), and show GitHub's own message
+      const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`; let last = "";
+      for (let n = 0; n < 4; n++){
+        let sha;
+        const g = await fetch(api, { headers: H, cache:"no-store" });
+        if (g.ok){ const gj = await g.json(); sha = Array.isArray(gj) ? undefined : gj.sha; } else if (g.status !== 404) throw new Error("GET " + g.status + " " + await ghMsg(g));
+        const p = await fetch(api, { method:"PUT", headers: { ...H, "Content-Type":"application/json" }, body: JSON.stringify({ message: msg, content: b64, ...(sha ? { sha } : {}) }) });
+        if (p.ok) return;
+        last = "PUT " + p.status + " " + await ghMsg(p);
+        if (![409, 422, 500, 502, 503].includes(p.status)) break;
+        await new Promise(r => setTimeout(r, 800 * (n + 1)));
+      }
+      throw new Error(last);
     };
     try {
       for (const it of items){
         if (/^data:image\/jpeg;base64,/.test(it.photo)){ const path = `assets/verkoop/${it.id}-${Date.now().toString(36)}.jpg`; await put(path, it.photo.split(",")[1], "Productfoto (app)"); try { const m = shopPhotoMap(); m[path] = it.photo; const ks = Object.keys(m); while (ks.length > 12) delete m[ks.shift()]; localStorage.setItem(SHOP_PHOTOS, JSON.stringify(m)); } catch(e){ /* optional */ } it.photo = path; }
         if (Array.isArray(it.photos)) for (let k = 0; k < it.photos.length; k++){ const pp = it.photos[k]; if (/^data:image\/jpeg;base64,/.test(pp)){ const path = `assets/verkoop/${it.id}-x${k}-${Date.now().toString(36)}.jpg`; await put(path, pp.split(",")[1], "Productfoto (app)"); try { const m = shopPhotoMap(); m[path] = pp; const ks = Object.keys(m); while (ks.length > 12) delete m[ks.shift()]; localStorage.setItem(SHOP_PHOTOS, JSON.stringify(m)); } catch(e){ /* optional */ } it.photos[k] = path; } }
       }
-      const out = { v:1, u: new Date().toISOString(), cats: shopCatOrder(), skins: shopSkinOrder(), items };
+      const out = { v:1, u: new Date().toISOString(), cats: shopCatOrder(), skins: shopSkinOrder(), custom: shop.custom, items };
       await put(SHOP_FILE, giftToken64(JSON.stringify(out, null, 1)), "Verkoophoekje bijgewerkt (app)");
       shop.pub = shopClean(items); shop.ver = out.u.replace(/[^0-9]/g, "").slice(0, 14); shop.draft = null;
-      try { localStorage.removeItem(SHOP_DRAFT); localStorage.removeItem(SHOP_ORDER_KEY); localStorage.setItem(SHOP_CACHE, JSON.stringify(shop.pub)); } catch(e){}
+      try { localStorage.removeItem(SHOP_DRAFT); localStorage.removeItem(SHOP_ORDER_KEY); localStorage.setItem(SHOP_CUSTOM_KEY, JSON.stringify(shop.custom)); localStorage.setItem(SHOP_CACHE, JSON.stringify(shop.pub)); } catch(e){}
       showToast(sh("pub_ok"));
     } catch(e){ showToast(sh("pub_fail").replace("{e}", String(e && e.message || e))); }
     shop.busy = false; renderShop(); shopSyncLinks();
@@ -3327,6 +3423,17 @@
     if (a === "add"){ const d = shopDraft(), nid = "nieuw-" + Date.now().toString(36); d.unshift({ id: nid, name: sh("newp"), desc: "", ingr: "", cat: shop.filter === "all" ? "verzorging" : shop.filter, skin: "", tags: [], photos: [], status: "concept", price: null, qty: null, photo: "" }); shop.edit = nid; shop.q = ""; shop.tag = ""; shop.skin = ""; shop.pmin = ""; shop.pmax = ""; shopSaveDraft(); renderShop(); const ec = $("#shopList"); if (ec && ec.scrollIntoView) ec.scrollIntoView({ block:"start" }); return; }
     if (a === "catup" || a === "catdown"){ shop.catOrder = shopMove(shopCatOrder(), id, a === "catup" ? -1 : 1); shopSaveOrder(); return renderShop(); }
     if (a === "skinup" || a === "skindown"){ shop.skinOrder = shopMove(shopSkinOrder(), id, a === "skinup" ? -1 : 1); shopSaveOrder(); return renderShop(); }
+    if (a === "catadd" || a === "skinadd"){
+      const el = $(a === "catadd" ? "#shNewCat" : "#shNewSkin"), lb = ((el || {}).value || "").trim().slice(0, 40); if (!lb){ showToast("Typ eerst een naam."); return; }
+      const c0 = shopCustomClean(shop.custom), k = a === "catadd" ? "cats" : "skins", all = (k === "cats" ? SHOP_CATS : SHOP_SKINS);
+      if (c0[k].length >= (k === "cats" ? 12 : 20)){ showToast("Je kan niet meer toevoegen."); return; }
+      if ((k === "cats" ? SHOP_CATS : SHOP_SKINS).some(x => (k === "cats" ? shopCatLabel(x) : shopSkinLabel(x)).toLowerCase() === lb.toLowerCase())){ showToast("Die naam bestaat al."); return; }
+      c0[k].push({ id:"c-" + shopSlug(lb) + "-" + Math.random().toString(36).slice(2, 5), label:lb }); shopApplyCustom(c0); shopSaveOrder(); return renderShop(); }
+    if (a === "catdel" || a === "skindel"){
+      const k = a === "catdel" ? "cats" : "skins", used = shopDraft().filter(i => (k === "cats" ? i.cat : i.skin) === id).length;
+      if (used){ showToast("Er staan nog " + used + " product(en) in. Verplaats ze eerst naar een andere groep."); return; }
+      if (!window.confirm("Deze groep verwijderen?")) return;
+      const c0 = shopCustomClean(shop.custom); c0[k] = c0[k].filter(x => x.id !== id); shopApplyCustom(c0); shopSaveOrder(); return renderShop(); }
     if (a === "az"){ const d0 = shopDraft(); d0.sort((x, y) => x.name.localeCompare(y.name, "nl")); shopSaveDraft(); return renderShop(); }
     const d = shopDraft(), it = d.find(x => x.id === id);
     if (a === "mvup" || a === "mvdown"){ if (!it) return; const grp = d.filter(x => x.cat === it.cat && (it.cat !== "verzorging" || x.skin === it.skin)), gi = grp.indexOf(it), oth = grp[gi + (a === "mvup" ? -1 : 1)]; if (oth){ const p = d.indexOf(it), q = d.indexOf(oth); d[p] = oth; d[q] = it; shopSaveDraft(); } return renderShop(); }
@@ -3421,6 +3528,7 @@
     const html = sect(gs("sec_static"), stat) + sect(gs("sec_shop"), shopHits) + sect(gs("sec_price"), priceHits) + sect(gs("sec_ingr"), ingrHits);
     out.innerHTML = html || `<p class="step__hint">${esc(gs("none"))}</p>`;
   }
+  document.addEventListener("change", ev => { const el = ev.target; if (el && el.id === "accF_dex"){ const pc = accDexPct(el.value), pe = $("#accF_prof"); if (pc !== null && pe) pe.value = String(pc); } });
   document.addEventListener("input", ev => { if (ev.target && ev.target.id === "gsInput") gsRender(); });
   document.addEventListener("click", ev => {
     const b = ev.target.closest && ev.target.closest("[data-gs]"); if (!b) return;
@@ -6744,6 +6852,9 @@
             <div class="open-row__fields">
               <label>${t("inv_n", L)} <input type="number" min="0" step="1" class="pm-input inv-f" data-f="n" data-id="${esc(id)}" value="${r ? (r.n || 0) : 0}"></label>
               <label>${t("inv_per", L)} <input type="number" min="1" step="1" class="pm-input inv-f" data-f="per" data-id="${esc(id)}" value="${r && r.per ? r.per : (g.per || "")}"></label>
+              <label>Aankoopprijs per verpakking (€, zonder btw) <input type="text" inputmode="decimal" class="pm-input inv-f" data-f="buy" data-id="${esc(id)}" value="${r && r.buy ? String(r.buy).replace(".", ",") : ""}" placeholder="€"></label>
+              <label>Btw % op de aankoop <input type="text" inputmode="decimal" class="pm-input inv-f" data-f="vat" data-id="${esc(id)}" value="${r && r.vat != null ? String(r.vat).replace(".", ",") : "21"}"></label>
+              ${r && r.buy > 0 && r.per > 0 ? `<p class="ingr-muted">Kost per keer: ${esc(accEur(invCostPerUse(r)))} (${accVatApplies() ? "incl. btw" : "excl. btw"})</p>` : ""}
               <label>${t("inv_left", L)} <input type="number" min="0" step="1" class="pm-input inv-f" data-f="left" data-id="${esc(id)}" value="${r && r.left != null ? r.left : ""}" placeholder="—"></label>
               ${sellOn ? `<label>${t("inv_price", L)} <input type="text" inputmode="decimal" class="pm-input inv-f" data-f="price" data-id="${esc(id)}" value="${r && r.price ? String(r.price).replace(".", ",") : ""}" placeholder="€"></label>` : ""}
             </div>
@@ -6823,6 +6934,7 @@
       r.per = Math.max(1, parseInt(v("per"), 10) || 1);
       r.left = v("left") === "" ? null : Math.max(0, parseInt(v("left"), 10) || 0);
       const pe = $(`.inv-f[data-f="price"][data-id="${id}"]`); if (pe) r.price = invPrice(v("price"));
+      r.buy = invPrice(v("buy")) || 0; { const vv = accNum(v("vat")); r.vat = (vv >= 0 && vv <= 100) ? vv : 21; }
       const se = $(`.inv-f[data-f="sell"][data-id="${id}"]`); if (se) r.sell = !!se.checked;
       invSave(x); ingr.invOpen = null; showToast(t("inv_toast_saved", state.lang)); renderIngredients(); return;
     }
