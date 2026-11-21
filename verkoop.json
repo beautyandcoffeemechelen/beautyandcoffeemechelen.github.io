@@ -1,6 +1,6 @@
 {
  "v": 1,
- "u": "2026-11-14T07:25:23.615Z",
+ "u": "2026-11-21T05:33:02.573Z",
  "cats": [
   "verzorging",
   "zepen",
@@ -12,8 +12,13 @@
   "gevoelige-huid",
   "hydratatie",
   "vette-huid",
-  "algemeen"
+  "algemeen",
+  "pigmentatie"
  ],
+ "custom": {
+  "cats": [],
+  "skins": []
+ },
  "items": [
   {
    "id": "nieuw-mwg1f3lw",
@@ -336,8 +341,8 @@
   },
   {
    "id": "nieuw-mwajmk4j",
-   "name": "Autumn Elegance",
-   "desc": "Een luxueus, handgebonden herfstboeket van ruim 37 stelen dat dankzij de ambachtelijke korenschooftechniek volledig zelfstandig rechtop blijft staan. Geen vaas nodig; instant najaarswarmte op je dressoir, tafel of balie.",
+   "name": "Lotingsboeket 1/1/2027",
+   "desc": "Om het jaar feestelijk af te sluiten en jullie te bedanken voor alle mooie momenten bij Beauty & Coffee, verloot ik ons grootste handgebonden droogboeket (ruim 37 stelen, t.w.v. €70). \n\nEen luxueus, handgebonden boeket van ruim 37 stelen dat dankzij de ambachtelijke korenschooftechniek volledig zelfstandig rechtop blijft staan. Geen vaas nodig.",
    "ingr": "",
    "cat": "boeketten",
    "skin": "",
